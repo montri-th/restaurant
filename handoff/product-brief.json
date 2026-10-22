@@ -341,7 +341,7 @@
   },
   "buildingJoinContract": {
     "decision": "owner 2026-10-23: spatial join of restaurant names/venues with the 3D building mass",
-    "buildings": "focus-tier OSM footprints kept by js/massing.js before rounding/offset (stable ids focusFeatureId(tile, featureIndex, polygonIndex)) + official host buildings drawn by js/buildings.js",
+    "buildings": "focus-tier OSM footprints kept by js/massing.js before rounding/offset (stable ids focusFeatureId(tile, polygon ordinal in the tile)) + official host buildings drawn by js/buildings.js",
     "points": "row display positions (MVT z10 grid, ≈ 9.55 m)",
     "rule": "a row joins the smallest drawn footprint containing its display point (holes excluded); bbox grid index; recomputed when the focus tier, the drawn hosts or the filters change",
     "venueBuildings": "official host geometry when drawn; otherwise OSM buildings holding ≥ max(1, ⌈0.2 × n⌉) of the venue's n joined name-linked points",
@@ -883,6 +883,6 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261023-r1 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)"
+    "cacheTag": "?v=20261023-r2 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)"
   }
 }

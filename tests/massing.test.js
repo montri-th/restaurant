@@ -17,9 +17,11 @@ test('focus massing keeps only buildings inside the focus region, lifts them and
   const ids = out.features.map(f => f.properties.osm_id).sort();
   assert.deepEqual(ids, [101], 'only the square at tile x≈1147 lies in the left half');
   const f = out.features[0];
-  const fi = layer.features.findIndex(x => x.id === 101);
-  assert.equal(f.id, focusFeatureId(tile, fi, 0), 'stable id: tile + feature index + polygon index (never the merged OSM id)');
-  assert.ok(Number.isSafeInteger(f.id));
+  // Stable id: tile + ordinal among all building polygons of the tile, counted before the focus filter —
+  // the same building keeps its id when the focus region changes (here: left half vs whole tile).
+  const all = shapeTile(tile, layer, {regions: [whole], radiusM: r, offsetM: d});
+  assert.equal(all.features.find(x => x.properties.osm_id === 101).id, f.id);
+  assert.ok(Number.isSafeInteger(f.id) && f.id >= focusFeatureId(tile, 0) && f.id < focusFeatureId(tile, 0) + 2 ** 24);
   assert.equal(f.properties.height, 20 + HEIGHT_LIFT_M);
   assert.equal(f.properties.base, 0);
   assert.ok(f.geometry.coordinates[0].length > 5, 'corners are rounded (extra vertices)');
@@ -42,6 +44,13 @@ test('hide_3d features are skipped, holes are kept and edge-crossing buildings a
   const ids = out.features.map(f => f.properties.osm_id).sort((a, b) => a - b);
   assert.deepEqual(ids, [101, 102, 103, 103, 105], 'hide_3d (104) is out; the merged feature yields one polygon per outer ring');
   assert.equal(new Set(out.features.map(f => f.id)).size, out.features.length, 'the two polygons of merged feature 103 get distinct ids');
+  // One OpenFreeMap feature can hold hundreds of polygons (same-height buildings merged under one OSM id):
+  // every polygon still gets its own id.
+  const ring = (x, y) => [[x, y], [x + 10, y], [x + 10, y + 10], [x, y + 10], [x, y]]; // clockwise on screen (MVT outer)
+  const merged = {extent: 4096, features: [{type: 3, id: 7, properties: {render_height: 6}, rings: () => Array.from({length: 600}, (_, i) => ring(100 + (i % 30) * 20, 100 + Math.floor(i / 30) * 20))}]};
+  const many = shapeTile(tile, merged, {regions: [whole], radiusM: 3, offsetM: 1.2});
+  assert.equal(many.features.length, 600);
+  assert.equal(new Set(many.features.map(x => x.id)).size, 600, '600 polygons of one feature → 600 ids');
   assert.equal(out.footprints.find(b => b.osmId === 102).holes.length, 1, 'the footprint keeps its hole (a courtyard is not inside)');
   const l = out.features.find(f => f.properties.osm_id === 102);
   assert.equal(l.geometry.coordinates.length, 2, 'outer + hole');

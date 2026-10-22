@@ -62,13 +62,15 @@ export const MAX_TILES = 9;
 export const HEIGHT_LIFT_M = 0.35;
 
 /**
- * Stable, unique id of one focus building: its z14 tile, its index in the tile's
- * building layer and the polygon index within that feature (< 2^52, exact in JS).
- * OpenFreeMap merges same-height buildings under one OSM id, so the OSM id stays a
- * property and is never used as the key.
+ * Stable, unique id of one focus building: its z14 tile and the ordinal of the
+ * polygon among ALL building polygons of that tile, counted before any focus or
+ * host filtering (< 2^52, exact in JS) — the same building keeps its id whatever
+ * the focus or the zoom. One OpenFreeMap feature can carry hundreds of polygons
+ * (buildings sharing a height are merged under one OSM id, verified live
+ * 2026-10-23), so neither the OSM id nor a per-feature polygon index is a key.
  */
-export function focusFeatureId(tile, featureIndex, polygonIndex = 0) {
-  return ((tile.x * 16384 + tile.y) * 65536 + (featureIndex % 65536)) * 256 + Math.min(255, polygonIndex);
+export function focusFeatureId(tile, ordinal) {
+  return (tile.x * 16384 + tile.y) * 16777216 + (ordinal % 16777216);
 }
 
 /** Display radius (m) for corner rounding at a map zoom: ~4 px, kept within 3–12 m. */
@@ -108,7 +110,7 @@ export function shapeTile(tile, layer, {regions = [], hosts = [], radiusM, offse
   const toLonLat = ring => ring.map(([px, py]) => tileToLonLat(px, py, tile, extent));
   const regionRings = regions.map(toTile), hostRings = hosts.map(toTile);
   const features = [], footprints = [], hiddenIds = new Set();
-  let kept = 0, dropped = 0;
+  let kept = 0, dropped = 0, ordinal = 0;
   for (let fi = 0; fi < layer.features.length; fi++) {
     const f = layer.features[fi];
     if (f.type !== 3 || f.properties.hide_3d === true) continue;
@@ -123,7 +125,8 @@ export function shapeTile(tile, layer, {regions = [], hosts = [], radiusM, offse
       if (isClockwise(ring)) polygons.push({outer: ring, holes: []});
       else if (polygons.length) polygons[polygons.length - 1].holes.push(ring);
     }
-    polygons.forEach((poly, pi) => {
+    polygons.forEach(poly => {
+      const id = focusFeatureId(tile, ordinal++); // counted before the focus/host filters: stable per building
       const outer = clipRingToBox(poly.outer, box);
       if (!outer) return;
       const inFocus = regionRings.some(region => ringsIntersect(outer, region));
@@ -136,7 +139,6 @@ export function shapeTile(tile, layer, {regions = [], hosts = [], radiusM, offse
       const shapedHoles = holes.map(h => roundRing(offsetRing(h, d, 1), r, segments, {encloseOffset: d}))
         .filter(h => Math.abs(signedArea(h)) > 0);
       const coordinates = [shapedOuter, ...shapedHoles].map(toLonLat);
-      const id = focusFeatureId(tile, fi, pi);
       features.push({type: 'Feature', id, geometry: {type: 'Polygon', coordinates}, properties: {osm_id: f.id ?? null, height: height + HEIGHT_LIFT_M, base, render_height: height}});
       // The original footprint (clipped to the tile, not rounded or offset): what restaurant points are joined to.
       footprints.push({id, osmId: f.id ?? null, outer: toLonLat(outer), holes: holes.map(toLonLat), height, base});
