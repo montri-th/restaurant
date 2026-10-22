@@ -260,8 +260,8 @@ function renderPanel(summary = summarize(state.rows)) {
   let html = '';
   const groups = state.data.groups;
   const meta = state.data.meta || {};
-  if (mode === 'area') html = renderArea(buildAreaProfile(state.scopeRows, id, state.index, groups), meta);
-  else if (mode === 'district') html = renderDistrict(buildDistrictProfile(state.scopeRows, id, state.index, groups), densityClassOf, meta);
+  if (mode === 'area') html = renderArea(buildAreaProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds}), meta);
+  else if (mode === 'district') html = renderDistrict(buildDistrictProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds}), densityClassOf, meta);
   else if (mode === 'venue') html = renderVenue(buildVenueProfile(state.scopeRows, state.venueById.get(id), state.index, groups, {hosted: state.hosted.has(id)}), state.index, meta);
   else if (mode === 'store') html = renderStore(buildStoreDetail(rowById(id), {scopeRows: state.scopeRows, index: state.index, groups}), {...meta, index: state.index});
   if (!html) {
@@ -457,6 +457,8 @@ function onPanelAction(event) {
     case 'back': goBack(); break;
     case 'explore-top': exploreTop(); break;
     case 'clear-focus': clearFocus(); break;
+    // An empty selection under the filters: keep the filters, leave the area/district, fit to where they match.
+    case 'leave-area': resetToOverview(); announce('แสดงทุกพื้นที่ตามตัวกรอง'); break;
     case 'open-charts': openInsights(true); closeMobilePanel(); break;
     case 'open-table': $('results').hidden = false; closeMobilePanel(); $('toggle-table').focus({preventScroll: true}); break;
     case 'clear-filter': clearFilter(id); break;

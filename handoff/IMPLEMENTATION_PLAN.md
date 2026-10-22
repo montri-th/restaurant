@@ -51,7 +51,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | P03 | ข้อมูล โลโก้ อาคาร จากชีต | P01 | AC20 |
 | P04 | model, areas, scales, cues, first Aha | P02, P03 | AC02, AC05, AC06, AC21 |
 | P05 | ชั้นแผนที่ | P04 | AC03, AC06, AC12, AC15 |
-| P06 | แผง breadcrumb provenance | P04 | AC07–AC11 |
+| P06 | แผง breadcrumb provenance | P04 | AC07–AC11, AC24 |
 | P07 | กราฟและตาราง | P04 | AC13, AC14 |
 | P08 | app, URL, ธีม, มือถือ, failure paths | P05–P07 | AC01, AC04, AC16–AC19 |
 | P09 | tests, LDS parity, harness | P08 | AC20, AC21 |
@@ -84,6 +84,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | AC21 | LDS parity | LUT classes scaleVersion series foundation map roles dataState ตรง LDS 0.9.7 | script |
 | AC22 | เผยแพร่ | `npm run verify:live` ผ่านทุกไฟล์ + ตรวจด้วย Chrome desktop light/dark และจอแคบ | live |
 | AC23 | attribution และชั้นซ้อน | ที่ 1440, 1180 และ 390 px attribution ของแผนที่อ่านได้ครบเหนือถาดกราฟ (ไม่อยู่ใต้ถาด legend การ์ด Aha หรือป้าย) และตารางไม่ล้นเกินขอบบนของแผนที่เมื่อเปิดกราฟอยู่ | browser (live) |
+| AC24 | การเลือกที่ว่าง | แขวง/ตำบลหรือเขต/อำเภอที่เป็นลายทแยง (no_data) เปิดคำอธิบายโดยไม่มีช่องตัวเลข 0; พื้นที่ที่มีข้อมูลแต่ตัวกรองเหลือ 0 แสดงศูนย์ที่วัดได้และพาไปพื้นที่ที่ตัวกรองเดียวกันพบร้าน | unit + browser |
 
 ## 6. วิธีทำงานต่อ
 
@@ -110,3 +111,4 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | N08 | ป้ายพื้นที่เป็น symbol layer ของ MapLibre ที่มี collision ในตัว | frontend |
 | N09 | ขยายความครอบคลุมเกิน 7 จังหวัดเมื่อแหล่งข้อมูลครอบคลุม; ระหว่างนั้นคง no_data | data owner |
 | N10 | ตารางข้อมูลรายพื้นที่และ answer blocks สำหรับ Search/LLM ตาม PB v6 channel readiness | product |
+| N11 | มือถือขณะเปิดแผงข้อมูล: แสดง attribution แบบย่อเหนือแผง (ตอนนี้อยู่ใต้แผงจนกด “กลับไปแผนที่”) | frontend |

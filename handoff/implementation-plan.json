@@ -291,7 +291,8 @@
         "AC08",
         "AC09",
         "AC10",
-        "AC11"
+        "AC11",
+        "AC24"
       ],
       "files": [
         "js/profile-model.js",
@@ -542,6 +543,13 @@
       "expected": "at 1440, 1180 and 390 px the map attribution is fully readable above the charts tray (never under the tray, legend, phone Aha card or labels); the table stays below the map top while the charts are open",
       "verificationType": "browser (live)",
       "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC24",
+      "scenario": "Empty selections",
+      "expected": "a hatched (no_data) subdistrict or district opens a note with no 0 tiles; a covered one left at 0 by the filters shows measured zero and offers the areas where the same filters match (leave-area)",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
     }
   ],
   "developerWorkflow": [
@@ -613,6 +621,12 @@
       "id": "N10",
       "title": "Accessible data table per area (export-free) and Search/LLM answer blocks per PB v6 channel readiness",
       "ownerRole": "product",
+      "status": "backlog"
+    },
+    {
+      "id": "N11",
+      "title": "Phone with the reading sheet open: keep a compact attribution above the sheet (today it sits under the sheet until “กลับไปแผนที่”)",
+      "ownerRole": "frontend",
       "status": "backlog"
     }
   ]

@@ -50,22 +50,33 @@ export function buildOverview(scopeRows, index, {province = ''} = {}) {
   return {ranking, chains: chainsIn(scopeRows, 10), districts: summarizeDistricts(scopeRows, index, {province}).sort(byCount)};
 }
 
-export function buildAreaProfile(scopeRows, areaId, index, groups) {
+/**
+ * EVID-05 state of a selection: no_data when the source has no row there at all (covered = areas holding
+ * ≥ 1 row in the full dataset), measured_zero when it is covered but the filters leave 0, else measured.
+ * Without `covered` (older callers) the state falls back to measured / measured_zero.
+ */
+const selectionState = (count, isCovered) => (!isCovered ? 'no_data' : count ? 'measured' : 'measured_zero');
+
+export function buildAreaProfile(scopeRows, areaId, index, groups, {covered = null} = {}) {
   const area = index.byId.get(areaId);
   if (!area) return null;
   const ranking = rankAreas(scopeRows, index);
   const mine = scopeRows.filter(r => r.area === areaId);
   const pos = ranking.eligible.findIndex(a => a.id === areaId);
   const district = index.districtById.get(area.district) || null;
+  const coverageState = selectionState(mine.length, !covered || covered.has(areaId));
   return {
-    area, district, words: levelWords(area.province), count: mine.length, km2: area.km2, density: area.km2 ? mine.length / area.km2 : null,
+    area, district, words: levelWords(area.province), count: mine.length, km2: area.km2,
+    // no_data never becomes a density of 0 (INV05/INV06).
+    density: coverageState === 'no_data' || !area.km2 ? null : mine.length / area.km2,
+    coverageState, scopeCount: scopeRows.length,
     rank: pos >= 0 ? pos + 1 : null, rankOf: ranking.eligible.length, minRows: ranking.minRows,
     ...stats(mine), ...mixOf(mine, groups), topReviewed: mine.filter(r => Number.isFinite(r.reviews)).sort(byReviews).slice(0, 8),
     chains: chainsIn(mine, 16), venues: venuesIn(mine, 10), rows: mine,
   };
 }
 
-export function buildDistrictProfile(scopeRows, districtId, index, groups) {
+export function buildDistrictProfile(scopeRows, districtId, index, groups, {covered = null} = {}) {
   const district = index.districtById.get(districtId);
   if (!district) return null;
   const mine = scopeRows.filter(r => r.district === districtId);
@@ -73,8 +84,11 @@ export function buildDistrictProfile(scopeRows, districtId, index, groups) {
   // Same eligibility as the areas: only districts with ≥ MIN_AREA_ROWS rows compete on density.
   const all = summarizeDistricts(scopeRows, index).filter(d => d.count >= MIN_AREA_ROWS).sort(byDensity);
   const pos = all.findIndex(d => d.id === districtId);
+  const coverageState = selectionState(mine.length, !covered || district.areas.some(a => covered.has(a.id)));
   return {
-    district, words: levelWords(district.province), count: mine.length, km2: district.km2, density: district.km2 ? mine.length / district.km2 : null,
+    district, words: levelWords(district.province), count: mine.length, km2: district.km2,
+    density: coverageState === 'no_data' || !district.km2 ? null : mine.length / district.km2,
+    coverageState, scopeCount: scopeRows.length,
     rank: pos >= 0 ? pos + 1 : null, rankOf: all.length, minRows: MIN_AREA_ROWS, areas: ranking.all, areaTotal: district.areas.length,
     ...stats(mine), ...mixOf(mine, groups), chains: chainsIn(mine, 16), venues: venuesIn(mine, 8), rows: mine,
   };

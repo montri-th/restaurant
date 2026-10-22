@@ -422,6 +422,10 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .matrix-cell { display: block; width: 100%; min-width: 0; height: 36px; min-height: 36px; padding: 0 4px; border: 1px solid var(--border-default); border-radius: 6px; font-size: 13px; text-align: center; }
 .matrix-cell.is-measured_zero { color: var(--text-metadata); }
 .matrix tr.is-selected .matrix-cell { outline: 2px solid var(--map-selected-stroke); outline-offset: -2px; }
+/* Empty selection note (no_data vs measured_zero): neutral surface, no coloured rail. */
+.empty-note { display: grid; gap: 6px; justify-items: start; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-alt); font-size: 13px; line-height: 1.55; color: var(--text-secondary); }
+.empty-note strong { color: var(--text-primary); font-weight: 600; }
+.empty-note .btn { min-height: 36px; font-size: 12px; padding: 5px 12px; }
 .chart-empty { display: grid; place-items: center; gap: 10px; min-height: 120px; text-align: center; color: var(--text-metadata); font-size: 13px; }
 
 /* The table sits on top of the charts tray: never taller than the map space left above the tray (it scrolls inside). */

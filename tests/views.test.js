@@ -4,7 +4,7 @@ import {load, readJSON} from './helpers.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildVenueProfile, buildStoreDetail, describeGeometry, describePrice} from '../js/profile-model.js';
 import {renderOverview, renderArea, renderDistrict, renderVenue, renderStore, renderFilterChips, provenance, dens} from '../js/panel.js';
 import {summarizeAreaInsight} from '../js/area-insight.js';
-import {summarize, productionLink, PRICE_LABELS} from '../js/model.js';
+import {summarize, productionLink, PRICE_LABELS, filterRows} from '../js/model.js';
 import {buildChartModel, areaMatrix, areaPrices} from '../js/chart-model.js';
 import {buildBreadcrumb, renderBreadcrumb, breadcrumbText, productionHref} from '../js/breadcrumb.js';
 import {configureBrandLogos} from '../js/brand-logos.js';
@@ -130,4 +130,32 @@ test('venue header says how much of its total is the venue\'s own listing (e.g. 
   assert.equal(p.entityRows, 1);
   assert.equal(p.entityReviews, 24563);
   assert.ok(text(renderVenue(p, index, {})).includes('ตัวเลขรวม 1 รายการที่เป็นชื่อสถานที่เอง (24,563 รีวิว)'));
+});
+
+test('empty selections: no_data is never shown as 0; measured_zero offers the areas where the filters match', () => {
+  const {data, index, covered} = setup();
+  // Uncovered subdistrict (no row in the source): no tiles, no density, an explicit no-data note.
+  const unc = [...index.byId.values()].find(a => !covered.has(a.id));
+  const p = buildAreaProfile(data.rows, unc.id, index, data.groups, {covered});
+  assert.equal(p.coverageState, 'no_data');
+  assert.equal(p.density, null);
+  const t = text(renderArea(p, {}));
+  assert.ok(t.includes(`ไม่มีข้อมูลร้านจากแหล่งข้อมูลใน${p.words.area}${unc.name}`), t.slice(0, 300));
+  assert.ok(!t.includes('ร้าน/ตร.กม.') && !/\b0 ร้าน\b/.test(t), 'no zero tiles for no_data');
+  // An uncovered district is no_data too.
+  const ud = [...index.districtById.values()].find(d => !d.areas.some(a => covered.has(a.id)));
+  const dp = buildDistrictProfile(data.rows, ud.id, index, data.groups, {covered});
+  assert.equal(dp.coverageState, 'no_data');
+  assert.ok(text(renderDistrict(dp, () => ({}), {})).includes('ไม่มีข้อมูลร้านจากแหล่งข้อมูล'));
+  // Covered area, filter leaves 0: measured zero + the count found elsewhere.
+  const kfc = filterRows(data.rows, {brand: 'RBR-kfc'});
+  const z = buildAreaProfile(kfc, '100204', index, data.groups, {covered});
+  assert.equal(z.coverageState, 'measured_zero');
+  assert.equal(z.density, 0);
+  const zt = text(renderArea(z, {}));
+  assert.ok(zt.includes('ไม่พบร้านตามตัวกรองในแขวงสี่แยกมหานาค'));
+  assert.ok(zt.includes(`ตัวกรองเดียวกันพบ ${new Intl.NumberFormat('th-TH').format(kfc.length)} ร้านในพื้นที่อื่น`));
+  assert.ok(renderArea(z, {}).includes('data-action="leave-area"'));
+  // A covered area with rows stays measured.
+  assert.equal(buildAreaProfile(data.rows, '100204', index, data.groups, {covered}).coverageState, 'measured');
 });

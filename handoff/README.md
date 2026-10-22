@@ -12,7 +12,7 @@ Live: [Restaurants](https://montri-th.github.io/restaurant/) · Source: [GitHub]
 |---|---|---|
 | [../PRODUCT_STATEMENT.md](../PRODUCT_STATEMENT.md) | [product-statement.json](product-statement.json) | Winning strategy: Who / What / Which / How, quality bar, ป้ายหลักฐาน, hypotheses — อ่านก่อนเปลี่ยนสิ่งที่หน้าแรกบอก |
 | [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) | [product-brief.json](product-brief.json) | row scopes + focus modes, first Aha, สัญญาตัวชี้วัด ความครอบคลุม รูปทรงประเภท แผนที่ focus/quiet, breadcrumb, แผงห้าโหมด, กราฟ, invariants INV01–INV23 |
-| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [implementation-plan.json](implementation-plan.json) | โมดูล งาน P01–P10 acceptance AC01–AC23 backlog N01–N10 วิธีทำงานต่อ |
+| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [implementation-plan.json](implementation-plan.json) | โมดูล งาน P01–P10 acceptance AC01–AC24 backlog N01–N11 วิธีทำงานต่อ |
 | [VERIFICATION.md](VERIFICATION.md) | `handoff-manifest.json` (ใน bundle) | ผลตรวจแยกระดับ (unit / LDS parity / rendered / live) และ hash ของทุกไฟล์ |
 | README นี้ | [handoff.schema.json](handoff.schema.json) | สัญญาโครงสร้างของ JSON (schema 1.4.0) |
 
