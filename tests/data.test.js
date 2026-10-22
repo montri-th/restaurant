@@ -119,3 +119,41 @@ test('coverage: 308 frames hold rows; the other 273 are no-data, never zero', ()
   assert.equal(index.areas.length - covered.size, 273);
   assert.ok(Math.abs(coverage.km2 - 3899.11) < 0.01, `coverage ${coverage.km2}`);
 });
+
+test('name-ending venues (owner decision 2026-10-23): sheet links first, then a sheet name at the end, then a repeated place ending', () => {
+  const {raw, data} = load();
+  const s = raw.meta.venueSuffix;
+  // Snapshot values (regression fixtures, never UI constants).
+  assert.deepEqual({suffixRows: s.suffixRows, autoRows: s.autoRows, autoVenues: s.autoVenues, radiusM: s.radiusM}, {suffixRows: 11, autoRows: 252, autoVenues: 84, radiusM: 200});
+  const by = m => data.rows.filter(r => r.venueMatch === m);
+  assert.equal(by('suffix').length, s.suffixRows);
+  assert.equal(by('auto').length, s.autoRows);
+  assert.ok(data.rows.every(r => (r.venue ? ['sheet', 'suffix', 'auto'].includes(r.venueMatch) : r.venueMatch === null)));
+  // A sheet venue name at the end of the restaurant name (a branch/floor word may follow).
+  const kfc = data.rows.find(r => r.name === 'KFC Gateway Bangsue');
+  assert.equal(kfc.venue?.name, 'Gateway Bangsue');
+  assert.equal(kfc.venueMatch, 'suffix');
+  assert.equal(data.rows.find(r => r.name === 'Shabu Shabu Nangnai (Panya Market Branch)')?.venue?.name, 'Panya Market');
+  // A place word after หน้า / Behind … names a neighbour, never a host.
+  for (const name of ['ข้าวต้มลุงเล็ก หน้าโลตัสศรีนครินทร์', 'Por Prathip Ayutthaya Noodle - Behind Central Bangna']) {
+    const r = data.rows.find(x => x.name === name);
+    assert.ok(r, name);
+    assert.equal(r.venue, null, `${name} has no venue`);
+  }
+  // Name-derived places: ids RX-…, ≥ 2 rows each, every point within 200 m of the rows' median point.
+  const auto = data.venues.filter(v => v.match === 'auto');
+  assert.equal(auto.length, s.autoVenues);
+  const metres = (a, b) => Math.hypot((a[0] - b[0]) * 111320 * Math.cos(((a[1] + b[1]) / 2) * Math.PI / 180), (a[1] - b[1]) * 110574);
+  for (const v of auto) {
+    assert.match(v.id, /^RX-[0-9a-f]{16}$/);
+    const rs = data.rows.filter(r => r.venue?.id === v.id);
+    assert.ok(rs.length >= 2 && rs.every(r => r.venueMatch === 'auto'), v.name);
+    const med = i => { const x = rs.map(r => (i ? r.latitude : r.longitude)).sort((a, b) => a - b); return x[x.length >> 1]; };
+    // Display points sit on the ≈ 9.55 m grid: allow the grid half-diagonal.
+    for (const r of rs) assert.ok(metres([r.longitude, r.latitude], [med(0), med(1)]) <= 200 + 7, `${v.name}: ${r.name}`);
+  }
+  const charn = auto.find(v => v.name === 'Charn At The Avenue');
+  assert.equal(charn?.rows, 14);
+  assert.ok(auto.some(v => v.name === 'ตลาดพระราม 5'), 'Thai endings with and without a space merge into one place');
+  assert.ok(!auto.some(v => v.name === 'ตลาดพระราม5'));
+});

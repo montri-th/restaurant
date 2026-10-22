@@ -76,6 +76,10 @@ export function decodeDataset(json, areas) {
   const brandOf = new Map((json.brand || []).map(([i, b]) => [i, brands[b]]));
   const venueOf = new Map((json.venue || []).map(([i, v]) => [i, venues[v]]));
   const venueEntity = new Set(json.venueEntity || []);
+  // How the row's venue was found (meta.venueSuffix.codes): absent = the sheet link (07_VENUES);
+  // 1 = a 07_VENUES name/alias ends the restaurant name; 2 = a name-derived place (repeated ending).
+  const MATCH = {1: 'suffix', 2: 'auto'};
+  const venueMatch = new Map((json.venueMatch || []).map(([i, m]) => [i, MATCH[m] || 'sheet']));
   const rows = [];
   let dropped = 0;
   for (let i = 0; i < n; i++) {
@@ -94,6 +98,7 @@ export function decodeDataset(json, areas) {
       rating: c.rating[i], reviews: c.reviews[i],
       area: code, district: a.district, province: a.province,
       brand, venue, venueEntity: venueEntity.has(i),
+      venueMatch: venue ? (venueMatch.get(i) || 'sheet') : null,
     };
     row.haystack = lower([row.name, brand?.name, venue?.name, a.name, a.nameEn, a.districtName].filter(Boolean).join(' '));
     rows.push(row);

@@ -95,3 +95,32 @@ export function combinedDensity(areas) {
   const count = areas.reduce((s, a) => s + a.count, 0), area = areas.reduce((s, a) => s + (a.km2 || 0), 0);
   return {count, km2: area, density: area ? count / area : null};
 }
+
+/**
+ * Point → แขวง/ตำบล id on the CityMETER frames, for DISPLAY only (where to anchor a label that is on
+ * screen). Never membership: a row's area is always its own source code (INV02).
+ */
+export function areaLocator(index) {
+  const inRing = ([x, y], ring) => {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+  };
+  const items = index.areas.map(a => {
+    const g = a.feature?.geometry;
+    const polys = g?.type === 'Polygon' ? [g.coordinates] : g?.type === 'MultiPolygon' ? g.coordinates : [];
+    let w = 180, s = 90, e = -180, n = -90;
+    for (const p of polys) for (const [x, y] of p[0]) { if (x < w) w = x; if (x > e) e = x; if (y < s) s = y; if (y > n) n = y; }
+    return {id: a.id, polys, w, s, e, n};
+  });
+  return ([x, y]) => {
+    for (const it of items) {
+      if (x < it.w || x > it.e || y < it.s || y > it.n) continue;
+      if (it.polys.some(p => inRing([x, y], p[0]) && !p.slice(1).some(h => inRing([x, y], h)))) return it.id;
+    }
+    return '';
+  };
+}

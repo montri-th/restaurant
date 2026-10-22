@@ -5,7 +5,9 @@
  *  - focus: rows that carry detail (the focused areas, the selected area/venue),
  *    one symbol per row in its food-type series: theme fill + the LDS shape cue of
  *    that series (js/cues.js, DATAVIZ-05), outlined in the marker stroke;
- *  - context: the rest of the filtered scope, small grey dots, no logo.
+ *  - context: the whole filtered scope as small grey dots under the focus symbols,
+ *    no logo, not focusable and not a click target (a click there selects the area);
+ *    re-sent only when the filters change.
  * From DETAIL_MIN_ZOOM the focus rows inside the viewport (≤ MAX_DETAIL_PINS,
  * nearest the centre first) become HTML buttons: keyboard-reachable (roving
  * tabindex, arrow keys), co-located rows get bounded screen-space slots around
@@ -153,7 +155,8 @@ export function detailCandidates(rows, project, bounds, limit = MAX_DETAIL_PINS)
  * options.onLayout(stats) after each layout.
  */
 export function installRestaurantPins(map, container, {onSelect, onLayout, reservedBottom = () => 90} = {}) {
-  let focusRows = [], contextRows = [], byId = new Map(), selectedId = '', hoveredId = '', activeId = '', entries = [], frame = 0, detailKeys = [];
+  let focusRows = [], contextRows = [], focusById = new Map(), contextById = new Map(), selectedId = '', hoveredId = '', activeId = '', entries = [], frame = 0, detailKeys = [];
+  const rowOf = id => focusById.get(id) || contextById.get(id);
 
   map.addSource(SOURCES.context, {type: 'geojson', data: {type: 'FeatureCollection', features: []}});
   map.addSource(SOURCES.focus, {type: 'geojson', data: {type: 'FeatureCollection', features: []}});
@@ -184,6 +187,29 @@ export function installRestaurantPins(map, container, {onSelect, onLayout, reser
   container.append(overlay);
 
   const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(layout); };
+  // While the camera moves, pins keep their last slot (offset from their own anchor) and only follow the
+  // map: no candidate search, slot separation, logo placement or chrome measuring per frame (an
+  // area-to-area move stays one smooth animation). The full layout runs again when the move ends.
+  let moving = false, placement = new Map();
+  const onMoveStart = () => { moving = true; };
+  const onMoveEnd = () => { moving = false; schedule(); };
+  function followLayout() {
+    if (map.getZoom() < DETAIL_MIN_ZOOM) return false;
+    const w = container.clientWidth, h = container.clientHeight;
+    for (const e of entries) {
+      const slot = placement.get(e.row.id);
+      if (!slot) { e.button.hidden = true; continue; }
+      const p = map.project([e.row.longitude, e.row.latitude]);
+      const x = p.x + slot.dx, y = p.y + slot.dy, off = !(x > 0 && y > 0 && x < w && y < h);
+      e.button.hidden = off;
+      if (!off) { e.button.style.left = `${x}px`; e.button.style.top = `${y}px`; }
+      if (e.row.id === (hoveredId || selectedId)) {
+        for (const [k, v] of Object.entries({x1: p.x, y1: p.y, x2: x, y2: y})) leader.setAttribute(k, v);
+        anchor.setAttribute('cx', p.x); anchor.setAttribute('cy', p.y);
+      }
+    }
+    return true;
+  }
 
   function bounds() {
     const width = container.clientWidth, height = container.clientHeight;
@@ -197,10 +223,12 @@ export function installRestaurantPins(map, container, {onSelect, onLayout, reser
   function clearDetail() {
     for (const e of entries) e.button.remove();
     entries = [];
+    placement = new Map();
     if (detailKeys.length) { detailKeys = []; if (map.getLayer(PIN_LAYERS.focus)) map.setFilter(PIN_LAYERS.focus, null); }
   }
 
   function layout() {
+    if (moving && entries.length && placement.size && followLayout()) return;
     const zoom = map.getZoom();
     const b = bounds();
     if (zoom < DETAIL_MIN_ZOOM) {
@@ -239,6 +267,7 @@ export function installRestaurantPins(map, container, {onSelect, onLayout, reser
       label.hidden = !l;
       if (l) { label.style.left = `${l.x - p.x}px`; label.style.top = `${l.y - p.y}px`; label.style.width = `${l.width}px`; label.style.height = `${l.height}px`; }
     }
+    placement = new Map(placed.map(p => [p.id, {dx: p.x - p.anchorX, dy: p.y - p.anchorY}]));
     const focus = placed.find(p => p.id === (hoveredId || selectedId));
     svg.style.display = focus ? '' : 'none';
     if (focus) {
@@ -254,7 +283,7 @@ export function installRestaurantPins(map, container, {onSelect, onLayout, reser
     if (view) for (const r of focusRows) if (r.longitude >= view.getWest() && r.longitude <= view.getEast() && r.latitude >= view.getSouth() && r.latitude <= view.getNorth()) inView++;
     overlay.dataset.visiblePins = String(htmlPins);
     overlay.dataset.visibleLogos = String(logos);
-    onLayout?.({focusInView: inView, htmlPins, visibleLogos: logos, logoLimit: MAX_LOGOS, contextRows: contextRows.length, zoom: map.getZoom()});
+    onLayout?.({focusInView: inView, htmlPins, visibleLogos: logos, logoLimit: MAX_LOGOS, contextRows: contextOnly, zoom: map.getZoom()});
   }
 
   function makeEntry(row) {
@@ -293,40 +322,49 @@ export function installRestaurantPins(map, container, {onSelect, onLayout, reser
   }
 
   /**
-   * focus = rows with detail; contextRows = the rest of the scope (quiet dots, not in the tab order).
-   * On the first draw a large context (tens of thousands of points) is handed to the worker a
-   * moment after the focus, so the focused pins and the area fills are not queued behind its
-   * index build. Later updates replace the data in place (no flicker).
+   * focus = rows with detail; context = the whole filtered scope as quiet dots (not in the tab
+   * order, not clickable). Focus symbols are drawn above and cover their own dot, so the context
+   * only changes with the filters: a selection (area, venue, building, store) re-sends the focus
+   * rows only and never the tens of thousands of context points (smooth area-to-area moves).
+   * On the first draw a large context is handed to the worker a moment after the focus, so the
+   * focused pins and the area fills are not queued behind its index build.
    */
-  let contextTimer = 0, firstContext = true;
+  let contextTimer = 0, firstContext = true, sentContext = null, contextOnly = 0;
   function update(focus, {context = []} = {}) {
     focusRows = focus.filter(hasPoint);
-    contextRows = context;
-    byId = new Map([...focusRows, ...contextRows].map(r => [r.id, r]));
+    focusById = new Map(focusRows.map(r => [r.id, r]));
+    if (context !== contextRows) { contextRows = context; contextById = new Map(contextRows.map(r => [r.id, r])); }
+    contextOnly = Math.max(0, contextRows.length - focusRows.filter(r => contextById.has(r.id)).length);
     map.getSource(SOURCES.focus)?.setData(pointCollection(focusRows));
     clearTimeout(contextTimer);
-    const sendContext = () => { firstContext = false; map.getSource(SOURCES.context)?.setData(pointCollection(contextRows)); };
-    if (firstContext && contextRows.length > 5000) contextTimer = setTimeout(sendContext, 900);
-    else sendContext();
+    const sendContext = () => { firstContext = false; sentContext = contextRows; map.getSource(SOURCES.context)?.setData(pointCollection(contextRows)); };
+    if (sentContext !== contextRows) {
+      if (firstContext && contextRows.length > 5000) contextTimer = setTimeout(sendContext, 900);
+      else sendContext();
+    }
     clearDetail();
     schedule();
   }
 
   function select(id) {
     selectedId = id || '';
-    const r = byId.get(selectedId);
+    const r = rowOf(selectedId);
     map.getSource(SOURCES.selected)?.setData(r ? pointCollection([r]) : {type: 'FeatureCollection', features: []});
     for (const e of entries) e.button.classList.toggle('is-selected', e.row.id === selectedId);
     schedule();
   }
 
-  /** The row under a screen point (focus first, then context), or null. */
-  function hitTest(point, radius = 6) {
+  /**
+   * The focus row under a screen point, or null. Quiet context dots are not targets: a click in
+   * the quiet context goes to the area underneath (move to that แขวง/ตำบล), never to a random row.
+   * `{context: true}` also tests the dots (diagnostics only).
+   */
+  function hitTest(point, {radius = 6, context = false} = {}) {
     const box = [[point.x - radius, point.y - radius], [point.x + radius, point.y + radius]];
-    const hits = map.queryRenderedFeatures(box, {layers: [PIN_LAYERS.focus, PIN_LAYERS.context].filter(id => map.getLayer(id))});
+    const hits = map.queryRenderedFeatures(box, {layers: [PIN_LAYERS.focus, ...(context ? [PIN_LAYERS.context] : [])].filter(id => map.getLayer(id))});
     let best = null, bestD = Infinity;
     for (const f of hits) {
-      const r = byId.get(f.properties?.k);
+      const r = f.layer.id === PIN_LAYERS.focus ? focusById.get(f.properties?.k) : contextById.get(f.properties?.k);
       if (!r) continue;
       const p = map.project([r.longitude, r.latitude]), d = (p.x - point.x) ** 2 + (p.y - point.y) ** 2 + (f.layer.id === PIN_LAYERS.focus ? 0 : 4);
       if (d < bestD) { bestD = d; best = r; }
@@ -342,12 +380,14 @@ export function installRestaurantPins(map, container, {onSelect, onLayout, reser
 
   map.on('move', schedule);
   map.on('resize', schedule);
+  map.on('movestart', onMoveStart);
+  map.on('moveend', onMoveEnd);
   const resize = typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
   resize?.observe(container);
   function dispose() {
     cancelAnimationFrame(frame);
     clearTimeout(contextTimer);
-    map.off('move', schedule); map.off('resize', schedule); resize?.disconnect(); overlay.remove();
+    map.off('move', schedule); map.off('resize', schedule); map.off('movestart', onMoveStart); map.off('moveend', onMoveEnd); resize?.disconnect(); overlay.remove();
     for (const id of Object.values(PIN_LAYERS)) if (map.getLayer(id)) map.removeLayer(id);
     for (const id of Object.values(SOURCES)) if (map.getSource(id)) map.removeSource(id);
     for (let i = 1; i <= 10; i++) if (map.hasImage(ICON(i))) map.removeImage(ICON(i));

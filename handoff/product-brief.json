@@ -3,8 +3,8 @@
   "schemaVersion": "1.4.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.1.1",
-  "updatedOn": "2026-10-22",
+  "productVersion": "0.2.0",
+  "updatedOn": "2026-10-23",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
   "productName": "CityMETER · Restaurants",
@@ -39,6 +39,8 @@
     "เขต/อำเภอ profile",
     "store detail (rating, price, chain/venue candidates, display coordinate, source)",
     "venue with host building (x-ray, มุมสถาปนิก)",
+    "click a building in the focus (venue · store · ร้านที่จุดตกในอาคารนี้)",
+    "click the next แขวง/ตำบล on the map (or its label) to move there",
     "compare areas (density · type · price) and table",
     "open the same area in CityMETER production"
   ],
@@ -52,6 +54,13 @@
       "price family",
       "provenance line in every panel view",
       "name-based chain/venue candidates"
+    ],
+    "release020": [
+      "venue candidates also from the END of the restaurant name (sheet names/aliases) and from repeated place endings within 200 m (name-derived places RX-…)",
+      "display-time spatial join of restaurant points to the drawn buildings (จุดตกในอาคาร)",
+      "venue buildings drawn and clickable in the area view; every focus building is a click target",
+      "area-hit at every zoom, neighbour labels at visible anchors, context dots no longer click targets",
+      "no context re-send, massing shaped after the camera stops, pins follow during moves (smooth area-to-area moves)"
     ]
   },
   "rowScopes": {
@@ -87,6 +96,14 @@
       "consumers": [
         "cue symbols with detail",
         "counter and table at venue level"
+      ]
+    },
+    "buildingRows": {
+      "definition": "scopeRows whose display point falls inside the open building's footprint (building mode, js/building-join.js#containsPoint); recomputed when the filters change",
+      "consumers": [
+        "cue symbols with detail",
+        "counter and table",
+        "building panel"
       ]
     },
     "focusModes": {
@@ -278,21 +295,90 @@
         "quiet": "other frames outline-only"
       },
       "area": {
-        "focus": "selected frame fill below zoom 14.5, selected outline, cue symbols, HTML pins and logos from zoom 15.5",
-        "quiet": "as overviewAuto"
+        "focus": "selected frame fill below zoom 14.5, selected outline, cue symbols, HTML pins and logos from zoom 15.5; buildings of the venues named by the focused rows in map.activeLayer (official host geometry, or joined OSM buildings) — every focus building is clickable",
+        "quiet": "other frames outline-only with label chips at a visible point for every frame on screen (≤ 16 desktop, ≤ 4 phone) so the next แขวง/ตำบล is one click away"
       },
       "store": {
         "focus": "selected ring, leader line to the source display position, desktop popup",
         "quiet": "inherits current focus"
       },
       "venue": {
-        "focus": "only rows naming the venue carry detail; host building(s) in map.activeLayer drawn by the venue x-ray (always visible, clickable); มุมสถาปนิก by default when a host building exists",
+        "focus": "only rows naming the venue carry detail; the focus massing follows the venue's surroundings (venueRegion); host building(s) in map.activeLayer drawn by the venue x-ray (always visible, clickable) and มุมสถาปนิก by default when a host building exists, otherwise the joined OSM buildings in the massing venue tier",
         "quiet": "everything else"
+      },
+      "building": {
+        "focus": "the clicked building in map.activeLayer and the rows whose points fall inside it",
+        "quiet": "everything else; the camera stays where the user clicked"
       }
     },
     "choropleth": "density.area classes, opacity 1 beneath the basemap's first line layer, hard switch off at zoom ≥ 14.5, EVID-05 states per coverageContract",
-    "symbols": "symbol layer of cue icons for focus rows; grey circle layer for context rows (first draw of > 5,000 context rows deferred 0.9 s so focus and fills are not queued behind it)",
-    "labels": "HTML chips collision-managed against each other and the map chrome; area labels from zoom 11.5, province labels below zoom 9"
+    "symbols": "symbol layer of cue icons for focus rows above a grey circle layer of the whole scope (context: not focusable, not clickable, sent only when the filters change; first draw of > 5,000 rows deferred 0.9 s)",
+    "labels": "HTML chips collision-managed against each other and the map chrome (sizes measured once); area labels from zoom 11.5, province labels below zoom 9; while navigating, every frame on screen gets a chip at its label point or the nearest visible grid point inside it (refreshLabelView on moveend)"
+  },
+  "venueMatchContract": {
+    "rule": "meta.venueRule; per row venueMatch: sheet | suffix | auto (null without a venue)",
+    "steps": [
+      "sheet link (07_VENUES)",
+      "for rows without one: a sheet venue name/alias at the END of the restaurant name; floor, zone, branch or terminal words may follow; alias unambiguous, not a generic chain word, ≥ 6 characters (or qsncc / มสธ)",
+      "a place-like ending (ตลาด…, อาคาร…, …Tower, …Avenue, …Market …) repeated on ≥ 2 names whose points all lie within 200 m of their median point (trimmed to a fixed point) → name-derived venue RX-<sha256(key)[:16]>, match 'auto'"
+    ],
+    "exclusions": "a place word after หน้า/ข้าง/ตรงข้าม/ใกล้/หลัง/ติด/เยื้อง/near/opposite/behind/next to/in front of/across … names a neighbour, never a host (41 rows in the snapshot)",
+    "snapshot": {
+      "suffixRows": 11,
+      "autoRows": 252,
+      "autoVenues": 84,
+      "venues": 1100,
+      "status": "regression fixture — never a UI constant"
+    },
+    "copy": {
+      "sheet": "ชื่อร้านอ้างถึงสถานที่นี้",
+      "suffix": "ชื่อร้านลงท้ายด้วยชื่อสถานที่นี้",
+      "auto": "ชื่อร้านลงท้ายด้วยชื่อนี้ · สถานที่จากชื่อร้าน",
+      "venueEntity": "รายการนี้คือชื่อสถานที่เอง"
+    },
+    "joinKey": "venue_id only; the 200 m bound keeps one name from joining distant places and never links a row whose name does not name the place",
+    "module": "scripts/build-data.py#suffix_venue_rules → data/restaurants.json (venueMatch, venues[].match, meta.venueSuffix); js/model.js#decodeDataset"
+  },
+  "buildingJoinContract": {
+    "decision": "owner 2026-10-23: spatial join of restaurant names/venues with the 3D building mass",
+    "buildings": "focus-tier OSM footprints kept by js/massing.js before rounding/offset (stable ids focusFeatureId(tile, featureIndex, polygonIndex)) + official host buildings drawn by js/buildings.js",
+    "points": "row display positions (MVT z10 grid, ≈ 9.55 m)",
+    "rule": "a row joins the smallest drawn footprint containing its display point (holes excluded); bbox grid index; recomputed when the focus tier, the drawn hosts or the filters change",
+    "venueBuildings": "official host geometry when drawn; otherwise OSM buildings holding ≥ max(1, ⌈0.2 × n⌉) of the venue's n joined name-linked points",
+    "click": {
+      "venue": "the building is a venue's on screen → venue panel (the venue with most own points there)",
+      "store": "one point → store",
+      "building": "several points, no venue → building panel ร้านที่จุดตกในอาคารนี้",
+      "none": "falls through to the area"
+    },
+    "copy": "จุดตกในอาคาร (never ตั้งอยู่ใน) + precision ≈ 9.55 m; venue panel lists ร้านอื่นที่จุดตกในอาคารเดียวกัน apart from the venue's own rows",
+    "neverChanges": [
+      "venue rows and counts",
+      "area membership (INV02)",
+      "any number outside the building and venue panels"
+    ],
+    "module": "js/building-join.js (joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion) + js/app.js#refreshJoin/applyJoin"
+  },
+  "interactionContract": {
+    "clickOrder": [
+      "venue x-ray (venue level)",
+      "official host building (any venue with rows in scope)",
+      "focus pin",
+      "focus building (buildingJoinContract.click)",
+      "province frame (country zoom)",
+      "แขวง/ตำบล via area-hit at every zoom ≥ 8.5"
+    ],
+    "sameArea": "a click inside the selected area changes nothing (pan and tilt freely)",
+    "contextDots": "never click targets: a click in the quiet context selects the area underneath",
+    "hover": "pointer over anything clickable; a thin map.selectedStroke outline on the area a click would open",
+    "smoothMoves": [
+      "update() reuses scopeRows and the area model while the filters are unchanged",
+      "pins re-send only the focus rows; the context (whole scope) is re-sent only on filter change",
+      "the focus massing is shaped after the camera stops (map.isMoving)",
+      "HTML pins keep their slots and only follow the map during a move; full layout on moveend",
+      "label chips are measured once"
+    ],
+    "module": "js/app.js#onMapClick/onMapMove/refreshLabelView, js/map-layers.js (area-hit, area-hover), js/pins.js, js/massing.js"
   },
   "basemapContract": {
     "generator": "js/map-style.js#buildMapStyle(theme, {palette, tileJSON, glyphs}) — a MapLibre style v8 object built at runtime; no hosted style URL",
@@ -489,6 +575,7 @@
       "district",
       "area",
       "venue",
+      "building",
       "store"
     ],
     "navigation": "back stack (max 20); mode and id restored from URL (?district, ?area, ?place, ?store)",
@@ -497,6 +584,7 @@
       "select-district",
       "select-store",
       "select-venue",
+      "select-building",
       "select-province",
       "filter-brand",
       "back",
@@ -517,14 +605,15 @@
       "overview": "js/profile-model.js#buildOverview + js/area-insight.js#summarizeAreaInsight",
       "district": "js/profile-model.js#buildDistrictProfile",
       "area": "js/profile-model.js#buildAreaProfile",
-      "venue": "js/profile-model.js#buildVenueProfile",
+      "venue": "js/profile-model.js#buildVenueProfile (+ spatial from js/building-join.js#venueNeighbours)",
+      "building": "js/profile-model.js#buildBuildingProfile",
       "store": "js/profile-model.js#buildStoreDetail (+ describeGeometry, describePrice)"
     },
     "renderer": "js/panel.js (pure HTML strings, delegated data-action clicks); provenance() ends every view: ชุดข้อมูล · แหล่ง · ดึงข้อมูล · ขอบเขต + popularity caveat"
   },
   "data": {
     "observationGrain": "one observation of the public CityMETER Restaurants overlay (owning-tile view); never merged by name or coordinate",
-    "core": "data/restaurants.json (columnar; meta, priceBuckets, groups, types, typeGroup, areas, brands, venues, cols, brand, venue, venueEntity)",
+    "core": "data/restaurants.json (columnar; meta, priceBuckets, groups, types, typeGroup, areas, brands, venues, cols, brand, venue, venueEntity, venueMatch)",
     "areas": "data/areas.geojson (581), data/districts.geojson (90), data/provinces.geojson (7), data/boundary-receipts.json (581 receipts)",
     "hostBuildings": "data/venue-buildings.geojson (25 venues, 58 features)",
     "logos": "data/brand-logos.json (155), data/venue-logos.json (157)",
@@ -538,7 +627,11 @@
       "rowsWithPrice": 19999,
       "brands": 167,
       "brandHolds": 3,
-      "venues": 1016,
+      "venues": 1100,
+      "sheetVenues": 1016,
+      "nameDerivedVenues": 84,
+      "suffixRows": 11,
+      "autoRows": 252,
       "hostedVenues": 25
     },
     "verification": "fresh reproduction of the public API matched all 70,214 rows on every compared field (handoff/VERIFICATION.md)",
@@ -613,7 +706,7 @@
     },
     {
       "id": "INV09",
-      "rule": "Chain and venue links are name-based candidates: no “สาขา”, no “ตั้งอยู่ใน”, no proximity inference"
+      "rule": "Chain and venue links are name-based candidates (sheet link, name ending, repeated place ending within 200 m): no “สาขา”, no “ตั้งอยู่ใน”, no proximity inference for membership; a place word after หน้า/ข้าง/near/behind is never a host"
     },
     {
       "id": "INV10",
@@ -645,7 +738,7 @@
     },
     {
       "id": "INV17",
-      "rule": "Host building is the only building layer with a data colour; drawn only at venue level and kept visible by the x-ray"
+      "rule": "Only venue buildings carry the data colour (official host geometry or joined OSM buildings): in the area view for the venues named by the focused rows, at venue level only that venue's (official ones kept visible by the x-ray), in building mode only the open building"
     },
     {
       "id": "INV18",
@@ -670,6 +763,18 @@
     {
       "id": "INV23",
       "rule": "A venue total says how many of its rows (and reviews) are the venue's own listing (e.g. the mall row); rows are kept as the source lists them"
+    },
+    {
+      "id": "INV24",
+      "rule": "The building join is display-time only: display points × drawn footprints, said as “จุดตกในอาคาร” with the ≈ 9.55 m caveat; it never changes a venue's rows or counts or any area number"
+    },
+    {
+      "id": "INV25",
+      "rule": "Map clicks follow interactionContract.clickOrder; another แขวง/ตำบล is clickable at every zoom; a click inside the selected area changes nothing; quiet context dots are never targets"
+    },
+    {
+      "id": "INV26",
+      "rule": "A selection never re-sends the context points or shapes massing during a camera move; pins only follow the map while it moves"
     }
   ],
   "chartContracts": [
@@ -778,6 +883,6 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261022-r2 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)"
+    "cacheTag": "?v=20261023-r1 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)"
   }
 }

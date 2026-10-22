@@ -94,17 +94,39 @@ export function buildDistrictProfile(scopeRows, districtId, index, groups, {cove
   };
 }
 
-export function buildVenueProfile(scopeRows, venue, index, groups, {hosted = false} = {}) {
+/**
+ * `spatial` (optional, from js/building-join.js#venueNeighbours): {buildings, own, others} — the drawn
+ * buildings that are this venue's on screen, how many of its own rows' points fall in them and the
+ * other rows whose points fall there (not name-linked: listed apart, never added to the venue).
+ */
+export function buildVenueProfile(scopeRows, venue, index, groups, {hosted = false, spatial = null} = {}) {
   if (!venue) return null;
   const mine = scopeRows.filter(r => r.venue?.id === venue.id).sort(byReviews);
   const areas = new Map();
   for (const r of mine) { const a = index.byId.get(r.area); if (a) areas.set(a.id, a); }
   const provinces = [...new Set(mine.map(r => r.province))];
+  const matched = {sheet: 0, suffix: 0, auto: 0};
+  for (const r of mine) if (r.venueMatch in matched) matched[r.venueMatch]++;
   return {venue, rows: mine, count: mine.length, areas: [...areas.values()], provinces, province: provinces.length === 1 ? provinces[0] : '',
     entityRows: mine.filter(r => r.venueEntity).length,
     // Reviews of the rows that ARE the venue (e.g. the mall's own listing): shown so the venue total is read correctly.
     entityReviews: mine.filter(r => r.venueEntity && Number.isFinite(r.reviews)).reduce((s, r) => s + r.reviews, 0),
+    matched, nameDerived: venue.match === 'auto',
+    spatial: spatial && spatial.buildings ? {buildings: spatial.buildings, own: spatial.own, count: spatial.others.length, others: [...spatial.others].sort(byReviews).slice(0, 8)} : null,
     hosted, ...stats(mine), ...mixOf(mine, groups)};
+}
+
+/**
+ * A building the map draws, with the rows whose display points fall inside it (building-join.js):
+ * sel = {key, kind: 'osm'|'host', rows, height}. Not a venue: no name; venues named by the rows are listed.
+ */
+export function buildBuildingProfile(sel, index, groups) {
+  if (!sel?.rows?.length) return null;
+  const rows = [...sel.rows].sort(byReviews);
+  const area = index.byId.get(rows[0].area) || null;
+  const areaIds = [...new Set(rows.map(r => r.area))];
+  return {key: sel.key, kind: sel.kind || 'osm', rows, count: rows.length, area, areaCount: areaIds.length, words: levelWords(rows[0].province),
+    height: Number.isFinite(sel.height) ? sel.height : null, venues: venuesIn(rows, 6), ...stats(rows), ...mixOf(rows, groups)};
 }
 
 /** Coordinate precision, read from the encoding — never upgraded. */
@@ -125,7 +147,8 @@ export function describePrice(row) {
   return {bucket: row.price, range};
 }
 
-export function buildStoreDetail(row, {scopeRows, index, groups}) {
+/** `building` (optional): {key, others} — the drawn building the row's display point falls in (building-join.js). */
+export function buildStoreDetail(row, {scopeRows, index, groups, building = null}) {
   if (!row) return null;
   const area = index.byId.get(row.area) || null;
   const district = area ? index.districtById.get(area.district) : null;
@@ -133,7 +156,7 @@ export function buildStoreDetail(row, {scopeRows, index, groups}) {
   const sameArea = scopeRows.filter(r => r.area === row.area && r.id !== row.id && r.group === row.group).sort(byReviews).slice(0, 6);
   const coLocated = scopeRows.filter(r => r.gx === row.gx && r.gy === row.gy && r.id !== row.id).length;
   return {row, area, district, words: levelWords(row.province), group: groups[row.group], price: describePrice(row), geometry: describeGeometry(row),
-    coLocated, sameBrand: {count: sameBrand.length, rows: sameBrand.sort(byReviews).slice(0, 8), areas: new Set(sameBrand.map(r => r.area)).size}, sameArea};
+    coLocated, building, sameBrand: {count: sameBrand.length, rows: sameBrand.sort(byReviews).slice(0, 8), areas: new Set(sameBrand.map(r => r.area)).size}, sameArea};
 }
 
 export {PRICE_BUCKETS, PRICED, combinedDensity};

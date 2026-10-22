@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {load, readJSON} from './helpers.js';
-import {buildOverview, buildAreaProfile, buildDistrictProfile, buildVenueProfile, buildStoreDetail, describeGeometry, describePrice} from '../js/profile-model.js';
-import {renderOverview, renderArea, renderDistrict, renderVenue, renderStore, renderFilterChips, provenance, dens} from '../js/panel.js';
+import {buildOverview, buildAreaProfile, buildDistrictProfile, buildVenueProfile, buildStoreDetail, buildBuildingProfile, describeGeometry, describePrice} from '../js/profile-model.js';
+import {renderOverview, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, provenance, dens} from '../js/panel.js';
 import {summarizeAreaInsight} from '../js/area-insight.js';
 import {summarize, productionLink, PRICE_LABELS, filterRows} from '../js/model.js';
 import {buildChartModel, areaMatrix, areaPrices} from '../js/chart-model.js';
@@ -29,6 +29,7 @@ test('every panel view ends with dataset · source · date · boundary and the p
     district: renderDistrict(buildDistrictProfile(data.rows, '1002', index, data.groups), () => '#000', meta),
     venue: renderVenue(buildVenueProfile(data.rows, data.venues.find(v => v.host), index, data.groups, {hosted: true}), index, meta),
     store: renderStore(buildStoreDetail(data.rows.find(r => r.brand && r.venue), {scopeRows: data.rows, index, groups: data.groups}), {...meta, index}),
+    building: renderBuilding(buildBuildingProfile({key: 'osm:1', kind: 'osm', rows: data.rows.filter(r => r.area === '100204').slice(0, 5), height: 24}, index, data.groups), {...meta, index}),
   };
   for (const [name, html] of Object.entries(views)) {
     const t = text(html);
@@ -158,4 +159,40 @@ test('empty selections: no_data is never shown as 0; measured_zero offers the ar
   assert.ok(renderArea(z, {}).includes('data-action="leave-area"'));
   // A covered area with rows stays measured.
   assert.equal(buildAreaProfile(data.rows, '100204', index, data.groups, {covered}).coverageState, 'measured');
+});
+
+test('venue and store copy say how the name link was made; spatial results say “จุดตกในอาคาร”, never “ตั้งอยู่ใน”', () => {
+  const {data, index} = setup();
+  const meta = data.meta;
+  // Name-derived place.
+  const charn = data.venues.find(v => v.name === 'Charn At The Avenue');
+  const pc = buildVenueProfile(data.rows, charn, index, data.groups);
+  assert.equal(pc.nameDerived, true);
+  assert.equal(pc.matched.auto, 14);
+  const tc = text(renderVenue(pc, index, meta));
+  assert.ok(tc.includes('สถานที่จากชื่อร้าน') && tc.includes('ทุกจุดอยู่ในรัศมี 200 ม. จากจุดกลาง'), tc.slice(0, 400));
+  // Sheet venue with rows found by their name ending.
+  const gw = data.venues.find(v => v.name === 'Gateway Bangsue');
+  const tg = text(renderVenue(buildVenueProfile(data.rows, gw, index, data.groups), index, meta));
+  assert.ok(tg.includes('3 ร้านจับจากชื่อที่ลงท้ายด้วยชื่อสถานที่'), tg.slice(0, 400));
+  // Store facts.
+  const store = name => text(renderStore(buildStoreDetail(data.rows.find(r => r.name === name), {scopeRows: data.rows, index, groups: data.groups}), {...meta, index}));
+  assert.ok(store('KFC Gateway Bangsue').includes('ชื่อร้านลงท้ายด้วยชื่อสถานที่นี้'));
+  const autoRow = data.rows.find(r => r.venue?.id === charn.id);
+  assert.ok(store(autoRow.name).includes('ชื่อร้านลงท้ายด้วยชื่อนี้ · สถานที่จากชื่อร้าน'));
+  // Spatial join results (venue section, store fact, building panel).
+  const sp = {buildings: 2, own: 9, others: data.rows.filter(r => !r.venue).slice(0, 3)};
+  const ts = text(renderVenue(buildVenueProfile(data.rows, charn, index, data.groups, {spatial: sp}), index, meta));
+  assert.ok(ts.includes('ร้านอื่นที่จุดตกในอาคารเดียวกัน') && ts.includes('ตกในอาคาร 2 หลัง') && ts.includes('ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร'));
+  assert.ok(ts.includes('อาคารสีน้ำเงินคืออาคารที่จุดของร้านเหล่านี้ตกอยู่'));
+  const r0 = data.rows.find(r => r.area === '100204');
+  const tb = text(renderStore(buildStoreDetail(r0, {scopeRows: data.rows, index, groups: data.groups, building: {key: 'osm:7', others: 4}}), {...meta, index}));
+  assert.ok(tb.includes('จุดตกในอาคารเดียวกับอีก 4 ร้าน'));
+  const b = buildBuildingProfile({key: 'osm:1', kind: 'osm', rows: data.rows.filter(r => r.area === '100204').slice(0, 5), height: 24.4}, index, data.groups);
+  const tbu = text(renderBuilding(b, {...meta, index}));
+  assert.ok(tbu.includes('ร้านที่จุดตกในอาคารนี้') && tbu.includes('ไม่ได้ยืนยันว่าร้านตั้งอยู่ในอาคารนี้') && tbu.includes('ความสูงบนแผนที่ราว 24 ม.'));
+  for (const t of [tc, tg, ts, tb, tbu]) assert.ok(!/ตั้งอยู่ใน(?!ภายใน)/.test(t.replace(/ไม่ได้ยืนยันว่า(ร้าน)?ตั้งอยู่ใน\S*/g, '')), 'no located-inside claim');
+  // A building without reviewed rows shows no review total (missing ≠ 0).
+  const noReviews = buildBuildingProfile({key: 'osm:2', rows: data.rows.filter(r => !Number.isFinite(r.reviews)).slice(0, 2)}, index, data.groups);
+  assert.ok(text(renderBuilding(noReviews, meta)).includes('— รีวิว'));
 });

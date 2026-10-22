@@ -70,6 +70,197 @@ VENUE_TYPE_TH = {
     'convention_center': 'ศูนย์ประชุม', 'government_complex': 'ศูนย์ราชการ',
 }
 
+VENUE_TYPE_TH.update({
+    'name_suffix_market': 'ตลาด', 'name_suffix_building': 'อาคาร', 'name_suffix_hospital': 'โรงพยาบาล',
+    'name_suffix_hotel': 'โรงแรม / ที่พัก', 'name_suffix_campus': 'มหาวิทยาลัย', 'name_suffix_station': 'สถานี',
+    'name_suffix_condo': 'คอนโดมิเนียม', 'name_suffix_complex': 'คอมมูนิตี้มอลล์ / ศูนย์การค้า',
+})
+
+# ---------- venue names at the end of a restaurant name (owner decision 2026-10-23) ----------
+# Two name-based rules for rows the sheet left without a venue. Both stay candidates (the name
+# mentions the place), keyed by venue id — never a verified located-inside relationship.
+#   suffix: a 07_VENUES name/alias is the end of the restaurant name (floor/zone/branch words may follow);
+#   auto:   the same place-like ending (ตลาด…, …Tower, …Avenue) on ≥ 2 restaurant names whose display
+#           points all lie within AUTO_RADIUS_M of their median point (trimmed to a fixed point) → a new name-derived venue.
+# A place word preceded by หน้า/ข้าง/ตรงข้าม/near/opposite… describes a neighbour, not a host: no match.
+THAI_CHAR = re.compile(r'[฀-๿]')
+SUFFIX_GENERIC = {'ptt', 'pttor', 'ปตท', 'big c', 'bigc', 'lotus', 'makro', 'โลตัส', 'lotus s', 'lotuss', 'central', 'the mall',
+                  'robinson', 'tops', 'villa market', 'foodland', 'gourmet market'}
+SUFFIX_SHORT_OK = {'qsncc', 'มสธ'}
+PROXIMITY = (r'(?:หน้า|ข้างๆ|ข้าง|ตรงข้าม|ตรงกันข้าม|ใกล้ๆ|ใกล้|ข้างหลัง|หลัง|ติดกับ|ติด|เยื้อง|ถัดจาก|ทางเข้า|ปากทาง|'
+             r'near|opposite|opp|behind|beside|next to|in front of|front of|across from|across)')
+PROXIMITY_END = re.compile(PROXIMITY + r'\s*$')
+Q_EN = (r'(?:g|m|b|l|lg|ug|gf|b1|b2|b3|fl|flr|floor|level|lv|zone|branch|outlet|store|shop|kiosk|t1|t2|t3|terminal|'
+        r'arrival|arrivals|departure|departures|gate|sha|plus|\d+(?:st|nd|rd|th)|[ivx]+)')
+Q_TH = r'(?:ชั้น\s*\S{0,6}|โซน\s*\S{0,6}|สาขา\s*\d{0,3}|ใต้ดิน)'
+QUALIFIER_TAIL = re.compile(r'^(?:\s*(?:' + Q_EN + r'|' + Q_TH + r'))*\s*$')
+QUALIFIER_END = re.compile(r'(?:\s(?:' + Q_EN + r')|\s?(?:' + Q_TH + r'))$')
+PLACE_EN = (r'(?:tower|building|bldg|square|plaza|complex|center|centre|mall|place|park|market|hospital|hotel|residence|'
+            r'residences|condo|condominium|office|avenue|village|walk|court|hub|campus|university|station|terminal)')
+PLACE_TH = (r'(?:อาคาร|ตึก|ทาวเวอร์|พลาซ่า|สแควร์|คอมเพล็กซ์|เซ็นเตอร์|มอลล์|ตลาด|โรงพยาบาล|โรงแรม|คอนโด|มหาวิทยาลัย|สถานี|'
+            r'ศูนย์การค้า|ศูนย์อาหาร|เพลส|ปาร์ค|วิลเลจ|อเวนิว)')
+EN_PLACE_TAIL = re.compile(r'(?:^| )((?:[a-z0-9]+ ){0,3}' + PLACE_EN + r'(?: [a-z0-9]+){0,2})$')
+TH_PLACE_TAIL = re.compile(r'(' + PLACE_TH + r'[^\s]{2,40}(?: [^\s]{1,20})?)$')
+AUTO_RADIUS_M = 200
+AUTO_MERGE_M = 300
+AUTO_TYPES = [('name_suffix_market', ('ตลาด', 'market')), ('name_suffix_hospital', ('โรงพยาบาล', 'hospital')),
+              ('name_suffix_hotel', ('โรงแรม', 'hotel', 'residence')), ('name_suffix_campus', ('มหาวิทยาลัย', 'university', 'campus')),
+              ('name_suffix_station', ('สถานี', 'station', 'terminal')), ('name_suffix_condo', ('คอนโด', 'condo')),
+              ('name_suffix_building', ('อาคาร', 'ตึก', 'tower', 'building', 'bldg', 'office', 'ทาวเวอร์'))]
+
+def snorm(value):
+    """Matching form of a name: NFKC, lower case, punctuation → space (Thai sara am kept composed)."""
+    import unicodedata
+    s = unicodedata.normalize('NFKC', str(value or '')).replace('​', '').replace('ํา', 'ำ').lower()
+    s = s.replace('&', ' and ').replace('’', "'")
+    s = re.sub(r"[\(\)\[\]\{\}\-–—_@#,.:;!?\"|/\\+*~'`<>]+", ' ', s)
+    return re.sub(r'\s+', ' ', s).strip()
+
+def metres_between(a, b):
+    kx = 111320 * math.cos(math.radians((a[1] + b[1]) / 2))
+    return math.hypot((a[0] - b[0]) * kx, (a[1] - b[1]) * 110574)
+
+def suffix_venue_rules(stores, venues_tab):
+    """Assign the sheet-less rows by the two suffix rules; returns (assigned, auto_venues, stats)."""
+    aliases = collections.defaultdict(set)
+    for v in venues_tab:
+        names = {v.get('venue_candidate_name')} | {x for x in str(v.get('venue_aliases') or '').split('|') if x and x != 'None'}
+        for n in names:
+            key = snorm(n)
+            if key:
+                aliases[key].add(v['venue_candidate_id'])
+    usable = {k: next(iter(s)) for k, s in aliases.items()
+              if len(s) == 1 and k not in SUFFIX_GENERIC and (len(k) >= 6 or k in SUFFIX_SHORT_OK)}
+    by_length = sorted(usable, key=lambda k: (-len(k), k))
+    stats = collections.Counter(ambiguousAliases=sum(1 for s in aliases.values() if len(s) > 1))
+
+    def boundary(n, i, end, a):
+        before = i == 0 or n[i - 1] == ' ' or (THAI_CHAR.match(a[0]) and THAI_CHAR.match(n[i - 1]))
+        after = end == len(n) or n[end] == ' ' or THAI_CHAR.match(a[-1])
+        return before and after
+
+    def gazetteer(name):
+        n = snorm(name)
+        for a in by_length:
+            i = n.rfind(a)
+            while i != -1:
+                end = i + len(a)
+                if boundary(n, i, end, a) and QUALIFIER_TAIL.match(n[end:]):
+                    if PROXIMITY_END.search(re.sub(r'สาขา\s*$', '', n[:i].rstrip()).rstrip()):
+                        near_names.add(name)
+                        return None
+                    return usable[a]
+                i = n.rfind(a, 0, i)
+        return None
+
+    def strip_qualifiers(n):
+        previous = None
+        while previous != n:
+            previous = n
+            n = QUALIFIER_END.sub('', n).strip()
+        return n
+
+    def place_tail(name):
+        n = strip_qualifiers(snorm(name))
+        m = EN_PLACE_TAIL.search(n) or TH_PLACE_TAIL.search(n)
+        if not m:
+            return None
+        tail = m.group(1).strip()
+        i = n.rfind(tail)
+        if i <= 0 or len(tail) < 6:
+            return None  # the whole name is the place itself, or too short to name a place
+        if PROXIMITY_END.search(re.sub(r'สาขา\s*$', '', n[:i].rstrip()).rstrip()):
+            near_names.add(name)
+            return None
+        return tail
+
+    assigned, pending, near_names = {}, [], set()
+    for r in stores:
+        if r['venue_candidate_id']:
+            continue
+        vid = gazetteer(r['store_name'])
+        if vid:
+            assigned[r['snapshot_observation_id']] = (vid, 'suffix')
+        else:
+            pending.append(r)
+    point = lambda r: (float(r['longitude']), float(r['latitude']))
+    groups, tail_of = collections.defaultdict(list), {}
+    for r in pending:
+        t = place_tail(r['store_name'])
+        if t:
+            groups[t].append(r)
+            tail_of[r['snapshot_observation_id']] = t
+
+    def median(rs):
+        xs, ys = sorted(point(r)[0] for r in rs), sorted(point(r)[1] for r in rs)
+        return (xs[len(xs) // 2], ys[len(ys) // 2])
+    def related(x, y):
+        # Thai is written without word spaces ("ตลาดพระราม 5" = "ตลาดพระราม5"); Latin needs a word boundary.
+        if THAI_CHAR.search(x) or THAI_CHAR.search(y):
+            cx, cy = x.replace(' ', ''), y.replace(' ', '')
+            return cx.startswith(cy) or cy.startswith(cx)
+        return x == y or x.startswith(y + ' ') or y.startswith(x + ' ')
+    merged = {}
+    for key in sorted(groups, key=lambda k: (len(k.replace(' ', '')), len(k), k)):
+        target = next((m for m in merged if related(key, m)
+                       and metres_between(median(merged[m]), median(groups[key])) <= AUTO_MERGE_M), None)
+        if target:
+            merged[target] += groups[key]
+        else:
+            merged[key] = list(groups[key])
+
+    def display_name(rs):
+        # The ending most of the grouped names use. Among equally common endings take the shortest, extended
+        # only to complete a cut-off Thai word ("ตลาดมีน" → "ตลาดมีนบุรี"), never by trailing words after a space.
+        counts = collections.Counter(tail_of[r['snapshot_observation_id']] for r in rs)
+        top = max(counts.values())
+        tied = sorted((k for k, c in counts.items() if c == top), key=lambda k: (len(k), k))
+        key = tied[0]
+        for longer in tied[1:]:
+            if longer.startswith(key) and longer[len(key)] != ' ':
+                key = longer
+        if THAI_CHAR.search(key):
+            return key
+        pattern = re.compile(r'[\W_]*'.join(re.escape(t) for t in key.split(' ')), re.IGNORECASE)
+        found = collections.Counter(m.group(0) for r in rs for m in [pattern.search(str(r['store_name']))] if m)
+        if not found:
+            return key.title()
+        # The written form most names use; a capitalised form wins over an all-lower-case one.
+        capitalised = {k: c for k, c in found.items() if any(ch.isupper() for ch in k)} or found
+        return sorted(capitalised.items(), key=lambda kv: (-kv[1], -sum(ch.isupper() for ch in kv[0]), kv[0]))[0][0]
+
+    auto_venues = []
+    for key in sorted(merged):
+        rs = merged[key]
+        # Trim to a fixed point: every kept point lies within AUTO_RADIUS_M of the KEPT points' median
+        # (removing a far point moves the median, so check again; only removals → terminates).
+        inside = list(rs)
+        while len(inside) >= 2:
+            centre = median(inside)
+            near = [r for r in inside if metres_between(point(r), centre) <= AUTO_RADIUS_M]
+            if len(near) == len(inside):
+                break
+            inside = near
+        centre = median(inside) if inside else median(rs)
+        inside = sorted(inside, key=lambda r: r['snapshot_observation_id'])
+        stats['autoFar'] += len(rs) - len(inside)
+        if len(inside) < 2:
+            continue
+        vid = 'RX-' + hashlib.sha256(key.encode('utf-8')).hexdigest()[:16]
+        kind = next((t for t, words in AUTO_TYPES if any(w in key for w in words)), 'name_suffix_complex')
+        auto_venues.append({'venue_candidate_id': vid, 'venue_candidate_name': display_name(inside), 'venue_type': kind,
+                            'host_link_status': 'name_suffix_auto', 'venue_aliases': '', 'logo_key': None, 'logo_role': None,
+                            'match_key': key, 'median': [round(centre[0], 7), round(centre[1], 7)]})
+        for r in inside:
+            assigned[r['snapshot_observation_id']] = (vid, 'auto')
+    # Rows (not names) left without a venue because the place word followed หน้า/ข้าง/near/behind….
+    stats['proximityExcluded'] = sum(1 for r in stores if not r['venue_candidate_id'] and r['store_name'] in near_names
+                                     and r['snapshot_observation_id'] not in assigned)
+    stats['suffixRows'] = sum(1 for v in assigned.values() if v[1] == 'suffix')
+    stats['autoRows'] = sum(1 for v in assigned.values() if v[1] == 'auto')
+    stats['autoVenues'] = len(auto_venues)
+    return assigned, auto_venues, dict(stats)
+
 def sha(path):
     return hashlib.sha256(open(path, 'rb').read()).hexdigest()
 
@@ -192,6 +383,14 @@ def main():
     venues_tab = read_tab(wb, '07_VENUES')
     catalog = read_tab(wb, '12_SOURCE_CATALOG')
 
+    # ---------- venue names at the end of restaurant names (rows the sheet left without a venue) ----------
+    suffix_assigned, auto_venues, suffix_stats = suffix_venue_rules(stores, venues_tab)
+    for r in stores:
+        hit = suffix_assigned.get(r['snapshot_observation_id'])
+        if hit:
+            r['venue_candidate_id'], r['_venue_match'] = hit
+    venues_tab = venues_tab + auto_venues
+
     # ---------- observations ----------
     if len(stores) != len({r['snapshot_observation_id'] for r in stores}):
         sys.exit('duplicate snapshot_observation_id')
@@ -219,7 +418,7 @@ def main():
     KEY_HEX = 12
     if len({m.group(1)[:KEY_HEX] + m.group(2) for m in fingerprints}) != len(stores):
         sys.exit('row key prefix is not unique')
-    ordinals, brand_col, venue_col, venue_entity = {}, {}, {}, []
+    ordinals, brand_col, venue_col, venue_entity, venue_match = {}, {}, {}, [], {}
     status_values = collections.Counter(); geometry_roles = collections.Counter(); grids = set(); retrieved = set(); checked = set()
     tile_mismatch = 0
     rows_sorted = sorted(stores, key=lambda r: (str(r['subdistrict_code']), r['snapshot_observation_id']))
@@ -259,6 +458,8 @@ def main():
             brand_col[i] = b_index[r['brand_candidate_id']]
         if r['venue_candidate_id']:
             venue_col[i] = v_index[r['venue_candidate_id']]
+            if r.get('_venue_match'):
+                venue_match[i] = 1 if r['_venue_match'] == 'suffix' else 2
             if r['venue_candidate_row_role'] == 'source_venue_entity_audit':
                 venue_entity.append(i)
         status_values[r['operating_status']] += 1; geometry_roles[r['geometry_role']] += 1
@@ -339,7 +540,8 @@ def main():
         venue_records.append({'id': vid, 'name': v.get('venue_candidate_name') or vid, 'type': v.get('venue_type') or '',
                               'typeTh': VENUE_TYPE_TH.get(v.get('venue_type'), 'สถานที่'), 'rows': venue_rows[vid],
                               'logo': key, 'role': role or (v.get('logo_role') or ''), 'roleTh': VENUE_ROLE_TH.get(role or v.get('logo_role'), ''),
-                              'link': v.get('host_link_status') or ''})
+                              'link': v.get('host_link_status') or '',
+                              'match': 'auto' if str(v.get('venue_type') or '').startswith('name_suffix_') else 'sheet'})
 
     # ---------- host buildings (exact name match with the Luxury Brands host set) ----------
     hb = json.load(open(a.host_buildings, encoding='utf-8'))
@@ -396,13 +598,15 @@ def main():
         'keyEncoding': 'cols.key = first 12 hex digits of snapshot_observation_id (R-<24 hex>-<ordinal>), plus -NN when the ordinal is not 01; unique in this snapshot',
         'tileRule': 'every row comes from the z10 overlay tile that contains its display coordinate (checked at build time)',
         'brandRule': 'brand = explicit source-name chain candidate (01_BRANDS); not a verified branch relationship',
-        'venueRule': 'venue = explicit source-name host candidate (07_VENUES); not a verified located-inside relationship',
+        'venueRule': 'venue = name-based host candidate: (1) the sheet link (07_VENUES); (2) for rows without one, a 07_VENUES name/alias at the end of the restaurant name (venueMatch 1); (3) a place-like ending repeated on ≥ 2 restaurant names whose points all lie within 200 m of their median point (venueMatch 2, a name-derived venue RX-…); a place word after หน้า/ข้าง/ตรงข้าม/near/opposite is a neighbour, never a host; not a verified located-inside relationship',
+        'venueSuffix': {**suffix_stats, 'radiusM': AUTO_RADIUS_M, 'mergeM': AUTO_MERGE_M, 'decidedOn': '2026-10-23',
+                        'codes': {'1': 'suffix of a 07_VENUES name/alias', '2': 'name-derived place (repeated ending, every point within radiusM of the median point)'}},
     }
     data = {'meta': meta, 'priceBuckets': PRICE_BUCKETS,
             'groups': [{'id': g[0], 'th': g[1], 'en': g[2]} for g in GROUPS],
             'types': types, 'typeGroup': type_group, 'areas': area_codes,
             'brands': brand_records, 'venues': venue_records,
-            'cols': cols, 'brand': pairs(brand_col), 'venue': pairs(venue_col), 'venueEntity': venue_entity}
+            'cols': cols, 'brand': pairs(brand_col), 'venue': pairs(venue_col), 'venueEntity': venue_entity, 'venueMatch': pairs(venue_match)}
     os.makedirs(os.path.join(a.out, 'data'), exist_ok=True)
     def write(name, obj):
         path = os.path.join(a.out, 'data', name)

@@ -3,8 +3,11 @@
  *
  * Every actionable element carries data-action (+ data-id / data-value); the app
  * binds one delegated handler. Actions: select-area · select-district ·
- * select-store · select-venue · select-province · filter-brand · back ·
- * explore-top · clear-focus · open-charts · open-table · clear-filter.
+ * select-store · select-venue · select-building · select-province · filter-brand ·
+ * back · explore-top · clear-focus · open-charts · open-table · clear-filter.
+ *
+ * Building wording (spatial join, js/building-join.js): "จุดของร้านตกในอาคาร" — the
+ * display point falls inside the drawn outline (≈ 9.55 m grid); never "ตั้งอยู่ใน".
  *
  * Copy is short, natural Thai. Units: ร้าน = one restaurant observation of the
  * source; ร้าน/ตร.กม. = rows ÷ production area; รีวิว / คะแนน = the source's
@@ -268,21 +271,54 @@ export function renderArea(p, meta = {}) {
 
 /* ---------- Venue ---------- */
 
+/** How the venue's rows were linked by name (sheet link, name ending, name-derived place). */
+function venueMatchNote(v) {
+  if (v.nameDerived) return `ชื่อสถานที่ได้จากท้ายชื่อร้านที่ลงท้ายเหมือนกัน (ทุกจุดอยู่ในรัศมี 200 ม. จากจุดกลาง) ไม่ได้ยืนยันว่าร้านตั้งอยู่ภายใน`;
+  const suffix = v.matched?.suffix ? ` · ${num(v.matched.suffix)} ร้านจับจากชื่อที่ลงท้ายด้วยชื่อสถานที่` : '';
+  return `นับจากชื่อร้านที่อ้างถึงสถานที่นี้ ไม่ได้ยืนยันว่าร้านตั้งอยู่ภายใน${suffix}`;
+}
+
 export function renderVenue(v, index, meta = {}) {
   if (!v) return '';
   const logo = getVenueLogo(v.venue);
+  const sp = v.spatial;
+  const building = v.hosted ? ' · อาคารสีน้ำเงินบนแผนที่คืออาคารของสถานที่' : sp ? ' · อาคารสีน้ำเงินคืออาคารที่จุดของร้านเหล่านี้ตกอยู่' : '';
   return `<section class="detail-head venue${logo ? ' has-venue-logo' : ''}">
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
       ${logo ? venueLogoMarkup(v.venue, {size: 'lg', className: 'detail-venue-logo', decorative: false}) : ''}
-      <p class="eyebrow">${esc(v.venue.typeTh || 'สถานที่')}${logo?.roleLabel ? ` · <span class="venue-logo-role">${esc(logo.roleLabel)}</span>` : ''}</p>
+      <p class="eyebrow">${esc(v.venue.typeTh || 'สถานที่')}${logo?.roleLabel ? ` · <span class="venue-logo-role">${esc(logo.roleLabel)}</span>` : ''}${v.nameDerived ? ' · สถานที่จากชื่อร้าน' : ''}</p>
       <h2>${esc(v.venue.name)}</h2>
-      <div class="metrics compact">${metricTile(v.count, 'ร้าน', 'store')}${metricTile(v.areas.length, 'พื้นที่', 'area')}${metricTile(v.reviews, 'รีวิว', 'exclusive')}</div>
-      <p class="hint">นับจากชื่อร้านที่อ้างถึงสถานที่นี้ ไม่ได้ยืนยันว่าร้านตั้งอยู่ภายใน${v.entityRows ? ` · ตัวเลขรวม ${num(v.entityRows)} รายการที่เป็นชื่อสถานที่เอง (${num(v.entityReviews)} รีวิว)` : ''}${v.hosted ? ' · อาคารสีน้ำเงินบนแผนที่คืออาคารของสถานที่' : ''}</p>
+      <div class="metrics compact">${metricTile(v.count, 'ร้าน', 'store')}${metricTile(v.areas.length, 'พื้นที่', 'area')}${metricTile(v.reviewed ? v.reviews : '—', 'รีวิว', 'exclusive')}</div>
+      <p class="hint">${esc(venueMatchNote(v))}${v.entityRows ? ` · ตัวเลขรวม ${num(v.entityRows)} รายการที่เป็นชื่อสถานที่เอง (${num(v.entityReviews)} รีวิว)` : ''}${building}</p>
     </section>
     <section class="panel-section"><div class="section-heading">${heading('store', `ร้านที่ชื่ออ้างถึง ${v.venue.name}`)}<span class="hint">${num(v.count)}</span></div>${restaurantList(v.rows, {showArea: true, index})}
       ${v.entityRows ? `<p class="hint">รวม ${num(v.entityRows)} รายการที่เป็นชื่อสถานที่เอง</p>` : ''}</section>
+    ${sp ? `<section class="panel-section venue-spatial"><div class="section-heading">${heading('venue', 'ร้านอื่นที่จุดตกในอาคารเดียวกัน')}<span class="hint">${num(sp.count)} ร้าน</span></div>
+      ${sp.count ? restaurantList(sp.others, {showArea: true, index}) : '<p class="hint">ไม่มีร้านอื่นตามตัวกรองนี้</p>'}
+      <p class="hint">จุดที่ API แสดง (ละเอียดราว 9.55 ม.) ตกในอาคาร ${num(sp.buildings)} หลังเดียวกับจุดของร้านที่ชื่ออ้างถึงสถานที่นี้ ${num(sp.own)} ร้าน · ชื่อร้านเหล่านี้ไม่ได้อ้างถึงสถานที่ จึงไม่นับรวมด้านบน และไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร${sp.count > sp.others.length ? ` · แสดง ${num(sp.others.length)} ร้านที่มีรีวิวมากที่สุด` : ''}</p></section>` : ''}
     <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}</div>${groupBars(v.byGroup, v.count)}</section>
     ${provenance(meta, `ร้านที่ชื่ออ้างถึง ${v.venue.name}${v.provinces.length === 1 ? ` · ${provinceName(v.provinces[0])}` : ''}`)}`;
+}
+
+/* ---------- Building (spatial join) ---------- */
+
+export function renderBuilding(b, meta = {}) {
+  if (!b) return '';
+  const w = b.words;
+  const area = b.area ? `${w.area}${b.area.name}` : '';
+  const height = b.height != null ? `ความสูงบนแผนที่ราว ${num(Math.round(b.height))} ม. (OpenStreetMap ผ่าน OpenFreeMap ไม่ใช่ผลรังวัด)` : '';
+  return `<section class="detail-head building">
+      <button type="button" class="btn quiet back" data-action="back">กลับ</button>
+      <p class="eyebrow">อาคารบนแผนที่${area ? ` · ${b.area ? `<button type="button" class="link-button" data-action="select-area" data-id="${esc(b.area.id)}">${esc(area)}</button>` : ''}` : ''}</p>
+      <h2>ร้านที่จุดตกในอาคารนี้</h2>
+      <div class="metrics compact">${metricTile(b.count, 'ร้าน', 'store')}${metricTile(b.reviewed ? b.reviews : '—', 'รีวิว', 'exclusive')}${b.ratingMean != null ? metricTile(dec(b.ratingMean), 'คะแนนเฉลี่ย', 'plain') : ''}</div>
+      <p class="hint">จุดที่ API แสดง (ละเอียดราว 9.55 ม.) ตกในขอบอาคารที่แผนที่วาด ไม่ได้ยืนยันว่าร้านตั้งอยู่ในอาคารนี้หรือชั้นใด${height ? ` · ${esc(height)}` : ''}</p>
+    </section>
+    <section class="panel-section"><div class="section-heading">${heading('store', 'ร้าน')}<span class="hint">${num(b.count)}</span></div>${restaurantList(b.rows.slice(0, 40), {showArea: b.areaCount > 1, index: meta.index})}
+      ${b.count > 40 ? `<p class="hint">แสดง ${num(40)} จาก ${num(b.count)} ร้าน (รีวิวมากก่อน) · ดูทั้งหมดในตาราง</p>` : ''}</section>
+    ${b.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(b.venues.length)} แห่ง</span></div>${venueRows(b.venues)}</section>` : ''}
+    <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}</div>${groupBars(b.byGroup, b.count)}</section>
+    ${provenance(meta, `จุดของร้านที่ตกในขอบอาคาร OpenStreetMap หนึ่งหลัง${area ? ` · ${area} (ขอบเขต CityMETER)` : ''}`)}`;
 }
 
 /* ---------- Store ---------- */
@@ -295,7 +331,11 @@ export function renderStore(d, meta = {}) {
   const rating = Number.isFinite(r.rating) ? `★ <span class="data-number">${dec(r.rating)}</span>${Number.isFinite(r.reviews) ? ` · <span class="data-number">${num(r.reviews)}</span> รีวิว` : ''}` : 'ไม่มีคะแนนในแหล่งข้อมูล';
   const price = r.price === 'UNSPECIFIED' ? 'ไม่ระบุราคา (ไม่ใช่ราคา 0)' : `${esc(PRICE_LABELS[r.price])}${d.price.range ? `<br><span class="hint">ช่วงราคาที่ระบุ ${esc(d.price.range)} · จัดระดับจากราคาสูงสุดที่ระบุ</span>` : ''}`;
   const brand = r.brand ? `<dt>เครือร้าน</dt><dd class="fact-brand">${blogo ? brandLogoMarkup(r.brand, {size: 'md'}) : ''}<span><button type="button" class="link-button" data-action="filter-brand" data-value="${esc(r.brand.id)}">${esc(r.brand.name)}</button><br><span class="hint">${r.brand.hold ? 'รอยืนยันตัวตนเครือ' : 'จับคู่จากชื่อร้าน'}</span></span></dd>` : '';
-  const venue = r.venue ? `<dt>สถานที่</dt><dd class="fact-venue">${venueLogoMarkup(r.venue, {size: 'md'})}<span><button type="button" class="link-button" data-action="select-venue" data-id="${esc(r.venue.id)}">${esc(r.venue.name)}</button><br><span class="hint">${r.venueEntity ? 'รายการนี้คือชื่อสถานที่เอง' : 'ชื่อร้านอ้างถึงสถานที่นี้'}</span></span></dd>` : '';
+  const venueHint = r.venueEntity ? 'รายการนี้คือชื่อสถานที่เอง' : r.venueMatch === 'suffix' ? 'ชื่อร้านลงท้ายด้วยชื่อสถานที่นี้'
+    : r.venueMatch === 'auto' ? 'ชื่อร้านลงท้ายด้วยชื่อนี้ · สถานที่จากชื่อร้าน' : 'ชื่อร้านอ้างถึงสถานที่นี้';
+  const venue = r.venue ? `<dt>สถานที่</dt><dd class="fact-venue">${venueLogoMarkup(r.venue, {size: 'md'})}<span><button type="button" class="link-button" data-action="select-venue" data-id="${esc(r.venue.id)}">${esc(r.venue.name)}</button><br><span class="hint">${venueHint}</span></span></dd>` : '';
+  const bd = d.building;
+  const building = bd ? `<dt>อาคาร</dt><dd>${bd.others ? `<button type="button" class="link-button" data-action="select-building" data-id="${esc(bd.key)}">จุดตกในอาคารเดียวกับอีก ${num(bd.others)} ร้าน</button>` : 'จุดตกในอาคารที่แผนที่วาด ไม่มีร้านอื่นตามตัวกรองนี้'}<br><span class="hint">ขอบอาคาร OpenStreetMap · จุดละเอียดราว 9.55 ม. ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร</span></dd>` : '';
   const area = d.area ? `<button type="button" class="link-button" data-action="select-area" data-id="${esc(d.area.id)}">${esc(w.area)}${esc(d.area.name)}</button> · <button type="button" class="link-button" data-action="select-district" data-id="${esc(d.area.district)}">${esc(w.district)}${esc(d.area.districtName)}</button>` : '—';
   return `<section class="detail-head store">
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
@@ -306,7 +346,7 @@ export function renderStore(d, meta = {}) {
       <dl class="facts">
         <dt>คะแนน</dt><dd>${rating}</dd>
         <dt>ราคา</dt><dd>${price}</dd>
-        ${brand}${venue}
+        ${brand}${venue}${building}
         <dt>พื้นที่</dt><dd>${area}</dd>
         <dt>พิกัด</dt><dd><span class="data-number">${esc(coords)}</span><br><span class="hint" title="${esc(d.geometry.note)}">${esc(d.geometry.label)}${d.coLocated ? ` · ตำแหน่งเดียวกับอีก ${num(d.coLocated)} ร้าน` : ''}</span></dd>
         <dt>แหล่งข้อมูล</dt><dd>CityMETER Restaurants API สาธารณะ · ดึงข้อมูล ${esc(thaiDate(meta.retrievedOn || meta.asOf || ''))}<br><span class="hint data-number" title="รหัสสังเกตการณ์ในชุดข้อมูลนี้ (ย่อ)">รหัส R-${esc(r.id.split('-')[0])}…</span></dd>

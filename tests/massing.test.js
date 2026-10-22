@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {parseVectorTile, tileToLonLat} from '../js/mvt.js';
 import {pointInRing, signedArea} from '../js/geometry.js';
-import {shapeTile, tilesForRegions, roundingRadiusM, encloseOffsetM, outerRings, installMassing, HEIGHT_LIFT_M, MAX_TILES, CITY_LAYER, FOCUS_LAYER, FOCUS_SOURCE, OCCLUDER_LAYER, SCENE, FADE_NEAR_M, FADE_FAR_M} from '../js/massing.js';
+import {shapeTile, tilesForRegions, roundingRadiusM, encloseOffsetM, outerRings, installMassing, focusFeatureId, HEIGHT_LIFT_M, MAX_TILES, CITY_LAYER, FOCUS_LAYER, FOCUS_SOURCE, OCCLUDER_LAYER, VENUE_LAYER, SCENE, FADE_NEAR_M, FADE_FAR_M} from '../js/massing.js';
 
 const tile = {z: 14, x: 12767, y: 7560};
 const layer = parseVectorTile(readFileSync(new URL('./fixtures/mvt-sample.pbf', import.meta.url))).layers.building;
@@ -14,26 +14,39 @@ const whole = [[-10, -10], [4106, -10], [4106, 4106], [-10, 4106], [-10, -10]].m
 test('focus massing keeps only buildings inside the focus region, lifts them and encloses the original', () => {
   const r = roundingRadiusM(15.5), d = encloseOffsetM(r);
   const out = shapeTile(tile, layer, {regions: [region], radiusM: r, offsetM: d});
-  const ids = out.features.map(f => f.id).sort();
+  const ids = out.features.map(f => f.properties.osm_id).sort();
   assert.deepEqual(ids, [101], 'only the square at tile x≈1147 lies in the left half');
   const f = out.features[0];
+  const fi = layer.features.findIndex(x => x.id === 101);
+  assert.equal(f.id, focusFeatureId(tile, fi, 0), 'stable id: tile + feature index + polygon index (never the merged OSM id)');
+  assert.ok(Number.isSafeInteger(f.id));
   assert.equal(f.properties.height, 20 + HEIGHT_LIFT_M);
   assert.equal(f.properties.base, 0);
   assert.ok(f.geometry.coordinates[0].length > 5, 'corners are rounded (extra vertices)');
   // Every original vertex (tile units → lon/lat) is inside the model ring.
   const original = layer.features.find(x => x.id === 101).rings()[0].map(([px, py]) => tileToLonLat(px, py, tile));
   for (const p of original) assert.ok(pointInRing(p, f.geometry.coordinates[0]), 'model encloses the original footprint');
+  // The original footprint (not rounded, not offset) is kept for the spatial join, under the same id.
+  assert.equal(out.footprints.length, 1);
+  const fp = out.footprints[0];
+  assert.equal(fp.id, f.id);
+  assert.equal(fp.osmId, 101);
+  assert.equal(fp.height, 20);
+  assert.equal(fp.outer.length, original.length);
+  fp.outer.forEach((p, i) => { assert.ok(Math.abs(p[0] - original[i][0]) < 1e-12 && Math.abs(p[1] - original[i][1]) < 1e-12); });
 });
 
 test('hide_3d features are skipped, holes are kept and edge-crossing buildings are clipped to the tile', () => {
   const r = roundingRadiusM(16), d = encloseOffsetM(r);
   const out = shapeTile(tile, layer, {regions: [whole], radiusM: r, offsetM: d});
-  const ids = out.features.map(f => f.id).sort((a, b) => a - b);
+  const ids = out.features.map(f => f.properties.osm_id).sort((a, b) => a - b);
   assert.deepEqual(ids, [101, 102, 103, 103, 105], 'hide_3d (104) is out; the merged feature yields one polygon per outer ring');
-  const l = out.features.find(f => f.id === 102);
+  assert.equal(new Set(out.features.map(f => f.id)).size, out.features.length, 'the two polygons of merged feature 103 get distinct ids');
+  assert.equal(out.footprints.find(b => b.osmId === 102).holes.length, 1, 'the footprint keeps its hole (a courtyard is not inside)');
+  const l = out.features.find(f => f.properties.osm_id === 102);
   assert.equal(l.geometry.coordinates.length, 2, 'outer + hole');
   assert.ok(Math.abs(signedArea(l.geometry.coordinates[1])) < Math.abs(signedArea(l.geometry.coordinates[0])));
-  const edge = out.features.find(f => f.id === 105);
+  const edge = out.features.find(f => f.properties.osm_id === 105);
   const [east] = tileToLonLat(4096, 0, tile);
   const maxLon = Math.max(...edge.geometry.coordinates[0].map(p => p[0]));
   const slackDeg = (d * 1.5) / 111320; // the outward offset may exceed the tile edge by ≈d metres, never by the 64-unit buffer
@@ -44,8 +57,9 @@ test('host overlap removes the OSM twin from the focus tier and reports its id f
   const host = layer.features.find(x => x.id === 101).rings()[0].map(([px, py]) => tileToLonLat(px, py, tile));
   const r = roundingRadiusM(16), d = encloseOffsetM(r);
   const out = shapeTile(tile, layer, {regions: [whole], hosts: [host], radiusM: r, offsetM: d});
-  assert.ok(!out.features.some(f => f.id === 101));
-  assert.deepEqual([...out.hiddenIds], [101]);
+  assert.ok(!out.features.some(f => f.properties.osm_id === 101));
+  assert.ok(!out.footprints.some(b => b.osmId === 101), 'a host-covered building is not joined as OSM (the host geometry is)');
+  assert.deepEqual([...out.hiddenIds], [101], 'hidden in the city tier by its tile (OSM) id');
   assert.equal(out.dropped, 1);
 });
 
@@ -186,4 +200,36 @@ test('city tier fades with distance from the focus anchors: near → quiet tone,
   assert.equal(map.featureState[3].fade, 0, 'the far building is now next to the anchor');
   assert.equal(map.featureState[1].fade, 1);
   massing.dispose();
+});
+
+test('venue highlight tier: chosen focus buildings move to the data-colour layer, never occluders; hit test returns the footprint', async () => {
+  const map = fakeMap();
+  const bytes = readFileSync(new URL('./fixtures/mvt-sample.pbf', import.meta.url));
+  const massing = installMassing(map, {
+    beforeId: null, colors: {quiet: '#ECEDE8', focus: '#D9D7CD', venue: '#347DA8'},
+    tileUrl: t => `stub/${t.z}/${t.x}/${t.y}.pbf`,
+    fetchImpl: async () => ({ok: true, arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)}),
+  });
+  assert.equal(map.getLayer(VENUE_LAYER).paint['fill-extrusion-color'], '#347DA8');
+  await massing.update({regions: [whole], hosts: [], zoom: 15.5, enabled: true, city: true, latitude: 13.75});
+  const list = massing.buildings();
+  assert.ok(list.length >= 2 && list.every(b => Array.isArray(b.outer) && b.bbox.length === 4));
+  const v0 = massing.version;
+  const target = list.find(b => b.osmId === 101);
+  assert.equal(massing.setHighlight([target.id, 999]), 1, 'unknown ids are ignored');
+  assert.deepEqual(map.filters[VENUE_LAYER], ['in', ['id'], ['literal', [target.id]]]);
+  assert.deepEqual(map.filters[FOCUS_LAYER], ['all', ['!', ['in', ['id'], ['literal', []]]], ['!', ['in', ['id'], ['literal', [target.id]]]]]);
+  // Re-shaping at another zoom keeps the ids: the highlight stays on the same building.
+  await massing.update({regions: [whole], hosts: [], zoom: 17.2, enabled: true, city: true, latitude: 13.75});
+  assert.ok(massing.version > v0);
+  assert.ok(massing.buildings().some(b => b.id === target.id && b.osmId === 101));
+  // Hit test: the query result's id resolves to the footprint record.
+  map.queryRenderedFeatures = () => [{id: target.id, layer: {id: VENUE_LAYER}}];
+  assert.equal(massing.hitTest({x: 1, y: 1})?.osmId, 101);
+  map.queryRenderedFeatures = () => [];
+  assert.equal(massing.hitTest({x: 1, y: 1}), null);
+  massing.setHighlight([]);
+  assert.deepEqual(map.filters[VENUE_LAYER], ['in', ['id'], ['literal', []]]);
+  massing.dispose();
+  assert.equal(map.getLayer(VENUE_LAYER), undefined);
 });

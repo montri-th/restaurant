@@ -9,6 +9,10 @@
  * and labels stay readable above an exact, opaque data colour; it switches off at
  * zoom ≥ FILL_MAX_ZOOM (hard switch) where pins and buildings carry the reading.
  *
+ * Every frame stays a click target at every zoom (`area-hit`, a transparent fill
+ * without maxzoom): from a selected แขวง/ตำบล a click on the next one moves there,
+ * also at detail zoom where the choropleth is off. Hover draws a thin outline.
+ *
  * EVID-05 per frame: measured (class fill) · measured_zero (frame holds rows in the
  * dataset but none in this selection → lowest fill + zero outline) · no_data (no
  * row of the dataset in this frame — the source does not cover it; 135° hatch +
@@ -21,7 +25,7 @@ import {buildDensityClasses, classify} from './scales.js';
 export const FILL_MAX_ZOOM = 14.5;
 export const AREA_MIN_ZOOM = 8.5;
 const SOURCE = 'areas', DISTRICTS = 'districts', HATCH = 'nodata-hatch';
-export const AREA_LAYERS = Object.freeze({fill: 'area-fill', hatch: 'area-nodata', zero: 'area-zero-outline', outline: 'area-outline', selected: 'area-selected'});
+export const AREA_LAYERS = Object.freeze({hit: 'area-hit', fill: 'area-fill', hatch: 'area-nodata', zero: 'area-zero-outline', outline: 'area-outline', hover: 'area-hover', selected: 'area-selected'});
 export const DISTRICT_LAYERS = Object.freeze({outline: 'district-outline', selected: 'district-selected'});
 
 function cssVar(name, fallback) {
@@ -81,6 +85,9 @@ export function installAreaLayers(map, areas, districts) {
     attribution: 'ขอบเขตแขวง/ตำบล: <a href="https://landometer.com/v3/citymeter" target="_blank" rel="noopener">CityMETER</a>'});
   map.addSource(DISTRICTS, {type: 'geojson', data: districts, promoteId: 'id'});
   const fs = (key, on, off = 0) => ['case', ['boolean', ['feature-state', key], false], on, off];
+  // Click target only (never drawn): every frame at every zoom from AREA_MIN_ZOOM.
+  map.addLayer({id: AREA_LAYERS.hit, type: 'fill', source: SOURCE, minzoom: AREA_MIN_ZOOM,
+    paint: {'fill-color': '#000000', 'fill-opacity': 0}}, beforeId);
   map.addLayer({id: AREA_LAYERS.fill, type: 'fill', source: SOURCE, minzoom: AREA_MIN_ZOOM, maxzoom: FILL_MAX_ZOOM,
     paint: {'fill-color': ['coalesce', ['feature-state', 'fill'], '#000000'], 'fill-opacity': fs('filled', 1), 'fill-antialias': true}}, beforeId);
   map.addLayer({id: AREA_LAYERS.hatch, type: 'fill', source: SOURCE, minzoom: AREA_MIN_ZOOM, maxzoom: FILL_MAX_ZOOM,
@@ -94,6 +101,8 @@ export function installAreaLayers(map, areas, districts) {
     paint: {'line-color': ['case', ['boolean', ['feature-state', 'quiet'], false], cssVar('--border-default', '#C9D0CB'), cssVar('--border-emphasis', '#7D877F')],
       'line-width': ['interpolate', ['linear'], ['zoom'], 10, 0.5, 14, 1, 17, 1.4], 'line-dasharray': [3, 2],
       'line-opacity': ['interpolate', ['linear'], ['zoom'], 8.5, 0.4, 11, 0.85]}});
+  map.addLayer({id: AREA_LAYERS.hover, type: 'line', source: SOURCE, minzoom: AREA_MIN_ZOOM,
+    paint: {'line-color': cssVar('--map-selected-stroke', '#176B82'), 'line-width': 2, 'line-opacity': fs('hover', 0.7)}});
   map.addLayer({id: DISTRICT_LAYERS.selected, type: 'line', source: DISTRICTS,
     paint: {'line-color': cssVar('--map-selected-stroke', '#176B82'), 'line-width': 2.4, 'line-opacity': fs('selected', 1)}});
   map.addLayer({id: AREA_LAYERS.selected, type: 'line', source: SOURCE,
@@ -139,13 +148,28 @@ export function installAreaLayers(map, areas, districts) {
     if (map.getLayer(AREA_LAYERS.zero)) map.setPaintProperty(AREA_LAYERS.zero, 'line-color', cssVar('--data-zero-outline', '#7D877F'));
   }
 
+  /** The frame under a screen point (any zoom ≥ AREA_MIN_ZOOM), as its id, or ''. */
+  function hitTest(point) {
+    if (!map.getLayer(AREA_LAYERS.hit) || map.getLayoutProperty?.(AREA_LAYERS.hit, 'visibility') === 'none') return '';
+    const f = map.queryRenderedFeatures([point.x, point.y], {layers: [AREA_LAYERS.hit]})[0];
+    return f ? String(f.id ?? f.properties?.id) : '';
+  }
+  let hovered = '';
+  /** Thin outline on the frame under the pointer ('' clears). */
+  function hover(id = '') {
+    if (id === hovered) return;
+    if (hovered) map.setFeatureState({source: SOURCE, id: hovered}, {hover: false});
+    hovered = id;
+    if (hovered) map.setFeatureState({source: SOURCE, id: hovered}, {hover: true});
+  }
+
   function dispose() {
     for (const id of [...Object.values(AREA_LAYERS), ...Object.values(DISTRICT_LAYERS)]) if (map.getLayer(id)) map.removeLayer(id);
     for (const s of [SOURCE, DISTRICTS]) if (map.getSource(s)) map.removeSource(s);
     if (map.hasImage(HATCH)) map.removeImage(HATCH);
   }
 
-  return {update, retheme, dispose, model: () => current, layerIds: AREA_LAYERS};
+  return {update, retheme, dispose, hitTest, hover, model: () => current, layerIds: AREA_LAYERS};
 }
 
 /**
@@ -177,7 +201,9 @@ export function installAreaLabels(map, container, {onSelect, reservedBottom = ()
       const p = map.project(e.center);
       e.button.hidden = !(e.visible && inWindow && shown < maxLabels && p.x > 0 && p.x < width && p.y > 48 && p.y < height);
       if (e.button.hidden) continue;
-      const w = e.button.offsetWidth, h = e.button.offsetHeight;
+      // A chip's size never changes after it is built: measure once (no forced layout on every frame of a move).
+      if (!e.size) e.size = {w: e.button.offsetWidth, h: e.button.offsetHeight};
+      const {w, h} = e.size;
       let position = null;
       for (const [dx, dy] of [[0, 0], [0, -26], [0, 26], [-36, 0], [36, 0]]) {
         const x = p.x + dx, y = p.y + dy;

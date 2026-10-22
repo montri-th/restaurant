@@ -3,8 +3,8 @@
   "schemaVersion": "1.4.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.1.1",
-  "updatedOn": "2026-10-22",
+  "productVersion": "0.2.0",
+  "updatedOn": "2026-10-23",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
   "evidenceLabels": {
@@ -270,9 +270,10 @@
     "inferred_fields": [
       "food-type group",
       "chain candidate (name-based)",
-      "venue candidate (name-based)"
+      "venue candidate (name-based: sheet link, name ending, or a name-derived place from repeated endings within 200 m)",
+      "building join (display point falls inside a drawn building footprint; display-time only)"
     ],
-    "limitation_text": "ไม่ใช่สำมะโนร้านอาหาร; 7 จังหวัด นอกสามจังหวัดหลักเพียงบางตำบล; พิกัดแสดงผลกริด 9.55 ม.; คะแนน/รีวิวเป็นความนิยมตามแหล่งข้อมูล"
+    "limitation_text": "ไม่ใช่สำมะโนร้านอาหาร; 7 จังหวัด นอกสามจังหวัดหลักเพียงบางตำบล; พิกัดแสดงผลกริด 9.55 ม. จึงบอกได้เพียงว่าจุดตกในอาคารใด ไม่ใช่ที่ตั้งร้าน; คะแนน/รีวิวเป็นความนิยมตามแหล่งข้อมูล"
   },
   "known_limitations": [
     "ไม่ใช่สำมะโน",
@@ -315,8 +316,13 @@
       "hypothesis": "เวลาจากคำถามถึงรายชื่อพื้นที่ < 10 นาที",
       "test": "จับเวลา 3 task",
       "criterion": "มัธยฐาน < 10 นาที"
+    },
+    {
+      "hypothesis": "การกดอาคารและพื้นที่ข้างเคียงบนแผนที่โดยตรงทำให้ไล่เทียบพื้นที่ติดกันได้เร็วขึ้น และผู้ใช้ไม่อ่าน “จุดตกในอาคาร” เป็นที่ตั้งร้านยืนยัน",
+      "test": "ให้ผู้ใช้เทียบ 3 แขวงที่ติดกันและเปิดอาคารของสถานที่ 1 แห่ง แล้วอธิบายรายการ “ร้านอื่นที่จุดตกในอาคารเดียวกัน”",
+      "criterion": "ทำครบภายใน 3 นาที และ ≥ 80% อธิบายว่าเป็นจุดแสดงผล ไม่ใช่ที่ตั้งยืนยัน"
     }
   ],
   "owner_team": "Landometer · CityMETER",
-  "last_reviewed": "2026-10-22"
+  "last_reviewed": "2026-10-23"
 }

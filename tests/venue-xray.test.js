@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildSolid, screenBoxOf, solidHit, mat4Multiply, mat4Translation, transformPoint, installVenueXray, XRAY_LAYER, XRAY_MIN_ZOOM} from '../js/venue-xray.js';
-import {installMassing, CITY_LAYER, FOCUS_LAYER, OCCLUDER_LAYER} from '../js/massing.js';
+import {installMassing, CITY_LAYER, FOCUS_LAYER, OCCLUDER_LAYER, VENUE_LAYER} from '../js/massing.js';
 import {HOST_LAYERS} from '../js/buildings.js';
 
 // Mercator stand-in: x = lon/360 + 0.5, y = 0.5 - lat/360 (flat), z = altitude × 1e-7 (like MercatorCoordinate near the equator).
@@ -160,5 +160,5 @@ test('draw order contract: massing tiers are inserted before the host extrusion 
   map.addLayer({id: 'water-name', type: 'symbol'});
   map.addLayer({id: HOST_LAYERS.extrusion, type: 'fill-extrusion'}, 'water-name');
   installMassing(map, {beforeId: HOST_LAYERS.extrusion, colors: {}, tileUrl: () => ''});
-  assert.deepEqual(map.layers, [CITY_LAYER, FOCUS_LAYER, OCCLUDER_LAYER, HOST_LAYERS.extrusion, 'water-name']);
+  assert.deepEqual(map.layers, [CITY_LAYER, FOCUS_LAYER, OCCLUDER_LAYER, VENUE_LAYER, HOST_LAYERS.extrusion, 'water-name']);
 });

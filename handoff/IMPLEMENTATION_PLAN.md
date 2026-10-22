@@ -1,6 +1,6 @@
-# Implementation Plan — CityMETER · Restaurants 0.1
+# Implementation Plan — CityMETER · Restaurants 0.2
 
-คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.4.0) · อ่าน [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) ก่อน
+รุ่น 0.2.0 · 23 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.4.0) · อ่าน [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) ก่อน
 
 ## 1. สถาปัตยกรรม
 
@@ -20,29 +20,32 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 
 | ไฟล์ | หน้าที่ |
 |---|---|
-| `js/app.js` | ประกอบทั้งหมด: row scopes, focus modes, coverage ตามจังหวัด/เขต, panel modes + back stack, URL, map lifecycle + reinstall เมื่อเปลี่ยนธีม, camera, ลำดับการคลิกแผนที่ (x-ray → อาคาร → หมุด → จังหวัด → แขวง), legend ตาม zoom, ตัวนับ/ตาราง |
+| `js/app.js` | ประกอบทั้งหมด: row scopes, focus modes, coverage ตามจังหวัด/เขต, panel modes + back stack, URL, map lifecycle + reinstall เมื่อเปลี่ยนธีม, camera, ลำดับการคลิกแผนที่ (x-ray → อาคารของสถานที่ → หมุด → อาคารในโฟกัส → จังหวัด → แขวงทุกซูม), hover, ป้ายพื้นที่บนจอ (`refreshLabelView`), join อาคารและสีอาคารของสถานที่ (`refreshJoin`/`applyJoin`), legend ตาม zoom, ตัวนับ/ตาราง |
+| `js/building-join.js` | จับจุดแสดงผลกับขอบอาคารที่วาด (ขอบเล็กสุดที่มีจุด), อาคารของสถานที่ (ข้อมูลอาคาร หรือ ≥ max(1, 20 %) ของจุด), ผลการกดอาคาร, ร้านอื่นในอาคารของสถานที่, พื้นที่โฟกัสรอบสถานที่ |
 | `js/model.js` | ถอดข้อมูล (กริด → lon/lat), PROVINCES, ราคา, GROUP_SHORT, filterRows, summarize, mixOf, productionLink |
-| `js/areas.js` | index แขวง/ตำบล เขต/อำเภอ จังหวัด, คำระดับ, summarizeAreas/Districts, combinedDensity |
+| `js/areas.js` | index แขวง/ตำบล เขต/อำเภอ จังหวัด, คำระดับ, summarizeAreas/Districts, combinedDensity, `areaLocator` (วางป้ายเท่านั้น ไม่ใช่สมาชิก) |
 | `js/area-insight.js` | ข้อค้นพบแรก + filterAreaRows |
 | `js/scales.js` | LUT density.area / count / price, การจัดระดับ, EVID-05, ink |
 | `js/cues.js` | กลุ่มประเภท → series + รูปทรง, SVG และ icon แผนที่ |
-| `js/map-layers.js` | choropleth แขวง/ตำบล, hatch, เส้นเขต, ป้าย HTML |
+| `js/map-layers.js` | choropleth แขวง/ตำบล, `area-hit` (เป้ากดทุกซูม) + เส้น hover, hatch, เส้นเขต, ป้าย HTML (วัดขนาดครั้งเดียว) |
 | `js/provinces.js` | กรอบจังหวัด (count) |
-| `js/pins.js` | symbol layer, จุดบริบท, หมุด HTML, โลโก้ |
-| `js/buildings.js`, `js/venue-xray.js`, `js/massing.js`, `js/geometry.js`, `js/mvt.js`, `js/map-style.js`, `js/camera.js` | อาคารสถานที่, x-ray, มวลอาคาร, basemap, กล้อง (จาก Luxury Brands 0.5 ไม่เปลี่ยนตรรกะ) |
+| `js/pins.js` | symbol layer บนจุดบริบทของทั้ง selection (ส่งเมื่อเปลี่ยนตัวกรอง ไม่รับการกด), หมุด HTML, โลโก้; หมุดเกาะแผนที่ระหว่างกล้องเคลื่อนแล้วจัดใหม่เมื่อหยุด |
+| `js/buildings.js` | อาคารของสถานที่ (ข้อมูลอาคาร): ระดับสถานที่ = สถานที่นั้น · มุมมองพื้นที่ = ทุกสถานที่ที่ร้านในโฟกัสอ้างถึง, hitTest |
+| `js/massing.js` | มวลอาคาร quiet/focus จาก OpenFreeMap + id คงที่ต่อหลัง (`focusFeatureId`), ขอบเดิมสำหรับ join, ชั้นสีอาคารของสถานที่ (`focus-massing-venue`), hitTest; คำนวณรูปทรงหลังกล้องหยุด |
+| `js/venue-xray.js`, `js/geometry.js`, `js/mvt.js`, `js/map-style.js`, `js/camera.js` | x-ray, เรขาคณิต, ถอด MVT, basemap, กล้อง (จาก Luxury Brands 0.5 ไม่เปลี่ยนตรรกะ) |
 | `js/breadcrumb.js` | breadcrumb + ลิงก์ production |
-| `js/profile-model.js`, `js/panel.js` | view models + HTML ของแผง + provenance |
+| `js/profile-model.js`, `js/panel.js` | view models + HTML ของแผง (รวมแผงอาคาร วิธีจับคู่สถานที่ และร้านอื่นที่จุดตกในอาคารเดียวกัน) + provenance |
 | `js/chart-model.js`, `js/charts.js` | กราฟ HTML ไม่มี vendor |
 | `js/brand-logos.js`, `js/venue-logos.js` | registry โลโก้ |
 | `js/navigation.js`, `js/launch.js`, `js/vendors.js` | ไอคอน/help, launch overlay, MapLibre loader |
 | `scripts/build-boundaries.py` | ขอบเขตจาก production + ใบรับ |
-| `scripts/build-data.py` | ข้อมูล โลโก้ อาคาร จากชีตวิจัยและ manifest |
+| `scripts/build-data.py` | ข้อมูล โลโก้ อาคาร จากชีตวิจัยและ manifest + สถานที่จากท้ายชื่อร้าน (`suffix_venue_rules`) |
 
 ## 3. Selection
 
-ตัวกรอง: `search` `group` `price` `province` `brand` · URL: + `district` `area` `areas` `view` `store` `place` `view3d` `cam` · Row scopes: scopeRows → baseRows → rows (+ ร้านของสถานที่) · Panel actions: `select-area` `select-district` `select-store` `select-venue` `select-province` `filter-brand` `back` `explore-top` `clear-focus` `open-charts` `open-table` `clear-filter` `crumb-*` `toggle-3d`
+ตัวกรอง: `search` `group` `price` `province` `brand` · URL: + `district` `area` `areas` `view` `store` `place` `view3d` `cam` · Row scopes: scopeRows → baseRows → rows (+ ร้านของสถานที่, ร้านในอาคาร) · Panel actions: `select-area` `select-district` `select-store` `select-venue` `select-building` `select-province` `filter-brand` `back` `explore-top` `clear-focus` `open-charts` `open-table` `clear-filter` `crumb-*` `toggle-3d`
 
-## 4. งาน (ทำแล้วในรุ่น 0.1 และ 0.1.1)
+## 4. งาน (ทำแล้วในรุ่น 0.1, 0.1.1 และ 0.2.0)
 
 | ID | งาน | ขึ้นกับ | Acceptance |
 |---|---|---|---|
@@ -56,6 +59,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | P08 | app, URL, ธีม, มือถือ, failure paths | P05–P07 | AC01, AC04, AC16–AC19 |
 | P09 | tests, LDS parity, harness | P08 | AC20, AC21 |
 | P10 | เอกสาร handoff เผยแพร่ ตรวจ live | P09 | AC22, AC23 |
+| P11 | 0.2.0: สถานที่จากท้ายชื่อร้าน, จับจุดกับอาคารและกดอาคาร, ย้ายไปแขวงข้าง ๆ และกล้องลื่น (เจ้าของสั่ง 23 ต.ค. 2569) | P10 | AC25, AC26, AC27, AC22 |
 
 ## 5. Acceptance criteria
 
@@ -85,12 +89,15 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | AC22 | เผยแพร่ | `npm run verify:live` ผ่านทุกไฟล์ + ตรวจด้วย Chrome desktop light/dark และจอแคบ | live |
 | AC23 | attribution และชั้นซ้อน | ที่ 1440, 1180 และ 390 px attribution ของแผนที่อ่านได้ครบเหนือถาดกราฟ (ไม่อยู่ใต้ถาด legend การ์ด Aha หรือป้าย) และตารางไม่ล้นเกินขอบบนของแผนที่เมื่อเปิดกราฟอยู่ | browser (live) |
 | AC24 | การเลือกที่ว่าง | แขวง/ตำบลหรือเขต/อำเภอที่เป็นลายทแยง (no_data) เปิดคำอธิบายโดยไม่มีช่องตัวเลข 0; พื้นที่ที่มีข้อมูลแต่ตัวกรองเหลือ 0 แสดงศูนย์ที่วัดได้และพาไปพื้นที่ที่ตัวกรองเดียวกันพบร้าน | unit + browser |
+| AC25 | สถานที่จากท้ายชื่อร้าน | “KFC Gateway Bangsue” → Gateway Bangsue; Charn At The Avenue เป็นสถานที่จากชื่อร้าน 14 ร้าน ทุกจุดอยู่ในรัศมี 200 ม.; “… หน้าโลตัสศรีนครินทร์” และ “… Behind Central Bangna” ไม่มีสถานที่; แผงร้าน/สถานที่บอกวิธีจับคู่ | unit + browser |
+| AC26 | อาคาร | ในพื้นที่ที่โฟกัส อาคารของสถานที่เป็นสีน้ำเงิน กดแล้วเปิดสถานที่; อาคารที่มีจุดเดียวเปิดร้าน หลายจุดเปิดแผง “ร้านที่จุดตกในอาคารนี้”; แผงสถานที่แยก “ร้านอื่นที่จุดตกในอาคารเดียวกัน”; ไม่มีข้อความ “ตั้งอยู่ใน” | unit + harness + live |
+| AC27 | ย้ายไปพื้นที่ข้าง ๆ | เมื่อเปิดพื้นที่ (3D หรือ 2D ทุกซูม) กดแขวง/ตำบลถัดไปหรือป้ายของมัน (มีป้ายทุกพื้นที่บนจอ) แล้วย้ายไปในการเคลื่อนกล้องครั้งเดียว; กดจุดบริบทสีเทาแล้วไปพื้นที่นั้น (ไม่เปิดร้าน); กดในพื้นที่ที่เลือกอยู่แล้วไม่เปลี่ยนอะไร | harness + live |
 
 ## 6. วิธีทำงานต่อ
 
 1. อ่าน AGENTS.md แล้ว handoff/README.md, PRODUCT_STATEMENT.md และ brief คู่ md/json
 2. `npm test` ก่อนแก้; คง row scopes, focus modes, metric/coverage contracts และ panel actions
-3. แก้ทีละงาน คง INV01–INV23
+3. แก้ทีละงาน คง INV01–INV26
 4. ตรวจการคำนวณด้วยข้อมูลจริงใน tests/ (`tests/helpers.js` โหลดครั้งเดียว)
 5. ดูภาษาไทยจริงที่ 390 px และ desktop ทั้งสองธีม; ใช้ harness แบบ stub tiles เมื่อ CDN/tiles ถูกบล็อก แล้วยืนยันภาพจริงบนเว็บ
 6. ปรับกล้อง/ชั้นสดผ่าน `window.__citymeter` ใน console ก่อนเปลี่ยนค่าคงที่
@@ -112,3 +119,6 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | N09 | ขยายความครอบคลุมเกิน 7 จังหวัดเมื่อแหล่งข้อมูลครอบคลุม; ระหว่างนั้นคง no_data | data owner |
 | N10 | ตารางข้อมูลรายพื้นที่และ answer blocks สำหรับ Search/LLM ตาม PB v6 channel readiness | product |
 | N11 | มือถือขณะเปิดแผงข้อมูล: แสดง attribution แบบย่อเหนือแผง (ตอนนี้อยู่ใต้แผงจนกด “กลับไปแผนที่”) | frontend |
+| N12 | แผงอาคารใน URL (ต้องมี key อาคารที่คงที่จากแหล่งขอบอาคารที่เจ้าของอนุมัติ — id ของ OSM tile เป็นรายแผ่น) | frontend + data |
+| N13 | เทียบผล join กับขอบอาคารของ CityMETER production (building/detailMvt) และพิกัดต้นทางเมื่อมี N02 รายงานสัดส่วนจุดต่อประเภทอาคาร | data |
+| N14 | ตรวจสถานที่จากชื่อร้าน (RX-…) แล้วยกเข้าชีตสถานที่พร้อมหลักฐาน | research |

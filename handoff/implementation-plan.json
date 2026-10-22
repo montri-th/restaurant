@@ -3,8 +3,8 @@
   "schemaVersion": "1.4.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.1.1",
-  "updatedOn": "2026-10-22",
+  "productVersion": "0.2.0",
+  "updatedOn": "2026-10-23",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
   "humanPlan": "IMPLEMENTATION_PLAN.md",
@@ -43,7 +43,11 @@
     "modules": [
       {
         "path": "js/app.js",
-        "role": "orchestration: row scopes (scopeRows/baseRows/rows/venue rows), focus modes, scoped coverage, panel modes and back stack, URL state, map lifecycle and theme reinstall, camera calls, single map click priority (x-ray → host → pin → province → area), legend switch by zoom, counter/table sync"
+        "role": "orchestration: row scopes (scopeRows/baseRows/rows/venue rows/building rows), focus modes, scoped coverage, panel modes and back stack, URL state, map lifecycle and theme reinstall, camera calls, single map click priority (x-ray → host → pin → building → province → area-hit), hover, neighbour labels (refreshLabelView), building join refresh and venue highlight (refreshJoin/applyJoin), legend switch by zoom, counter/table sync"
+      },
+      {
+        "path": "js/building-join.js",
+        "role": "display-time spatial join: display points × drawn footprints (smallest containing), venue buildings (official host or ≥ max(1, 20%) of joined points), click resolution, neighbours of a venue, venue focus region"
       },
       {
         "path": "js/model.js",
@@ -51,7 +55,7 @@
       },
       {
         "path": "js/areas.js",
-        "role": "index of แขวง/ตำบล, เขต/อำเภอ, จังหวัด; level words; summarizeAreas/Districts; combinedDensity (Σ/Σ)"
+        "role": "index of แขวง/ตำบล, เขต/อำเภอ, จังหวัด; level words; summarizeAreas/Districts; combinedDensity (Σ/Σ); areaLocator for label anchors only (never membership)"
       },
       {
         "path": "js/area-insight.js",
@@ -67,7 +71,7 @@
       },
       {
         "path": "js/map-layers.js",
-        "role": "แขวง/ตำบล choropleth (feature-state fill/zero/nodata/quiet/selected), hatch image, district outlines, buildAreaModel, HTML label chips with collision"
+        "role": "แขวง/ตำบล choropleth (feature-state fill/zero/nodata/quiet/selected), area-hit (click target at every zoom) and hover outline, hatch image, district outlines, buildAreaModel, HTML label chips with collision (sizes measured once)"
       },
       {
         "path": "js/provinces.js",
@@ -75,11 +79,11 @@
       },
       {
         "path": "js/pins.js",
-        "role": "focus cue symbol layer, grey context circles (first large draw deferred), selection ring, HTML pins from zoom 15.5 with keyboard tour, co-located slots and leader line, chain logos ≤ 250"
+        "role": "focus cue symbol layer over grey context circles of the whole scope (sent on filter change only, never click targets), selection ring, HTML pins from zoom 15.5 with keyboard tour, co-located slots and leader line, chain logos ≤ 250; pins follow the map during camera moves and re-layout on moveend"
       },
       {
         "path": "js/buildings.js",
-        "role": "host buildings of the open venue (fill-extrusion + footprint outline), hitTest, displayedFeatures"
+        "role": "official host buildings: of the open venue at venue level, of every hosted venue named by the focused rows in the area view (fill-extrusion + footprint outline), hitTest, displayedFeatures"
       },
       {
         "path": "js/venue-xray.js",
@@ -87,7 +91,7 @@
       },
       {
         "path": "js/massing.js · js/geometry.js · js/mvt.js",
-        "role": "quiet city massing + rounded focus massing from OpenFreeMap tiles (carried over unchanged)"
+        "role": "quiet city massing + rounded focus massing from OpenFreeMap tiles; stable focus ids, original footprints for the join, venue tier in map.activeLayer, hitTest; shaping waits for the camera to stop"
       },
       {
         "path": "js/map-style.js",
@@ -103,7 +107,7 @@
       },
       {
         "path": "js/profile-model.js",
-        "role": "overview, district, area, venue and store view models; describeGeometry, describePrice"
+        "role": "overview, district, area, venue (match counts, spatial neighbours), building and store (building fact) view models; describeGeometry, describePrice"
       },
       {
         "path": "js/panel.js",
@@ -127,7 +131,7 @@
       },
       {
         "path": "scripts/build-data.py",
-        "role": "research sheet + logo manifest + files → restaurants.json, logo registries, assets, venue-buildings.geojson"
+        "role": "research sheet + logo manifest + files → restaurants.json (incl. name-ending venues: suffix_venue_rules), logo registries, assets, venue-buildings.geojson"
       },
       {
         "path": "scripts/build-handoff.mjs · scripts/verify-live.mjs",
@@ -162,13 +166,15 @@
       "scopeRows": "filters only",
       "baseRows": "scopeRows ∩ selected district or area",
       "rows": "baseRows ∩ area focus",
-      "venueRows": "scopeRows naming the open venue"
+      "venueRows": "scopeRows naming the open venue",
+      "buildingRows": "scopeRows whose display point falls in the open building"
     },
     "panelActions": [
       "select-area",
       "select-district",
       "select-store",
       "select-venue",
+      "select-building",
       "select-province",
       "filter-brand",
       "back",
@@ -380,6 +386,34 @@
         "handoff/"
       ],
       "status": "done"
+    },
+    {
+      "id": "P11",
+      "title": "0.2.0: name-ending venues, display-time building join and building clicks, neighbour moves and smooth camera (owner 2026-10-23)",
+      "dependsOn": [
+        "P10"
+      ],
+      "acceptanceCriteria": [
+        "AC25",
+        "AC26",
+        "AC27",
+        "AC22"
+      ],
+      "files": [
+        "scripts/build-data.py",
+        "data/restaurants.json",
+        "js/building-join.js",
+        "js/massing.js",
+        "js/app.js",
+        "js/map-layers.js",
+        "js/pins.js",
+        "js/panel.js",
+        "js/profile-model.js",
+        "js/model.js",
+        "js/areas.js",
+        "tests/building-join.test.js"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -449,7 +483,7 @@
     {
       "id": "AC10",
       "scenario": "Venue with host building",
-      "expected": "only rows naming the venue carry detail; host building blue and visible at any pitch (x-ray); มุมสถาปนิก on by default; counter and table follow the venue rows",
+      "expected": "only rows naming the venue carry detail; host building blue and visible at any pitch (x-ray); มุมสถาปนิก on by default; counter and table follow the venue rows; in the area view the host building is blue and opens the venue on click",
       "verificationType": "browser",
       "result": "see VERIFICATION.md"
     },
@@ -550,12 +584,33 @@
       "expected": "a hatched (no_data) subdistrict or district opens a note with no 0 tiles; a covered one left at 0 by the filters shows measured zero and offers the areas where the same filters match (leave-area)",
       "verificationType": "unit + browser",
       "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC25",
+      "scenario": "Name-ending venues",
+      "expected": "“KFC Gateway Bangsue” → Gateway Bangsue (suffix); Charn At The Avenue is a name-derived place of 14 rows with every point within 200 m of its median; “… หน้าโลตัสศรีนครินทร์” and “… Behind Central Bangna” have no venue; store and venue copy say how the link was made",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC26",
+      "scenario": "Buildings",
+      "expected": "in a focused area the venue buildings are blue; a click on a venue building opens the venue, on a building with one point the store, with several the building panel “ร้านที่จุดตกในอาคารนี้”; the venue panel lists ร้านอื่นที่จุดตกในอาคารเดียวกัน apart; no copy says ตั้งอยู่ใน",
+      "verificationType": "unit + harness + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC27",
+      "scenario": "Neighbour moves",
+      "expected": "with an area open (3D or plan, any zoom) a click on the next แขวง/ตำบล — or its label, shown for every frame on screen — moves there in one animation; a click on a quiet context dot moves to its area (no store opens); a click inside the selected area changes nothing",
+      "verificationType": "harness + live",
+      "result": "see VERIFICATION.md"
     }
   ],
   "developerWorkflow": [
     "Read AGENTS.md, then handoff/README.md, PRODUCT_STATEMENT.md and the paired human/machine briefs",
     "Run npm test before changes; keep the row scopes, focus modes, metric and coverage contracts and the panel action contract",
-    "Change one bounded task at a time; preserve invariant IDs INV01–INV23",
+    "Change one bounded task at a time; preserve invariant IDs INV01–INV26",
     "Validate calculations with the real data in tests/ (tests/helpers.js loads it once)",
     "Review rendered Thai at 390 px and desktop in both themes; use the stub-tile harness when CDN/tiles are blocked, then confirm the real-tile look live",
     "Tune camera and layers live via window.__citymeter in the console before changing constants",
@@ -627,6 +682,24 @@
       "id": "N11",
       "title": "Phone with the reading sheet open: keep a compact attribution above the sheet (today it sits under the sheet until “กลับไปแผนที่”)",
       "ownerRole": "frontend",
+      "status": "backlog"
+    },
+    {
+      "id": "N12",
+      "title": "Building panel in the URL (a stable building key from an owner-approved footprint source; OSM tile ids are per-tile)",
+      "ownerRole": "frontend + data",
+      "status": "backlog"
+    },
+    {
+      "id": "N13",
+      "title": "Compare the OSM join with CityMETER production building footprints (building/detailMvt) and with source coordinates once N02 exists; report the share of points per building class",
+      "ownerRole": "data",
+      "status": "backlog"
+    },
+    {
+      "id": "N14",
+      "title": "Verify name-derived places (RX-…) and promote confirmed ones into the venue sheet with evidence",
+      "ownerRole": "research",
       "status": "backlog"
     }
   ]
