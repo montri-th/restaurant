@@ -367,7 +367,8 @@
         "P09"
       ],
       "acceptanceCriteria": [
-        "AC22"
+        "AC22",
+        "AC23"
       ],
       "files": [
         "README.md",
@@ -534,12 +535,19 @@
       "expected": "npm run verify:live passes for every published file; live checks in Chrome desktop light/dark and narrow",
       "verificationType": "live",
       "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC23",
+      "scenario": "Attribution and overlays",
+      "expected": "at 1440, 1180 and 390 px the map attribution is fully readable above the charts tray (never under the tray, legend, phone Aha card or labels); the table stays below the map top while the charts are open",
+      "verificationType": "browser (live)",
+      "result": "see VERIFICATION.md"
     }
   ],
   "developerWorkflow": [
     "Read AGENTS.md, then handoff/README.md, PRODUCT_STATEMENT.md and the paired human/machine briefs",
     "Run npm test before changes; keep the row scopes, focus modes, metric and coverage contracts and the panel action contract",
-    "Change one bounded task at a time; preserve invariant IDs INV01–INV20",
+    "Change one bounded task at a time; preserve invariant IDs INV01–INV23",
     "Validate calculations with the real data in tests/ (tests/helpers.js loads it once)",
     "Review rendered Thai at 390 px and desktop in both themes; use the stub-tile harness when CDN/tiles are blocked, then confirm the real-tile look live",
     "Tune camera and layers live via window.__citymeter in the console before changing constants",

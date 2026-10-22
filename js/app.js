@@ -30,7 +30,7 @@
  */
 import {PROVINCES, PRICE_BUCKETS, PRICE_LABELS, provinceByCode, provinceCodeFrom, decodeDataset, filterRows, summarize, hasPoint, productionLink} from './model.js';
 import {buildAreaIndex, areaWord, districtWord} from './areas.js';
-import {summarizeAreaInsight, filterAreaRows} from './area-insight.js';
+import {summarizeAreaInsight, filterAreaRows, MIN_AREA_ROWS} from './area-insight.js';
 import {renderInsightChart} from './charts.js';
 import {loadMapLibrary} from './vendors.js';
 import {installRestaurantPins} from './pins.js';
@@ -41,7 +41,7 @@ import {configureVenueLogos} from './venue-logos.js';
 import {installAreaLayers, installAreaLabels, buildAreaModel, featureBounds, FILL_MAX_ZOOM} from './map-layers.js';
 import {installProvinceLayers, buildProvinceModel, PROVINCE_FILL_MAX_ZOOM, PROVINCE_LABEL_MAX_ZOOM} from './provinces.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile} from './profile-model.js';
-import {renderOverview, renderArea, renderDistrict, renderVenue, renderStore, renderFilterChips, link, esc, num, dec} from './panel.js';
+import {renderOverview, renderArea, renderDistrict, renderVenue, renderStore, renderFilterChips, link, esc, num, dec, dens} from './panel.js';
 import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE} from './map-style.js';
 import {installMassing, outerRings} from './massing.js';
 import {presetFor, applyPreset, fitPitched, framePoint} from './camera.js';
@@ -74,6 +74,8 @@ const rowById = id => state.rowById.get(id) || null;
 const areaById = id => state.index.byId.get(id) || null;
 const districtById = id => state.index.districtById.get(id) || null;
 const bottomSpace = () => $('insights').getBoundingClientRect().height + 12;
+/** Area/province labels also keep clear of the map attribution (its live height is --attrib-height on .map-panel). */
+const labelBottomSpace = () => bottomSpace() + (parseFloat(getComputedStyle(document.querySelector('.map-panel')).getPropertyValue('--attrib-height')) || 0);
 const activeFilterCount = f => FIELDS.filter(k => f[k]).length;
 const overviewPanel = () => ({mode: 'overview', id: ''});
 const sheetOffset = () => (mobilePortrait() ? [0, -Math.round(window.innerHeight * 0.2)] : [0, 0]);
@@ -288,7 +290,7 @@ function renderMapAha(insight) {
   const names = insight.areas.map(a => esc(a.name)).join(' · ');
   el.innerHTML = mode === 'explicit'
     ? `<div>${crumb}<h2>กำลังสำรวจ ${num(insight.areas.length)} พื้นที่</h2><p>${num(insight.count)} ร้าน</p></div><button type="button" class="btn" data-action="clear-focus">ดูทุกพื้นที่</button>`
-    : `<div>${crumb}<h2>${insight.mode === 'density' ? `${dec(insight.density)} ร้าน/ตร.กม. ใน ${num(insight.areas.length)} พื้นที่ที่แน่นที่สุด` : `${num(Math.round(insight.share))}% ของร้านอยู่ใน ${num(insight.areas.length)} พื้นที่`}</h2><p>${names}</p></div>${mode === 'auto'
+    : `<div>${crumb}<h2>${insight.mode === 'density' ? `${dens(insight.density)} ร้าน/ตร.กม. ใน ${num(insight.areas.length)} พื้นที่ที่แน่นที่สุด` : `${num(Math.round(insight.share))}% ของร้านอยู่ใน ${num(insight.areas.length)} พื้นที่`}</h2><p>${names}</p></div>${mode === 'auto'
       ? '<button type="button" class="btn" data-action="clear-focus">ดูทุกพื้นที่</button>'
       : '<button type="button" class="btn primary" data-action="explore-top">โฟกัส</button>'}`;
 }
@@ -615,13 +617,15 @@ function areaLabelItems() {
   const focus = new Set(state.selectedArea ? [state.selectedArea] : state.focusIds);
   const district = state.selectedDistrict;
   const pool = m.areas.filter(a => a.count > 0 && (!district || a.district === district));
-  const others = pool.filter(a => !focus.has(a.id)).sort((a, b) => (b.density ?? 0) - (a.density ?? 0));
+  // Eligible areas (≥ MIN_AREA_ROWS rows) first, so a tiny area's high density on a handful of rows never
+  // outranks the Aha on the map; then by density.
+  const eligible = a => (a.count >= MIN_AREA_ROWS ? 1 : 0);
+  const others = pool.filter(a => !focus.has(a.id)).sort((a, b) => eligible(b) - eligible(a) || (b.density ?? 0) - (a.density ?? 0));
   const quietLimit = district ? 40 : focus.size ? (mobilePortrait() ? 0 : 12) : (mobilePortrait() ? 10 : 30);
   const ordered = [...pool.filter(a => focus.has(a.id)), ...others.slice(0, quietLimit)];
-  const fmt = new Intl.NumberFormat('th-TH', {maximumFractionDigits: m.classes.precision ?? 0, minimumFractionDigits: m.classes.precision ?? 0});
-  return ordered.map(a => ({id: a.id, name: a.name, value: fmt.format(a.density || 0), state: a.state, quiet: focus.size > 0 && !focus.has(a.id) && !district,
+  return ordered.map(a => ({id: a.id, name: a.name, value: dens(a.density || 0), state: a.state, quiet: focus.size > 0 && !focus.has(a.id) && !district,
     selected: a.id === state.selectedArea, center: a.label, swatch: a.fill || '',
-    title: `${areaWord(a.province)}${a.name} · ${dec(a.density || 0)} ร้าน/ตร.กม. · ${num(a.count)} ร้าน`}));
+    title: `${areaWord(a.province)}${a.name} · ${dens(a.density || 0)} ร้าน/ตร.กม. · ${num(a.count)} ร้าน`}));
 }
 
 function updateSpatialLayers() {
@@ -712,14 +716,31 @@ function installSpatialLayers() {
   }
 }
 
+/**
+ * The attribution (OpenStreetMap / OpenMapTiles / CityMETER) must stay readable: its live height —
+ * expanded on load, compact after the first drag — becomes --attrib-height, which keeps the phone
+ * legend and Aha card above it.
+ */
+function trackAttribution(map) {
+  const panel = map.getContainer().closest('.map-panel');
+  const el = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
+  if (!panel || !el) return null;
+  const set = () => panel.style.setProperty('--attrib-height', `${Math.ceil(el.getBoundingClientRect().height) + 10}px`);
+  const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(set) : null;
+  observer?.observe(el);
+  set();
+  return observer;
+}
+
 function initMap() {
   if (!window.maplibregl) throw new Error('Map library is unavailable');
   try {
     state.mapTheme = theme();
     state.map = new maplibregl.Map({container: 'map', center: BANGKOK.center, zoom: BANGKOK.zoom, pitch: 0, maxPitch: 85, attributionControl: {compact: true}, style: buildMapStyle(state.mapTheme)});
     state.map.addControl(new maplibregl.NavigationControl({showCompass: true, visualizePitch: true}), 'top-right');
-    state.labels = installAreaLabels(state.map, $('map'), {className: 'neighborhood-label', hostId: 'area-labels', hostLabel: 'แขวง/ตำบลบนแผนที่', minZoom: 11.5, verb: 'กดเพื่อสำรวจพื้นที่', onSelect: id => selectArea(id, {fromMap: true}), reservedBottom: bottomSpace, maxLabels: 40});
-    state.provinceLabels = installAreaLabels(state.map, $('map'), {className: 'province-label', hostId: 'province-labels', hostLabel: 'จังหวัดบนแผนที่', minZoom: 0, maxZoom: PROVINCE_LABEL_MAX_ZOOM, verb: 'กดเพื่อดูจังหวัด', detailZoomClass: false, onSelect: code => selectProvince(code), reservedBottom: bottomSpace});
+    state.attribObserver = trackAttribution(state.map);
+    state.labels = installAreaLabels(state.map, $('map'), {className: 'neighborhood-label', hostId: 'area-labels', hostLabel: 'แขวง/ตำบลบนแผนที่', minZoom: 11.5, verb: 'กดเพื่อสำรวจพื้นที่', onSelect: id => selectArea(id, {fromMap: true}), reservedBottom: labelBottomSpace, maxLabels: 40});
+    state.provinceLabels = installAreaLabels(state.map, $('map'), {className: 'province-label', hostId: 'province-labels', hostLabel: 'จังหวัดบนแผนที่', minZoom: 0, maxZoom: PROVINCE_LABEL_MAX_ZOOM, verb: 'กดเพื่อดูจังหวัด', detailZoomClass: false, onSelect: code => selectProvince(code), reservedBottom: labelBottomSpace});
     state.map.on('zoomend', () => { if (state.loaded) renderLegend(); });
     state.map.on('style.load', installSpatialLayers);
     state.map.on('click', onMapClick);
@@ -728,7 +749,7 @@ function initMap() {
     fetch(TILEJSON_URL).then(r => r.json()).then(j => { state.tileTemplate = j.tiles?.[0] || ''; if (state.loaded) updateSpatialLayers(); }).catch(e => console.warn('TileJSON', e));
   } catch (e) {
     state.loaded = false; state.initialCameraDone = false;
-    for (const cleanup of [() => state.labels?.dispose(), () => state.provinceLabels?.dispose(), disposeSpatial, () => state.map?.remove()]) { try { cleanup(); } catch (err) { console.warn('Map cleanup', err); } }
+    for (const cleanup of [() => state.attribObserver?.disconnect(), () => state.labels?.dispose(), () => state.provinceLabels?.dispose(), disposeSpatial, () => state.map?.remove()]) { try { cleanup(); } catch (err) { console.warn('Map cleanup', err); } }
     state.map = null; state.labels = null; state.provinceLabels = null; state.provinceModel = null;
     throw e;
   }

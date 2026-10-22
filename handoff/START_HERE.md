@@ -6,7 +6,7 @@
 
 เข้าโฟลเดอร์ `source` แล้วรัน `npm test` และ `npm start` เปิด http://127.0.0.1:4173/
 
-ชุดนี้มี source code (ES modules มีคอมเมนต์สัญญาทุกโมดูล), datasets, assets ที่ตรวจ hash แล้ว, unit tests บนข้อมูลจริง, JSON Schema 1.4.0, acceptance criteria AC01–AC22, สคริปต์สร้างข้อมูล/ขอบเขต/manifest/bundle และตรวจ live bytes อ่าน `source/AGENTS.md` ก่อนแก้ไข
+ชุดนี้มี source code (ES modules มีคอมเมนต์สัญญาทุกโมดูล), datasets, assets ที่ตรวจ hash แล้ว, unit tests บนข้อมูลจริง, JSON Schema 1.4.0, acceptance criteria AC01–AC23, สคริปต์สร้างข้อมูล/ขอบเขต/manifest/bundle และตรวจ live bytes อ่าน `source/AGENTS.md` ก่อนแก้ไข
 
 เว็บจริง: https://montri-th.github.io/restaurant/
 Repository: https://github.com/montri-th/restaurant

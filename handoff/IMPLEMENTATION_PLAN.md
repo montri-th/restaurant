@@ -55,7 +55,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | P07 | กราฟและตาราง | P04 | AC13, AC14 |
 | P08 | app, URL, ธีม, มือถือ, failure paths | P05–P07 | AC01, AC04, AC16–AC19 |
 | P09 | tests, LDS parity, harness | P08 | AC20, AC21 |
-| P10 | เอกสาร handoff เผยแพร่ ตรวจ live | P09 | AC22 |
+| P10 | เอกสาร handoff เผยแพร่ ตรวจ live | P09 | AC22, AC23 |
 
 ## 5. Acceptance criteria
 
@@ -83,12 +83,13 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | AC20 | ความถูกต้องของข้อมูล | 70,214 แถวไม่หลุด ตรง meta ใบรับขอบเขต sha256 โลโก้ | unit |
 | AC21 | LDS parity | LUT classes scaleVersion series foundation map roles dataState ตรง LDS 0.9.7 | script |
 | AC22 | เผยแพร่ | `npm run verify:live` ผ่านทุกไฟล์ + ตรวจด้วย Chrome desktop light/dark และจอแคบ | live |
+| AC23 | attribution และชั้นซ้อน | ที่ 1440, 1180 และ 390 px attribution ของแผนที่อ่านได้ครบเหนือถาดกราฟ (ไม่อยู่ใต้ถาด legend การ์ด Aha หรือป้าย) และตารางไม่ล้นเกินขอบบนของแผนที่เมื่อเปิดกราฟอยู่ | browser (live) |
 
 ## 6. วิธีทำงานต่อ
 
 1. อ่าน AGENTS.md แล้ว handoff/README.md, PRODUCT_STATEMENT.md และ brief คู่ md/json
 2. `npm test` ก่อนแก้; คง row scopes, focus modes, metric/coverage contracts และ panel actions
-3. แก้ทีละงาน คง INV01–INV20
+3. แก้ทีละงาน คง INV01–INV23
 4. ตรวจการคำนวณด้วยข้อมูลจริงใน tests/ (`tests/helpers.js` โหลดครั้งเดียว)
 5. ดูภาษาไทยจริงที่ 390 px และ desktop ทั้งสองธีม; ใช้ harness แบบ stub tiles เมื่อ CDN/tiles ถูกบล็อก แล้วยืนยันภาพจริงบนเว็บ
 6. ปรับกล้อง/ชั้นสดผ่าน `window.__citymeter` ใน console ก่อนเปลี่ยนค่าคงที่

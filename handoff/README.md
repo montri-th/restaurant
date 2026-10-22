@@ -11,8 +11,8 @@ Live: [Restaurants](https://montri-th.github.io/restaurant/) · Source: [GitHub]
 | คนอ่าน | เครื่องอ่าน | ใช้ทำอะไร |
 |---|---|---|
 | [../PRODUCT_STATEMENT.md](../PRODUCT_STATEMENT.md) | [product-statement.json](product-statement.json) | Winning strategy: Who / What / Which / How, quality bar, ป้ายหลักฐาน, hypotheses — อ่านก่อนเปลี่ยนสิ่งที่หน้าแรกบอก |
-| [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) | [product-brief.json](product-brief.json) | row scopes + focus modes, first Aha, สัญญาตัวชี้วัด ความครอบคลุม รูปทรงประเภท แผนที่ focus/quiet, breadcrumb, แผงห้าโหมด, กราฟ, invariants INV01–INV20 |
-| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [implementation-plan.json](implementation-plan.json) | โมดูล งาน P01–P10 acceptance AC01–AC22 backlog N01–N10 วิธีทำงานต่อ |
+| [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) | [product-brief.json](product-brief.json) | row scopes + focus modes, first Aha, สัญญาตัวชี้วัด ความครอบคลุม รูปทรงประเภท แผนที่ focus/quiet, breadcrumb, แผงห้าโหมด, กราฟ, invariants INV01–INV23 |
+| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [implementation-plan.json](implementation-plan.json) | โมดูล งาน P01–P10 acceptance AC01–AC23 backlog N01–N10 วิธีทำงานต่อ |
 | [VERIFICATION.md](VERIFICATION.md) | `handoff-manifest.json` (ใน bundle) | ผลตรวจแยกระดับ (unit / LDS parity / rendered / live) และ hash ของทุกไฟล์ |
 | README นี้ | [handoff.schema.json](handoff.schema.json) | สัญญาโครงสร้างของ JSON (schema 1.4.0) |
 
@@ -47,6 +47,7 @@ npm test       # unit tests บนข้อมูลจริง
 - หนึ่งสัญลักษณ์ต่อหนึ่ง observation ไม่ cluster; โลโก้ ≤ 250 เฉพาะ zoom ≥ 15.5 ในโฟกัส; โลโก้คงไบต์เดิม
 - LDS 0.9.7 tokens เท่านั้น สีข้อมูลเหมือนกันสองธีม; nav-7 FILL 0 / wght 300; ไม่มี decorative bracket หรือ colored left rail; focus ring มองเห็น; reduced motion
 - ข้อมูลหลักต้องใช้ได้เมื่อแผนที่ไม่พร้อม; มี loading/slow/error/retry
+- attribution ของแผนที่ (OpenStreetMap, OpenMapTiles/OpenFreeMap, CityMETER) ต้องอ่านได้เหนือถาดกราฟ: กฎ CSS ของ control ต้อง scope ใต้ `.map-panel` เพราะ CSS ของ MapLibre โหลดทีหลัง และ `--attrib-height` ดัน legend/การ์ด Aha บนมือถือขึ้นเหนือมัน
 
 ## เริ่มด้วยงานหนึ่งชิ้น
 

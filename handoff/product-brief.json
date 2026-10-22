@@ -447,9 +447,9 @@
       "function": "fitPitched(map, bounds, {preset, padding, maxZoom 16, minZoom 10, points, shift})",
       "method": "start from cameraForBounds (flat), apply preset pitch/bearing/FOV, zoom out in 0.1 steps until every point (polygon vertices when given, else bbox corners) projects inside the padded viewport, then zoom in while they still fit; jumps are computed without rendering and the final camera is animated",
       "padding": "desktop 3D padding ignores the legend; mobile portrait with the sheet open uses plan, then re-frames in 3D on sheet close",
-      "bearing": "28° (carried over from Luxury Brands; the first-paint frame is fitted to the focused areas whatever their axis)",
+      "bearing": "28° so the Siam → Chit Lom → Phrom Phong axis runs left-to-right on wide screens",
       "venue": "frameVenue: fitPitched over the host footprint vertices AND roof vertices (vertex + display_height_m, projected with camera.projectPoint through transform.modelViewProjectionMatrix), top padding 12% (eye) / 10% (model), maxZoom 17.6, minZoom = max(14.5, footprint-only fit − 1) so a very tall tower cannot push the pins out of reading range; falls back to framePoint(zoom 16) when no host building is displayed or on mobile portrait",
-      "แขวง/ตำบล": "fitFeature: fitPitched over the แขวง/ตำบล or เขต/อำเภอ outline vertices (maxZoom 17.5 / 16) so the outline fills the frame"
+      "แขวง/ตำบล": "fitArea: fitPitched over the area outline vertices, maxZoom 17.5 so the outline fills the frame"
     },
     "maplibre": {
       "version": "5.6.2",
@@ -658,6 +658,18 @@
     {
       "id": "INV20",
       "rule": "No private Drive/Sheet URLs, credentials, internal sheet or full LDS library in the repository"
+    },
+    {
+      "id": "INV21",
+      "rule": "Map attribution (OpenStreetMap, OpenMapTiles/OpenFreeMap, CityMETER) stays readable above the charts tray; the legend, the phone Aha card and area labels keep clear of it"
+    },
+    {
+      "id": "INV22",
+      "rule": "A measured non-zero density never prints as 0 (one shared format: 1 decimal ≥ 1, 2 decimals below 1, “<0.01” below that) on labels, panel and charts"
+    },
+    {
+      "id": "INV23",
+      "rule": "A venue total says how many of its rows (and reviews) are the venue's own listing (e.g. the mall row); rows are kept as the source lists them"
     }
   ],
   "chartContracts": [
@@ -707,7 +719,7 @@
     "depth": "scissored depth clear inside the venue screen box (device pixels, padded 4 px), then LEQUAL read-write depth test against itself only; polygon offset keeps edges on top",
     "visibility": "3D only (pitch > 0) and zoom ≥ 13 (XRAY_MIN_ZOOM); hidden with the 3D toggle; disabled at non-venue levels (empty feature set)",
     "colours": "faces map.activeLayer × shade (roof 1, walls 0.66–0.92 by orientation), edges map.selectedStroke — map roles, not data colours",
-    "interaction": "two paths: the style layer restaurant-venue-buildings-3d (MapLibre hit-test, reliable near the footprint) and xray.hitTest(point) — point-in-triangle against the solid projected with the last frame matrix — wired in app.js on map click (opens the venue when not already there) and mousemove (pointer cursor); MapLibre alone misses tall walls away from the footprint (observed live 2026-10-22)",
+    "interaction": "two paths: the style layer luxury-venue-buildings-3d (MapLibre hit-test, reliable near the footprint) and xray.hitTest(point) — point-in-triangle against the solid projected with the last frame matrix — wired in app.js on map click (opens the venue when not already there) and mousemove (pointer cursor); MapLibre alone misses tall walls away from the footprint (observed live 2026-10-22)",
     "failSafe": "a GL error disables the layer (failed = true) and the style host layer keeps drawing",
     "references": [
       "MapLibre GL JS CustomLayerInterface (renderingMode 3d, defaultProjectionData.mainMatrix)",

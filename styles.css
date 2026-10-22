@@ -67,9 +67,11 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 
 .workspace { height: calc(100dvh - 48px); position: relative; }
 .map-column { position: absolute; inset: 0 var(--panel-width) 0 0; min-width: 0; }
-.map-panel { position: absolute; inset: 0; background: var(--surface-alt); isolation: isolate; overflow: hidden; }
+.map-panel { position: absolute; inset: 0; background: var(--surface-alt); isolation: isolate; overflow: hidden; container-type: inline-size; }
 #map { position: absolute; inset: 0; }
-.maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left { bottom: var(--bottom-panel-height); }
+/* Map controls sit above the charts tray. Scoped under .map-panel so the lazily loaded MapLibre CSS (same
+   specificity, later in the cascade) cannot pull them back under the tray: the attribution must stay visible. */
+.map-panel .maplibregl-ctrl-bottom-right, .map-panel .maplibregl-ctrl-bottom-left { bottom: var(--bottom-panel-height); }
 .maplibregl-ctrl-attrib { font: 11px/18px var(--font-body); }
 .map-panel .maplibregl-ctrl-attrib { background: color-mix(in srgb, var(--surface-card) 85%, transparent); color: var(--text-metadata); }
 .map-panel .maplibregl-ctrl-attrib a { color: var(--text-secondary); }
@@ -381,6 +383,7 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .bar-row.is-selected { background: var(--surface-alt); border-color: var(--border-default); }
 .bar-rank { font-size: 11px; color: var(--text-metadata); }
 .bar-label { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-label small { display: block; font-size: 11px; font-weight: 400; color: var(--text-metadata); overflow: hidden; text-overflow: ellipsis; }
 .bar-track { display: flex; height: 16px; background: var(--surface-soft); border: 1px solid var(--border-hairline); border-radius: 3px; overflow: hidden; }
 .bar-fill { display: block; height: 100%; box-shadow: inset -1px 0 0 var(--border-default); }
 .bar-fill span { display: inline-block; padding: 0 5px; font: 400 11px/16px var(--font-mono); color: var(--chart-on-fill); }
@@ -403,6 +406,11 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .matrix-corner { color: var(--text-metadata); font-weight: 400; }
 .matrix-col { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; }
 .matrix-col > span, .matrix-col { overflow: hidden; text-overflow: ellipsis; }
+/* Column heads wrap to two lines instead of truncating a food-type name (Thai breaks at word boundaries). */
+.matrix thead th:not(.matrix-corner) { white-space: normal; overflow: visible; }
+.matrix-col { align-items: flex-start; }
+.matrix-col > span { white-space: normal; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.matrix-col .cue-shape { flex: none; margin-top: 2px; }
 .matrix td { padding: 0; }
 .matrix-row { border: 0; background: transparent; padding: 2px 6px 2px 2px; min-height: 34px; border-radius: 6px; text-align: left; font-weight: 600; display: inline-flex; align-items: baseline; gap: 6px; max-width: 100%; }
 .matrix-row small { font-weight: 400; color: var(--text-metadata); }
@@ -412,7 +420,8 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .matrix tr.is-selected .matrix-cell { outline: 2px solid var(--map-selected-stroke); outline-offset: -2px; }
 .chart-empty { display: grid; place-items: center; gap: 10px; min-height: 120px; text-align: center; color: var(--text-metadata); font-size: 13px; }
 
-.results { position: absolute; left: 0; right: 0; bottom: var(--bottom-panel-height); max-height: 72%; z-index: 8; background: var(--surface-card); padding: 12px 14px; border-top: 1px solid var(--border-default); display: flex; flex-direction: column; }
+/* The table sits on top of the charts tray: never taller than the map space left above the tray (it scrolls inside). */
+.results { position: absolute; left: 0; right: 0; bottom: var(--bottom-panel-height); max-height: min(72%, calc(100% - var(--bottom-panel-height) - 12px)); z-index: 8; background: var(--surface-card); padding: 12px 14px; border-top: 1px solid var(--border-default); display: flex; flex-direction: column; }
 .results-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; }
 .results-heading h2 { font-size: 15px; }
 .results-heading button { font-size: 12px; min-height: 36px; padding: 5px 12px; }
@@ -456,10 +465,11 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
   .map-toolbar::-webkit-scrollbar { display: none; }
   .map-toolbar button { font-size: 12px; min-height: 38px; padding: 6px 10px; flex: 0 0 auto; }
   .map-toolbar button#mobile-panel { display: inline-flex; }
-  .map-legend { bottom: calc(var(--bottom-panel-height) + 8px); max-width: calc(100% - 16px); padding: 8px 10px; gap: 4px; }
+  /* --attrib-height (app.js) keeps the legend and the Aha card above the map attribution, expanded or compact. */
+  .map-legend { bottom: calc(var(--bottom-panel-height) + var(--attrib-height, 32px) + 4px); max-width: calc(100% - 16px); padding: 8px 10px; gap: 4px; }
   .legend-marks { display: none; }
   .map-status { display: none; }
-  .map-aha { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; position: absolute; left: 8px; right: 8px; bottom: calc(var(--bottom-panel-height) + 74px); z-index: 5; padding: 10px 12px; background: var(--surface-card); border: 1px solid var(--border-default); border-radius: var(--radius-sm); }
+  .map-aha { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; position: absolute; left: 8px; right: 8px; bottom: calc(var(--bottom-panel-height) + var(--attrib-height, 32px) + 70px); z-index: 5; padding: 10px 12px; background: var(--surface-card); border: 1px solid var(--border-default); border-radius: var(--radius-sm); }
   .map-aha h2 { font-size: 14px; line-height: 1.4; font-family: var(--font-body); font-weight: 600; }
   .map-aha p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
   .map-aha .map-aha-crumb { font-size: 11px; color: var(--text-metadata); margin: 0 0 2px; }
@@ -482,9 +492,9 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
   .insight-heading h2 { font-size: 14px; margin-right: auto; }
   .insight-heading .hint { display: none; }
   .insight-heading button { padding: 5px 9px; }
-  .results { padding: 8px 10px; max-height: 75%; }
+  .results { padding: 8px 10px; max-height: min(75%, calc(100% - var(--bottom-panel-height) - 8px)); }
   .results-heading h2 { font-size: 14px; }
-  .neighborhood-label, .province-label { max-width: 150px; font-size: 11px; }
+  .neighborhood-label, .province-label { max-width: 184px; font-size: 11px; }
   .bar-row { grid-template-columns: 16px minmax(70px, 110px) minmax(0, 1fr) 70px; gap: 6px; }
   .bar-row.stacked { grid-template-columns: minmax(70px, 110px) minmax(0, 1fr) 54px; }
   .map-failure { inset: 25% 12px; }
@@ -493,6 +503,9 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 }
 @media (min-width: 761px), (orientation: landscape) {
   .panel button.mobile-close, .map-toolbar button#mobile-panel { display: none; }
+  /* The attribution wraps upward on the right instead of running under the legend on the left. */
+  /* 100cqw = the map panel's width (container on .map-panel); 470px = legend (8 + 380) + gap + the attribution's own padding/margin. */
+  .map-panel .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib { max-width: max(200px, calc(100cqw - 470px)); }
 }
 .map-panel.is-tight .map-legend, .map-panel.is-tight .map-status { display: none; }
 /* At detail zoom the choropleth is off, so its legend steps step aside; pins and buildings remain explained. */

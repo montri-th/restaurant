@@ -87,7 +87,10 @@ export function buildVenueProfile(scopeRows, venue, index, groups, {hosted = fal
   for (const r of mine) { const a = index.byId.get(r.area); if (a) areas.set(a.id, a); }
   const provinces = [...new Set(mine.map(r => r.province))];
   return {venue, rows: mine, count: mine.length, areas: [...areas.values()], provinces, province: provinces.length === 1 ? provinces[0] : '',
-    entityRows: mine.filter(r => r.venueEntity).length, hosted, ...stats(mine), ...mixOf(mine, groups)};
+    entityRows: mine.filter(r => r.venueEntity).length,
+    // Reviews of the rows that ARE the venue (e.g. the mall's own listing): shown so the venue total is read correctly.
+    entityReviews: mine.filter(r => r.venueEntity && Number.isFinite(r.reviews)).reduce((s, r) => s + r.reviews, 0),
+    hosted, ...stats(mine), ...mixOf(mine, groups)};
 }
 
 /** Coordinate precision, read from the encoding — never upgraded. */

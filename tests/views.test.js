@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {load, readJSON} from './helpers.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildVenueProfile, buildStoreDetail, describeGeometry, describePrice} from '../js/profile-model.js';
-import {renderOverview, renderArea, renderDistrict, renderVenue, renderStore, renderFilterChips, provenance} from '../js/panel.js';
+import {renderOverview, renderArea, renderDistrict, renderVenue, renderStore, renderFilterChips, provenance, dens} from '../js/panel.js';
 import {summarizeAreaInsight} from '../js/area-insight.js';
 import {summarize, productionLink, PRICE_LABELS} from '../js/model.js';
 import {buildChartModel, areaMatrix, areaPrices} from '../js/chart-model.js';
@@ -109,4 +109,25 @@ test('filter chips escape user text and offer one clear-all', () => {
     {group: {thai: 'อาหารไทย'}, price: {}, province: {BKK: 'กรุงเทพมหานคร'}, brand: {}, venue: {}});
   assert.ok(!html.includes('<b>'));
   assert.equal((html.match(/data-id="all"/g) || []).length, 1);
+});
+
+test('density format: a measured non-zero density never prints as zero; labels and panel share it', () => {
+  assert.equal(dens(1 / 76.5), '0.01', 'one restaurant in the largest covered subdistrict (76.5 km²)');
+  assert.equal(dens(0.004), '<0.01');
+  assert.equal(dens(0.0549), '0.05');
+  assert.equal(dens(111.8), '111.8');
+  assert.equal(dens(0), '0');
+  assert.equal(dens(null), '—');
+  assert.equal(dens(NaN), '—');
+});
+
+test('venue header says how much of its total is the venue\'s own listing (e.g. the mall row)', () => {
+  const {data, index} = setup();
+  const venue = data.venues.find(v => v.id === 'RV-02fbbcc675cf1548');
+  const p = buildVenueProfile(data.rows, venue, index, data.groups, {hosted: true});
+  assert.equal(p.count, 12);
+  assert.equal(p.reviews, 30900);
+  assert.equal(p.entityRows, 1);
+  assert.equal(p.entityReviews, 24563);
+  assert.ok(text(renderVenue(p, index, {})).includes('ตัวเลขรวม 1 รายการที่เป็นชื่อสถานที่เอง (24,563 รีวิว)'));
 });

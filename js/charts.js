@@ -13,12 +13,16 @@ import {buildChartModel, areaMatrix, areaPrices} from './chart-model.js';
 import {buildCountClasses, buildDensityClasses, classify, priceColors} from './scales.js';
 import {PRICED, PRICE_SHORT, PRICE_LABELS} from './model.js';
 import {cueMarkup} from './cues.js';
+import {districtWord} from './areas.js';
 
 const NUMBER = new Intl.NumberFormat('th-TH', {maximumFractionDigits: 0});
 const DEC = new Intl.NumberFormat('th-TH', {minimumFractionDigits: 1, maximumFractionDigits: 1});
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const num = n => NUMBER.format(n);
 const dec = n => DEC.format(n);
+const DEC2 = new Intl.NumberFormat('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+/** Same density format as the panel (panel.js dens): a measured non-zero density never prints as 0.0. */
+const dens = n => (n == null || !Number.isFinite(n) ? '—' : n === 0 ? '0' : n < 0.01 ? '<0.01' : n < 1 ? DEC2.format(n) : DEC.format(n));
 
 function empty(element, message, actionLabel, action) {
   element.innerHTML = `<div class="chart-empty"><p>${esc(message)}</p>${action ? `<button type="button" class="chart-empty-action">${esc(actionLabel)}</button>` : ''}</div>`;
@@ -35,13 +39,13 @@ function density(element, model, select, selectedId) {
   const rows = model.areas.map((a, i) => {
     const cls = classify(value(a), classes);
     const pressed = a.id === selectedId;
-    const label = byCount ? `${num(a.count)} ร้าน (${dec(a.density)} ร้านต่อตารางกิโลเมตร)` : `${dec(a.density)} ร้านต่อตารางกิโลเมตร, ${num(a.count)} ร้าน`;
+    const label = byCount ? `${num(a.count)} ร้าน (${dens(a.density)} ร้านต่อตารางกิโลเมตร)` : `${dens(a.density)} ร้านต่อตารางกิโลเมตร, ${num(a.count)} ร้าน`;
     return `<li><button type="button" class="bar-row${pressed ? ' is-selected' : ''}" data-area="${esc(a.id)}" aria-pressed="${pressed}"
       aria-label="อันดับ ${i + 1} ${esc(a.name)}: ${label} กดเพื่อดูพื้นที่นี้">
       <span class="bar-rank data-number" aria-hidden="true">${i + 1}</span>
-      <span class="bar-label">${esc(a.name)}<small>${esc(a.districtName)}</small></span>
+      <span class="bar-label">${esc(a.name)}<small>${esc(districtWord(a.province))}${esc(a.districtName)}</small></span>
       <span class="bar-track" aria-hidden="true"><span class="bar-fill" style="width:${Math.max(2, Math.round((value(a) / max) * 100))}%;background:${cls.fill}"></span></span>
-      <span class="bar-value" aria-hidden="true">${byCount ? `<b class="data-number">${num(a.count)}</b><small>${dec(a.density)}/ตร.กม.</small>` : `<b class="data-number">${dec(a.density)}</b><small>${num(a.count)} ร้าน</small>`}</span>
+      <span class="bar-value" aria-hidden="true">${byCount ? `<b class="data-number">${num(a.count)}</b><small>${dens(a.density)}/ตร.กม.</small>` : `<b class="data-number">${dens(a.density)}</b><small>${num(a.count)} ร้าน</small>`}</span>
     </button></li>`;
   }).join('');
   const caption = byCount
