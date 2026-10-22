@@ -1,0 +1,322 @@
+{
+  "$schema": "./handoff.schema.json",
+  "schemaVersion": "1.4.0",
+  "documentType": "product-statement",
+  "productId": "citymeter-restaurants",
+  "productVersion": "0.1.0",
+  "updatedOn": "2026-10-22",
+  "humanDocument": "../PRODUCT_STATEMENT.md",
+  "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
+  "evidenceLabels": {
+    "personas": "hypothesis",
+    "alternatives": "inference",
+    "dataFacts": "observed",
+    "urgency": "inference",
+    "severity": "inference"
+  },
+  "dataset_id": "restaurant",
+  "dataset_name_en": "Restaurants",
+  "dataset_name_th": "ร้านอาหาร",
+  "category": "Location",
+  "outcome_layer": "Local Decisions",
+  "status": "prototype",
+  "positioning": {
+    "one_line_highlight": "แผนที่ความหนาแน่นร้านอาหารระดับแขวง/ตำบลที่บอกว่าร้านแน่นตรงไหน เป็นร้านแบบไหน ราคาระดับใด พร้อมที่มาของทุกตัวเลข เพื่อคัดทำเลก่อนลงพื้นที่",
+    "unique_advantage": "อ่านเป็นพื้นที่ด้วยความหนาแน่น (ร้าน/ตร.กม. ตัวหารเดียวกันทุกพื้นที่) พร้อมประเภท ราคา เครือร้าน และความครอบคลุมของข้อมูลบนแผนที่ บนฉากเมือง 3 มิติแบบ focus/quiet ที่พร้อมฉายในห้องประชุม",
+    "unique_vs_competitors": "แผนที่ค้นหาและแอปรีวิวแสดงร้านทีละจุด; รายงาน PDF ช้าและหยาบ; หน้า production สรุปทีละพื้นที่ — Restaurants บอกข้อค้นพบเชิงเปรียบเทียบก่อน เทียบพื้นที่ได้ด้วยตัวหารเดียวกัน และบอกว่าข้อมูลครอบคลุมแค่ไหน"
+  },
+  "users": {
+    "primary_users": [
+      "ทีมขยายสาขาและแฟรนไชส์ร้านอาหาร",
+      "ทีม leasing/asset ของศูนย์การค้า community mall และอาคารพาณิชย์",
+      "นักวิเคราะห์ ที่ปรึกษา และหน่วยงานท้องถิ่น"
+    ],
+    "decision_contexts": [
+      "เปิดสาขาใหม่ที่พื้นที่ใด",
+      "เติมร้านอาหารประเภทใดในโครงการ",
+      "หลักฐานใดใช้ในรายงานพื้นที่หรือ proposal"
+    ],
+    "functional_needs": [
+      "เห็นความหนาแน่นของร้านเทียบพื้นที่",
+      "รู้ประเภท ระดับราคา และเครือที่อยู่แล้ว",
+      "ตัวเลขพร้อมแหล่ง วันที่ ขอบเขต",
+      "ส่งรายชื่อพื้นที่ต่อทีมสำรวจ"
+    ],
+    "emotional_needs": [
+      "ไม่อยากเลือกทำเลที่ร้านล้นหรือผิดกลุ่มราคา",
+      "อยากมีเหตุผลที่อธิบายต่อผู้บริหารได้",
+      "ไม่อยากถูก challenge เรื่องที่มาของตัวเลข"
+    ],
+    "trigger_voice_in_head": [
+      "แถวนี้ร้านแน่นไปไหม?",
+      "ร้านแบบเราราคาประมาณนี้มีกี่ร้านแล้ว?",
+      "ตัวเลขนี้มาจากไหน ครอบคลุมแค่ไหน?"
+    ],
+    "value_proposition": "จาก “รู้ว่าย่านนี้ร้านเยอะ” เป็น “เห็นตัวเลขต่อพื้นที่ที่เทียบกันได้ ว่าแน่นแค่ไหน ร้านแบบไหน ราคาระดับไหน ใครอยู่แล้ว และข้อมูลครอบคลุมแค่ไหน”"
+  },
+  "problem": {
+    "statement": "ก่อนคัดทำเลร้านอาหาร ทีมต้องรู้ว่าพื้นที่ใดมีร้านหนาแน่น เป็นร้านประเภทและราคาแบบไหน และเครือใดอยู่แล้ว แต่ไม่มีแหล่งเดียวที่สรุปเป็นพื้นที่ เทียบกันได้ และบอกขอบเขตข้อมูลชัด",
+    "not_solved": [
+      "ยอดขาย",
+      "ความต้องการของลูกค้า",
+      "footfall",
+      "กำลังซื้อ",
+      "ค่าเช่า"
+    ],
+    "urgency": "ทุกรอบที่วางแผนขยายสาขาหรือมีพื้นที่ว่างในโครงการ (Inference)",
+    "severity": "การเลือกทำเลผิดผูกกับสัญญาเช่าและเงินลงทุนตกแต่งร้าน (Inference; ไม่มีตัวเลขต้นทุน)"
+  },
+  "competitor_landscape": {
+    "present_competitors": [
+      {
+        "name": "Google Maps / Apple Maps",
+        "how_users_use_it": "ค้นร้านรอบจุดหนึ่ง",
+        "strength": "เร็ว ครอบคลุมกว้าง มีรีวิว",
+        "gap": "จุดทีละร้าน ไม่สรุปเป็นพื้นที่ ไม่มีตัวหาร ใช้เป็นหลักฐานไม่ได้"
+      },
+      {
+        "name": "แอปรีวิวและไกด์ร้านอาหาร",
+        "how_users_use_it": "ดูร้านยอดนิยมและหมวดอาหาร",
+        "strength": "ข้อมูลร้านละเอียด",
+        "gap": "มุ่งผู้บริโภค ไม่สรุปเป็นพื้นที่ ไม่บอกความครอบคลุม"
+      },
+      {
+        "name": "แอปเดลิเวอรี (มุมมองร้านค้า)",
+        "how_users_use_it": "ดูร้านที่ส่งในรัศมี",
+        "strength": "สะท้อนตลาดเดลิเวอรี",
+        "gap": "เฉพาะร้านในแพลตฟอร์ม ข้อมูลไม่เปิด เทียบข้ามพื้นที่ไม่ได้"
+      },
+      {
+        "name": "รายงานตลาด F&B ของที่ปรึกษา/broker",
+        "how_users_use_it": "ภาพรวมย่านค้าปลีก",
+        "strength": "น่าเชื่อถือ มีบริบทตลาด",
+        "gap": "ช้าเป็นไตรมาส ระดับย่านกว้าง ไม่ interactive"
+      },
+      {
+        "name": "เดินสำรวจ + Excel ภายใน",
+        "how_users_use_it": "นับร้านรอบทำเลเป้าหมาย",
+        "strength": "แม่นในจุดที่สำรวจ",
+        "gap": "ใช้แรงงาน ทำได้ไม่กี่จุด"
+      },
+      {
+        "name": "หน้า Restaurant ของ CityMETER production",
+        "how_users_use_it": "ดูสรุปของพื้นที่ที่เลือก",
+        "strength": "ข้อมูลชุดเดียวกัน ครบทุกระดับพื้นที่",
+        "gap": "สรุปทีละพื้นที่ ผู้ใช้ต้องไล่เทียบเอง"
+      }
+    ],
+    "aspirational_competitors": [
+      "เครื่องมือแผนที่สถาปัตยกรรม (archiMap)",
+      "แพลตฟอร์ม location intelligence ระดับสากล",
+      "CityMETER · Luxury Brands 0.5",
+      "CityMETER production"
+    ],
+    "expected_quality_bar": [
+      "ตอบ “แน่นที่สุดตรงไหน” ภายใน 1 นาทีโดยไม่ตั้งค่าตัวกรอง",
+      "ทุกตัวเลขมี dataset · source · date · boundary",
+      "เทียบพื้นที่ด้วยตัวหารเดียวกัน",
+      "ไม่มีข้อมูล ≠ ศูนย์ ≠ ไม่มีร้าน",
+      "ภาพพร้อมห้องประชุม สองธีม จอแคบ",
+      "breadcrumb และลิงก์ลึกตรง production",
+      "ซื่อสัตย์เรื่องขอบเขต"
+    ]
+  },
+  "winning_strategy": [
+    "อ่านเป็นพื้นที่ด้วยความหนาแน่น (scopeRows เป็นฐานเทียบเดียว ตัวหาร = ตร.กม. ของ production)",
+    "ความครอบคลุมเป็นข้อเท็จจริงบนแผนที่ (no_data ≠ measured_zero; missing ≠ 0)",
+    "โฟกัสแล้วเงียบ (รายละเอียดเฉพาะส่วนที่ตัดสินใจ)",
+    "ภาพระดับสถาปนิกด้วยข้อมูลเปิด (basemap paper, massing OSM, venue x-ray)",
+    "พร้อมสำหรับคนและเครื่อง (breadcrumb/ลิงก์ลึก production, JSON + schema)"
+  ],
+  "primary_decisions": [
+    "screen แขวง/ตำบลสำหรับร้านใหม่",
+    "compare ประเภทและราคาข้ามพื้นที่",
+    "prioritize พื้นที่ไปสำรวจ"
+  ],
+  "primary_questions": [
+    "ร้านอาหารแน่นที่สุดอยู่ตรงไหน",
+    "พื้นที่นี้เป็นร้านแบบไหน ราคาระดับไหน",
+    "เครือ X อยู่พื้นที่ไหนบ้าง"
+  ],
+  "channel_readiness": {
+    "search": {
+      "priority": "P2",
+      "target_queries": [
+        "ร้านอาหาร หนาแน่น แขวง",
+        "restaurant density Bangkok subdistrict"
+      ],
+      "required_page_blocks": [
+        "title/meta",
+        "summary",
+        "map",
+        "HTML table",
+        "source/limitation"
+      ],
+      "schema_types": [
+        "Dataset",
+        "Place"
+      ]
+    },
+    "llm": {
+      "priority": "P1",
+      "askable_questions": [
+        "แขวงไหนร้านอาหารแน่นที่สุด",
+        "แขวง X มีร้านประเภทไหนมากที่สุด",
+        "ข้อมูลครอบคลุมจังหวัดไหน"
+      ],
+      "answer_blocks": [
+        "first Aha",
+        "area profile",
+        "provenance line"
+      ]
+    },
+    "agent": {
+      "priority": "P1",
+      "feeds": [
+        "handoff/product-brief.json",
+        "data/restaurants.json",
+        "data/areas.geojson"
+      ],
+      "actions": [
+        "filter",
+        "rank areas",
+        "open production deep link"
+      ]
+    }
+  },
+  "primary_decision_actions": [
+    "screen",
+    "compare",
+    "prioritize",
+    "open in production"
+  ],
+  "data_sources": [
+    {
+      "name": "CityMETER Restaurants public API (overlay MVT per subdistrict)",
+      "owner": "Landometer · CityMETER",
+      "url_or_reference": "https://landometer.com/v3/citymeter?d=restaurant",
+      "data_type": "platform (upstream provider not exposed)"
+    },
+    {
+      "name": "Research sheet (02_STORES, 01_BRANDS, 07_VENUES)",
+      "owner": "Landometer research",
+      "url_or_reference": "internal; matched the public API on every row",
+      "data_type": "derived / enrichment"
+    },
+    {
+      "name": "CityMETER production boundaries",
+      "owner": "Landometer · CityMETER",
+      "url_or_reference": "data/boundary-receipts.json (581 receipts)",
+      "data_type": "official administrative frames as served by production"
+    },
+    {
+      "name": "OpenStreetMap via OpenFreeMap; host buildings from Luxury Brands 0.5",
+      "owner": "OpenStreetMap contributors",
+      "url_or_reference": "https://openfreemap.org · data/venue-buildings.geojson",
+      "data_type": "open (ODbL 1.0)"
+    }
+  ],
+  "spatial_granularity": "display point → แขวง/ตำบล (analytical unit) → เขต/อำเภอ → จังหวัด (production code) → ประเทศ",
+  "temporal_coverage": "snapshot retrieved 2026-10-22; upstream collection date not exposed",
+  "update_frequency": "ad hoc",
+  "last_updated": "2026-10-22",
+  "key_metrics": [
+    "restaurants per km² per แขวง/ตำบล",
+    "combined density of the three densest areas",
+    "coverage baseline density",
+    "restaurants per province (count)",
+    "rows by food-type group",
+    "rows by price bucket (priced rows)",
+    "reviews (popularity proxy)",
+    "rating mean (rated rows)"
+  ],
+  "visual_layers": [
+    "choropleth",
+    "point (cue symbols)",
+    "polygon",
+    "ranking",
+    "matrix",
+    "stacked bar",
+    "3d-massing"
+  ],
+  "recommended_pairing_layers": [
+    "Population",
+    "Shopping Center",
+    "Building",
+    "Transit: Road",
+    "Business Dynamics",
+    "Locale Insight (context only)"
+  ],
+  "data_transparency": {
+    "raw_fields": [
+      "name",
+      "primary_type",
+      "start_price",
+      "end_price",
+      "price_bucket",
+      "rating",
+      "rating_count",
+      "subdistrict code",
+      "display coordinate (z10 grid)"
+    ],
+    "calculated_metrics": [
+      "density (rows ÷ km²)",
+      "combined density Σ/Σ",
+      "coverage baseline",
+      "group and price shares",
+      "review totals",
+      "rating mean"
+    ],
+    "inferred_fields": [
+      "food-type group",
+      "chain candidate (name-based)",
+      "venue candidate (name-based)"
+    ],
+    "limitation_text": "ไม่ใช่สำมะโนร้านอาหาร; 7 จังหวัด นอกสามจังหวัดหลักเพียงบางตำบล; พิกัดแสดงผลกริด 9.55 ม.; คะแนน/รีวิวเป็นความนิยมตามแหล่งข้อมูล"
+  },
+  "known_limitations": [
+    "ไม่ใช่สำมะโน",
+    "ครอบคลุม 7 จังหวัด นอก กทม./นนทบุรี/สมุทรปราการ เพียงบางตำบล",
+    "ไม่มีผู้ให้ข้อมูลและวันที่เก็บต้นทาง",
+    "พิกัดเป็นตำแหน่งแสดงผล (9.55 ม.)",
+    "primary type เดียว รวมสถานที่ไม่ใช่อาหาร 130 แถว",
+    "ราคาไม่ระบุ 71.5%",
+    "เครือ/สถานที่เป็น candidate จากชื่อ",
+    "ตัวหารเป็นพื้นที่ทั้งตำบล"
+  ],
+  "methodology_note": "DATA_METHOD.md, docs/AREA_METHOD.md, docs/CHART_SELECTION.md",
+  "example_use_cases": [
+    "คัดแขวงสำหรับสาขาใหม่ของเครือร้านก๋วยเตี๋ยว",
+    "เทียบประเภทร้านรอบ community mall กับรอบศูนย์คู่แข่ง",
+    "ภาพความหนาแน่นร้านอาหารสำหรับรายงานพื้นที่ของหน่วยงานท้องถิ่น"
+  ],
+  "hypotheses_to_validate": [
+    {
+      "hypothesis": "ผู้ใช้สามกลุ่มถาม ‘แน่นแค่ไหน/ร้านแบบไหน’ ก่อนคัดทำเลและเริ่มจากพื้นที่",
+      "test": "สัมภาษณ์ 3–5 คนต่อกลุ่มด้วย demo 0.1",
+      "criterion": "≥ 2 ใน 3 กลุ่มยืนยัน trigger และใช้โปรไฟล์พื้นที่ก่อนตาราง"
+    },
+    {
+      "hypothesis": "ร้าน/ตร.กม. ไม่ถูกอ่านเป็นความต้องการหรือยอดขาย",
+      "test": "ให้ผู้ใช้อธิบายตัวเลขด้วยคำของตัวเอง",
+      "criterion": "≥ 80% อธิบายถูก"
+    },
+    {
+      "hypothesis": "ลายทแยงไม่มีข้อมูลลดการตีความว่าไม่มีร้าน",
+      "test": "ถามผู้ใช้ถึงแขวงที่เป็นลายทแยง",
+      "criterion": "≥ 80% ตอบว่าแหล่งข้อมูลไม่ครอบคลุม"
+    },
+    {
+      "hypothesis": "ภาพ 3D focus/quiet ถูกใช้ใน deck โดยไม่วาดใหม่",
+      "test": "ขอ screenshot ที่ใช้จริง",
+      "criterion": "อย่างน้อย 1 กรณี (ไม่นับเป็น traction)"
+    },
+    {
+      "hypothesis": "เวลาจากคำถามถึงรายชื่อพื้นที่ < 10 นาที",
+      "test": "จับเวลา 3 task",
+      "criterion": "มัธยฐาน < 10 นาที"
+    }
+  ],
+  "owner_team": "Landometer · CityMETER",
+  "last_reviewed": "2026-10-22"
+}

@@ -1,0 +1,4083 @@
+{
+"metadata": {
+"source": "CityMETER production boundaries (public read-only API)",
+"geometryEndpoint": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/{uuid}/SUBDISTRICT",
+"attributeEndpoint": "https://landometer.com/api/v2/citymeter-v3/base/info/lv1/{province uuid}",
+"retrievedOn": "2026-10-22",
+"builtOn": "2026-10-22",
+"simplification": "mapshaper -simplify interval=16 keep-shapes -clean (display only, topology preserved); districts dissolved from the simplified subdistricts; provinces dissolved then simplified at interval=120 for the country view",
+"areaSqm": "production value from base info; never recomputed from the simplified outline",
+"receipts": 581,
+"receiptsSha256": "ddaed08c299728d67031c1aaab4b2d439a44c85de0b5f11c842d82a15b5b796a",
+"limits": "Administrative frames for navigation and aggregation of this dataset; not an official boundary certificate."
+},
+"receipts": [
+{
+"id": "00043392-9824-404f-bfe4-038a2a219588",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/00043392-9824-404f-bfe4-038a2a219588/SUBDISTRICT",
+"sha256": "77401f4ee5c0b1b57f58b5b842c8d04742881ca1ca15762fcf6519e8310a0ce5",
+"bytes": 24048,
+"retrievedAt": "2026-10-22T13:29:27.429012+00:00"
+},
+{
+"id": "003b62b1-e440-42ca-a69e-8dbcb9e6b0ac",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/003b62b1-e440-42ca-a69e-8dbcb9e6b0ac/SUBDISTRICT",
+"sha256": "ffb221551266193a330895999903849c573f45d783cfce17e1b7377e3737c2ad",
+"bytes": 7806,
+"retrievedAt": "2026-10-22T13:29:56.784644+00:00"
+},
+{
+"id": "003ecf08-54e1-4d9d-b3c5-8a52dc8b3b95",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/003ecf08-54e1-4d9d-b3c5-8a52dc8b3b95/SUBDISTRICT",
+"sha256": "194379b1f540afe8a22deb442f6a93f9747377cb2c3f746bf8766a798b1db2fb",
+"bytes": 21446,
+"retrievedAt": "2026-10-22T13:29:41.638854+00:00"
+},
+{
+"id": "00c60bae-9231-4645-aa8d-ef4911be553f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/00c60bae-9231-4645-aa8d-ef4911be553f/SUBDISTRICT",
+"sha256": "3458406acade49d61425009335032436002f1efd9f463984621e93dfe2f7934f",
+"bytes": 12849,
+"retrievedAt": "2026-10-22T13:30:09.848761+00:00"
+},
+{
+"id": "0127ef86-48f2-4859-b4d6-cd006e089d63",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0127ef86-48f2-4859-b4d6-cd006e089d63/SUBDISTRICT",
+"sha256": "c62bc2ba7e499fe7d7523a762b1d3fcdc05449582ce50638bef91af7f177519e",
+"bytes": 14174,
+"retrievedAt": "2026-10-22T13:29:16.314158+00:00"
+},
+{
+"id": "01aad879-424d-4df3-86cd-59fdfa678966",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/01aad879-424d-4df3-86cd-59fdfa678966/SUBDISTRICT",
+"sha256": "82e9aa7b865aa6e51481c19cecb23a51652bdc8f6657f1614edcfbacc93750c4",
+"bytes": 23360,
+"retrievedAt": "2026-10-22T13:30:04.849084+00:00"
+},
+{
+"id": "0449b38a-ca8f-48a1-ab8e-79a67f501c31",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0449b38a-ca8f-48a1-ab8e-79a67f501c31/SUBDISTRICT",
+"sha256": "1438470233ce101aaf28cc7ae90669cbe9edc89ca8ee5ce8c7539476ed8449e1",
+"bytes": 12519,
+"retrievedAt": "2026-10-22T13:29:51.489298+00:00"
+},
+{
+"id": "0526714a-cdd3-4f0e-9e1f-d7a4489254e4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0526714a-cdd3-4f0e-9e1f-d7a4489254e4/SUBDISTRICT",
+"sha256": "e6c2eec6e99bb3c9b46f688cc639e52ea43dc97a5a10034e0747885020d8e322",
+"bytes": 16931,
+"retrievedAt": "2026-10-22T13:29:49.331751+00:00"
+},
+{
+"id": "056ddea1-79f6-4938-9061-a6a656a7d945",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/056ddea1-79f6-4938-9061-a6a656a7d945/SUBDISTRICT",
+"sha256": "4e780075db423b9d098ab0298b4b02f0fb2acd860659e3e796329a7e55c14e4a",
+"bytes": 25452,
+"retrievedAt": "2026-10-22T13:30:06.382341+00:00"
+},
+{
+"id": "060970c9-a73c-4419-838e-0231682c164f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/060970c9-a73c-4419-838e-0231682c164f/SUBDISTRICT",
+"sha256": "bbd9646eb375c4b74ea7a7cb8e42b3ae134264dc993533f60754c06b2f4b68f7",
+"bytes": 5170,
+"retrievedAt": "2026-10-22T13:29:56.463963+00:00"
+},
+{
+"id": "065abef4-df87-48fa-893a-231dd518f0cc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/065abef4-df87-48fa-893a-231dd518f0cc/SUBDISTRICT",
+"sha256": "d6de35cea20704c2ea202084d0254a2ea32d5a5fc0e81bc70658a90fc0ff24df",
+"bytes": 35929,
+"retrievedAt": "2026-10-22T13:29:41.434075+00:00"
+},
+{
+"id": "065c1148-20d6-49e3-a2c5-11a9df1ace10",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/065c1148-20d6-49e3-a2c5-11a9df1ace10/SUBDISTRICT",
+"sha256": "4301573c90870ef71639e723eb65c6d2ad05f9a68cf8ca4baf035bf7c0da5ae7",
+"bytes": 10475,
+"retrievedAt": "2026-10-22T13:29:08.457103+00:00"
+},
+{
+"id": "06a43cb7-3282-49db-9adb-6597d79746db",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/06a43cb7-3282-49db-9adb-6597d79746db/SUBDISTRICT",
+"sha256": "1c7be6bce37c07c761511cdea4a00358f6e633ff7d749cefa8d3009ee2c0f161",
+"bytes": 12839,
+"retrievedAt": "2026-10-22T13:29:46.440904+00:00"
+},
+{
+"id": "06d1dc9f-318b-4965-9f8a-cb2a5d8e0c16",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/06d1dc9f-318b-4965-9f8a-cb2a5d8e0c16/SUBDISTRICT",
+"sha256": "d715c59cc99221060cc89a58f8c11dca1c4a6ee64b88f920da0c9752af1d0338",
+"bytes": 21114,
+"retrievedAt": "2026-10-22T13:30:15.654720+00:00"
+},
+{
+"id": "07114d5d-c04e-4618-8402-e90cfb6e861f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/07114d5d-c04e-4618-8402-e90cfb6e861f/SUBDISTRICT",
+"sha256": "ba093cfc90a0be93ee896836ec3195694101390db8ef83e160f655bad7928ba0",
+"bytes": 26185,
+"retrievedAt": "2026-10-22T13:30:18.850965+00:00"
+},
+{
+"id": "078e6143-0d2c-4b39-bd84-048e64d3c34b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/078e6143-0d2c-4b39-bd84-048e64d3c34b/SUBDISTRICT",
+"sha256": "ca12ecffa076843eb4536aa2e634e7cf9cc6c797f37c29e3c72dd6ed03f8f749",
+"bytes": 17724,
+"retrievedAt": "2026-10-22T13:30:08.387945+00:00"
+},
+{
+"id": "07ed8249-941d-440f-97e5-73e2fc181790",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/07ed8249-941d-440f-97e5-73e2fc181790/SUBDISTRICT",
+"sha256": "774bbc0d6377d3561bf084538397e715bd8d23f2b3d030b0c2cbf29d4e048e80",
+"bytes": 7355,
+"retrievedAt": "2026-10-22T13:29:27.020157+00:00"
+},
+{
+"id": "082b203e-f0b5-494b-829e-c5e577b3ccdd",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/082b203e-f0b5-494b-829e-c5e577b3ccdd/SUBDISTRICT",
+"sha256": "2827eac6cd5423c96a4e3107758d4a2ffd91605cf5ac03a3ddd976e8840c2514",
+"bytes": 10375,
+"retrievedAt": "2026-10-22T13:30:04.699072+00:00"
+},
+{
+"id": "0868f9c0-2d85-4f37-b553-d913e5a53814",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0868f9c0-2d85-4f37-b553-d913e5a53814/SUBDISTRICT",
+"sha256": "6caa713b5ee8a40c38795f426851ebad41b16e3e83b375f5f452ca7247519b4a",
+"bytes": 2878,
+"retrievedAt": "2026-10-22T13:29:41.860882+00:00"
+},
+{
+"id": "0872ab83-2a90-4c7d-b269-e7696c074fbc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0872ab83-2a90-4c7d-b269-e7696c074fbc/SUBDISTRICT",
+"sha256": "dbf4c1998d91297390303c34d0268186d12ebc370c280cbcbbb45994cf7c3357",
+"bytes": 6733,
+"retrievedAt": "2026-10-22T13:29:53.708644+00:00"
+},
+{
+"id": "088c549d-f9a3-40e6-b50d-481e666efe5d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/088c549d-f9a3-40e6-b50d-481e666efe5d/SUBDISTRICT",
+"sha256": "e4beb675864a4f72994aa7e99599153467ee897962209ae2b878861471e078b1",
+"bytes": 9679,
+"retrievedAt": "2026-10-22T13:30:15.854223+00:00"
+},
+{
+"id": "08f770e9-21fd-4e99-b844-08de87f86f53",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/08f770e9-21fd-4e99-b844-08de87f86f53/SUBDISTRICT",
+"sha256": "061e178f0e8dcbe8aad47365d9fcb0554fa4b8b7ba0eff72657b362918eaf91b",
+"bytes": 19106,
+"retrievedAt": "2026-10-22T13:29:11.440553+00:00"
+},
+{
+"id": "0921ac19-0794-45f8-87ef-5594a099d30e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0921ac19-0794-45f8-87ef-5594a099d30e/SUBDISTRICT",
+"sha256": "8a36d1ace77e43b48104130136281f360fb170943a870758962b31725035d15d",
+"bytes": 7287,
+"retrievedAt": "2026-10-22T13:29:57.825204+00:00"
+},
+{
+"id": "09b9471b-206d-4dc2-a307-217675ca3883",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/09b9471b-206d-4dc2-a307-217675ca3883/SUBDISTRICT",
+"sha256": "eaacece70229e66da5f77c0200aa493714a3654707fe3f2d1498c771bcc30e69",
+"bytes": 24037,
+"retrievedAt": "2026-10-22T13:29:11.490325+00:00"
+},
+{
+"id": "0a1d0532-1550-43c0-9e65-1b05ca494162",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0a1d0532-1550-43c0-9e65-1b05ca494162/SUBDISTRICT",
+"sha256": "44555d8021d6af4701e47417dfb9d96eed4d0491fdcac9e1753fbf266021ea09",
+"bytes": 144600,
+"retrievedAt": "2026-10-22T13:29:13.890114+00:00"
+},
+{
+"id": "0b3ec377-ee7f-4725-83ad-cb4c904d7270",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0b3ec377-ee7f-4725-83ad-cb4c904d7270/SUBDISTRICT",
+"sha256": "f83e2bc0c5004364cdbb458ceedbb0b18f2fde88ea03428afa463aac92f4dc00",
+"bytes": 6250,
+"retrievedAt": "2026-10-22T13:29:50.713883+00:00"
+},
+{
+"id": "0b8a8c8c-bf4e-4a6e-a8d2-9d5ae8fd94cd",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0b8a8c8c-bf4e-4a6e-a8d2-9d5ae8fd94cd/SUBDISTRICT",
+"sha256": "6568dcca867b2c2747b0ed7f5962da45c2fa25d593c84633accf0555433f0d01",
+"bytes": 8245,
+"retrievedAt": "2026-10-22T13:29:44.436207+00:00"
+},
+{
+"id": "0bd3567e-0552-4e95-a535-dddbc7167cf4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0bd3567e-0552-4e95-a535-dddbc7167cf4/SUBDISTRICT",
+"sha256": "e1aa5e1320ac73a9bd7109f177e7ef5d6220687774294b750a4e9f5a978f45a4",
+"bytes": 26555,
+"retrievedAt": "2026-10-22T13:30:06.614577+00:00"
+},
+{
+"id": "0c18b7c7-33d1-473d-805e-354aa3c435e9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0c18b7c7-33d1-473d-805e-354aa3c435e9/SUBDISTRICT",
+"sha256": "4abb6f38493402b5a440d7b67d8ce74f9c3f5788952376047183936d1ace0afd",
+"bytes": 22859,
+"retrievedAt": "2026-10-22T13:29:09.796636+00:00"
+},
+{
+"id": "0d24d79b-3028-4f5f-b869-6f1c4f96db53",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0d24d79b-3028-4f5f-b869-6f1c4f96db53/SUBDISTRICT",
+"sha256": "b54a16f4fad6d43d9ba39ecd321ffa89e3febaa447ce519022fc5e8629376c5f",
+"bytes": 16434,
+"retrievedAt": "2026-10-22T13:29:27.434226+00:00"
+},
+{
+"id": "0d69b968-adc9-40bb-951f-b58fbbc64ee2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0d69b968-adc9-40bb-951f-b58fbbc64ee2/SUBDISTRICT",
+"sha256": "3bdae6a08cbbb9689e812201f10b93315c2e4cfe717622d7a472fa19d9bbadbc",
+"bytes": 15643,
+"retrievedAt": "2026-10-22T13:29:41.574078+00:00"
+},
+{
+"id": "0ddb1bd3-25ec-4d95-977f-98fce523d680",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0ddb1bd3-25ec-4d95-977f-98fce523d680/SUBDISTRICT",
+"sha256": "6b35957d09825e1062820b58528563fb1bb0e5e57da2332e56e3adaf9ca88454",
+"bytes": 17437,
+"retrievedAt": "2026-10-22T13:29:24.894871+00:00"
+},
+{
+"id": "0f46f1fd-7a8b-433f-bb28-3d3ad3f9b0de",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0f46f1fd-7a8b-433f-bb28-3d3ad3f9b0de/SUBDISTRICT",
+"sha256": "b54e7b00d3347a8fb920061db73a86559d318221326722860370f9dc108e0df9",
+"bytes": 22487,
+"retrievedAt": "2026-10-22T13:30:14.837580+00:00"
+},
+{
+"id": "10e66359-5ae7-4a17-b5d3-911e3e7a7403",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/10e66359-5ae7-4a17-b5d3-911e3e7a7403/SUBDISTRICT",
+"sha256": "2492fd57a819b9e63836379eeaec8f83f1be6998b0d8f35ab115f177a0b133b2",
+"bytes": 7393,
+"retrievedAt": "2026-10-22T13:29:50.689808+00:00"
+},
+{
+"id": "112487a2-b11e-40ea-9413-d16abf62cac8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/112487a2-b11e-40ea-9413-d16abf62cac8/SUBDISTRICT",
+"sha256": "36090814bff989af32519a4e2de713f089dbb37b982ca3b7cb52e66ad8e28ff1",
+"bytes": 12501,
+"retrievedAt": "2026-10-22T13:30:11.553439+00:00"
+},
+{
+"id": "1150a3df-0fd7-49fe-974e-da6e9a6004c8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1150a3df-0fd7-49fe-974e-da6e9a6004c8/SUBDISTRICT",
+"sha256": "dc66142d4d15394e7a0e7d9dfea7b10edcff07f8ce2fb3a257576a02919afa81",
+"bytes": 23837,
+"retrievedAt": "2026-10-22T13:29:57.952386+00:00"
+},
+{
+"id": "11847506-0b6d-49eb-804a-4532a1d1b2e4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/11847506-0b6d-49eb-804a-4532a1d1b2e4/SUBDISTRICT",
+"sha256": "7a79651d606e956008e2a7ce652851a81eb0a4ec47f91fa661b96c8eadecae22",
+"bytes": 8196,
+"retrievedAt": "2026-10-22T13:29:23.174437+00:00"
+},
+{
+"id": "122b2316-2018-424a-9602-18696247a92b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/122b2316-2018-424a-9602-18696247a92b/SUBDISTRICT",
+"sha256": "a55a2a004b409c96e116ae52af4f37813ca09307079ce5719e904b5b8d8276cf",
+"bytes": 7873,
+"retrievedAt": "2026-10-22T13:29:21.909542+00:00"
+},
+{
+"id": "131e6b63-1058-482b-a277-9308227d590f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/131e6b63-1058-482b-a277-9308227d590f/SUBDISTRICT",
+"sha256": "5260e88879b69771c348ffb21b67a0d3fd555b06d6a3ee6302031f9cb47a6694",
+"bytes": 9413,
+"retrievedAt": "2026-10-22T13:29:28.630522+00:00"
+},
+{
+"id": "134ede1e-13df-4218-9a92-0dba89ca4dfb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/134ede1e-13df-4218-9a92-0dba89ca4dfb/SUBDISTRICT",
+"sha256": "e6e8422958e6834c1a204442e11505a78c2d647ed8bbde163b4a8108732bcd6a",
+"bytes": 15483,
+"retrievedAt": "2026-10-22T13:29:26.938914+00:00"
+},
+{
+"id": "14647959-5caa-475b-a165-213e6a4f87fc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/14647959-5caa-475b-a165-213e6a4f87fc/SUBDISTRICT",
+"sha256": "b4caa7eaed5b29bfea7e573f90367d74c59edc70ffb4adafc3bfdb1ffd9d0732",
+"bytes": 10255,
+"retrievedAt": "2026-10-22T13:29:57.565571+00:00"
+},
+{
+"id": "14fe13c1-b260-42a0-9063-e467d4b792d2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/14fe13c1-b260-42a0-9063-e467d4b792d2/SUBDISTRICT",
+"sha256": "1c949a926a38ebd9b3f14fdf168e49feebf8597a33531d0047680ab45c6162b1",
+"bytes": 12313,
+"retrievedAt": "2026-10-22T13:30:12.614189+00:00"
+},
+{
+"id": "1573b021-b01a-46f5-bc4a-db086e10ce2e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1573b021-b01a-46f5-bc4a-db086e10ce2e/SUBDISTRICT",
+"sha256": "c8ad1aabf5d713f0f9d664911e96841c98ecb9181ae3a59e96c64b2b1a6d7b1b",
+"bytes": 2218,
+"retrievedAt": "2026-10-22T13:29:15.627745+00:00"
+},
+{
+"id": "159a1fbc-57c5-485d-92b3-e05e4f41c8cc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/159a1fbc-57c5-485d-92b3-e05e4f41c8cc/SUBDISTRICT",
+"sha256": "a6776d56ae3b06f5c2a3a1d6b3d678bc7dd489395dd260cc69f597b02ff2012f",
+"bytes": 11116,
+"retrievedAt": "2026-10-22T13:29:51.647345+00:00"
+},
+{
+"id": "16442947-f6b1-472b-b820-95d4dee09e8e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/16442947-f6b1-472b-b820-95d4dee09e8e/SUBDISTRICT",
+"sha256": "bf8dc7cd4950c350ba7312850f65d490e27e77047d08683d795f6132a834a8a1",
+"bytes": 944,
+"retrievedAt": "2026-10-22T13:29:15.813008+00:00"
+},
+{
+"id": "169c8fc4-6c8d-42ef-afc2-9f69f6449952",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/169c8fc4-6c8d-42ef-afc2-9f69f6449952/SUBDISTRICT",
+"sha256": "3aea7936c82cf883996ab0a4b7581457b8cd42ac9bd08661b630f367937e6b11",
+"bytes": 9501,
+"retrievedAt": "2026-10-22T13:29:24.534054+00:00"
+},
+{
+"id": "1747657f-d7e6-455d-8695-936d51efd9d7",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1747657f-d7e6-455d-8695-936d51efd9d7/SUBDISTRICT",
+"sha256": "9eeffea82dc7230b2b69a0014554fd798239420cfef016d8544ffbad93a56c26",
+"bytes": 13724,
+"retrievedAt": "2026-10-22T13:30:17.779090+00:00"
+},
+{
+"id": "180d544a-b684-421f-80d4-1cd3e16fb260",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/180d544a-b684-421f-80d4-1cd3e16fb260/SUBDISTRICT",
+"sha256": "32d63ce86e4bfd733951b3d3522df7575d48ee602cb5e5869ef88503e65f8bfd",
+"bytes": 27560,
+"retrievedAt": "2026-10-22T13:30:02.262098+00:00"
+},
+{
+"id": "186eaf52-7128-4e55-a514-67295e412b5d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/186eaf52-7128-4e55-a514-67295e412b5d/SUBDISTRICT",
+"sha256": "c49f8f65511a6f3d4163bc18b64f23183db845f78fa11270149e72d8f953c6f9",
+"bytes": 10555,
+"retrievedAt": "2026-10-22T13:29:06.752567+00:00"
+},
+{
+"id": "18ed906d-279a-42d8-b444-d2d22f5ef4e0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/18ed906d-279a-42d8-b444-d2d22f5ef4e0/SUBDISTRICT",
+"sha256": "94bc3cb71516e9ce0c134f85b852d8fc30b061f838bb1541d182cd07ea612900",
+"bytes": 19535,
+"retrievedAt": "2026-10-22T13:29:11.819527+00:00"
+},
+{
+"id": "191cab98-f5ef-486c-90a8-37f3ce38aacc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/191cab98-f5ef-486c-90a8-37f3ce38aacc/SUBDISTRICT",
+"sha256": "08955ec37ea2d79653003f8e1dd441057791763b79a4d9f3e1cc297762e23615",
+"bytes": 36445,
+"retrievedAt": "2026-10-22T13:30:16.481209+00:00"
+},
+{
+"id": "196033a7-42e6-498a-be78-4f19870bd386",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/196033a7-42e6-498a-be78-4f19870bd386/SUBDISTRICT",
+"sha256": "1adbe5270bb0023f7330e42fd0ba20c108585b51253250e5d684e303860cb3d4",
+"bytes": 1629,
+"retrievedAt": "2026-10-22T13:29:38.094966+00:00"
+},
+{
+"id": "19a5072d-5ef1-4627-b413-0d933ecc34b2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/19a5072d-5ef1-4627-b413-0d933ecc34b2/SUBDISTRICT",
+"sha256": "466f46bb0e4ded83298067d8e2b3227003279b86c006f860fad7a927405fb25a",
+"bytes": 34189,
+"retrievedAt": "2026-10-22T13:29:40.754108+00:00"
+},
+{
+"id": "1a73f69e-4f18-4e2d-aba1-a4ba165207c0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1a73f69e-4f18-4e2d-aba1-a4ba165207c0/SUBDISTRICT",
+"sha256": "62d721364afe5000c49e1e8895012a0aa86b5554a9d06e6e9b9436d8d5f8be11",
+"bytes": 13734,
+"retrievedAt": "2026-10-22T13:29:26.588584+00:00"
+},
+{
+"id": "1a991f95-3bf4-423d-9ed1-66648f7f8fc9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1a991f95-3bf4-423d-9ed1-66648f7f8fc9/SUBDISTRICT",
+"sha256": "17bfd899c7fd47c19e6d9434adef12601508665a58e4fea4f9b40fd1159ee89f",
+"bytes": 26011,
+"retrievedAt": "2026-10-22T13:29:10.210068+00:00"
+},
+{
+"id": "1b3afb75-433e-40ad-8046-9a8a3d30a93a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1b3afb75-433e-40ad-8046-9a8a3d30a93a/SUBDISTRICT",
+"sha256": "452aebc516c5c12952e76e38d90512cf63e06540f9c82f9793cf9652a7d03bb2",
+"bytes": 14570,
+"retrievedAt": "2026-10-22T13:30:17.554202+00:00"
+},
+{
+"id": "1b94defb-dbef-4728-9e2d-9424f80b392e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1b94defb-dbef-4728-9e2d-9424f80b392e/SUBDISTRICT",
+"sha256": "0aadf0558a4aaa7979d8888948ec312b14244aa9aa67314f6bb13bedb1cc7cce",
+"bytes": 12619,
+"retrievedAt": "2026-10-22T13:29:24.356995+00:00"
+},
+{
+"id": "1d4af914-4afb-4069-96f2-eb5f1369c016",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1d4af914-4afb-4069-96f2-eb5f1369c016/SUBDISTRICT",
+"sha256": "290dfddc2c13497a704f98c94d85147abde9290e0e0708def43b3dace6f54579",
+"bytes": 6929,
+"retrievedAt": "2026-10-22T13:29:07.650859+00:00"
+},
+{
+"id": "1d9a2463-350c-43ec-a46c-3f2a128b7a79",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1d9a2463-350c-43ec-a46c-3f2a128b7a79/SUBDISTRICT",
+"sha256": "5c5a55cc2e331e5bbe4b5a10ea6172d2cd631f3a90a6d71847d8645d089cfa04",
+"bytes": 14342,
+"retrievedAt": "2026-10-22T13:29:26.874225+00:00"
+},
+{
+"id": "1e459275-fc52-42c9-bd58-2b81a11e8774",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1e459275-fc52-42c9-bd58-2b81a11e8774/SUBDISTRICT",
+"sha256": "fe9da2687397f1fcf06e6d22ad013d0dea79af151cf52cbdc728d8a569807571",
+"bytes": 13810,
+"retrievedAt": "2026-10-22T13:29:29.392782+00:00"
+},
+{
+"id": "1e47f554-871f-4f03-9278-b597ca4189ed",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1e47f554-871f-4f03-9278-b597ca4189ed/SUBDISTRICT",
+"sha256": "04c4afcb5a5cfd95728d1df07cd4df2b4d0c2928c2009454ae377b2264b6e6c3",
+"bytes": 12950,
+"retrievedAt": "2026-10-22T13:29:04.917755+00:00"
+},
+{
+"id": "1ed65431-60c6-4354-897a-85bac5370db5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1ed65431-60c6-4354-897a-85bac5370db5/SUBDISTRICT",
+"sha256": "5ce2406f1bc0aafe7b0bae46c9af953013d6fb236928c868fd5c669d6ea937a4",
+"bytes": 2107,
+"retrievedAt": "2026-10-22T13:29:42.230002+00:00"
+},
+{
+"id": "1f036d29-abdc-4fb2-8a9c-b8d48eb9fffb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1f036d29-abdc-4fb2-8a9c-b8d48eb9fffb/SUBDISTRICT",
+"sha256": "ced856f52aea3bacf925907a9fb98ec5723abae394e0ab2489c3efbf3d381e21",
+"bytes": 3237,
+"retrievedAt": "2026-10-22T13:29:47.909143+00:00"
+},
+{
+"id": "1f80fa0a-59b1-4d23-8a1e-0f6ec3f4fb42",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1f80fa0a-59b1-4d23-8a1e-0f6ec3f4fb42/SUBDISTRICT",
+"sha256": "2f858b6b5faaeeee87e5294b089bd76e60cf7ab5e204d68fc659db7d75e42763",
+"bytes": 21265,
+"retrievedAt": "2026-10-22T13:29:57.126953+00:00"
+},
+{
+"id": "1fa59ae1-0664-4a36-99ab-c3c16e72edbb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1fa59ae1-0664-4a36-99ab-c3c16e72edbb/SUBDISTRICT",
+"sha256": "2bf56de9f32cf4993480d6cd32df4c512a83685d653ec038a563b3cd64ffbf18",
+"bytes": 9637,
+"retrievedAt": "2026-10-22T13:29:11.438733+00:00"
+},
+{
+"id": "204f8220-fb54-4689-a54e-38249b1173e1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/204f8220-fb54-4689-a54e-38249b1173e1/SUBDISTRICT",
+"sha256": "2079dd87a1702b5456d104fa20fc5bc8646bfcf4840443b97b12c3aec677df4d",
+"bytes": 3929,
+"retrievedAt": "2026-10-22T13:29:53.712236+00:00"
+},
+{
+"id": "20585eae-f74e-4c67-9880-fd4f65bad66a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/20585eae-f74e-4c67-9880-fd4f65bad66a/SUBDISTRICT",
+"sha256": "c8630a5500646c1515dbc65bb03d06e6d9a7e146b50e72c7e555925ada6ca0cf",
+"bytes": 10952,
+"retrievedAt": "2026-10-22T13:30:18.126413+00:00"
+},
+{
+"id": "207b80fc-a6f8-459a-b25f-ffa565dd1005",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/207b80fc-a6f8-459a-b25f-ffa565dd1005/SUBDISTRICT",
+"sha256": "7bbf4fd9bbb70bf5310eabb0bf22946f6c0cf985cf6b10d04cd256831c79b487",
+"bytes": 4202,
+"retrievedAt": "2026-10-22T13:29:48.308710+00:00"
+},
+{
+"id": "2109b1f2-5b75-43a3-8434-44853b3af4b2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2109b1f2-5b75-43a3-8434-44853b3af4b2/SUBDISTRICT",
+"sha256": "fb19f59591e76c7dc6dfee6195c40242bf77c70b843dc89234f468da60b4ea01",
+"bytes": 9852,
+"retrievedAt": "2026-10-22T13:29:04.194209+00:00"
+},
+{
+"id": "2184d850-6c21-443f-8bd0-f4062f38104f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2184d850-6c21-443f-8bd0-f4062f38104f/SUBDISTRICT",
+"sha256": "d8674e1284c21547ad7db8dca49d6264fee4b742d0868cbe5eebefdc8f9f5f73",
+"bytes": 136428,
+"retrievedAt": "2026-10-22T13:29:13.848642+00:00"
+},
+{
+"id": "21e0a1d2-6225-453f-aec3-d536db220af1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/21e0a1d2-6225-453f-aec3-d536db220af1/SUBDISTRICT",
+"sha256": "e37832466f8c97b7caaa51eca17d715ef1c9124133352f7a8cde2de3b37ed1fc",
+"bytes": 4220,
+"retrievedAt": "2026-10-22T13:30:19.644124+00:00"
+},
+{
+"id": "222e8141-6419-4a0e-98d1-db44a5bbd2a9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/222e8141-6419-4a0e-98d1-db44a5bbd2a9/SUBDISTRICT",
+"sha256": "c6128202fe9956890daa2345461bc558c769ed8d7a7c8fad8d5b0a8c781180b2",
+"bytes": 53274,
+"retrievedAt": "2026-10-22T13:29:12.565576+00:00"
+},
+{
+"id": "2240e773-5476-4bf1-adaa-351fcccb4c4a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2240e773-5476-4bf1-adaa-351fcccb4c4a/SUBDISTRICT",
+"sha256": "c492c5015261e1b3d4fec9fc22710ce36ed6026dbb20ba7148457f61456c54a3",
+"bytes": 8191,
+"retrievedAt": "2026-10-22T13:29:46.293789+00:00"
+},
+{
+"id": "22d0f8e2-1a40-4807-815d-9cdffa2d02cc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/22d0f8e2-1a40-4807-815d-9cdffa2d02cc/SUBDISTRICT",
+"sha256": "9896beaf7442f721347e5900c8bd439aafd28ce1e6411e42c0bf0ff39f291808",
+"bytes": 23190,
+"retrievedAt": "2026-10-22T13:29:41.420537+00:00"
+},
+{
+"id": "24342219-8092-4a8e-bcf6-5d172d21ee69",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/24342219-8092-4a8e-bcf6-5d172d21ee69/SUBDISTRICT",
+"sha256": "dc30e4ee14f0f2db55cb534526d25aaf2167296794052de2a3e49bd2c156482e",
+"bytes": 9343,
+"retrievedAt": "2026-10-22T13:29:23.165055+00:00"
+},
+{
+"id": "24fb5f8f-2885-41db-aab7-e756b781da65",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/24fb5f8f-2885-41db-aab7-e756b781da65/SUBDISTRICT",
+"sha256": "ff12cab2aa890f70cc3807f6ea87cddefba25930e33add1f96ec7a526937e7f2",
+"bytes": 10071,
+"retrievedAt": "2026-10-22T13:29:19.062978+00:00"
+},
+{
+"id": "24fdf9bf-b669-449a-ad57-1f511754928f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/24fdf9bf-b669-449a-ad57-1f511754928f/SUBDISTRICT",
+"sha256": "cce2313898d7037f697da2a6aa498300fd76ea52f57e1bf9e4c72f147e987224",
+"bytes": 10630,
+"retrievedAt": "2026-10-22T13:30:08.282912+00:00"
+},
+{
+"id": "259f51bb-194f-4067-995c-865c633af6dc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/259f51bb-194f-4067-995c-865c633af6dc/SUBDISTRICT",
+"sha256": "da7d054f079e8d281b521b4805e2eb31a39f3eefc34bde63c9af8cc44ff87058",
+"bytes": 14618,
+"retrievedAt": "2026-10-22T13:29:29.798345+00:00"
+},
+{
+"id": "262e088c-e867-47f7-9803-028e5202224b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/262e088c-e867-47f7-9803-028e5202224b/SUBDISTRICT",
+"sha256": "e2cc7a7b66b6471c9c6484b5a60ff80a9910914946e634d545c6d3a551bb69fc",
+"bytes": 7191,
+"retrievedAt": "2026-10-22T13:29:43.822800+00:00"
+},
+{
+"id": "2670b8b5-12be-46ba-8a7b-91ac3031b602",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2670b8b5-12be-46ba-8a7b-91ac3031b602/SUBDISTRICT",
+"sha256": "70dd8951e712132c0e152b4316e31cb0612d3aeb19da5162ffac0999fe946193",
+"bytes": 10462,
+"retrievedAt": "2026-10-22T13:29:10.109178+00:00"
+},
+{
+"id": "268b06f6-9dd0-4b32-a39f-423567335965",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/268b06f6-9dd0-4b32-a39f-423567335965/SUBDISTRICT",
+"sha256": "b2e3bf2921dc6aebdaef9ae669b6d288def77b4b02ecafcb6d407637cbdbd7c3",
+"bytes": 19676,
+"retrievedAt": "2026-10-22T13:29:29.511383+00:00"
+},
+{
+"id": "26be177b-8bda-4773-a8fb-ca9d971fdc6a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/26be177b-8bda-4773-a8fb-ca9d971fdc6a/SUBDISTRICT",
+"sha256": "2cb37841cc6597286f8456358f4522a49195aeb56ed1130ac37d2a60aaf5903c",
+"bytes": 49956,
+"retrievedAt": "2026-10-22T13:29:13.479754+00:00"
+},
+{
+"id": "271f42ef-15c3-4ef2-9b66-5651039c7259",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/271f42ef-15c3-4ef2-9b66-5651039c7259/SUBDISTRICT",
+"sha256": "309990189f13ef5b14b5d4b261ff236314c25e18a100b8f731ddcaa47e20d88b",
+"bytes": 4793,
+"retrievedAt": "2026-10-22T13:29:48.753306+00:00"
+},
+{
+"id": "2781109c-dcba-4f9b-a7c4-251cc672d525",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2781109c-dcba-4f9b-a7c4-251cc672d525/SUBDISTRICT",
+"sha256": "89085e36fb3ac7bded5e0c92ff9d4d04342447f8b96e30d4f45d998bd32b9b0a",
+"bytes": 18278,
+"retrievedAt": "2026-10-22T13:29:52.885288+00:00"
+},
+{
+"id": "278b02b6-1660-478c-b99d-0418d8176e63",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/278b02b6-1660-478c-b99d-0418d8176e63/SUBDISTRICT",
+"sha256": "d483cbe3456166c9f3e60913d6543534431a1030c6629164f9629847b8ea8b79",
+"bytes": 47748,
+"retrievedAt": "2026-10-22T13:30:11.687586+00:00"
+},
+{
+"id": "285c286c-70e1-4168-a71f-64a6ab5665bd",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/285c286c-70e1-4168-a71f-64a6ab5665bd/SUBDISTRICT",
+"sha256": "34b80c226dda9014dedb69e3b7b4da8c01431538659ce21b8bf75684ceb1a0d6",
+"bytes": 4464,
+"retrievedAt": "2026-10-22T13:29:30.323538+00:00"
+},
+{
+"id": "28ebbdb7-5e41-443b-a7ec-08c3c1de0dd0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/28ebbdb7-5e41-443b-a7ec-08c3c1de0dd0/SUBDISTRICT",
+"sha256": "ae2d086fd53e09eb405af7092862d1cf92d91b75ecf1067fa4895fb158e6544b",
+"bytes": 21477,
+"retrievedAt": "2026-10-22T13:29:55.558269+00:00"
+},
+{
+"id": "2902c365-3c2e-45e8-ab5d-d8d855616de2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2902c365-3c2e-45e8-ab5d-d8d855616de2/SUBDISTRICT",
+"sha256": "650b4e76c6fb2727a03ec7ce538e1e7b52d496cbd02fb078843542b275abc265",
+"bytes": 36339,
+"retrievedAt": "2026-10-22T13:29:16.621028+00:00"
+},
+{
+"id": "2941e37c-caee-4353-a5f6-5c7fc54fbbde",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2941e37c-caee-4353-a5f6-5c7fc54fbbde/SUBDISTRICT",
+"sha256": "71b65747f4037402b2f6199d5cb99f45bf79bb90af04f4c46b29f90fc07c9d6e",
+"bytes": 3226,
+"retrievedAt": "2026-10-22T13:29:45.731813+00:00"
+},
+{
+"id": "297c6442-f42a-4a36-94a2-03388fd55eee",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/297c6442-f42a-4a36-94a2-03388fd55eee/SUBDISTRICT",
+"sha256": "c77356de0102b6687a3b90f59e58cfd5a67634f4733fd98bf744be7fec0f94be",
+"bytes": 1443,
+"retrievedAt": "2026-10-22T13:30:00.523667+00:00"
+},
+{
+"id": "2a18e96c-f18d-4d96-a2c7-5c514a127936",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2a18e96c-f18d-4d96-a2c7-5c514a127936/SUBDISTRICT",
+"sha256": "a741de8d621de6602ef12d716333bb76cc595d1ae1b8798a35b6292dce065f3e",
+"bytes": 14405,
+"retrievedAt": "2026-10-22T13:29:07.888321+00:00"
+},
+{
+"id": "2a630dd1-3d3d-4af6-b319-69acc53cb6db",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2a630dd1-3d3d-4af6-b319-69acc53cb6db/SUBDISTRICT",
+"sha256": "b238fbc7de7b018fc92aac24e1d36c073c88b47c0f8a4683a4b4759907bebfd0",
+"bytes": 2837,
+"retrievedAt": "2026-10-22T13:29:44.118171+00:00"
+},
+{
+"id": "2ac3d159-1567-4644-ae40-a6812ddd5168",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2ac3d159-1567-4644-ae40-a6812ddd5168/SUBDISTRICT",
+"sha256": "74c5724d5575537b227c39eb73e30666a50ccd5f29270b542974c066a0c84a45",
+"bytes": 5691,
+"retrievedAt": "2026-10-22T13:29:45.045536+00:00"
+},
+{
+"id": "2b2f797c-a529-44fb-b500-f3e6fe5c1b76",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2b2f797c-a529-44fb-b500-f3e6fe5c1b76/SUBDISTRICT",
+"sha256": "fa434be42f0b03b8e4078800b3146830ebf5ce70b60c987fa003948a35358e43",
+"bytes": 14984,
+"retrievedAt": "2026-10-22T13:30:10.889939+00:00"
+},
+{
+"id": "2b99a31a-f477-4469-90fe-4ddf3f1d9dd6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2b99a31a-f477-4469-90fe-4ddf3f1d9dd6/SUBDISTRICT",
+"sha256": "fbccd7ebf26af8964124824bc69e02d164f75fab13b119b005dd8ba320ed3e39",
+"bytes": 30458,
+"retrievedAt": "2026-10-22T13:30:01.357590+00:00"
+},
+{
+"id": "2bf19974-ce8f-42fa-a678-577c3209a26a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2bf19974-ce8f-42fa-a678-577c3209a26a/SUBDISTRICT",
+"sha256": "8ebb9155aa70657a00ad86740ff495cb8072ab2a03fb5704d0c2cf915c030d31",
+"bytes": 917,
+"retrievedAt": "2026-10-22T13:29:38.936115+00:00"
+},
+{
+"id": "2d6f16e8-02ee-49dc-945d-1a6661790a1c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2d6f16e8-02ee-49dc-945d-1a6661790a1c/SUBDISTRICT",
+"sha256": "6a682d8bc6480185c10f3af414b29742aa62c75d3e6485453325560fe4f61457",
+"bytes": 52508,
+"retrievedAt": "2026-10-22T13:30:15.615447+00:00"
+},
+{
+"id": "2d9ce541-c4e6-468f-b335-f6a9330f0544",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2d9ce541-c4e6-468f-b335-f6a9330f0544/SUBDISTRICT",
+"sha256": "ed703ab3d9510beb17c53ef84c685a2cacf01cdbf0a50f87a1dd5c83cdaf450e",
+"bytes": 6637,
+"retrievedAt": "2026-10-22T13:29:32.353549+00:00"
+},
+{
+"id": "2e513c7d-b8bb-4066-97ae-ea8fc91dcfe6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2e513c7d-b8bb-4066-97ae-ea8fc91dcfe6/SUBDISTRICT",
+"sha256": "233c3031c92900a2054f6442a62e42f1a6dd0c9c52f843b90592b3cf24b2ee92",
+"bytes": 9384,
+"retrievedAt": "2026-10-22T13:29:14.568062+00:00"
+},
+{
+"id": "2e64570c-e257-4390-a852-e8ff28a4a06a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2e64570c-e257-4390-a852-e8ff28a4a06a/SUBDISTRICT",
+"sha256": "c64dfb44bd98fcd76057862b91fec1420f6190c6caa14c66bf655c3cc45053d4",
+"bytes": 2064,
+"retrievedAt": "2026-10-22T13:29:46.643611+00:00"
+},
+{
+"id": "2ea33c6f-a98f-4c4e-a213-dfbc3e93c4af",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2ea33c6f-a98f-4c4e-a213-dfbc3e93c4af/SUBDISTRICT",
+"sha256": "f52bbfaaaf1e631c99c179b6b66f92d3e6a0012225d547d0145258ef18863296",
+"bytes": 40365,
+"retrievedAt": "2026-10-22T13:29:12.269345+00:00"
+},
+{
+"id": "2ec352ad-b6f6-402e-8347-56ffc8e1a798",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2ec352ad-b6f6-402e-8347-56ffc8e1a798/SUBDISTRICT",
+"sha256": "2ebc472c796344faca17d9bd9b7360edb06d4d6cd324b2920e167ca6e614f601",
+"bytes": 25038,
+"retrievedAt": "2026-10-22T13:29:39.926250+00:00"
+},
+{
+"id": "2f131ed9-e312-4cd8-9b96-2400d12ecd1d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2f131ed9-e312-4cd8-9b96-2400d12ecd1d/SUBDISTRICT",
+"sha256": "7cb7e6f827c25c71edb6e6a62e363320948efdbbb4472e3554710c5889214129",
+"bytes": 16522,
+"retrievedAt": "2026-10-22T13:29:49.547005+00:00"
+},
+{
+"id": "2f42de6b-fffe-4344-adca-4f1b2a043bda",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2f42de6b-fffe-4344-adca-4f1b2a043bda/SUBDISTRICT",
+"sha256": "8409e637506be5b00fd258a6c966ee2b17431bfaf200cdd8751255d464aa8c15",
+"bytes": 32264,
+"retrievedAt": "2026-10-22T13:30:17.186193+00:00"
+},
+{
+"id": "2f47d5bb-25eb-42ab-becf-9242c97301a8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/2f47d5bb-25eb-42ab-becf-9242c97301a8/SUBDISTRICT",
+"sha256": "71e01bba40c322d27cb408cd2403bcf936e69e10092f44cae51d523a14ce3f83",
+"bytes": 15000,
+"retrievedAt": "2026-10-22T13:29:05.111775+00:00"
+},
+{
+"id": "3000874d-a12b-4fe6-971a-07716ff52a09",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3000874d-a12b-4fe6-971a-07716ff52a09/SUBDISTRICT",
+"sha256": "60f21bf02f7f96dcb10f1a2f01755c868756e7a644ad8fe4aa8a67debdac0081",
+"bytes": 8584,
+"retrievedAt": "2026-10-22T13:29:09.382018+00:00"
+},
+{
+"id": "300e7b82-b907-429d-8784-9fe1ce3161d1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/300e7b82-b907-429d-8784-9fe1ce3161d1/SUBDISTRICT",
+"sha256": "8e464fe984e4ebcd7dea45812035a25f92d81916c761178a099513e8838df529",
+"bytes": 21530,
+"retrievedAt": "2026-10-22T13:30:07.030436+00:00"
+},
+{
+"id": "3105b08e-109e-40d7-a873-d2a1d1fae0d7",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3105b08e-109e-40d7-a873-d2a1d1fae0d7/SUBDISTRICT",
+"sha256": "9a6b227bade53b59374480942848b133ebf023f70186f77a18fde6f036059b77",
+"bytes": 15406,
+"retrievedAt": "2026-10-22T13:29:21.900132+00:00"
+},
+{
+"id": "31a06712-9dfd-4f1e-b270-89c5d51a361f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/31a06712-9dfd-4f1e-b270-89c5d51a361f/SUBDISTRICT",
+"sha256": "199a8b85f40361ba6b7d5d40b3b4b1ce8babfd601dfe9151afa962af0fc66d3c",
+"bytes": 2807,
+"retrievedAt": "2026-10-22T13:29:59.807938+00:00"
+},
+{
+"id": "325ae65b-4de4-41c4-a977-c73dd69f5cfb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/325ae65b-4de4-41c4-a977-c73dd69f5cfb/SUBDISTRICT",
+"sha256": "e3991f76b652ad7dc5e4ae8b237c997a52038325eb7d65da6c94b187c98eaa65",
+"bytes": 33007,
+"retrievedAt": "2026-10-22T13:29:43.667531+00:00"
+},
+{
+"id": "32716ab7-aae6-4b38-a628-1ba3ba87c5d2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/32716ab7-aae6-4b38-a628-1ba3ba87c5d2/SUBDISTRICT",
+"sha256": "67b14396cde79eae9d39780352c7a7eefe25712f2e8d7d2aa15037cfe2c3754a",
+"bytes": 13957,
+"retrievedAt": "2026-10-22T13:29:54.946600+00:00"
+},
+{
+"id": "32a27702-2247-4518-829e-e41f69e45a17",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/32a27702-2247-4518-829e-e41f69e45a17/SUBDISTRICT",
+"sha256": "8ca853c43b23b0e0037c1a33e0d76ca4cc62b618558c1541c2bf7b400ac77c92",
+"bytes": 26927,
+"retrievedAt": "2026-10-22T13:29:23.929924+00:00"
+},
+{
+"id": "33a0cd1f-9b33-4741-8354-d67cb23d59fb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/33a0cd1f-9b33-4741-8354-d67cb23d59fb/SUBDISTRICT",
+"sha256": "a246beedb5c5dbf32148c4308019598082a7a126e3a0c5da9f34f54980fb0120",
+"bytes": 32534,
+"retrievedAt": "2026-10-22T13:29:43.645599+00:00"
+},
+{
+"id": "33b4a21e-580f-47fa-a792-4018809cb0a7",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/33b4a21e-580f-47fa-a792-4018809cb0a7/SUBDISTRICT",
+"sha256": "f2894622b350e035bb39c38a9c5d7bb8cea3af2c4f1ef0ca41bd06ba42ce520a",
+"bytes": 34809,
+"retrievedAt": "2026-10-22T13:30:02.254609+00:00"
+},
+{
+"id": "35175672-4160-4c12-a8b8-44283f8930f8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/35175672-4160-4c12-a8b8-44283f8930f8/SUBDISTRICT",
+"sha256": "69792e419c4173dfca1900a975a2bf34d919c249fc32521b94ef8ff30b991283",
+"bytes": 21754,
+"retrievedAt": "2026-10-22T13:30:16.581970+00:00"
+},
+{
+"id": "355c2662-f1c2-4586-9346-490203c90f0d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/355c2662-f1c2-4586-9346-490203c90f0d/SUBDISTRICT",
+"sha256": "2c3e096233b98b1bfd23fb9dd289a536e671bb32aa7f06be8c86f27c9ace39f7",
+"bytes": 9239,
+"retrievedAt": "2026-10-22T13:29:16.658938+00:00"
+},
+{
+"id": "35b0651e-f896-431f-8074-0fcf51ba2032",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/35b0651e-f896-431f-8074-0fcf51ba2032/SUBDISTRICT",
+"sha256": "637c03a81feb3f3c3530acf2645e5c8813954eba28be17376823391cb14ffc8e",
+"bytes": 13445,
+"retrievedAt": "2026-10-22T13:29:04.504062+00:00"
+},
+{
+"id": "35c70bc0-78a7-49fc-b6fe-c8175415102f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/35c70bc0-78a7-49fc-b6fe-c8175415102f/SUBDISTRICT",
+"sha256": "2d50a56485f301d153bb50404778c6e357c2579980297e7b67d412b085e81943",
+"bytes": 1975,
+"retrievedAt": "2026-10-22T13:29:40.798146+00:00"
+},
+{
+"id": "35f6c2bd-617c-4b9b-84e6-b4d07926ad7a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/35f6c2bd-617c-4b9b-84e6-b4d07926ad7a/SUBDISTRICT",
+"sha256": "08b04542946301b13320f8499500a7eae55afd94e8feb4c3d53b6212b0863f6a",
+"bytes": 3405,
+"retrievedAt": "2026-10-22T13:29:49.975230+00:00"
+},
+{
+"id": "37aef8fe-3364-4936-a01c-f8a34223ed52",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/37aef8fe-3364-4936-a01c-f8a34223ed52/SUBDISTRICT",
+"sha256": "b6d5f6dc6f04c24732e37ce2f85519972443e46654520df36dd46dd079478600",
+"bytes": 19003,
+"retrievedAt": "2026-10-22T13:29:11.078267+00:00"
+},
+{
+"id": "3820a23f-77a7-4820-96e3-01227d26b5f2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3820a23f-77a7-4820-96e3-01227d26b5f2/SUBDISTRICT",
+"sha256": "c0f4d9c5d0fd41b09f60a990507639c9ee8f76174cfe8276f03a3a249097c353",
+"bytes": 16434,
+"retrievedAt": "2026-10-22T13:29:05.112711+00:00"
+},
+{
+"id": "3849fead-c33a-42ea-87e9-ad3629ec610e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3849fead-c33a-42ea-87e9-ad3629ec610e/SUBDISTRICT",
+"sha256": "5366cdf4d506999b82141e718b1722db249e8dc7cc8ad723f9d7cbef9163a2b2",
+"bytes": 18324,
+"retrievedAt": "2026-10-22T13:30:02.790621+00:00"
+},
+{
+"id": "38770952-0eec-4ee7-bb34-d53a5acad23e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/38770952-0eec-4ee7-bb34-d53a5acad23e/SUBDISTRICT",
+"sha256": "e545cbaffd968e766cef9f791dba081a080ed949c76fd60b8b428d7a9591f6ea",
+"bytes": 7426,
+"retrievedAt": "2026-10-22T13:29:50.341860+00:00"
+},
+{
+"id": "390fd7cd-8327-4a3b-be01-ddfe82c886e4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/390fd7cd-8327-4a3b-be01-ddfe82c886e4/SUBDISTRICT",
+"sha256": "5cee1ea403885f82d1edfe329f49580db28770905b752836a7b70570d1dc3b3e",
+"bytes": 8974,
+"retrievedAt": "2026-10-22T13:29:56.252831+00:00"
+},
+{
+"id": "3a0bb1f5-9b98-4cce-8911-2376dab670ef",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3a0bb1f5-9b98-4cce-8911-2376dab670ef/SUBDISTRICT",
+"sha256": "6501f8f2a2fc06e9e8f3ffaad14d6d1c90297b7b3fc145d30638621441a569d2",
+"bytes": 19534,
+"retrievedAt": "2026-10-22T13:29:55.413786+00:00"
+},
+{
+"id": "3a664c1e-77eb-4677-865c-a7ea5e88ba08",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3a664c1e-77eb-4677-865c-a7ea5e88ba08/SUBDISTRICT",
+"sha256": "25bb605c627c567b0ceb6277b273df9d2b3b26b6b9da649f6f09060439318259",
+"bytes": 64441,
+"retrievedAt": "2026-10-22T13:29:17.095935+00:00"
+},
+{
+"id": "3af42d2e-84eb-4108-b83b-ba1c459f9204",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3af42d2e-84eb-4108-b83b-ba1c459f9204/SUBDISTRICT",
+"sha256": "419a5624f027afafd0167b9b00b4ecccf104223ef6696d9549a8341cde9dfe56",
+"bytes": 3307,
+"retrievedAt": "2026-10-22T13:29:51.026296+00:00"
+},
+{
+"id": "3bde265c-e3b9-47a9-953b-45fec11bff91",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3bde265c-e3b9-47a9-953b-45fec11bff91/SUBDISTRICT",
+"sha256": "deaf4137184e856bdd0b33d3aeff6840d5afb83c3d55ccb314d0c9ba438a021c",
+"bytes": 8246,
+"retrievedAt": "2026-10-22T13:29:54.312173+00:00"
+},
+{
+"id": "3c0a467b-7a43-4698-ba02-14d09ba4d5e1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3c0a467b-7a43-4698-ba02-14d09ba4d5e1/SUBDISTRICT",
+"sha256": "55e0b18c39564da6c967979b1f691047bedbb68b1bda05d8d88850cfe41e9f3f",
+"bytes": 23052,
+"retrievedAt": "2026-10-22T13:30:10.209772+00:00"
+},
+{
+"id": "3c9fabcc-4c70-409d-94d7-155682edc6c1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3c9fabcc-4c70-409d-94d7-155682edc6c1/SUBDISTRICT",
+"sha256": "f100310d0a81ff662d684b377b306d823f778f9db461b920e305a0d23b7e5390",
+"bytes": 11478,
+"retrievedAt": "2026-10-22T13:30:06.552829+00:00"
+},
+{
+"id": "3d2f0bd7-e394-43e6-9f7a-2eb293dd1542",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3d2f0bd7-e394-43e6-9f7a-2eb293dd1542/SUBDISTRICT",
+"sha256": "126e4a3837967cfefdeb6567aaf547f7d93218ac10699263c3a5b54c823a948f",
+"bytes": 7271,
+"retrievedAt": "2026-10-22T13:29:49.083099+00:00"
+},
+{
+"id": "3de4a63f-b4bf-42d9-9def-87f67abd610d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3de4a63f-b4bf-42d9-9def-87f67abd610d/SUBDISTRICT",
+"sha256": "fdf87da095140615ada183698a2608285afda8fe1e052f0148ac92d243ba7343",
+"bytes": 13998,
+"retrievedAt": "2026-10-22T13:29:52.303566+00:00"
+},
+{
+"id": "3e1c3bb9-99a5-42b3-9621-efe2a393bdb6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3e1c3bb9-99a5-42b3-9621-efe2a393bdb6/SUBDISTRICT",
+"sha256": "12b5074b448d76e9ed815634faa269795138c2a3fc11012d74e4880507f562c0",
+"bytes": 4170,
+"retrievedAt": "2026-10-22T13:29:27.832886+00:00"
+},
+{
+"id": "3ea0033e-56b0-425a-87e4-06b537c3d280",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3ea0033e-56b0-425a-87e4-06b537c3d280/SUBDISTRICT",
+"sha256": "8f1b0266b2b7f40af5791f3c833280d72905a2e5d4e04f36655d7b42c8f71a51",
+"bytes": 26951,
+"retrievedAt": "2026-10-22T13:30:14.363320+00:00"
+},
+{
+"id": "3ea6f644-be66-4853-9465-9e143f198f9e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3ea6f644-be66-4853-9465-9e143f198f9e/SUBDISTRICT",
+"sha256": "9afcc0aca9fd1e9c7e3043d82d6f5a5cd648348ab919c24222ae2e563b388bcb",
+"bytes": 10345,
+"retrievedAt": "2026-10-22T13:29:45.889023+00:00"
+},
+{
+"id": "3f37883d-1d23-495c-b4ff-90467e307351",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3f37883d-1d23-495c-b4ff-90467e307351/SUBDISTRICT",
+"sha256": "6437b0ff21c987e22191b943c106cc9fe2da3241e81252ad904087052a385227",
+"bytes": 8921,
+"retrievedAt": "2026-10-22T13:29:49.106848+00:00"
+},
+{
+"id": "40087192-5bd0-41ea-a9da-cdc68d4f1b0d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/40087192-5bd0-41ea-a9da-cdc68d4f1b0d/SUBDISTRICT",
+"sha256": "5fb6c3da04bb3f016f0f50cb5eaedc8add87ff97417d61d9b69eb0049607281c",
+"bytes": 1321,
+"retrievedAt": "2026-10-22T13:29:44.072200+00:00"
+},
+{
+"id": "402eba88-ca9a-44bd-ac38-163c88aa217f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/402eba88-ca9a-44bd-ac38-163c88aa217f/SUBDISTRICT",
+"sha256": "3f84039cac6953204c4ccaef89c7e7ea20f3ab9e17c008655c5313e1e88bc3bf",
+"bytes": 18272,
+"retrievedAt": "2026-10-22T13:30:12.620894+00:00"
+},
+{
+"id": "406bcf1d-ca0b-438e-babe-da567afca017",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/406bcf1d-ca0b-438e-babe-da567afca017/SUBDISTRICT",
+"sha256": "d8f56f490fce7815c9b4acbbd7e739a685f01773233aee30041c5a32b84c9cbb",
+"bytes": 15932,
+"retrievedAt": "2026-10-22T13:29:04.253266+00:00"
+},
+{
+"id": "40b669ee-dee1-4819-817a-c56dd5143139",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/40b669ee-dee1-4819-817a-c56dd5143139/SUBDISTRICT",
+"sha256": "bde866a9cd3c4ee42d93aab9e4448958a6cf7674d41c9c2257fe1fed2e12fcd3",
+"bytes": 22957,
+"retrievedAt": "2026-10-22T13:29:10.662897+00:00"
+},
+{
+"id": "40ba121b-1980-4a68-8bb6-9849b62291a0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/40ba121b-1980-4a68-8bb6-9849b62291a0/SUBDISTRICT",
+"sha256": "87e448eee87478c57a16ed3948e85b23e29275d8d607121eb3bf135e645c7415",
+"bytes": 25278,
+"retrievedAt": "2026-10-22T13:29:15.889040+00:00"
+},
+{
+"id": "40c4652f-9fe7-411d-bf0c-4dc16be8a6d0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/40c4652f-9fe7-411d-bf0c-4dc16be8a6d0/SUBDISTRICT",
+"sha256": "e39abec8585cefb50e12aa5657fba1ccc35ddb9ee57dc3d9e45fd5cc55142c47",
+"bytes": 3318,
+"retrievedAt": "2026-10-22T13:29:39.403823+00:00"
+},
+{
+"id": "40f9eed4-7efd-4c5e-a2ff-bd9f9d01a683",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/40f9eed4-7efd-4c5e-a2ff-bd9f9d01a683/SUBDISTRICT",
+"sha256": "c0abfef13140fd875635217817aebef2a876be55125576606497a409d90169e4",
+"bytes": 35001,
+"retrievedAt": "2026-10-22T13:30:17.148140+00:00"
+},
+{
+"id": "427f4362-2fce-4be6-a1e5-564d61c0b304",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/427f4362-2fce-4be6-a1e5-564d61c0b304/SUBDISTRICT",
+"sha256": "883fc596c2e8ab08ecf84716fd939bf56b9b01d59cf85afa17829a3aaa23a479",
+"bytes": 35594,
+"retrievedAt": "2026-10-22T13:29:06.368172+00:00"
+},
+{
+"id": "428d250b-e4c3-44a2-bd01-79977c36114d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/428d250b-e4c3-44a2-bd01-79977c36114d/SUBDISTRICT",
+"sha256": "a0c819272914032aa7046a24e202df0a092cedbd57cfa258144d94e033f864d3",
+"bytes": 6435,
+"retrievedAt": "2026-10-22T13:29:08.927626+00:00"
+},
+{
+"id": "42abbbad-f473-43a2-ab9d-f8ac0b83f34b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/42abbbad-f473-43a2-ab9d-f8ac0b83f34b/SUBDISTRICT",
+"sha256": "678d332fd0792e9c2e1dff4b690dca9a3d998da8872c05d12e25c465a7b106ff",
+"bytes": 11491,
+"retrievedAt": "2026-10-22T13:30:00.026891+00:00"
+},
+{
+"id": "431262f3-22db-4c28-b60d-59fb5eb48307",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/431262f3-22db-4c28-b60d-59fb5eb48307/SUBDISTRICT",
+"sha256": "dcba98df5d67fcb6ed9d3d9370829fc251658e641280431a6d211a43384ff18d",
+"bytes": 15379,
+"retrievedAt": "2026-10-22T13:29:23.079884+00:00"
+},
+{
+"id": "43205f96-606a-428e-826a-e84b8d3c67f8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/43205f96-606a-428e-826a-e84b8d3c67f8/SUBDISTRICT",
+"sha256": "ef88ea99ad6c22cf08b8aa980519c9417d307fbe8e3b48acea73f076b2423497",
+"bytes": 32768,
+"retrievedAt": "2026-10-22T13:29:04.633940+00:00"
+},
+{
+"id": "435dea09-b9d8-4abe-9722-1d5541a5128a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/435dea09-b9d8-4abe-9722-1d5541a5128a/SUBDISTRICT",
+"sha256": "7d8f15ea17259965e9b0514dcccfd650334d0f60a1d93aa6d34c0875578f6d29",
+"bytes": 2175,
+"retrievedAt": "2026-10-22T13:29:41.252113+00:00"
+},
+{
+"id": "4423ef07-2a0e-462d-bc75-c24306dc44e0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4423ef07-2a0e-462d-bc75-c24306dc44e0/SUBDISTRICT",
+"sha256": "e668bb78decbc9a0d5e757dca2d7d16aa20743147664afb23149c15fad00d4d3",
+"bytes": 17062,
+"retrievedAt": "2026-10-22T13:29:53.514414+00:00"
+},
+{
+"id": "44702fa4-eb7d-4b89-be2c-6e19e69d8eed",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/44702fa4-eb7d-4b89-be2c-6e19e69d8eed/SUBDISTRICT",
+"sha256": "d8fdc80e06f8c8d4e2538fa7246b92a34755851ee1689c1a542f9658a5347792",
+"bytes": 2237,
+"retrievedAt": "2026-10-22T13:30:08.968267+00:00"
+},
+{
+"id": "44c8d185-3ebf-4a80-beda-1cf951766150",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/44c8d185-3ebf-4a80-beda-1cf951766150/SUBDISTRICT",
+"sha256": "c44b2541c05f689fe628a55ca5450feca03fa7922c68a87f211c8edaf355af60",
+"bytes": 3249,
+"retrievedAt": "2026-10-22T13:29:54.080131+00:00"
+},
+{
+"id": "452ea64d-dd54-42be-93da-f819f6b5b7ed",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/452ea64d-dd54-42be-93da-f819f6b5b7ed/SUBDISTRICT",
+"sha256": "103305561deb587c84d0a630682987bd1b07a19eb02038eb36c2c2be347a3c1f",
+"bytes": 3367,
+"retrievedAt": "2026-10-22T13:29:47.934410+00:00"
+},
+{
+"id": "4542fdd7-eba2-4af9-b1bc-3d82fcff3182",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4542fdd7-eba2-4af9-b1bc-3d82fcff3182/SUBDISTRICT",
+"sha256": "7c0050634f5589fe440a03f4e7f6e2253d77845c3870be0b5ab17ae66a1fba9d",
+"bytes": 10432,
+"retrievedAt": "2026-10-22T13:29:46.359599+00:00"
+},
+{
+"id": "4561def7-a81b-4272-aaba-75cca5e93890",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4561def7-a81b-4272-aaba-75cca5e93890/SUBDISTRICT",
+"sha256": "f52315b528e17b794374e4d195e05b24629bc2a1de72fbf687aec86a56dc982a",
+"bytes": 920,
+"retrievedAt": "2026-10-22T13:29:38.252419+00:00"
+},
+{
+"id": "45b66150-079b-434d-a980-e5ce0ac05d5d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/45b66150-079b-434d-a980-e5ce0ac05d5d/SUBDISTRICT",
+"sha256": "0125f3f9a812eb0fc9bc7be8bf106334a5111415eedc92bf89c930cfb03a2bbd",
+"bytes": 10379,
+"retrievedAt": "2026-10-22T13:29:31.446846+00:00"
+},
+{
+"id": "45bface6-95ea-4bc6-afb9-dc30fefb5ec2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/45bface6-95ea-4bc6-afb9-dc30fefb5ec2/SUBDISTRICT",
+"sha256": "ce2a955e144cfe129dce7b32e6aad904c4e9ae36a6157d3f48ab1271541e0574",
+"bytes": 23885,
+"retrievedAt": "2026-10-22T13:29:47.533257+00:00"
+},
+{
+"id": "45fc61de-35f5-4b97-9ecc-a9b8ff4fd199",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/45fc61de-35f5-4b97-9ecc-a9b8ff4fd199/SUBDISTRICT",
+"sha256": "b9a23c80f38db622009d2f1b2637cac9f2bb6bcb208a949f648e610a4a5bdb08",
+"bytes": 6494,
+"retrievedAt": "2026-10-22T13:29:55.180149+00:00"
+},
+{
+"id": "46faddff-fe28-4f7e-8053-bc42e3066b39",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/46faddff-fe28-4f7e-8053-bc42e3066b39/SUBDISTRICT",
+"sha256": "a2ddf5c7df5b8ee6782c309844c002414f62e19eace0ad3c2413af0f5e7993bf",
+"bytes": 16503,
+"retrievedAt": "2026-10-22T13:30:01.650210+00:00"
+},
+{
+"id": "47bd0eda-dda1-48be-86c1-a5d65f930e75",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/47bd0eda-dda1-48be-86c1-a5d65f930e75/SUBDISTRICT",
+"sha256": "7897c9f286eb72c46f2dac858ae13ac814e5db607223eb05dd063625882df8c1",
+"bytes": 10459,
+"retrievedAt": "2026-10-22T13:29:47.449047+00:00"
+},
+{
+"id": "47c0e50c-7ca8-478d-afcb-6d874e7ebc9b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/47c0e50c-7ca8-478d-afcb-6d874e7ebc9b/SUBDISTRICT",
+"sha256": "08aeb619c4ea856bebee2a61086bee71e4214a20c95081ab9c6e3fc415d2278e",
+"bytes": 19832,
+"retrievedAt": "2026-10-22T13:29:43.721144+00:00"
+},
+{
+"id": "47e3d656-f632-4430-8ce1-108be2e1cb7d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/47e3d656-f632-4430-8ce1-108be2e1cb7d/SUBDISTRICT",
+"sha256": "5b6b9ece8ce0d2eadabc5a143f48305b654d912e8398f17d16dc7f0a8a9d29d0",
+"bytes": 1742,
+"retrievedAt": "2026-10-22T13:29:19.727438+00:00"
+},
+{
+"id": "47edc41f-5e19-4e44-a1d9-a8b82cd383e5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/47edc41f-5e19-4e44-a1d9-a8b82cd383e5/SUBDISTRICT",
+"sha256": "2c827782427ca87dbc4b8ee7dede6e519caafa85eb9c508935d9fd443c51c9db",
+"bytes": 43095,
+"retrievedAt": "2026-10-22T13:30:16.907300+00:00"
+},
+{
+"id": "4811b86a-bc96-4d8c-b262-96957d310cdc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4811b86a-bc96-4d8c-b262-96957d310cdc/SUBDISTRICT",
+"sha256": "366868617e80dd31ea80d953f7323414970113fca28c8e90c60eb31173c4429a",
+"bytes": 942,
+"retrievedAt": "2026-10-22T13:29:38.477056+00:00"
+},
+{
+"id": "4814c9e3-872b-4572-b3e6-5fe88e241553",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4814c9e3-872b-4572-b3e6-5fe88e241553/SUBDISTRICT",
+"sha256": "dd8ce0372129c5f2501e0ad3d5805575aee0c989c694c686b55dd754d752c5b6",
+"bytes": 54658,
+"retrievedAt": "2026-10-22T13:30:04.403832+00:00"
+},
+{
+"id": "48f25bc4-d531-4427-8e15-80ddb8591cc5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/48f25bc4-d531-4427-8e15-80ddb8591cc5/SUBDISTRICT",
+"sha256": "57f791992d52c77aa6e2e129e5dc7fe3224c6d60c5714860b185891393a7134e",
+"bytes": 11896,
+"retrievedAt": "2026-10-22T13:29:31.577516+00:00"
+},
+{
+"id": "49020b63-beed-4e17-86ab-0fe4e65ad147",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/49020b63-beed-4e17-86ab-0fe4e65ad147/SUBDISTRICT",
+"sha256": "4523ea1df4f7fb1d12350dbc2787be32d7478c80754aeafa802d0f8e1d956d82",
+"bytes": 6803,
+"retrievedAt": "2026-10-22T13:29:48.278793+00:00"
+},
+{
+"id": "4902f56c-1b1f-4366-b828-69ae560be50f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4902f56c-1b1f-4366-b828-69ae560be50f/SUBDISTRICT",
+"sha256": "3e569babb8a81c87d7554feb614d3eee372c5f165d34a9033ed1dd32e40eff38",
+"bytes": 7014,
+"retrievedAt": "2026-10-22T13:29:50.621568+00:00"
+},
+{
+"id": "4910f78f-05de-45a3-82c3-ef073c1394cd",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4910f78f-05de-45a3-82c3-ef073c1394cd/SUBDISTRICT",
+"sha256": "7a1e46e460da7fad276e6cf91ca8fb5feebef047dc2cd157f3ca3ad1b3fd7786",
+"bytes": 32243,
+"retrievedAt": "2026-10-22T13:30:18.601396+00:00"
+},
+{
+"id": "49cfbf86-09ec-4ad5-88cd-5ea5affa52ab",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/49cfbf86-09ec-4ad5-88cd-5ea5affa52ab/SUBDISTRICT",
+"sha256": "473df67ab8f18223f7a468d41a128a8bda552acfbcd627b97d64d82dbdd9c64f",
+"bytes": 51895,
+"retrievedAt": "2026-10-22T13:30:00.887786+00:00"
+},
+{
+"id": "49edad09-e8e8-4e52-bfc4-d41862f940c5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/49edad09-e8e8-4e52-bfc4-d41862f940c5/SUBDISTRICT",
+"sha256": "a52a081d5623f947c6e140e6bf8bec4dd7c23d92869118ada0742e3c23e13f9a",
+"bytes": 1142,
+"retrievedAt": "2026-10-22T13:29:42.373846+00:00"
+},
+{
+"id": "4a05bf3e-9b26-485a-993b-96fc87ad5487",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4a05bf3e-9b26-485a-993b-96fc87ad5487/SUBDISTRICT",
+"sha256": "89114f66851f427909dda82f4b018d5b8bd08e5a09126f88df2e9a4d9fb88bae",
+"bytes": 13987,
+"retrievedAt": "2026-10-22T13:30:03.542289+00:00"
+},
+{
+"id": "4a0a2c5b-0aed-418e-9937-b81f99e08583",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4a0a2c5b-0aed-418e-9937-b81f99e08583/SUBDISTRICT",
+"sha256": "f291f3ff52381456504132ebd60883a4b241aae237d619a9261810577376632f",
+"bytes": 49169,
+"retrievedAt": "2026-10-22T13:30:02.065885+00:00"
+},
+{
+"id": "4a5124ab-a045-48cb-a149-b4c2a2b027a5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4a5124ab-a045-48cb-a149-b4c2a2b027a5/SUBDISTRICT",
+"sha256": "baa4a75a7f8af5b9a6021fd2e0d3562af047fa6ccdf13280648ca695971997ed",
+"bytes": 18709,
+"retrievedAt": "2026-10-22T13:29:42.804389+00:00"
+},
+{
+"id": "4a569d96-119c-4aab-939e-a1a0df909a7e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4a569d96-119c-4aab-939e-a1a0df909a7e/SUBDISTRICT",
+"sha256": "b5c5d39e9ca44ce16f9ed58fdb9fcc8ed5d752e032c3baac985f80d9663a88c1",
+"bytes": 5852,
+"retrievedAt": "2026-10-22T13:29:07.552577+00:00"
+},
+{
+"id": "4a80d54c-28c2-42fb-a271-a21b1ffb3161",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4a80d54c-28c2-42fb-a271-a21b1ffb3161/SUBDISTRICT",
+"sha256": "153ea41ce95112ee871d84d0b8a95aa74f14df0c4c91b1329d1273c47534cd22",
+"bytes": 2561,
+"retrievedAt": "2026-10-22T13:30:16.726462+00:00"
+},
+{
+"id": "4b7e1ad5-8ecc-460e-9fe9-64e0a8f2568d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4b7e1ad5-8ecc-460e-9fe9-64e0a8f2568d/SUBDISTRICT",
+"sha256": "e6a292e17c9d2f0979a91b30d905cdc3caeb734c97dbcb00756c0c6d3363ebb2",
+"bytes": 19450,
+"retrievedAt": "2026-10-22T13:30:14.543172+00:00"
+},
+{
+"id": "4c09ccd1-405e-4fcb-8fd7-3dcde1649aac",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4c09ccd1-405e-4fcb-8fd7-3dcde1649aac/SUBDISTRICT",
+"sha256": "277b7548c6df75f98c9fb512abd986018c49ddeb860d25ef061b03baa6a8df62",
+"bytes": 27176,
+"retrievedAt": "2026-10-22T13:30:05.087135+00:00"
+},
+{
+"id": "4cf3238d-e3c2-485f-9d88-456cbf99542c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4cf3238d-e3c2-485f-9d88-456cbf99542c/SUBDISTRICT",
+"sha256": "8e879fe429e072181d2dc7835f775c3b7b7a68af27cdc67595f23bc4106fd4bd",
+"bytes": 120044,
+"retrievedAt": "2026-10-22T13:29:12.990511+00:00"
+},
+{
+"id": "4cf483fe-c2d0-442a-8546-2c60a126c1f0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4cf483fe-c2d0-442a-8546-2c60a126c1f0/SUBDISTRICT",
+"sha256": "cf15c4acd7a4eefe22a6a75edb4af6076d2324b81699fa6f0668840ad80feb72",
+"bytes": 6790,
+"retrievedAt": "2026-10-22T13:29:45.324589+00:00"
+},
+{
+"id": "4d153f83-cd62-445a-a4be-a4e54751ff21",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4d153f83-cd62-445a-a4be-a4e54751ff21/SUBDISTRICT",
+"sha256": "75f7a0f88506e7649de7c913044af34648bf3970eecf50b026b5044dff3d51a9",
+"bytes": 19389,
+"retrievedAt": "2026-10-22T13:29:28.971473+00:00"
+},
+{
+"id": "4e1e835f-bf10-4872-84b9-42624faf8029",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4e1e835f-bf10-4872-84b9-42624faf8029/SUBDISTRICT",
+"sha256": "309a309e3462c69a376243e1ffbc04a605d1b7c1f6bb3ad12732da02bdff866c",
+"bytes": 24438,
+"retrievedAt": "2026-10-22T13:29:55.814396+00:00"
+},
+{
+"id": "4eaf7fa5-4310-4bc7-b023-3614bfdf1364",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4eaf7fa5-4310-4bc7-b023-3614bfdf1364/SUBDISTRICT",
+"sha256": "fd0ca889cedbdfb27c342325bcd2768254dc1b1d278a614328cfbae57218868d",
+"bytes": 5777,
+"retrievedAt": "2026-10-22T13:29:19.321289+00:00"
+},
+{
+"id": "4f287916-06c9-40be-be1a-f9d378da4b8a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4f287916-06c9-40be-be1a-f9d378da4b8a/SUBDISTRICT",
+"sha256": "c2df594f80c1b025f146bd98966d2fcfcf2d8a48f9c873792e8f1891dec13884",
+"bytes": 15676,
+"retrievedAt": "2026-10-22T13:30:14.417348+00:00"
+},
+{
+"id": "4f759834-344f-41c1-962e-9817225e48f6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4f759834-344f-41c1-962e-9817225e48f6/SUBDISTRICT",
+"sha256": "1d75cacc8b3b50cbd5928ee996d883b2d9cc4df961881dd6014d9a3363332ac8",
+"bytes": 5882,
+"retrievedAt": "2026-10-22T13:29:49.943719+00:00"
+},
+{
+"id": "4fcd97e6-188a-498c-94b4-6df37febdd69",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4fcd97e6-188a-498c-94b4-6df37febdd69/SUBDISTRICT",
+"sha256": "f52b998deb24a68ca82243ca8eaecb7a22dc879531a95f53161b72cab1c02d78",
+"bytes": 9956,
+"retrievedAt": "2026-10-22T13:29:48.927752+00:00"
+},
+{
+"id": "5019531d-ca64-4f99-b688-660cf412c5d3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5019531d-ca64-4f99-b688-660cf412c5d3/SUBDISTRICT",
+"sha256": "afeff43e71995f10dedc50c8c031ca7c23618bab1d8ec9e7b93bc12aae32546e",
+"bytes": 21132,
+"retrievedAt": "2026-10-22T13:29:28.135994+00:00"
+},
+{
+"id": "50504338-63a8-40d5-8f28-13c81e6f440e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/50504338-63a8-40d5-8f28-13c81e6f440e/SUBDISTRICT",
+"sha256": "80cece534a523621ff40123a0f138c778caead788dc528077f3147d64398046e",
+"bytes": 6089,
+"retrievedAt": "2026-10-22T13:29:17.924845+00:00"
+},
+{
+"id": "5062e252-a7fd-452c-859b-141d064ef90a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5062e252-a7fd-452c-859b-141d064ef90a/SUBDISTRICT",
+"sha256": "64f2e03f538c670a88f220eb1bcbdb58ecf6cd0e8c713994df5efb782e5dca83",
+"bytes": 21263,
+"retrievedAt": "2026-10-22T13:29:10.179300+00:00"
+},
+{
+"id": "5115dbb3-44b5-4fa0-a182-4ba584968efb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5115dbb3-44b5-4fa0-a182-4ba584968efb/SUBDISTRICT",
+"sha256": "f21b8443d4d9d8d435ebeb9b51f45bd8a13bfd2e81b9d1c5c2525f59a7917b9c",
+"bytes": 33868,
+"retrievedAt": "2026-10-22T13:29:16.066518+00:00"
+},
+{
+"id": "514be1e4-996a-4db3-b5b7-dae7007bc80f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/514be1e4-996a-4db3-b5b7-dae7007bc80f/SUBDISTRICT",
+"sha256": "c7a43a9bcdaf3eff7f88976f09358bc40b6a0de34cce69852202e7a53caf453f",
+"bytes": 12666,
+"retrievedAt": "2026-10-22T13:30:07.917170+00:00"
+},
+{
+"id": "52322eed-f618-4cb3-93ac-ab1dd3f4bb99",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/52322eed-f618-4cb3-93ac-ab1dd3f4bb99/SUBDISTRICT",
+"sha256": "c448a2c7f8cda5a1539d8fbdb9b371f7b26cbcfedca9e5d281f01184dd5c5860",
+"bytes": 1688,
+"retrievedAt": "2026-10-22T13:29:42.621178+00:00"
+},
+{
+"id": "52759f56-0f99-4bec-8b8d-0b7f52fe3487",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/52759f56-0f99-4bec-8b8d-0b7f52fe3487/SUBDISTRICT",
+"sha256": "d14902f1a04bfad22806658d56d580dea9ec6bf6f7da4c56ae6a0ce235a276ba",
+"bytes": 19563,
+"retrievedAt": "2026-10-22T13:29:09.632057+00:00"
+},
+{
+"id": "52a9505d-c0d5-4f60-bf56-b437ed640eef",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/52a9505d-c0d5-4f60-bf56-b437ed640eef/SUBDISTRICT",
+"sha256": "7a68e18b2f1aa88ee1d2c6e730eb516b5113c122d507ca3b8e33e884ad8169e7",
+"bytes": 57353,
+"retrievedAt": "2026-10-22T13:29:16.890464+00:00"
+},
+{
+"id": "52abcab3-9fe8-4a88-8612-acf05d205835",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/52abcab3-9fe8-4a88-8612-acf05d205835/SUBDISTRICT",
+"sha256": "0c068943a8c0d3b9594e31a96dba848669a7b7a3c388253cfe38bce816f3420d",
+"bytes": 13711,
+"retrievedAt": "2026-10-22T13:29:19.087512+00:00"
+},
+{
+"id": "530f1e16-a0b2-4dea-94de-e71b54760b03",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/530f1e16-a0b2-4dea-94de-e71b54760b03/SUBDISTRICT",
+"sha256": "014b0cd802a7967dfe2b098e353b9b706c4c70c58092707d188d42d2b2208d95",
+"bytes": 4252,
+"retrievedAt": "2026-10-22T13:29:47.916117+00:00"
+},
+{
+"id": "53454cfb-bc93-4f1b-8fc5-725aa30704a5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/53454cfb-bc93-4f1b-8fc5-725aa30704a5/SUBDISTRICT",
+"sha256": "c523b6a231926af14d1bf5f1cd6ef9f972665d825dc8eeca17b85b0fb1e0c3d0",
+"bytes": 35241,
+"retrievedAt": "2026-10-22T13:29:16.217295+00:00"
+},
+{
+"id": "534da68a-1bfe-43d2-9f7f-fbfafdf054d1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/534da68a-1bfe-43d2-9f7f-fbfafdf054d1/SUBDISTRICT",
+"sha256": "33f4a47c419456cd13e7a7a029ccd3986ff0af89457a48700deb2dc4f2fa0828",
+"bytes": 7360,
+"retrievedAt": "2026-10-22T13:29:21.052959+00:00"
+},
+{
+"id": "538415e8-32bb-4b71-a53a-adc3f0c0e282",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/538415e8-32bb-4b71-a53a-adc3f0c0e282/SUBDISTRICT",
+"sha256": "278ac89d796d35eeace765f31529f724551b4934e8cae1df158b5900b1b65786",
+"bytes": 66959,
+"retrievedAt": "2026-10-22T13:30:19.438592+00:00"
+},
+{
+"id": "54309860-54a9-46b9-9e18-161721376015",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/54309860-54a9-46b9-9e18-161721376015/SUBDISTRICT",
+"sha256": "132bbb7fabc08bade54b2797a348e9153d16723cd74959f5d5a9102cface60d4",
+"bytes": 29663,
+"retrievedAt": "2026-10-22T13:29:47.482872+00:00"
+},
+{
+"id": "54897137-37ab-4f5d-af34-e9be5e510391",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/54897137-37ab-4f5d-af34-e9be5e510391/SUBDISTRICT",
+"sha256": "e80b424af8c50e694b2a83ca9f381313c20db6b11452ad5b7020f86a0d9ac136",
+"bytes": 34579,
+"retrievedAt": "2026-10-22T13:30:10.060973+00:00"
+},
+{
+"id": "54b8da04-4ace-4551-b4d3-1a7ee113e7ee",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/54b8da04-4ace-4551-b4d3-1a7ee113e7ee/SUBDISTRICT",
+"sha256": "cc9bb5ace0e8f7571438e2aa88d1c49490693f422867c5b607b8ac303078b588",
+"bytes": 2911,
+"retrievedAt": "2026-10-22T13:30:17.046343+00:00"
+},
+{
+"id": "5506bffc-267c-40a3-ba8c-c7600eef99ab",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5506bffc-267c-40a3-ba8c-c7600eef99ab/SUBDISTRICT",
+"sha256": "1ddc479ff3689c1022d80e55ba14b4629a81fc5450529926df4e8a9a11861602",
+"bytes": 10258,
+"retrievedAt": "2026-10-22T13:29:29.916010+00:00"
+},
+{
+"id": "55212695-d80f-40bd-afcf-27c12142c009",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/55212695-d80f-40bd-afcf-27c12142c009/SUBDISTRICT",
+"sha256": "a6f270da3385ec28169844a094ed072771fa0719caca7048b4339923fe750b24",
+"bytes": 21149,
+"retrievedAt": "2026-10-22T13:29:21.283293+00:00"
+},
+{
+"id": "562670c0-c261-4ec5-98b6-3ec0dd8380d6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/562670c0-c261-4ec5-98b6-3ec0dd8380d6/SUBDISTRICT",
+"sha256": "72be277490173f139a8dcf6833e00aa44b0433d0aacda142323400c216f1f85b",
+"bytes": 11349,
+"retrievedAt": "2026-10-22T13:29:11.033446+00:00"
+},
+{
+"id": "56583933-3953-42eb-a48f-c12c018f8ff4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/56583933-3953-42eb-a48f-c12c018f8ff4/SUBDISTRICT",
+"sha256": "fec213591a36f398fbf4aec156127dc8392f1c8daef0ebac61f2ab38f8948390",
+"bytes": 8258,
+"retrievedAt": "2026-10-22T13:29:07.184527+00:00"
+},
+{
+"id": "56743712-18a7-4096-be98-caf2f68189d4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/56743712-18a7-4096-be98-caf2f68189d4/SUBDISTRICT",
+"sha256": "6b7344e36dfec2befc0ef5e2f07b14da631353d914a7352859f6d0e759aca4fd",
+"bytes": 8848,
+"retrievedAt": "2026-10-22T13:30:06.854632+00:00"
+},
+{
+"id": "58f9d1e4-1ccc-407e-b6fa-6288ff1319f9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/58f9d1e4-1ccc-407e-b6fa-6288ff1319f9/SUBDISTRICT",
+"sha256": "39cd025cb88922f1872110b7232028cfb82644d3030fab26361ff823a1399d85",
+"bytes": 13957,
+"retrievedAt": "2026-10-22T13:29:54.458153+00:00"
+},
+{
+"id": "592e5dac-9599-45f3-9fbc-39057d5c24ed",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/592e5dac-9599-45f3-9fbc-39057d5c24ed/SUBDISTRICT",
+"sha256": "85c10f0e7f16068e3c37e4e9bb8b7d28b998f6a1d8d3bd3b6fab72897dbc60a8",
+"bytes": 21739,
+"retrievedAt": "2026-10-22T13:29:05.175979+00:00"
+},
+{
+"id": "5936289f-c8c1-4edd-81e7-2502ad730b54",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5936289f-c8c1-4edd-81e7-2502ad730b54/SUBDISTRICT",
+"sha256": "28e7d1c776afd49e7e6f539eca48cf69a336fbffc22d1c44c23ef7ca3f18fdf7",
+"bytes": 1651,
+"retrievedAt": "2026-10-22T13:29:39.021648+00:00"
+},
+{
+"id": "5960d57c-40a2-4ff6-80da-70150c5d9fbb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5960d57c-40a2-4ff6-80da-70150c5d9fbb/SUBDISTRICT",
+"sha256": "0e2d567a3fe0550dca1fa56a50f3379d4381518895fd88b06d616256ea1332f8",
+"bytes": 984,
+"retrievedAt": "2026-10-22T13:29:19.226186+00:00"
+},
+{
+"id": "59bb11c8-1ffb-4196-9b6f-9aed84e1fea8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/59bb11c8-1ffb-4196-9b6f-9aed84e1fea8/SUBDISTRICT",
+"sha256": "c63e3e9126347d38342f096e4b8053218e5ccea8aadde03c2371886cf438614a",
+"bytes": 39695,
+"retrievedAt": "2026-10-22T13:30:14.850636+00:00"
+},
+{
+"id": "59f6f72a-a3a0-43a3-a063-146c10741d58",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/59f6f72a-a3a0-43a3-a063-146c10741d58/SUBDISTRICT",
+"sha256": "decd245aa79d99428ecfacf89648d939d37f665414b31f5c58e1a17041e18c84",
+"bytes": 53322,
+"retrievedAt": "2026-10-22T13:30:16.038674+00:00"
+},
+{
+"id": "5a8b393b-d469-4089-9612-f6e25c924b6b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5a8b393b-d469-4089-9612-f6e25c924b6b/SUBDISTRICT",
+"sha256": "a5a60d6b8119fb40a3c2b7abab02b9326a9e76d97bf7f9aff382b278fe9f490d",
+"bytes": 7784,
+"retrievedAt": "2026-10-22T13:29:26.080028+00:00"
+},
+{
+"id": "5ac5887f-f623-4c50-8495-1f8262b150f1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5ac5887f-f623-4c50-8495-1f8262b150f1/SUBDISTRICT",
+"sha256": "9199c49cc2652fd44f031fed2803f3fee5514daca84c4ba51fc999e02a17c780",
+"bytes": 1778,
+"retrievedAt": "2026-10-22T13:29:39.556103+00:00"
+},
+{
+"id": "5afc911a-ef63-4a27-adf9-10471b5abf60",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5afc911a-ef63-4a27-adf9-10471b5abf60/SUBDISTRICT",
+"sha256": "9b34eb04d82059c9a2a3da39f2ffa4154270cc609d9f0048b012609fe2521431",
+"bytes": 9360,
+"retrievedAt": "2026-10-22T13:30:00.237612+00:00"
+},
+{
+"id": "5c5f9c7e-605a-4efe-bf32-c3ef7b171499",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5c5f9c7e-605a-4efe-bf32-c3ef7b171499/SUBDISTRICT",
+"sha256": "d903b6c7ffc11d1b5805255db9616f2e28452156d211e2e2424162fd30e9cae3",
+"bytes": 18701,
+"retrievedAt": "2026-10-22T13:29:40.587378+00:00"
+},
+{
+"id": "5c983078-ab87-433f-acd3-50d7ffd5ef57",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5c983078-ab87-433f-acd3-50d7ffd5ef57/SUBDISTRICT",
+"sha256": "f4222af9e87556fd6d814392160bc91b1303aee2c7905f45244adc33b4f9d001",
+"bytes": 17308,
+"retrievedAt": "2026-10-22T13:29:23.273500+00:00"
+},
+{
+"id": "5d7b67ad-d15d-4a84-a0b9-20e622f8530b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5d7b67ad-d15d-4a84-a0b9-20e622f8530b/SUBDISTRICT",
+"sha256": "ca5168541346330924fe82a7cfc0626cabe10205143c3d88e74b97e0a7934a32",
+"bytes": 12598,
+"retrievedAt": "2026-10-22T13:29:53.285437+00:00"
+},
+{
+"id": "5daa7586-62de-458c-8e81-2e7184f4e888",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5daa7586-62de-458c-8e81-2e7184f4e888/SUBDISTRICT",
+"sha256": "d31480377bd114441933280a02c3122732bd55977fe9955913883a45309b4899",
+"bytes": 22456,
+"retrievedAt": "2026-10-22T13:29:05.326321+00:00"
+},
+{
+"id": "5dbc88cc-892c-4d58-9bf6-18f4fd275ad3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5dbc88cc-892c-4d58-9bf6-18f4fd275ad3/SUBDISTRICT",
+"sha256": "47ec8eb3a8775f44c2d595e06a7eb89957ba2f62c014421e03fe21ca3a1ad515",
+"bytes": 6356,
+"retrievedAt": "2026-10-22T13:29:18.662087+00:00"
+},
+{
+"id": "5eccdf3b-cf81-41e4-8a3e-ebaeae9b704c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5eccdf3b-cf81-41e4-8a3e-ebaeae9b704c/SUBDISTRICT",
+"sha256": "7aaee4bbe0d664b74a10cc7d1f12d08cc692d0a71721d4815f6c83e65b21456f",
+"bytes": 2192,
+"retrievedAt": "2026-10-22T13:29:38.653939+00:00"
+},
+{
+"id": "603e76d0-3c21-4bf0-a906-322501464411",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/603e76d0-3c21-4bf0-a906-322501464411/SUBDISTRICT",
+"sha256": "9d8acc05ae724a0a7fe2343835f618d01ca27a65541a7a4fbf2cbacb30abd3bf",
+"bytes": 4362,
+"retrievedAt": "2026-10-22T13:29:51.114929+00:00"
+},
+{
+"id": "60acb5d5-c084-4804-a2ee-1a355e3b9762",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/60acb5d5-c084-4804-a2ee-1a355e3b9762/SUBDISTRICT",
+"sha256": "29f6f4e59ecc772a2829877b40bbc180e84cbfc4204578b20556d7bf6ded661d",
+"bytes": 9693,
+"retrievedAt": "2026-10-22T13:29:11.858610+00:00"
+},
+{
+"id": "61554114-0824-42f4-85f5-da7c0da90b4d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/61554114-0824-42f4-85f5-da7c0da90b4d/SUBDISTRICT",
+"sha256": "1b25b5137127789bd1429b7176affa44be34d98f5c329e6b4d5545fa56c26f1b",
+"bytes": 38816,
+"retrievedAt": "2026-10-22T13:30:16.338135+00:00"
+},
+{
+"id": "61eb430b-9fb8-4846-80e3-52fa69c453e3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/61eb430b-9fb8-4846-80e3-52fa69c453e3/SUBDISTRICT",
+"sha256": "c5c973ce8badcb07d245418a7194e715612f76f483009e2b99c843ec6d219d4b",
+"bytes": 16359,
+"retrievedAt": "2026-10-22T13:30:04.007100+00:00"
+},
+{
+"id": "621b7efb-73f0-483c-8464-48a0cad3ad93",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/621b7efb-73f0-483c-8464-48a0cad3ad93/SUBDISTRICT",
+"sha256": "4dd54fe2b80e7500ddde935d58400fa51ad30769bf9201bfb353a6466460bf3d",
+"bytes": 26432,
+"retrievedAt": "2026-10-22T13:29:23.660230+00:00"
+},
+{
+"id": "632b5b18-f297-4005-a418-59afe8a15e38",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/632b5b18-f297-4005-a418-59afe8a15e38/SUBDISTRICT",
+"sha256": "c032774ab2826f19fe1fd5193d218ec7e8b3668d3fbd7432d1c959d72b6a6e8f",
+"bytes": 17582,
+"retrievedAt": "2026-10-22T13:29:57.964634+00:00"
+},
+{
+"id": "634d024c-a132-446a-9ff8-26bcec4f3d33",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/634d024c-a132-446a-9ff8-26bcec4f3d33/SUBDISTRICT",
+"sha256": "1b46bd17f68faede46f5307fabd8baf9943d75633a1eec0cf45e8ac711c45a1d",
+"bytes": 4862,
+"retrievedAt": "2026-10-22T13:29:52.086387+00:00"
+},
+{
+"id": "638ee524-7db0-403a-809d-ecd484d442a4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/638ee524-7db0-403a-809d-ecd484d442a4/SUBDISTRICT",
+"sha256": "9314c3463242d95dd8c33c136eff714c3cbf9b503abde4277a93a0618dca22f2",
+"bytes": 9510,
+"retrievedAt": "2026-10-22T13:30:15.231713+00:00"
+},
+{
+"id": "63acb1fe-6e16-4f2b-8efa-3504573f7dc9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/63acb1fe-6e16-4f2b-8efa-3504573f7dc9/SUBDISTRICT",
+"sha256": "f6f698eaa2e291d963efbb79eb56c76aa379a7619dbe3ce80221d81bd29ec29a",
+"bytes": 17759,
+"retrievedAt": "2026-10-22T13:29:40.209295+00:00"
+},
+{
+"id": "657f35d2-1007-4be9-bbbe-4bceeadd203a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/657f35d2-1007-4be9-bbbe-4bceeadd203a/SUBDISTRICT",
+"sha256": "cc255dd15a8dcdd66689b602c785236701653115ca7e79ad063d9ea8f27d9113",
+"bytes": 1099,
+"retrievedAt": "2026-10-22T13:29:38.655309+00:00"
+},
+{
+"id": "6591d48c-fbae-4664-b961-9f7ffea8b386",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6591d48c-fbae-4664-b961-9f7ffea8b386/SUBDISTRICT",
+"sha256": "a4dad519372e3cad3ef63f06b11fa7f32de9d657266e1ca864d48a3639f35430",
+"bytes": 15448,
+"retrievedAt": "2026-10-22T13:29:05.530454+00:00"
+},
+{
+"id": "664249b7-eaf9-4bb0-a3fc-2955537e6172",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/664249b7-eaf9-4bb0-a3fc-2955537e6172/SUBDISTRICT",
+"sha256": "dc38db534f8c8714f344d6cf95222d1b304e8a0b5cb93ff9acbeef061cf2ea11",
+"bytes": 10446,
+"retrievedAt": "2026-10-22T13:29:22.287642+00:00"
+},
+{
+"id": "66665c02-f853-43a5-968b-d907db2fac8c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/66665c02-f853-43a5-968b-d907db2fac8c/SUBDISTRICT",
+"sha256": "ce07796efad2779765eac86d0b8fbb2fec4826b6813e14ef866285eb53f92d77",
+"bytes": 3315,
+"retrievedAt": "2026-10-22T13:29:51.107508+00:00"
+},
+{
+"id": "666bb209-a502-4fa4-abcc-e58e13cec824",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/666bb209-a502-4fa4-abcc-e58e13cec824/SUBDISTRICT",
+"sha256": "583e0698bfb24991481514ae1c74e264b31aabb5f0d09c61020f3c25cf3dcdc3",
+"bytes": 22616,
+"retrievedAt": "2026-10-22T13:29:53.070236+00:00"
+},
+{
+"id": "666c8d32-12a1-4547-9618-f126cda6335d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/666c8d32-12a1-4547-9618-f126cda6335d/SUBDISTRICT",
+"sha256": "298006b2645df267f189e8eec222eac88ef01b2a41b6f3593b57c116f1344afc",
+"bytes": 30225,
+"retrievedAt": "2026-10-22T13:30:17.358336+00:00"
+},
+{
+"id": "66bfa15b-f7f0-4ea5-b264-7596b39567dc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/66bfa15b-f7f0-4ea5-b264-7596b39567dc/SUBDISTRICT",
+"sha256": "50d329f4dcc3e1420d582c3525250687cecc543519c93b4103a5fc06f58759cf",
+"bytes": 12498,
+"retrievedAt": "2026-10-22T13:29:16.709696+00:00"
+},
+{
+"id": "670633ca-e43b-479c-84c5-f4fb490e4928",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/670633ca-e43b-479c-84c5-f4fb490e4928/SUBDISTRICT",
+"sha256": "63ccde304e85fb986bac3c613e01eede009597bdb57c1cfb2f11bb5c52569bbd",
+"bytes": 39753,
+"retrievedAt": "2026-10-22T13:30:00.880847+00:00"
+},
+{
+"id": "6718bf6e-4843-428c-9e5b-0ed2daa4bc87",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6718bf6e-4843-428c-9e5b-0ed2daa4bc87/SUBDISTRICT",
+"sha256": "52abde98c113987d1eb0b31adec6025e71654ce56dcaf34629f0cc7a61c74f20",
+"bytes": 21467,
+"retrievedAt": "2026-10-22T13:29:57.178814+00:00"
+},
+{
+"id": "6774be2a-5cb0-46ea-ba31-b08204cc2b8c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6774be2a-5cb0-46ea-ba31-b08204cc2b8c/SUBDISTRICT",
+"sha256": "b0fe84606145a8ed988e4bc7c8ca2192738ca60ffa63f1a742543f2e0a6d7c0e",
+"bytes": 11533,
+"retrievedAt": "2026-10-22T13:29:26.483382+00:00"
+},
+{
+"id": "679acf12-538d-4f5e-a32e-ec80c78b9482",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/679acf12-538d-4f5e-a32e-ec80c78b9482/SUBDISTRICT",
+"sha256": "eadbb5cac91fb067c5c301faefbcd9d6e9a23f8e22eb90c40b08dcc80161ce5b",
+"bytes": 8776,
+"retrievedAt": "2026-10-22T13:30:09.504384+00:00"
+},
+{
+"id": "67a772ef-9358-43f1-b233-fa448c596814",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/67a772ef-9358-43f1-b233-fa448c596814/SUBDISTRICT",
+"sha256": "82e2fc295fcd709f9e0cde3ada526134bd9a1fe64f9338a94c5aba1709c887c5",
+"bytes": 25592,
+"retrievedAt": "2026-10-22T13:30:17.608166+00:00"
+},
+{
+"id": "680be88f-be47-4a39-9061-d734759223fa",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/680be88f-be47-4a39-9061-d734759223fa/SUBDISTRICT",
+"sha256": "da8b6e7d3986680eb7b812aeb96b8217f8a7f12518648222192f346f89471663",
+"bytes": 32164,
+"retrievedAt": "2026-10-22T13:29:09.397249+00:00"
+},
+{
+"id": "6940537a-b605-44ab-accb-ac34f2f45eca",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6940537a-b605-44ab-accb-ac34f2f45eca/SUBDISTRICT",
+"sha256": "bd6dc890559687fc53d4a3b9c9b47a973e62744db2a38a318e01b87640bd3fd1",
+"bytes": 15479,
+"retrievedAt": "2026-10-22T13:29:24.070788+00:00"
+},
+{
+"id": "69481784-c4e1-4a38-a198-86f77c7eb1cd",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/69481784-c4e1-4a38-a198-86f77c7eb1cd/SUBDISTRICT",
+"sha256": "a52f43b04e99099222985cce9845b5f1bbaa960fc66d4276253fc9d4800a1c4c",
+"bytes": 14333,
+"retrievedAt": "2026-10-22T13:29:12.127338+00:00"
+},
+{
+"id": "697fa239-d55f-47ac-ac93-71d0835895c3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/697fa239-d55f-47ac-ac93-71d0835895c3/SUBDISTRICT",
+"sha256": "c46e3ebdf2d3fb15bc1b57029736082a5e64f6a88059df4598470c7d79b726e5",
+"bytes": 8544,
+"retrievedAt": "2026-10-22T13:29:25.310648+00:00"
+},
+{
+"id": "6a0abbf1-50d1-4072-8f2e-a659d9b031d0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6a0abbf1-50d1-4072-8f2e-a659d9b031d0/SUBDISTRICT",
+"sha256": "04067b972d9560061d49340c00d94bbe68cd9b711926939df0768f7f0a3777a4",
+"bytes": 6973,
+"retrievedAt": "2026-10-22T13:30:11.644347+00:00"
+},
+{
+"id": "6a87b18f-9ce1-46e3-9e88-e095023b506c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6a87b18f-9ce1-46e3-9e88-e095023b506c/SUBDISTRICT",
+"sha256": "9ff058dae0bb2ccf25c2e762ce6a6dccf333f5f14dc5516093fe7d4952f74d92",
+"bytes": 29295,
+"retrievedAt": "2026-10-22T13:30:04.411230+00:00"
+},
+{
+"id": "6aaa094d-70ce-4199-bf6b-63121020d3e4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6aaa094d-70ce-4199-bf6b-63121020d3e4/SUBDISTRICT",
+"sha256": "c4cbaeb40999978ac0d1c600701d55e82fd40683a7703df1ed707cb592783699",
+"bytes": 11312,
+"retrievedAt": "2026-10-22T13:29:29.803420+00:00"
+},
+{
+"id": "6aaf32b9-7ff1-47e8-b888-71fbf6f003e7",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6aaf32b9-7ff1-47e8-b888-71fbf6f003e7/SUBDISTRICT",
+"sha256": "4945222ba95d1d4feae58076defa74054a85b4b4975f81ac4d72c5ff746a24f5",
+"bytes": 18616,
+"retrievedAt": "2026-10-22T13:29:40.184783+00:00"
+},
+{
+"id": "6b18bd2f-9fbe-4cb8-b589-ad2cbb958259",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6b18bd2f-9fbe-4cb8-b589-ad2cbb958259/SUBDISTRICT",
+"sha256": "ee1de41889b68a1652f68988fa34ae5ca16758d330759713d4c07c8033373500",
+"bytes": 48004,
+"retrievedAt": "2026-10-22T13:29:58.205362+00:00"
+},
+{
+"id": "6b6535d6-2dc5-4925-a66c-f3066ac4f408",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6b6535d6-2dc5-4925-a66c-f3066ac4f408/SUBDISTRICT",
+"sha256": "b4c0c4e7135938357b33f1c0350466f04fff12ff4020052a800a0bff427818c8",
+"bytes": 21929,
+"retrievedAt": "2026-10-22T13:29:07.029937+00:00"
+},
+{
+"id": "6bbccac2-18e4-4973-bad8-c6953bf0339f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6bbccac2-18e4-4973-bad8-c6953bf0339f/SUBDISTRICT",
+"sha256": "fa176873d45c30d00081d7e7760f70e0d53093a577f16049501fda57b31e8c5d",
+"bytes": 33309,
+"retrievedAt": "2026-10-22T13:29:14.424544+00:00"
+},
+{
+"id": "6c3378a9-ee72-4685-a488-dd903681e46d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6c3378a9-ee72-4685-a488-dd903681e46d/SUBDISTRICT",
+"sha256": "4d3097da66085a255d7050d9725b049f8947964cce8117edaed05ddad512add2",
+"bytes": 26420,
+"retrievedAt": "2026-10-22T13:30:07.492649+00:00"
+},
+{
+"id": "6cc64a61-c95c-49b2-8ece-beb395e4e5e2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6cc64a61-c95c-49b2-8ece-beb395e4e5e2/SUBDISTRICT",
+"sha256": "56dea2089d93c06ec55326fc2de32519d300e9d15bae9a08d3170198abecebc5",
+"bytes": 70204,
+"retrievedAt": "2026-10-22T13:29:13.462071+00:00"
+},
+{
+"id": "6cc6dd38-a621-42d4-b9b1-9449d73a5d5c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6cc6dd38-a621-42d4-b9b1-9449d73a5d5c/SUBDISTRICT",
+"sha256": "37aaaee0f213a318d7bf15e3a1d486f79923d42ce4b0d2b2d93aebd1347ca5e2",
+"bytes": 6159,
+"retrievedAt": "2026-10-22T13:30:03.973401+00:00"
+},
+{
+"id": "6ce64308-1792-44d6-bdec-5e4a08a022f8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6ce64308-1792-44d6-bdec-5e4a08a022f8/SUBDISTRICT",
+"sha256": "a50c67b99119e80747beac9eabb3c626beb8bc5f087bec78d704c3ea465bafae",
+"bytes": 23546,
+"retrievedAt": "2026-10-22T13:29:40.146368+00:00"
+},
+{
+"id": "6d56f79c-2b38-422f-abd6-72381ac0526e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6d56f79c-2b38-422f-abd6-72381ac0526e/SUBDISTRICT",
+"sha256": "2dbf6319c2513c2c4e20b82ed1610c370711db2fc1ff7df4140b06cdec7afcd0",
+"bytes": 21942,
+"retrievedAt": "2026-10-22T13:30:18.427930+00:00"
+},
+{
+"id": "6d717675-756b-44f8-b3e4-0a56bf776e6f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6d717675-756b-44f8-b3e4-0a56bf776e6f/SUBDISTRICT",
+"sha256": "02b6c0b8e21af96350c1483b6b3242bfb15d032f1236f2c2d113fed5812ee85d",
+"bytes": 27035,
+"retrievedAt": "2026-10-22T13:29:11.011928+00:00"
+},
+{
+"id": "6d9477bb-5f12-4cf6-9790-e7cc5d4d8cb8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6d9477bb-5f12-4cf6-9790-e7cc5d4d8cb8/SUBDISTRICT",
+"sha256": "60980267302d2d3aacba36caa08b8440bf8a2c33eb90a7188d92dc2327d1b241",
+"bytes": 10196,
+"retrievedAt": "2026-10-22T13:29:05.511403+00:00"
+},
+{
+"id": "6e19f26c-afe8-4509-858a-2a4bea808c19",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6e19f26c-afe8-4509-858a-2a4bea808c19/SUBDISTRICT",
+"sha256": "25f4dc3a865eab898bb5e70e75e03f086a55cd354920955590383e4e1e8cf428",
+"bytes": 2604,
+"retrievedAt": "2026-10-22T13:29:39.759407+00:00"
+},
+{
+"id": "6e29e0c1-96ae-42cd-a733-db3bccb55b7c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6e29e0c1-96ae-42cd-a733-db3bccb55b7c/SUBDISTRICT",
+"sha256": "c44f54c6f39269c5bf57cb1a6827ad7536659a755839fe3fcbd7c750d4ca2c90",
+"bytes": 7591,
+"retrievedAt": "2026-10-22T13:30:09.567954+00:00"
+},
+{
+"id": "6e8b7a8d-366d-41c9-9257-e8c9226534c8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6e8b7a8d-366d-41c9-9257-e8c9226534c8/SUBDISTRICT",
+"sha256": "995c7059263a60416a954ef5c2a3ea4d60bf87633163f3d8edfa8db65b697a6c",
+"bytes": 6069,
+"retrievedAt": "2026-10-22T13:30:07.857709+00:00"
+},
+{
+"id": "6eae2bfc-4f58-44ba-b277-795a5cb4a715",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6eae2bfc-4f58-44ba-b277-795a5cb4a715/SUBDISTRICT",
+"sha256": "37d4070f8a8accc5211ee60b7cfd5b87cb4dbf3f38a9765501b64be095a4d9fd",
+"bytes": 31500,
+"retrievedAt": "2026-10-22T13:29:17.128363+00:00"
+},
+{
+"id": "6fa4b594-4686-416e-9367-fea62ea8ed54",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6fa4b594-4686-416e-9367-fea62ea8ed54/SUBDISTRICT",
+"sha256": "efcfdb1f1ea12fe80a2ef52c554f977f5ec0605857433039e887cd6f0ab5817a",
+"bytes": 5129,
+"retrievedAt": "2026-10-22T13:29:44.834218+00:00"
+},
+{
+"id": "6fc2330a-bbbc-4e78-a7cc-89f606bdd292",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6fc2330a-bbbc-4e78-a7cc-89f606bdd292/SUBDISTRICT",
+"sha256": "411dae9b1169f2a2f7f2c034f85514c3e19328c3b7bbd7a7488236df6dae8df6",
+"bytes": 18539,
+"retrievedAt": "2026-10-22T13:30:12.061755+00:00"
+},
+{
+"id": "6fc81ef5-1f89-4cc6-af37-4290e3736962",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6fc81ef5-1f89-4cc6-af37-4290e3736962/SUBDISTRICT",
+"sha256": "62713920d446b466106e44ea52b1c3435cfa91b23f25f991dd2312feedd5f658",
+"bytes": 16337,
+"retrievedAt": "2026-10-22T13:30:11.280087+00:00"
+},
+{
+"id": "7155c69d-776d-447b-a886-c7c55c74f711",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7155c69d-776d-447b-a886-c7c55c74f711/SUBDISTRICT",
+"sha256": "257868f598165d9cda5716ff376aca00e7f7ed62fd97a2f7f9382fffe677007b",
+"bytes": 4700,
+"retrievedAt": "2026-10-22T13:30:19.271450+00:00"
+},
+{
+"id": "72003d39-d7bd-4d35-ab13-6a1612a0551d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/72003d39-d7bd-4d35-ab13-6a1612a0551d/SUBDISTRICT",
+"sha256": "7d5b1ae0e76aba8e6eec8ff00079ecc25c54fea3dea0d90c4e5cd690a9a535a5",
+"bytes": 8043,
+"retrievedAt": "2026-10-22T13:29:03.960702+00:00"
+},
+{
+"id": "7289cea3-b77c-43f7-9b0b-9f7147af5e68",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7289cea3-b77c-43f7-9b0b-9f7147af5e68/SUBDISTRICT",
+"sha256": "a00272119dcb2fa16bc2dd24cf29753d834405748af6af1903c3ec8379f45a82",
+"bytes": 1013,
+"retrievedAt": "2026-10-22T13:29:38.240944+00:00"
+},
+{
+"id": "72cfc2ae-b666-441f-a601-c52ea153f6f3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/72cfc2ae-b666-441f-a601-c52ea153f6f3/SUBDISTRICT",
+"sha256": "08d1b38d2741fa08a526a2069115e34374ae678f41b9742b4a678b95d96e1bbd",
+"bytes": 39070,
+"retrievedAt": "2026-10-22T13:30:01.079298+00:00"
+},
+{
+"id": "72f65027-fd29-4e7d-a737-31ee5e29061a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/72f65027-fd29-4e7d-a737-31ee5e29061a/SUBDISTRICT",
+"sha256": "ad701569dba00be40e9ba2e9477484cde4b2c191e25f1d2c10be1caaffd18b9a",
+"bytes": 7015,
+"retrievedAt": "2026-10-22T13:30:03.590662+00:00"
+},
+{
+"id": "73313cfa-6cad-40fe-b7f0-4cf5d3e50fa6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/73313cfa-6cad-40fe-b7f0-4cf5d3e50fa6/SUBDISTRICT",
+"sha256": "9b7b3a03c7a182e8c7a18ba04e8f48a0a5b1647a563c2f30e5c24b9ac717bf80",
+"bytes": 5227,
+"retrievedAt": "2026-10-22T13:30:03.309171+00:00"
+},
+{
+"id": "7338a028-f96c-4a48-a604-6c5e5d58e653",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7338a028-f96c-4a48-a604-6c5e5d58e653/SUBDISTRICT",
+"sha256": "9ba1a109288d3922a87d27c2ced5a1c766598a2044c6970c52720eaf842598fc",
+"bytes": 11960,
+"retrievedAt": "2026-10-22T13:29:30.756015+00:00"
+},
+{
+"id": "7530868b-3021-4698-81a1-f611a340b2e2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7530868b-3021-4698-81a1-f611a340b2e2/SUBDISTRICT",
+"sha256": "8130b44219de6e1a9e989c2eea9c0faecf8fbff89bc7189ac276de5f0b3abbb0",
+"bytes": 11153,
+"retrievedAt": "2026-10-22T13:29:22.315474+00:00"
+},
+{
+"id": "755ef9fc-59b7-4e58-83ea-b4598f1fc31b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/755ef9fc-59b7-4e58-83ea-b4598f1fc31b/SUBDISTRICT",
+"sha256": "12d3a17195122a1797a49a5040695cc729a8735c373abb43e997a022d4341a9e",
+"bytes": 17154,
+"retrievedAt": "2026-10-22T13:29:25.682344+00:00"
+},
+{
+"id": "764d520f-94af-4f24-85c6-92f3423c7472",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/764d520f-94af-4f24-85c6-92f3423c7472/SUBDISTRICT",
+"sha256": "c4e418ed86c738ad44996a5be8e2afc6cc7bb0d9a935532891c036ad8f446018",
+"bytes": 3363,
+"retrievedAt": "2026-10-22T13:29:42.057226+00:00"
+},
+{
+"id": "767ab5e5-3a85-4853-b076-c198b20e4396",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/767ab5e5-3a85-4853-b076-c198b20e4396/SUBDISTRICT",
+"sha256": "3f723ec04e533e2d2616fb51a4b7671441ef7d489173b6f7fccbbbd958cbc4fb",
+"bytes": 12393,
+"retrievedAt": "2026-10-22T13:30:14.805515+00:00"
+},
+{
+"id": "76f6650d-5bd6-4fd3-9f30-d01a7c21b49e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/76f6650d-5bd6-4fd3-9f30-d01a7c21b49e/SUBDISTRICT",
+"sha256": "c9102ffa0603d89284d0ed4a293b5971983a89a407cc7ef6d470ba2453100ed5",
+"bytes": 8023,
+"retrievedAt": "2026-10-22T13:29:29.093224+00:00"
+},
+{
+"id": "773c146d-18db-4191-99b4-5fe9b8057023",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/773c146d-18db-4191-99b4-5fe9b8057023/SUBDISTRICT",
+"sha256": "4f1f4a61b3791e0e7365351e4cfa1fe827cfd91bb954e945b19d2ad2926534a3",
+"bytes": 26913,
+"retrievedAt": "2026-10-22T13:29:31.594163+00:00"
+},
+{
+"id": "7770b811-3371-4491-8486-d4e2daefb5f5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7770b811-3371-4491-8486-d4e2daefb5f5/SUBDISTRICT",
+"sha256": "512a1f8e46f2c9f5571619d94b959899f406ef9e3c76e0a30a38a91a18e4698e",
+"bytes": 9164,
+"retrievedAt": "2026-10-22T13:29:05.591113+00:00"
+},
+{
+"id": "779d7256-151e-4cc8-84e1-cbee7e701826",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/779d7256-151e-4cc8-84e1-cbee7e701826/SUBDISTRICT",
+"sha256": "260ae06c697756e390e1d5ffcc733148d91fa5ea3f3f32104a28d4fdf65adc03",
+"bytes": 17561,
+"retrievedAt": "2026-10-22T13:29:57.560774+00:00"
+},
+{
+"id": "77ae8cb3-b559-4341-ac13-056a4ce6bda6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/77ae8cb3-b559-4341-ac13-056a4ce6bda6/SUBDISTRICT",
+"sha256": "21af0244851101e00dfbc17b64727d9cd4a0c059994af160c93ee49672cd3cbc",
+"bytes": 23034,
+"retrievedAt": "2026-10-22T13:29:17.538783+00:00"
+},
+{
+"id": "77af54ac-9a04-40c5-9bb2-06f4a78c4457",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/77af54ac-9a04-40c5-9bb2-06f4a78c4457/SUBDISTRICT",
+"sha256": "6c3887bf2f3e7ac22ad9054807cf004a955b1708b7df484aaef18c0f7a89cb33",
+"bytes": 8194,
+"retrievedAt": "2026-10-22T13:29:49.138364+00:00"
+},
+{
+"id": "784d7a57-e09a-4a30-b463-011698a78be9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/784d7a57-e09a-4a30-b463-011698a78be9/SUBDISTRICT",
+"sha256": "33995a0d215c8c03d4595209fdbc42b4a808f626e58200247758d002ba2840e5",
+"bytes": 37905,
+"retrievedAt": "2026-10-22T13:29:18.685913+00:00"
+},
+{
+"id": "788285e3-837c-44aa-9d2d-3839bbee73bc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/788285e3-837c-44aa-9d2d-3839bbee73bc/SUBDISTRICT",
+"sha256": "7e199007dab14598f11720b95b33194576d74c7d52d69e7c3ae213fa742d3b55",
+"bytes": 13934,
+"retrievedAt": "2026-10-22T13:29:58.378076+00:00"
+},
+{
+"id": "7976fad8-4037-42f0-a7ae-56c5dd7a68bb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7976fad8-4037-42f0-a7ae-56c5dd7a68bb/SUBDISTRICT",
+"sha256": "5a7ad072f958756b99974c9a76421e7d51c41041b9bc3ff25acb8749578ad48b",
+"bytes": 96914,
+"retrievedAt": "2026-10-22T13:29:12.530329+00:00"
+},
+{
+"id": "7a871adc-a2bf-478d-8352-25ecca6b45f1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7a871adc-a2bf-478d-8352-25ecca6b45f1/SUBDISTRICT",
+"sha256": "839c96f562d666c9cb7ac2150dd83b037210a7763961f8ca53ebbb6609693437",
+"bytes": 12511,
+"retrievedAt": "2026-10-22T13:29:25.675598+00:00"
+},
+{
+"id": "7adf9b2e-e10f-4a36-8fb0-2582f380931b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7adf9b2e-e10f-4a36-8fb0-2582f380931b/SUBDISTRICT",
+"sha256": "8707b73f39ad465352a3528eed4c537fa785872649f1175429eedde175a86dd4",
+"bytes": 5514,
+"retrievedAt": "2026-10-22T13:30:18.072775+00:00"
+},
+{
+"id": "7bea8d6c-aea8-4d41-9894-bf6ead5d0d2a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7bea8d6c-aea8-4d41-9894-bf6ead5d0d2a/SUBDISTRICT",
+"sha256": "04c9456cac354e32f6a9adb32ebf1bfc4ac8f3c7390b6e372c4dc8625ff893ce",
+"bytes": 29676,
+"retrievedAt": "2026-10-22T13:30:19.167549+00:00"
+},
+{
+"id": "7c3b8127-9cce-484b-ac1a-57178354eb1a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7c3b8127-9cce-484b-ac1a-57178354eb1a/SUBDISTRICT",
+"sha256": "3cae112ca7c6f1da2b5e36dce2f6ccda453ee55538daa09ceea4f405db20fa2c",
+"bytes": 10392,
+"retrievedAt": "2026-10-22T13:29:27.003344+00:00"
+},
+{
+"id": "7c9ea8f3-6111-4d88-95d7-67a479d2b208",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7c9ea8f3-6111-4d88-95d7-67a479d2b208/SUBDISTRICT",
+"sha256": "353988406497387bdfb012f739a6dfa488ba8a07e8d05f6b83baadd2eda864ab",
+"bytes": 31321,
+"retrievedAt": "2026-10-22T13:29:04.749640+00:00"
+},
+{
+"id": "7ce51ea5-726e-46dd-9f43-286745669626",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7ce51ea5-726e-46dd-9f43-286745669626/SUBDISTRICT",
+"sha256": "16f42a8ebbf7a013cc2f90f6f1abe4cca4dccab73b838bae764007360389ac7d",
+"bytes": 11657,
+"retrievedAt": "2026-10-22T13:30:13.954968+00:00"
+},
+{
+"id": "7d13a9c8-07e9-48b6-b9de-f2ff1fb62597",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7d13a9c8-07e9-48b6-b9de-f2ff1fb62597/SUBDISTRICT",
+"sha256": "1c9a3d9209e84244d20e8aa642c07e9bf1855db528a16bcb45644da8e08be86d",
+"bytes": 11607,
+"retrievedAt": "2026-10-22T13:30:09.422290+00:00"
+},
+{
+"id": "7e526b7b-222e-431d-8d2c-ca1f656a066e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7e526b7b-222e-431d-8d2c-ca1f656a066e/SUBDISTRICT",
+"sha256": "0677f8583637dd84b66bbfab435177abd06d6d16d2b75450be59c79a98f1a0ce",
+"bytes": 12593,
+"retrievedAt": "2026-10-22T13:29:27.270498+00:00"
+},
+{
+"id": "7ee27d6a-2e99-4515-969f-5421633b4fd3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7ee27d6a-2e99-4515-969f-5421633b4fd3/SUBDISTRICT",
+"sha256": "246ac99415439d841a13aed1ba6da350976736bcbb869fff17dc9c9cffc3a865",
+"bytes": 3970,
+"retrievedAt": "2026-10-22T13:29:06.216819+00:00"
+},
+{
+"id": "7f4e2e61-3198-4274-a2c6-3e022e8bbb5a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7f4e2e61-3198-4274-a2c6-3e022e8bbb5a/SUBDISTRICT",
+"sha256": "25b192fc4a1ad46aa268fb6bfbf255674bb06ec2d80a47938c41418ad2b986d5",
+"bytes": 7814,
+"retrievedAt": "2026-10-22T13:29:21.077552+00:00"
+},
+{
+"id": "803ee7da-9110-41b7-903b-0bd7a952df62",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/803ee7da-9110-41b7-903b-0bd7a952df62/SUBDISTRICT",
+"sha256": "908cab408d23bd3264cf543e572f2d2fade7b24098517fb63c3127a22b934585",
+"bytes": 16093,
+"retrievedAt": "2026-10-22T13:29:31.153022+00:00"
+},
+{
+"id": "81404f23-89b3-4a04-8d52-afbea0fef5cc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/81404f23-89b3-4a04-8d52-afbea0fef5cc/SUBDISTRICT",
+"sha256": "4052a89af52a91b513baa1fee0130ae86b7b06793a8fa78a8a6394a723590f2d",
+"bytes": 13484,
+"retrievedAt": "2026-10-22T13:29:23.516555+00:00"
+},
+{
+"id": "81a7b867-2a41-47b7-9370-b1254631e51d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/81a7b867-2a41-47b7-9370-b1254631e51d/SUBDISTRICT",
+"sha256": "2e9371382f12a7897bd8572631a95ef4d89cf1522c7bb99bf4804932c7f68b25",
+"bytes": 28358,
+"retrievedAt": "2026-10-22T13:30:01.327152+00:00"
+},
+{
+"id": "81c459b3-d3b7-4fa6-b1b1-a938471aadec",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/81c459b3-d3b7-4fa6-b1b1-a938471aadec/SUBDISTRICT",
+"sha256": "e45ce9d92940df64df245b65c2cdc55e0447dfd8a53fb344cea5f110b6c2b2ba",
+"bytes": 3678,
+"retrievedAt": "2026-10-22T13:29:52.701373+00:00"
+},
+{
+"id": "82003d8b-4beb-4237-a071-25d68152319d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/82003d8b-4beb-4237-a071-25d68152319d/SUBDISTRICT",
+"sha256": "b46212f89fcfe2f77cce60ff075e0cabd8b33f37b7c06875c0bde6e5f94196f6",
+"bytes": 16861,
+"retrievedAt": "2026-10-22T13:29:28.565902+00:00"
+},
+{
+"id": "82320a55-49b1-4e36-a453-e95c4f6a4cf2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/82320a55-49b1-4e36-a453-e95c4f6a4cf2/SUBDISTRICT",
+"sha256": "4e10f926c0f239e02be11aaa154870032d9baf3377c3ab713bed76d4433aa92a",
+"bytes": 10753,
+"retrievedAt": "2026-10-22T13:29:21.912385+00:00"
+},
+{
+"id": "82a32762-8965-467b-9fe2-85a15e9e3935",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/82a32762-8965-467b-9fe2-85a15e9e3935/SUBDISTRICT",
+"sha256": "c8a2e695fd7ea413c1c95d2df19c0f3677a3e27ce2741da9a8406d9e33ed0223",
+"bytes": 33484,
+"retrievedAt": "2026-10-22T13:30:04.262297+00:00"
+},
+{
+"id": "82f53393-56a9-4fe8-965a-f07550679da6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/82f53393-56a9-4fe8-965a-f07550679da6/SUBDISTRICT",
+"sha256": "004c99e417a89b79fae08bef902a279161ba13b1cbf142865eb0de548bb0f8d3",
+"bytes": 12814,
+"retrievedAt": "2026-10-22T13:30:10.336158+00:00"
+},
+{
+"id": "83404b33-b1f6-45d1-a1d6-7defbf2f95f6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/83404b33-b1f6-45d1-a1d6-7defbf2f95f6/SUBDISTRICT",
+"sha256": "d08b6b271dd09fe6c8e607cd1e17258871a0df2727f9e4f3d24b3ceb4b6374f3",
+"bytes": 4944,
+"retrievedAt": "2026-10-22T13:30:06.815011+00:00"
+},
+{
+"id": "835575ba-fc12-4e36-a7d8-692a8cd9d79d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/835575ba-fc12-4e36-a7d8-692a8cd9d79d/SUBDISTRICT",
+"sha256": "0ad2a2c2b125c75a3b9e8eca0ee7ea4bdc51c61e498aed75cc433e7cebeb9dc9",
+"bytes": 59877,
+"retrievedAt": "2026-10-22T13:30:16.073404+00:00"
+},
+{
+"id": "83974861-3fa6-4db2-87a5-1bc0f6bce9c2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/83974861-3fa6-4db2-87a5-1bc0f6bce9c2/SUBDISTRICT",
+"sha256": "740c52e587237262cc9a84225e075f006fdd303e5e19a248da9516cb59628eb9",
+"bytes": 49119,
+"retrievedAt": "2026-10-22T13:30:04.853705+00:00"
+},
+{
+"id": "83eede56-73a4-4b6c-96a6-dcde20d45d6a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/83eede56-73a4-4b6c-96a6-dcde20d45d6a/SUBDISTRICT",
+"sha256": "2ae3fd5c657bc378d542801bf46ca4a10b3a6163368c37000923558861d27e9a",
+"bytes": 47819,
+"retrievedAt": "2026-10-22T13:29:12.646366+00:00"
+},
+{
+"id": "84341aa6-bc72-41d8-aae3-9620a95ceedd",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/84341aa6-bc72-41d8-aae3-9620a95ceedd/SUBDISTRICT",
+"sha256": "56eeb013720ea78f61911480993a8fda89963a533bab0ab00309636d0b04ebc7",
+"bytes": 5617,
+"retrievedAt": "2026-10-22T13:29:39.788071+00:00"
+},
+{
+"id": "8460511f-ae6b-4fcf-82f0-6114ce213fca",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8460511f-ae6b-4fcf-82f0-6114ce213fca/SUBDISTRICT",
+"sha256": "6bbe5932e916cd90d21f04e19399e95f02e9f8c9bb9c9490227c6124920849f3",
+"bytes": 10642,
+"retrievedAt": "2026-10-22T13:30:03.829740+00:00"
+},
+{
+"id": "8517cfd5-3a22-4f96-8c8b-9accd0cbde46",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8517cfd5-3a22-4f96-8c8b-9accd0cbde46/SUBDISTRICT",
+"sha256": "6d9fed4d059038fd92376cfc6aac3f1ed07438d76f159f0c753defb7656acf0f",
+"bytes": 9144,
+"retrievedAt": "2026-10-22T13:29:22.697922+00:00"
+},
+{
+"id": "856ea271-eba1-49f5-8b14-2959c7fe1a04",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/856ea271-eba1-49f5-8b14-2959c7fe1a04/SUBDISTRICT",
+"sha256": "412a09f81675e0d2744e091034ff6ded3082da9bbf202f234547079dc661081b",
+"bytes": 10861,
+"retrievedAt": "2026-10-22T13:30:08.256450+00:00"
+},
+{
+"id": "858ebf31-8bb3-4162-9d4c-9c485ae526be",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/858ebf31-8bb3-4162-9d4c-9c485ae526be/SUBDISTRICT",
+"sha256": "686f9a0f70a7988cd47af46bb2be027b6d3020ecd59ed482d5aa5f59a88eb4dc",
+"bytes": 6570,
+"retrievedAt": "2026-10-22T13:29:08.022202+00:00"
+},
+{
+"id": "85acecde-83c1-4ac7-b3df-0411145891ea",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/85acecde-83c1-4ac7-b3df-0411145891ea/SUBDISTRICT",
+"sha256": "bcdd62f2670d8ff3362e22a9b7e85f8dd0294d9a5e7bfcca048485e62f50a381",
+"bytes": 15612,
+"retrievedAt": "2026-10-22T13:29:52.484928+00:00"
+},
+{
+"id": "85f11fe7-fa86-4997-9315-22b912a95fb5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/85f11fe7-fa86-4997-9315-22b912a95fb5/SUBDISTRICT",
+"sha256": "7daaac46198bfe01c750eb0e7384d58fbae55e0273777365540c51464f50e114",
+"bytes": 12972,
+"retrievedAt": "2026-10-22T13:29:54.747886+00:00"
+},
+{
+"id": "8635a6f7-7082-4103-8fc7-2926ea42c684",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8635a6f7-7082-4103-8fc7-2926ea42c684/SUBDISTRICT",
+"sha256": "ead53e56f298c528a102944d51fd6f22cb08f5916312f580bff4a7c6e8216cd8",
+"bytes": 1586,
+"retrievedAt": "2026-10-22T13:29:39.379913+00:00"
+},
+{
+"id": "8653682d-46bd-4b44-a514-b13c0158c1c8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8653682d-46bd-4b44-a514-b13c0158c1c8/SUBDISTRICT",
+"sha256": "40c272b38ba2727ff0c36a8ec9dcccaf1debe107fe313cb2f65c1709c902fd8f",
+"bytes": 17520,
+"retrievedAt": "2026-10-22T13:30:12.832610+00:00"
+},
+{
+"id": "86b8cbfd-8556-4998-9ea2-43eb91923c33",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/86b8cbfd-8556-4998-9ea2-43eb91923c33/SUBDISTRICT",
+"sha256": "f18876623442475ea36ad231357cc36b7fd866a05f8afafc8c6eb82e18f77fd2",
+"bytes": 1218,
+"retrievedAt": "2026-10-22T13:29:39.773400+00:00"
+},
+{
+"id": "86c3f88a-5bc1-41f1-82d2-db07597b3588",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/86c3f88a-5bc1-41f1-82d2-db07597b3588/SUBDISTRICT",
+"sha256": "573715dde059c17f9e0a3258bf8e7b636dc7046f3b68a8616dd8347e7a2a43b4",
+"bytes": 13071,
+"retrievedAt": "2026-10-22T13:29:26.586514+00:00"
+},
+{
+"id": "86c625a6-7ab2-4fe8-a399-8c5568ef6622",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/86c625a6-7ab2-4fe8-a399-8c5568ef6622/SUBDISTRICT",
+"sha256": "56ca88de3653c2a3c4cc1897058c28c0752aebf4d2f04dd21074a7133878175b",
+"bytes": 19251,
+"retrievedAt": "2026-10-22T13:29:03.829774+00:00"
+},
+{
+"id": "87b9d0c1-0b8b-486c-85d8-0def37036bb6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/87b9d0c1-0b8b-486c-85d8-0def37036bb6/SUBDISTRICT",
+"sha256": "853ab73bd61604b9336606aeb0f96afbb7a6cc542d673501a92dcf42bc5252ad",
+"bytes": 15421,
+"retrievedAt": "2026-10-22T13:29:27.345014+00:00"
+},
+{
+"id": "87d17e88-2ddc-449a-a1e3-808b538148c8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/87d17e88-2ddc-449a-a1e3-808b538148c8/SUBDISTRICT",
+"sha256": "a814dfc2ec579b7e34450e7be70a7b39b546f73ec85bc641e189bb695382bb85",
+"bytes": 7159,
+"retrievedAt": "2026-10-22T13:29:58.511451+00:00"
+},
+{
+"id": "88117664-2731-48f9-b2af-e813cf2cddb4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/88117664-2731-48f9-b2af-e813cf2cddb4/SUBDISTRICT",
+"sha256": "53efc91b1ac93cba530cec7547efb140c969f50329131ddbf175cfa81a9dbd83",
+"bytes": 9767,
+"retrievedAt": "2026-10-22T13:29:31.819759+00:00"
+},
+{
+"id": "88689de3-165a-40b3-939a-6b9e564f4957",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/88689de3-165a-40b3-939a-6b9e564f4957/SUBDISTRICT",
+"sha256": "3ef03c5ca3c436bdfe748560abe71f9ec03cd600286048a765213bed7c9544ea",
+"bytes": 3112,
+"retrievedAt": "2026-10-22T13:29:44.916962+00:00"
+},
+{
+"id": "88bd87e4-0354-4406-87cd-64743da0ea15",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/88bd87e4-0354-4406-87cd-64743da0ea15/SUBDISTRICT",
+"sha256": "d6a56f2b929a095568db0535832124107f13f067fe92cda45790a6334441581b",
+"bytes": 9886,
+"retrievedAt": "2026-10-22T13:30:12.480176+00:00"
+},
+{
+"id": "89020e21-1d64-43f3-9e13-b58b27cc3794",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/89020e21-1d64-43f3-9e13-b58b27cc3794/SUBDISTRICT",
+"sha256": "8a2db17ad9ffb66fbe63841184a15d95fdef85ebd50d612159a1bac27944e4f3",
+"bytes": 4289,
+"retrievedAt": "2026-10-22T13:29:42.746966+00:00"
+},
+{
+"id": "89437e2c-9472-4c79-b92d-bb79baeaac69",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/89437e2c-9472-4c79-b92d-bb79baeaac69/SUBDISTRICT",
+"sha256": "6b10a7ef81323861af99f444de81e1439f4b4d62dcd1570aa48dea865e8c1685",
+"bytes": 4554,
+"retrievedAt": "2026-10-22T13:29:30.977414+00:00"
+},
+{
+"id": "89a04cc6-6478-4848-9e20-6bfa3d1a1ecb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/89a04cc6-6478-4848-9e20-6bfa3d1a1ecb/SUBDISTRICT",
+"sha256": "e65b0f2cad7cdd19a54aaa56564c204f7a91e90ff92773c6710b8c39066a28c1",
+"bytes": 14165,
+"retrievedAt": "2026-10-22T13:29:06.619003+00:00"
+},
+{
+"id": "89a897a1-45e0-4946-8d9d-c05d76062d9f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/89a897a1-45e0-4946-8d9d-c05d76062d9f/SUBDISTRICT",
+"sha256": "677f0858e900e20ccf756646f90f7a322b2764b0b2c602927d5c63cea3d96b42",
+"bytes": 9763,
+"retrievedAt": "2026-10-22T13:29:53.321417+00:00"
+},
+{
+"id": "89c0f2ee-50d7-4bf4-89e0-6bb4d5fa08b2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/89c0f2ee-50d7-4bf4-89e0-6bb4d5fa08b2/SUBDISTRICT",
+"sha256": "c6dd876d0dc4eda549d0704703f94ff0a4419f86d1f76c6b373d65b6e90faa1c",
+"bytes": 18379,
+"retrievedAt": "2026-10-22T13:29:08.553192+00:00"
+},
+{
+"id": "89c2d229-8fc8-4524-9d49-707ffd1bc098",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/89c2d229-8fc8-4524-9d49-707ffd1bc098/SUBDISTRICT",
+"sha256": "a85e9824f18225ac11c51ac6abce30c58bf0e6a5b77ee162f11813001e81b98b",
+"bytes": 3940,
+"retrievedAt": "2026-10-22T13:29:53.936395+00:00"
+},
+{
+"id": "89ccb523-4300-459c-95ba-03b988e0e921",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/89ccb523-4300-459c-95ba-03b988e0e921/SUBDISTRICT",
+"sha256": "bdde887ce90b3f2710a6760599242fc790bb70f99c2fbe4484892aedd470519c",
+"bytes": 11522,
+"retrievedAt": "2026-10-22T13:29:53.091262+00:00"
+},
+{
+"id": "8a279221-694d-4734-ac8f-6a1c7dd7544a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8a279221-694d-4734-ac8f-6a1c7dd7544a/SUBDISTRICT",
+"sha256": "85e8145f6890ef0377d638a4a534e308aae6548694d883a8ac5952e121c6aa76",
+"bytes": 19418,
+"retrievedAt": "2026-10-22T13:29:04.070326+00:00"
+},
+{
+"id": "8a3ced1c-a077-4e87-ab7a-0578f96b6c05",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8a3ced1c-a077-4e87-ab7a-0578f96b6c05/SUBDISTRICT",
+"sha256": "72586b34ce72dd42a370805b746baa86d2233ccb05f11749582e5e7f9a54d69a",
+"bytes": 23016,
+"retrievedAt": "2026-10-22T13:29:24.489009+00:00"
+},
+{
+"id": "8a3d3de3-f1d0-4e67-b4bc-4cd75b09139b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8a3d3de3-f1d0-4e67-b4bc-4cd75b09139b/SUBDISTRICT",
+"sha256": "12637e35deb087e84e38006e5a55c8624582c5b363e251c56ed4dd3cf7f2e89c",
+"bytes": 5645,
+"retrievedAt": "2026-10-22T13:29:52.299399+00:00"
+},
+{
+"id": "8aa85858-eafc-4838-8720-ac28a2ddf05e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8aa85858-eafc-4838-8720-ac28a2ddf05e/SUBDISTRICT",
+"sha256": "49a3bfc47bc80c0520fd0af7148f8597d369fe59fc2dd05f9cfcc326fde0d28e",
+"bytes": 14551,
+"retrievedAt": "2026-10-22T13:29:43.227612+00:00"
+},
+{
+"id": "8b088455-059b-45c3-b58a-16f3057e3f7f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8b088455-059b-45c3-b58a-16f3057e3f7f/SUBDISTRICT",
+"sha256": "4ca7ce30e50c18aa0e652f2f14e6140c6dd80a6f1be62790b0461def34cfd140",
+"bytes": 4245,
+"retrievedAt": "2026-10-22T13:30:09.189348+00:00"
+},
+{
+"id": "8b1b7b73-8732-461c-b4c2-109c8a177306",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8b1b7b73-8732-461c-b4c2-109c8a177306/SUBDISTRICT",
+"sha256": "fe212e8531e97bf1a92c752d519c6bee36f02ef6a8768e9241f038a4276983c8",
+"bytes": 9825,
+"retrievedAt": "2026-10-22T13:30:03.128258+00:00"
+},
+{
+"id": "8b39e2fe-9322-4f30-8b11-6d421e48233e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8b39e2fe-9322-4f30-8b11-6d421e48233e/SUBDISTRICT",
+"sha256": "ef60404c60b8ca3d86e0488b5c17a56e99ebcbe6ae1337fc9051c6a17b20df0c",
+"bytes": 7970,
+"retrievedAt": "2026-10-22T13:30:03.705196+00:00"
+},
+{
+"id": "8b5bbf7c-1146-4387-8de3-dbfd57795f33",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8b5bbf7c-1146-4387-8de3-dbfd57795f33/SUBDISTRICT",
+"sha256": "d4eecc63ecdf9a85c110669d67f63e97d8640c4ec7f7d74692fd32de1a718428",
+"bytes": 1104,
+"retrievedAt": "2026-10-22T13:29:39.392724+00:00"
+},
+{
+"id": "8ba30d4f-23bb-42b8-808d-b6282dbc0da5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8ba30d4f-23bb-42b8-808d-b6282dbc0da5/SUBDISTRICT",
+"sha256": "bc1a3ab6276316a2f5c9abf716da4a04f65a533092e76d94b79500a67aa705ed",
+"bytes": 35439,
+"retrievedAt": "2026-10-22T13:30:19.036847+00:00"
+},
+{
+"id": "8c4e9166-8e02-4c36-9d96-f9af67c8480f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8c4e9166-8e02-4c36-9d96-f9af67c8480f/SUBDISTRICT",
+"sha256": "1083a3f3a59116dd435ab9d7cd7bfc3714bd5deacb66bf5a9f77e08336d6e9a7",
+"bytes": 14152,
+"retrievedAt": "2026-10-22T13:30:07.603155+00:00"
+},
+{
+"id": "8ce62b33-be76-412a-b8b8-ab08a0506a41",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8ce62b33-be76-412a-b8b8-ab08a0506a41/SUBDISTRICT",
+"sha256": "eafc7c659fc0daa64f5c900c45b8c3b70e982cfc232bfe72ad1eaf024c662315",
+"bytes": 11071,
+"retrievedAt": "2026-10-22T13:29:18.377757+00:00"
+},
+{
+"id": "8d4f22af-5f2e-4ff0-92bb-f1e222331420",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8d4f22af-5f2e-4ff0-92bb-f1e222331420/SUBDISTRICT",
+"sha256": "b0b6be365e8755c7de03fa79a55fc27f805d2eec61f888fb696f4a6292f93b43",
+"bytes": 2380,
+"retrievedAt": "2026-10-22T13:29:41.028921+00:00"
+},
+{
+"id": "8d51d4cf-f5b5-4ae9-bd0b-7dfd30d0ced0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8d51d4cf-f5b5-4ae9-bd0b-7dfd30d0ced0/SUBDISTRICT",
+"sha256": "493f03a1dfee91ceebe8100d81b3581dee4e6677165c316c85b881c9fb48357d",
+"bytes": 15622,
+"retrievedAt": "2026-10-22T13:29:55.172816+00:00"
+},
+{
+"id": "8de484af-2778-4c5d-90dc-04e77e1da679",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8de484af-2778-4c5d-90dc-04e77e1da679/SUBDISTRICT",
+"sha256": "5abed782813c29ba71a4104314f4efd433c585b4f4106dca32fdb9ed0e605545",
+"bytes": 30245,
+"retrievedAt": "2026-10-22T13:30:05.272868+00:00"
+},
+{
+"id": "8ef4f007-85ea-4e76-aafb-bac35f1fb5c1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8ef4f007-85ea-4e76-aafb-bac35f1fb5c1/SUBDISTRICT",
+"sha256": "38b9800628375d6d407101022068c404259806621c1f8cb153678e76f02405f1",
+"bytes": 8551,
+"retrievedAt": "2026-10-22T13:29:06.315078+00:00"
+},
+{
+"id": "8f2a3fcd-53c4-4b45-bb36-67ce3e393ca9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8f2a3fcd-53c4-4b45-bb36-67ce3e393ca9/SUBDISTRICT",
+"sha256": "fed62149f9cc77f35c3ff35d989941bf00cf18c2a24a2af2f92fdcf3e4264514",
+"bytes": 35679,
+"retrievedAt": "2026-10-22T13:29:17.487136+00:00"
+},
+{
+"id": "8f9c10eb-d1c7-400a-b613-756235a1e952",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8f9c10eb-d1c7-400a-b613-756235a1e952/SUBDISTRICT",
+"sha256": "21e16dd3eb1c878c7a9bd71e71cee04b314290cc131aa45606139573072da1ff",
+"bytes": 9326,
+"retrievedAt": "2026-10-22T13:30:01.746506+00:00"
+},
+{
+"id": "8fb245c1-c2ef-403a-b808-2e570cc14896",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8fb245c1-c2ef-403a-b808-2e570cc14896/SUBDISTRICT",
+"sha256": "e56139d36633537a7e6124dc9975bcfd97ab3f12757cab0e23dad2465afecf7f",
+"bytes": 9866,
+"retrievedAt": "2026-10-22T13:30:07.199341+00:00"
+},
+{
+"id": "9005c202-d287-4aeb-a8b0-489b0cea4750",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9005c202-d287-4aeb-a8b0-489b0cea4750/SUBDISTRICT",
+"sha256": "0e285eb757a7941b28d18862672e24948bdb98e28f5123e2748f6d4e7902c404",
+"bytes": 7137,
+"retrievedAt": "2026-10-22T13:29:53.905113+00:00"
+},
+{
+"id": "90071566-f3cf-4ff2-9743-4be198010f01",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/90071566-f3cf-4ff2-9743-4be198010f01/SUBDISTRICT",
+"sha256": "d546989f7311a2e8dbe4d2919a74e3b68caa4c7cec6cc1cc0037a436be899127",
+"bytes": 17253,
+"retrievedAt": "2026-10-22T13:29:56.377652+00:00"
+},
+{
+"id": "901690e2-e2bd-4e5d-910b-1c9c226405f0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/901690e2-e2bd-4e5d-910b-1c9c226405f0/SUBDISTRICT",
+"sha256": "c70b3f133651242eca29c218e40de145f259e1744b4a229eeecc26cf80a881c8",
+"bytes": 16040,
+"retrievedAt": "2026-10-22T13:30:14.949280+00:00"
+},
+{
+"id": "901920fd-cede-4e2a-bfc0-17509fe308b1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/901920fd-cede-4e2a-bfc0-17509fe308b1/SUBDISTRICT",
+"sha256": "dbad232ed19feefad570395dcb83e5b4147b4438f33b15f9c471d4dd0438196c",
+"bytes": 20801,
+"retrievedAt": "2026-10-22T13:29:09.313922+00:00"
+},
+{
+"id": "9068aeef-9177-4ad8-a622-c1ba6bbed51a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9068aeef-9177-4ad8-a622-c1ba6bbed51a/SUBDISTRICT",
+"sha256": "10ae9e2b6fb019d64201987af10be7f9300a54a5f3555a3b853e63f0340044a9",
+"bytes": 21744,
+"retrievedAt": "2026-10-22T13:30:11.120322+00:00"
+},
+{
+"id": "909c5d74-0750-46ae-a4ac-a6973adb3c67",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/909c5d74-0750-46ae-a4ac-a6973adb3c67/SUBDISTRICT",
+"sha256": "aa9299b0d0bc2aca97a43980cb70b0fe9653ecd4cce6bb7384dbbd88155a0ea3",
+"bytes": 26239,
+"retrievedAt": "2026-10-22T13:29:24.454379+00:00"
+},
+{
+"id": "90b0d264-d48f-4af8-afaf-a17ba442145f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/90b0d264-d48f-4af8-afaf-a17ba442145f/SUBDISTRICT",
+"sha256": "842ca55745b6f76f92e4464d4e6a30df854839b198e1e7fa0816590f5d3610d4",
+"bytes": 4445,
+"retrievedAt": "2026-10-22T13:29:56.721431+00:00"
+},
+{
+"id": "9107fd38-0aef-47c6-9cff-870e403e3e63",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9107fd38-0aef-47c6-9cff-870e403e3e63/SUBDISTRICT",
+"sha256": "d1718b897dc1476d5b3850dd0ed68fea654e37d031f68642534e586c99cd7fde",
+"bytes": 9357,
+"retrievedAt": "2026-10-22T13:30:10.783050+00:00"
+},
+{
+"id": "91100532-1479-40e5-8454-4979a269b70c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/91100532-1479-40e5-8454-4979a269b70c/SUBDISTRICT",
+"sha256": "83d6cc6fc9d2c7fc362ffaef9e10c2891b48df4c91810eb4b27264ad479a5f11",
+"bytes": 57689,
+"retrievedAt": "2026-10-22T13:29:13.767275+00:00"
+},
+{
+"id": "917eb761-8564-4615-83d9-fb786aced4b1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/917eb761-8564-4615-83d9-fb786aced4b1/SUBDISTRICT",
+"sha256": "e26111684f68074e300621afb243b46d2263693d40fbfc01d38d3dfe4ec73fa0",
+"bytes": 8395,
+"retrievedAt": "2026-10-22T13:29:51.912949+00:00"
+},
+{
+"id": "91be0702-9ffd-4b8a-8e4f-882879c41d9b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/91be0702-9ffd-4b8a-8e4f-882879c41d9b/SUBDISTRICT",
+"sha256": "4494c958199a500d4c0682f8ccf20a99211400fa8d9768aed1441bcc8082bb53",
+"bytes": 5198,
+"retrievedAt": "2026-10-22T13:29:58.637005+00:00"
+},
+{
+"id": "91c802b6-cfbe-463a-aeee-8b0c0ba49a71",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/91c802b6-cfbe-463a-aeee-8b0c0ba49a71/SUBDISTRICT",
+"sha256": "14028376572fe66be8793fb894664cd8e90f8b0b076f708399684896e23b8a1e",
+"bytes": 44605,
+"retrievedAt": "2026-10-22T13:29:16.023324+00:00"
+},
+{
+"id": "91e58458-5c2b-42cf-b575-88e5dc7a08d6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/91e58458-5c2b-42cf-b575-88e5dc7a08d6/SUBDISTRICT",
+"sha256": "dadf94046328461b754c7d0f7e187b95796e5c39d16a2a0fd92c85bd6424cbcc",
+"bytes": 5234,
+"retrievedAt": "2026-10-22T13:29:18.299973+00:00"
+},
+{
+"id": "9206e516-c8c2-460c-a93d-252deec48683",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9206e516-c8c2-460c-a93d-252deec48683/SUBDISTRICT",
+"sha256": "b74e86aeb00876b7bc624f605579714f6a4d511cf3de8845269aa8ff10b5da0f",
+"bytes": 14190,
+"retrievedAt": "2026-10-22T13:29:30.316312+00:00"
+},
+{
+"id": "925f63ff-0da0-453e-9279-10ab99050b3a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/925f63ff-0da0-453e-9279-10ab99050b3a/SUBDISTRICT",
+"sha256": "1c122c4857e9580e63e7c6c50b8dbf0ffbb260342c661f3f2fd074d4c9040858",
+"bytes": 3073,
+"retrievedAt": "2026-10-22T13:29:46.668359+00:00"
+},
+{
+"id": "93f890d5-2b8f-46ac-862c-cc21d28d32db",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/93f890d5-2b8f-46ac-862c-cc21d28d32db/SUBDISTRICT",
+"sha256": "6ad11dd90f10c655b0d8fc9de8f1b559b5db551e1eaab08007961a8fc1d4287f",
+"bytes": 19213,
+"retrievedAt": "2026-10-22T13:29:29.506001+00:00"
+},
+{
+"id": "9491a928-3874-4762-9db3-9a57f10c60b9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9491a928-3874-4762-9db3-9a57f10c60b9/SUBDISTRICT",
+"sha256": "fcdc487b985919fdbcb64ab725d7ccc5089a7cf8b9a92a0573e678fc6f52536e",
+"bytes": 2132,
+"retrievedAt": "2026-10-22T13:30:09.083454+00:00"
+},
+{
+"id": "94eb580d-f33b-4a14-acf2-ddfe33b7f38a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/94eb580d-f33b-4a14-acf2-ddfe33b7f38a/SUBDISTRICT",
+"sha256": "a3defde931ddbe6e3120dde10c02ca3e2848edf5f62300091c2dea565d073302",
+"bytes": 13909,
+"retrievedAt": "2026-10-22T13:29:10.874663+00:00"
+},
+{
+"id": "96c0c4d4-c23a-40c7-8b16-4dcd7d2b11fb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/96c0c4d4-c23a-40c7-8b16-4dcd7d2b11fb/SUBDISTRICT",
+"sha256": "5889b5584178ccb184a5441198a5906d4e3862e5a066264ffd2a6b93a8b30054",
+"bytes": 16790,
+"retrievedAt": "2026-10-22T13:30:04.080558+00:00"
+},
+{
+"id": "96df783d-73c2-43ba-8ca8-e55693308a72",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/96df783d-73c2-43ba-8ca8-e55693308a72/SUBDISTRICT",
+"sha256": "e4c65efbe03992c7960f23d4105d518820a79850d7511610afa284b8ec000343",
+"bytes": 19920,
+"retrievedAt": "2026-10-22T13:29:49.529178+00:00"
+},
+{
+"id": "96e6d361-bb99-4764-aa8e-a1914abaa6b8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/96e6d361-bb99-4764-aa8e-a1914abaa6b8/SUBDISTRICT",
+"sha256": "307575208d7aaedb04bb9b16611b1742daddd3793e594625c65c92c80e92d5ec",
+"bytes": 9567,
+"retrievedAt": "2026-10-22T13:29:55.989539+00:00"
+},
+{
+"id": "96e83f4a-d885-4043-beaf-c0c264226a68",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/96e83f4a-d885-4043-beaf-c0c264226a68/SUBDISTRICT",
+"sha256": "9ef6ac08a80b33edabd944a4fd92feeb10d21719830c7136571ad9f063f81eeb",
+"bytes": 17971,
+"retrievedAt": "2026-10-22T13:29:26.531442+00:00"
+},
+{
+"id": "979ba660-2045-42aa-8de9-b2ed8b789e8d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/979ba660-2045-42aa-8de9-b2ed8b789e8d/SUBDISTRICT",
+"sha256": "741b7b08516ee480af7dfc6605bc06258c067979a1ffbaf876df6167b8db3aba",
+"bytes": 33067,
+"retrievedAt": "2026-10-22T13:30:01.924619+00:00"
+},
+{
+"id": "979bce5d-6632-4abc-8026-0383ac0611b4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/979bce5d-6632-4abc-8026-0383ac0611b4/SUBDISTRICT",
+"sha256": "22844b605fd08fab6128f5794188f1be9492e85a87dcfe81c167fd71a06cda5a",
+"bytes": 7791,
+"retrievedAt": "2026-10-22T13:29:43.025452+00:00"
+},
+{
+"id": "983d53d1-ff74-4635-aed4-ee77a09a361f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/983d53d1-ff74-4635-aed4-ee77a09a361f/SUBDISTRICT",
+"sha256": "2f91094c5dc283f2b85fd55ada6fd286479b15188e9e73e9edb152263244f439",
+"bytes": 3946,
+"retrievedAt": "2026-10-22T13:29:54.148635+00:00"
+},
+{
+"id": "99c838ba-f8e9-4e28-80b5-c12a49804571",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/99c838ba-f8e9-4e28-80b5-c12a49804571/SUBDISTRICT",
+"sha256": "bfccf76b21213991dcff267f2cdc3186e784bd7a20191c62af83226f00d07c43",
+"bytes": 18463,
+"retrievedAt": "2026-10-22T13:30:10.673167+00:00"
+},
+{
+"id": "9aba049d-2484-492a-a1ba-90ac239740d3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9aba049d-2484-492a-a1ba-90ac239740d3/SUBDISTRICT",
+"sha256": "136c929e9f7c67afae602cae010e6f49daf9a8d0459b68a522c990cdc29e7d58",
+"bytes": 29951,
+"retrievedAt": "2026-10-22T13:29:12.730086+00:00"
+},
+{
+"id": "9abae9c5-97b0-484f-b6b5-34d3409578fe",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9abae9c5-97b0-484f-b6b5-34d3409578fe/SUBDISTRICT",
+"sha256": "ac67a4fc6fd9faef75a44824ca4c691dc90a51a6b4e97332ed23db8ea4205e41",
+"bytes": 30553,
+"retrievedAt": "2026-10-22T13:29:24.076962+00:00"
+},
+{
+"id": "9af8a9b5-a0bc-482b-8c78-97461c0fed6e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9af8a9b5-a0bc-482b-8c78-97461c0fed6e/SUBDISTRICT",
+"sha256": "ab2a82bcb3821c92c82b350cd4158ed1bf46057918b39ff65eb89bedc178e94c",
+"bytes": 3754,
+"retrievedAt": "2026-10-22T13:29:51.921780+00:00"
+},
+{
+"id": "9b38c5d8-61e0-49be-ac40-1dcc085964da",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9b38c5d8-61e0-49be-ac40-1dcc085964da/SUBDISTRICT",
+"sha256": "16128af64cf0fa37ca9f02e0501ffc0eb8e71e8a542457f12667f6d9b82f7416",
+"bytes": 61258,
+"retrievedAt": "2026-10-22T13:30:01.828407+00:00"
+},
+{
+"id": "9c87cb74-197e-404b-a9a5-710cb2ad7f1c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9c87cb74-197e-404b-a9a5-710cb2ad7f1c/SUBDISTRICT",
+"sha256": "97f17fe4098b09fefa116784d79a13d8250a65e82c2d1ad2c2dc76dac28a5075",
+"bytes": 11222,
+"retrievedAt": "2026-10-22T13:29:30.566074+00:00"
+},
+{
+"id": "9d21cce8-ebbe-4740-93a6-58fed54dfe49",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9d21cce8-ebbe-4740-93a6-58fed54dfe49/SUBDISTRICT",
+"sha256": "8df61616341186689cf152592e509667a32cf0ef0be973b7cd675b3603e30e5e",
+"bytes": 9194,
+"retrievedAt": "2026-10-22T13:29:27.742872+00:00"
+},
+{
+"id": "9d508de7-f41c-4c5a-8b5f-0396732485d0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9d508de7-f41c-4c5a-8b5f-0396732485d0/SUBDISTRICT",
+"sha256": "f6ab0863d74885a3c2fd20e99cf05399f06d2a9cb1e32e248c6fc1e35403875a",
+"bytes": 15206,
+"retrievedAt": "2026-10-22T13:29:19.849460+00:00"
+},
+{
+"id": "9d7293f5-6650-408f-8ed0-eb3ba89574cb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9d7293f5-6650-408f-8ed0-eb3ba89574cb/SUBDISTRICT",
+"sha256": "f54563156d0b6a6918b1a139bd8bcd8f418ddb2504e36fd55e8ca74a82c37222",
+"bytes": 2715,
+"retrievedAt": "2026-10-22T13:29:41.867142+00:00"
+},
+{
+"id": "9e2b0264-c27b-4311-b192-80f7d1644d97",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9e2b0264-c27b-4311-b192-80f7d1644d97/SUBDISTRICT",
+"sha256": "6073dd569918c51ccfa4cc0621f80f85e3be5e664ae4eb5f7b7c902280338a1c",
+"bytes": 6100,
+"retrievedAt": "2026-10-22T13:29:52.676957+00:00"
+},
+{
+"id": "9eafa9e8-8156-489c-9e1f-b7037a7c546f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9eafa9e8-8156-489c-9e1f-b7037a7c546f/SUBDISTRICT",
+"sha256": "c7b24ff3d71e36e0987bed6a03beaf9ef12637e56d991fa71f3cb0ded4fd4fba",
+"bytes": 33604,
+"retrievedAt": "2026-10-22T13:29:14.162310+00:00"
+},
+{
+"id": "9f0152f0-a4d7-4356-b738-93c8e8ba9dc3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9f0152f0-a4d7-4356-b738-93c8e8ba9dc3/SUBDISTRICT",
+"sha256": "02b2be84aa8f453fa4e87cd62ec49a94b7a93eed1395f05537c6a0f36a835afb",
+"bytes": 15158,
+"retrievedAt": "2026-10-22T13:29:22.298321+00:00"
+},
+{
+"id": "9f394444-923f-4151-a0fa-b7af05ff077b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9f394444-923f-4151-a0fa-b7af05ff077b/SUBDISTRICT",
+"sha256": "2e2ec954eb044d4bfda582276f9846a8439e6e74cdaffc23b5b1783663b97f73",
+"bytes": 4513,
+"retrievedAt": "2026-10-22T13:29:30.274570+00:00"
+},
+{
+"id": "9f3ed578-5dc3-4343-8a78-5dfc5023383d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9f3ed578-5dc3-4343-8a78-5dfc5023383d/SUBDISTRICT",
+"sha256": "f2bc0da31a20b6683d7c5cb8fd41833f879180ad0f476bfb99ffc4a5ea907d8c",
+"bytes": 7044,
+"retrievedAt": "2026-10-22T13:29:49.785589+00:00"
+},
+{
+"id": "9f4c02e8-eaba-4af3-a7e9-5ea01c5e55e5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9f4c02e8-eaba-4af3-a7e9-5ea01c5e55e5/SUBDISTRICT",
+"sha256": "1dc87e4c47412efb873cd54923e66008f755f61bd79d12377990ac24307a7248",
+"bytes": 5773,
+"retrievedAt": "2026-10-22T13:29:31.991504+00:00"
+},
+{
+"id": "9fccd93e-5bff-48c3-a93a-cff5925eca52",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9fccd93e-5bff-48c3-a93a-cff5925eca52/SUBDISTRICT",
+"sha256": "e820a0fcec7ae57a1ca823e4afb250224c9f620d716347bf307f2666c7963f10",
+"bytes": 224452,
+"retrievedAt": "2026-10-22T13:29:13.012306+00:00"
+},
+{
+"id": "a0523e49-8934-4a9c-9a7d-583d54382296",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a0523e49-8934-4a9c-9a7d-583d54382296/SUBDISTRICT",
+"sha256": "06ef1d98b8efd86ce7668b17655cb69e896c77bc3a436768ec38de10b48ca8d8",
+"bytes": 876,
+"retrievedAt": "2026-10-22T13:29:38.507950+00:00"
+},
+{
+"id": "a0fea619-60a3-4fa1-81e6-8ce4b97965e9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a0fea619-60a3-4fa1-81e6-8ce4b97965e9/SUBDISTRICT",
+"sha256": "9af2bf400ce2cf02311dada994c17b275e9b2c8898e337fa9efa694d069d2fcb",
+"bytes": 29599,
+"retrievedAt": "2026-10-22T13:29:10.479476+00:00"
+},
+{
+"id": "a271d20b-82b6-4d68-8fb1-85aa301c48bc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a271d20b-82b6-4d68-8fb1-85aa301c48bc/SUBDISTRICT",
+"sha256": "25576158ef3c4238824a074faea5a7364c3ac80487a01683a46aa59ec39eb3ff",
+"bytes": 11128,
+"retrievedAt": "2026-10-22T13:30:00.134797+00:00"
+},
+{
+"id": "a3282c65-31bb-4b87-bc15-d1861d472e60",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a3282c65-31bb-4b87-bc15-d1861d472e60/SUBDISTRICT",
+"sha256": "c03351c3cfeb25fe36f36b79942cac195eac5e58259a62a2d88a4789a9171e14",
+"bytes": 16089,
+"retrievedAt": "2026-10-22T13:29:28.145775+00:00"
+},
+{
+"id": "a33e1fb5-2611-4ba4-aefa-7032914a94e1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a33e1fb5-2611-4ba4-aefa-7032914a94e1/SUBDISTRICT",
+"sha256": "0e4bb99158af517ffd4fee5b4dc21cf359f645d1c8fbb899a26d8f02f041e974",
+"bytes": 9447,
+"retrievedAt": "2026-10-22T13:29:14.358173+00:00"
+},
+{
+"id": "a351a5a5-b5c9-43d5-a372-1816df465e04",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a351a5a5-b5c9-43d5-a372-1816df465e04/SUBDISTRICT",
+"sha256": "36921560980718690b3bd6a3912f1346ad0cff46d916bebb0a6bf6dcaae8e1e5",
+"bytes": 14830,
+"retrievedAt": "2026-10-22T13:30:18.184575+00:00"
+},
+{
+"id": "a4769fd3-f958-4093-a27b-e65f76dae140",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a4769fd3-f958-4093-a27b-e65f76dae140/SUBDISTRICT",
+"sha256": "164af54004435cfe4ba79ca3b069557e2eccc79c5b6e648fe9f8e0b1ac968d00",
+"bytes": 10478,
+"retrievedAt": "2026-10-22T13:29:31.394631+00:00"
+},
+{
+"id": "a513d52f-80ba-4223-a257-b7a567a9ddb5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a513d52f-80ba-4223-a257-b7a567a9ddb5/SUBDISTRICT",
+"sha256": "6f3512ced4d2eb56eb2878883477642d028d8daba882c178903321d038841473",
+"bytes": 3814,
+"retrievedAt": "2026-10-22T13:30:00.471805+00:00"
+},
+{
+"id": "a5329ede-cb91-494e-bb0c-073106771481",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a5329ede-cb91-494e-bb0c-073106771481/SUBDISTRICT",
+"sha256": "b4d6a21d166942827aa5e8e89bf935d5af494bd4ba262c1f2b1f0746eb2f2e3d",
+"bytes": 25214,
+"retrievedAt": "2026-10-22T13:29:18.800973+00:00"
+},
+{
+"id": "a55f2368-a5ef-408a-ac73-5b09cb29128f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a55f2368-a5ef-408a-ac73-5b09cb29128f/SUBDISTRICT",
+"sha256": "490243cf0c93004ad4d86f6b9586b52820fb6c587b7a2e64c4e3b761eeb136da",
+"bytes": 47445,
+"retrievedAt": "2026-10-22T13:30:18.574334+00:00"
+},
+{
+"id": "a57168a6-5df7-448d-ab7f-fdc6905864aa",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a57168a6-5df7-448d-ab7f-fdc6905864aa/SUBDISTRICT",
+"sha256": "1f3294b93ba8b749f7b4dd569d90fa1183c5a7ae002017bf47b9433c4e95c11b",
+"bytes": 4864,
+"retrievedAt": "2026-10-22T13:29:19.432047+00:00"
+},
+{
+"id": "a582aa62-a336-4394-8629-c08d3cecf34d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a582aa62-a336-4394-8629-c08d3cecf34d/SUBDISTRICT",
+"sha256": "bbfa4433a86e944442eb0348dddfeef9799a40593e1f6b299afe73640d7a9546",
+"bytes": 12481,
+"retrievedAt": "2026-10-22T13:29:28.705556+00:00"
+},
+{
+"id": "a682b6ff-f3ad-404c-99c6-201659891cbe",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a682b6ff-f3ad-404c-99c6-201659891cbe/SUBDISTRICT",
+"sha256": "c267f3f39ecaf6a4235073d3d230a4ad00a26d4f68ae4f96d9bea44498cf7cb3",
+"bytes": 11226,
+"retrievedAt": "2026-10-22T13:29:10.260503+00:00"
+},
+{
+"id": "a6f42a52-cf67-49ae-9891-a1c26abeaaf3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a6f42a52-cf67-49ae-9891-a1c26abeaaf3/SUBDISTRICT",
+"sha256": "041ce4e59b8a84a0ee20f7665c6a5995360759192511963c84130170c6754598",
+"bytes": 14023,
+"retrievedAt": "2026-10-22T13:29:23.619762+00:00"
+},
+{
+"id": "a7315fef-8dfc-44e7-8005-3854d2b2ac87",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a7315fef-8dfc-44e7-8005-3854d2b2ac87/SUBDISTRICT",
+"sha256": "0384d31d04e11f901a4d4acd90624dde9448c7898a46844bc400a991cc29695d",
+"bytes": 2080,
+"retrievedAt": "2026-10-22T13:30:08.693518+00:00"
+},
+{
+"id": "a76b30cf-f957-43f8-a1d0-eaaf15c86edc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a76b30cf-f957-43f8-a1d0-eaaf15c86edc/SUBDISTRICT",
+"sha256": "41a794a55d2bb5dce63670e3d3765b7721dac3b1fcb94a3848b8a819fd335bc5",
+"bytes": 11420,
+"retrievedAt": "2026-10-22T13:29:21.466130+00:00"
+},
+{
+"id": "a7863623-10d2-48f6-8be7-87fb1fc3010e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a7863623-10d2-48f6-8be7-87fb1fc3010e/SUBDISTRICT",
+"sha256": "5adff4d5b9e29b9d08491658d5a339e87ab78802a9fe17f507141735b558039a",
+"bytes": 18464,
+"retrievedAt": "2026-10-22T13:30:15.819959+00:00"
+},
+{
+"id": "a852a444-2597-4654-ab44-4e1cffbc8eef",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a852a444-2597-4654-ab44-4e1cffbc8eef/SUBDISTRICT",
+"sha256": "84744b537ed1c0d12ca1c3666ec267af1a2ca0f0d161e94b7a9d75c00a31ee94",
+"bytes": 9139,
+"retrievedAt": "2026-10-22T13:29:32.216884+00:00"
+},
+{
+"id": "a9b07ed4-1c4c-4eea-af0d-4423fb452e77",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a9b07ed4-1c4c-4eea-af0d-4423fb452e77/SUBDISTRICT",
+"sha256": "ca40f8f249ef43e89a943480f21e54e0bfff71fb9d86ecdbcea7c046bce19909",
+"bytes": 23300,
+"retrievedAt": "2026-10-22T13:30:02.846783+00:00"
+},
+{
+"id": "a9c4a86e-a42e-4847-810a-913b975e57f9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a9c4a86e-a42e-4847-810a-913b975e57f9/SUBDISTRICT",
+"sha256": "b9109f270c33f16a6c0db576d6211a0b59a49ab139f4881905049947d827c893",
+"bytes": 22610,
+"retrievedAt": "2026-10-22T13:29:21.460232+00:00"
+},
+{
+"id": "a9fd7b0a-fd4e-4dd6-ab5f-1995da5e4d56",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/a9fd7b0a-fd4e-4dd6-ab5f-1995da5e4d56/SUBDISTRICT",
+"sha256": "6322a7a9e1e2ed976f4752f388e961286b27a174b05dd202ba108ae0168f8921",
+"bytes": 3710,
+"retrievedAt": "2026-10-22T13:29:46.738959+00:00"
+},
+{
+"id": "aa3136fc-995e-48fd-9b07-59741e0fe769",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/aa3136fc-995e-48fd-9b07-59741e0fe769/SUBDISTRICT",
+"sha256": "5f86e3cd5a4f283ebcd7f4a914fdda586eadc323fbf89c8e8649e47d3bf818c7",
+"bytes": 4593,
+"retrievedAt": "2026-10-22T13:29:54.550781+00:00"
+},
+{
+"id": "aa5f03d9-d538-4c10-9313-bdd0d72351a3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/aa5f03d9-d538-4c10-9313-bdd0d72351a3/SUBDISTRICT",
+"sha256": "b546ba698d602a7b54bc2bb870bfd6f0717cbe452da3a455204898029cdcffda",
+"bytes": 3703,
+"retrievedAt": "2026-10-22T13:29:52.870952+00:00"
+},
+{
+"id": "ab622293-36fb-46fe-b849-ccb1ac453a9a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ab622293-36fb-46fe-b849-ccb1ac453a9a/SUBDISTRICT",
+"sha256": "1d431e4fde1536327040e23d48ab09e86b1999d5010d4ef3d980b7384ce0c696",
+"bytes": 17845,
+"retrievedAt": "2026-10-22T13:29:22.344083+00:00"
+},
+{
+"id": "aba0d3c8-0510-4e13-9b03-9467577763ff",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/aba0d3c8-0510-4e13-9b03-9467577763ff/SUBDISTRICT",
+"sha256": "579f97d389bf2071c042eba5e8b94742467b7a0b9d42ed547e0d7a35695b4c2f",
+"bytes": 3040,
+"retrievedAt": "2026-10-22T13:29:41.993795+00:00"
+},
+{
+"id": "ac2f14b4-3c57-491f-894e-26123e2fb7a1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ac2f14b4-3c57-491f-894e-26123e2fb7a1/SUBDISTRICT",
+"sha256": "c3d734a0ed1bceb178348f448a2376794ef478adea9c6a76391fce575cc63161",
+"bytes": 18925,
+"retrievedAt": "2026-10-22T13:29:56.019649+00:00"
+},
+{
+"id": "ac4f6a77-70ca-4f0c-b417-22677c022d8a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ac4f6a77-70ca-4f0c-b417-22677c022d8a/SUBDISTRICT",
+"sha256": "3dfa26e42d8c3a74f12cdf5e81951aed5c8b8d715e5c0a0994a4bb8250f1ee8f",
+"bytes": 13485,
+"retrievedAt": "2026-10-22T13:29:17.913562+00:00"
+},
+{
+"id": "acbc7314-72ca-412f-a1bb-1eb766a46c74",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/acbc7314-72ca-412f-a1bb-1eb766a46c74/SUBDISTRICT",
+"sha256": "97dc3328ad316bbe0d545f3507789e6b485c7acdc74c6c0f4b73671d022d7066",
+"bytes": 3932,
+"retrievedAt": "2026-10-22T13:29:29.922350+00:00"
+},
+{
+"id": "ad5e5c1d-e5b2-4fee-a3a2-a31420407353",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ad5e5c1d-e5b2-4fee-a3a2-a31420407353/SUBDISTRICT",
+"sha256": "aed0a1a5db832488193b6421906c27e8e36c59c6226d1c320e33149c08ec24b8",
+"bytes": 14539,
+"retrievedAt": "2026-10-22T13:29:40.360354+00:00"
+},
+{
+"id": "ae19bae6-5ccb-4102-851f-4627585a41b7",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ae19bae6-5ccb-4102-851f-4627585a41b7/SUBDISTRICT",
+"sha256": "b0ed437bf177363decaef95ee56ee740d264de1a9ec9c495a0ff1083ed5b986f",
+"bytes": 72717,
+"retrievedAt": "2026-10-22T13:29:48.313331+00:00"
+},
+{
+"id": "ae251058-b260-4252-a506-1888b6154686",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ae251058-b260-4252-a506-1888b6154686/SUBDISTRICT",
+"sha256": "1f68104006bfed8ff1bc19d7fdca3e423604d4b109bf87c7bb58754410308b57",
+"bytes": 16740,
+"retrievedAt": "2026-10-22T13:29:55.947446+00:00"
+},
+{
+"id": "ae65e709-ac8e-4247-84b4-49fc1adc21ba",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ae65e709-ac8e-4247-84b4-49fc1adc21ba/SUBDISTRICT",
+"sha256": "a55180e16dbefd1a7319647e80b7e4e5f74ea9d8c345675632b3ffd04ba8cd47",
+"bytes": 17718,
+"retrievedAt": "2026-10-22T13:29:22.695766+00:00"
+},
+{
+"id": "aed0c1f4-e9ff-4922-9629-5084caabf356",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/aed0c1f4-e9ff-4922-9629-5084caabf356/SUBDISTRICT",
+"sha256": "d159cc1533e71f0b35e2ef88f128856032523dc846903cece59f103474181977",
+"bytes": 25571,
+"retrievedAt": "2026-10-22T13:29:40.588324+00:00"
+},
+{
+"id": "af6f85a6-2f86-4951-bb94-af31d9a82d2a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/af6f85a6-2f86-4951-bb94-af31d9a82d2a/SUBDISTRICT",
+"sha256": "5eb65b0c997a8c56bec9949e633ee4747b50387cb68cb5a9733faaecf5fa77f1",
+"bytes": 20978,
+"retrievedAt": "2026-10-22T13:30:16.245113+00:00"
+},
+{
+"id": "af85afe7-95b2-4547-82dd-0f0e9db0a2d8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/af85afe7-95b2-4547-82dd-0f0e9db0a2d8/SUBDISTRICT",
+"sha256": "fcd3dd9c8100ed95b415bccd1bf7c04f085055639e657a736ac91dd78c8cd2a6",
+"bytes": 18808,
+"retrievedAt": "2026-10-22T13:29:21.030554+00:00"
+},
+{
+"id": "af98b5a3-0985-4d46-8991-73c25697e7ea",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/af98b5a3-0985-4d46-8991-73c25697e7ea/SUBDISTRICT",
+"sha256": "dfb9a892e5b69399a527cafbdbdb6f3f9a9dc8938b19035437be0a2069042d1e",
+"bytes": 19865,
+"retrievedAt": "2026-10-22T13:29:27.723630+00:00"
+},
+{
+"id": "afb337ce-f85c-4be0-a329-2818003b7e01",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/afb337ce-f85c-4be0-a329-2818003b7e01/SUBDISTRICT",
+"sha256": "1b0bc6e7a1b47c4820a44f3e68c2d4ed2f0ac37ad5ce8a57c639075aac735a8b",
+"bytes": 20347,
+"retrievedAt": "2026-10-22T13:29:14.011077+00:00"
+},
+{
+"id": "b00468ec-0d11-4c32-946f-97631e72fce3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b00468ec-0d11-4c32-946f-97631e72fce3/SUBDISTRICT",
+"sha256": "a67daa7c9d43b6bedbf3289df84107d7a5c29d1a9435581cc939d63af1f60c90",
+"bytes": 50328,
+"retrievedAt": "2026-10-22T13:30:19.583206+00:00"
+},
+{
+"id": "b0459616-9706-495e-934b-10a479812922",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b0459616-9706-495e-934b-10a479812922/SUBDISTRICT",
+"sha256": "b91cab4af24ebd13433924f5013f513964dbc49f5552dbff928a37480e3dc993",
+"bytes": 15329,
+"retrievedAt": "2026-10-22T13:29:53.487251+00:00"
+},
+{
+"id": "b05141e7-83ec-491d-b64d-a693bfc109a1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b05141e7-83ec-491d-b64d-a693bfc109a1/SUBDISTRICT",
+"sha256": "861e137429403a1a25da6e54c9803ffab934e63f93faa892f839cda1cee1615e",
+"bytes": 14747,
+"retrievedAt": "2026-10-22T13:29:08.983100+00:00"
+},
+{
+"id": "b09736f0-3aa6-4286-8850-e3847645f446",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b09736f0-3aa6-4286-8850-e3847645f446/SUBDISTRICT",
+"sha256": "0e41b242713fae359393a68af3ab6f79aa79dcce093f05d5636128cc1223f856",
+"bytes": 181855,
+"retrievedAt": "2026-10-22T13:29:13.180988+00:00"
+},
+{
+"id": "b0d143d7-7559-4598-ab36-2d5a2819d65c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b0d143d7-7559-4598-ab36-2d5a2819d65c/SUBDISTRICT",
+"sha256": "30cdb11843c8f95a1ea8c35875a6d5217a5d1f0bdf5ab87c37733b2aa4940eae",
+"bytes": 7137,
+"retrievedAt": "2026-10-22T13:29:59.646908+00:00"
+},
+{
+"id": "b1ec013c-93c5-408b-92ac-615a2c05f9c4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b1ec013c-93c5-408b-92ac-615a2c05f9c4/SUBDISTRICT",
+"sha256": "4972fb46d84e6a831923e8b7e1adca845d52add0e3a4c591c85b824a1bab674a",
+"bytes": 19647,
+"retrievedAt": "2026-10-22T13:29:05.946769+00:00"
+},
+{
+"id": "b246b60b-43bf-48e4-95c0-07f1d94472f2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b246b60b-43bf-48e4-95c0-07f1d94472f2/SUBDISTRICT",
+"sha256": "bb14187342303116a923362ac216b990dace4c5e54da0834efb623902d95964c",
+"bytes": 9352,
+"retrievedAt": "2026-10-22T13:29:25.258574+00:00"
+},
+{
+"id": "b3003987-f9e1-4f4e-9325-c69f1b3c1955",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b3003987-f9e1-4f4e-9325-c69f1b3c1955/SUBDISTRICT",
+"sha256": "2d4672df0c9606dfe90b63686af361ce832b0b31ca1154911501bb3f7394608f",
+"bytes": 28754,
+"retrievedAt": "2026-10-22T13:29:18.837370+00:00"
+},
+{
+"id": "b42735ee-5e79-41e8-b64a-98ced088bb2d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b42735ee-5e79-41e8-b64a-98ced088bb2d/SUBDISTRICT",
+"sha256": "5c0e4fe7a12269c9a51116e0c0de1be3948003ea6efd2049db34ed1ceaa2617f",
+"bytes": 42294,
+"retrievedAt": "2026-10-22T13:29:07.126484+00:00"
+},
+{
+"id": "b46a1e26-7a5d-4ef2-82a8-21e4decb80c4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b46a1e26-7a5d-4ef2-82a8-21e4decb80c4/SUBDISTRICT",
+"sha256": "527f1e906a7486db0942c07dc5ad3278e330f0861ed5f07f6de95bb10d1d89f1",
+"bytes": 6390,
+"retrievedAt": "2026-10-22T13:29:17.875186+00:00"
+},
+{
+"id": "b49c0386-3e2b-48e2-af07-973f7f9c02b7",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b49c0386-3e2b-48e2-af07-973f7f9c02b7/SUBDISTRICT",
+"sha256": "50e62b990b050f8fc04f3792306b44dfda9f8b4c41f21e646aff71055a6f7c3c",
+"bytes": 16520,
+"retrievedAt": "2026-10-22T13:30:02.674358+00:00"
+},
+{
+"id": "b552990f-6530-46bf-b966-d01dea3703b1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b552990f-6530-46bf-b966-d01dea3703b1/SUBDISTRICT",
+"sha256": "f38d75813f445a8981bffd7f7e236236c1719710ea1c8b1d293fa26faed28658",
+"bytes": 3254,
+"retrievedAt": "2026-10-22T13:29:41.018979+00:00"
+},
+{
+"id": "b5a4cb3c-7fe5-4fb4-8739-c2a1762df136",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b5a4cb3c-7fe5-4fb4-8739-c2a1762df136/SUBDISTRICT",
+"sha256": "c78241e44f8fef81ecb9850b4a69427d1eba0d887cc8605389a6de3dd633f8d5",
+"bytes": 6431,
+"retrievedAt": "2026-10-22T13:29:58.397275+00:00"
+},
+{
+"id": "b5d17499-6ce5-41d4-9e13-4b7c92ad03a1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b5d17499-6ce5-41d4-9e13-4b7c92ad03a1/SUBDISTRICT",
+"sha256": "3fec24a7e3fce0172ad8685090236742d9ed3d2e8197b859cdad04e8afbde32e",
+"bytes": 1902,
+"retrievedAt": "2026-10-22T13:29:44.230085+00:00"
+},
+{
+"id": "b6710120-232a-4dc3-8a65-31b0f7156ac2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b6710120-232a-4dc3-8a65-31b0f7156ac2/SUBDISTRICT",
+"sha256": "52443b8f26ca41738819808b001db2f285cf387d8c58bcaffdb1236683b410a8",
+"bytes": 12262,
+"retrievedAt": "2026-10-22T13:29:56.329662+00:00"
+},
+{
+"id": "b69e8d16-144e-4f6a-9c32-9ec1068026bf",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b69e8d16-144e-4f6a-9c32-9ec1068026bf/SUBDISTRICT",
+"sha256": "fd894f456ffb137e05fc4e822bcfdee64d0ed6bf91cefa2760f7a19198b21358",
+"bytes": 9969,
+"retrievedAt": "2026-10-22T13:29:28.669913+00:00"
+},
+{
+"id": "b7fac71d-444f-4952-af7a-22ae46c88598",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b7fac71d-444f-4952-af7a-22ae46c88598/SUBDISTRICT",
+"sha256": "d9c80cacfea940d1cf0fa9c3828ed9eec7a762eac204fa425475a88bd9b4c4b0",
+"bytes": 26778,
+"retrievedAt": "2026-10-22T13:29:06.410377+00:00"
+},
+{
+"id": "b8693f7d-a280-46b3-852d-2134bcb4a21c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b8693f7d-a280-46b3-852d-2134bcb4a21c/SUBDISTRICT",
+"sha256": "094090cd2f1ba32c831a2afa1eac5f1a9903793de472db5261db60377d701713",
+"bytes": 79987,
+"retrievedAt": "2026-10-22T13:29:13.482161+00:00"
+},
+{
+"id": "b8fce4af-71c8-4126-b318-dfc936230136",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b8fce4af-71c8-4126-b318-dfc936230136/SUBDISTRICT",
+"sha256": "ddad592eaa6f54312015c96b91ac54d6fb8fb363bbbec84ff4fbc4b68dd69adc",
+"bytes": 9733,
+"retrievedAt": "2026-10-22T13:30:07.484061+00:00"
+},
+{
+"id": "b93d0e51-0705-425b-a3c9-17249235f7ed",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b93d0e51-0705-425b-a3c9-17249235f7ed/SUBDISTRICT",
+"sha256": "93c0ffd8f21bfe33da99f01dd080c4ff6c79f11b20e0b338d0386878f4e7bdb2",
+"bytes": 1562,
+"retrievedAt": "2026-10-22T13:29:15.640372+00:00"
+},
+{
+"id": "b94ab122-7c10-41a1-90fc-b9f6646f66ca",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b94ab122-7c10-41a1-90fc-b9f6646f66ca/SUBDISTRICT",
+"sha256": "ad35a6f915f87206af478b1646ae9bba76557ac875dcd849ac7af652483240d9",
+"bytes": 21585,
+"retrievedAt": "2026-10-22T13:30:17.460028+00:00"
+},
+{
+"id": "ba3d243a-0b33-4bf2-af58-a0a556323a9b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ba3d243a-0b33-4bf2-af58-a0a556323a9b/SUBDISTRICT",
+"sha256": "3173d230bd293ab24024066051c46c039291350c0c92ac1b54f50787490bbac7",
+"bytes": 34430,
+"retrievedAt": "2026-10-22T13:30:06.938884+00:00"
+},
+{
+"id": "ba978728-50f7-4157-9094-25a86734052f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ba978728-50f7-4157-9094-25a86734052f/SUBDISTRICT",
+"sha256": "d8535ca0fd0c4cf5c673011195ef939eee7b8e2a079e458cee5eb269a24fe508",
+"bytes": 23502,
+"retrievedAt": "2026-10-22T13:29:22.726571+00:00"
+},
+{
+"id": "bbf650e8-2a33-4cba-9bef-58287f49954e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/bbf650e8-2a33-4cba-9bef-58287f49954e/SUBDISTRICT",
+"sha256": "20954f02280e5e3a52883dc07c7ea9530a14be1c3cced564c9ff76022974fe17",
+"bytes": 58192,
+"retrievedAt": "2026-10-22T13:30:07.438667+00:00"
+},
+{
+"id": "bc4105ac-c0bd-46bb-bc15-3de3886d8308",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/bc4105ac-c0bd-46bb-bc15-3de3886d8308/SUBDISTRICT",
+"sha256": "5090dc183bbd7a775d5563b7b80e2f315b0ddda030a8fe00824ee0b11b2d0eb2",
+"bytes": 10762,
+"retrievedAt": "2026-10-22T13:29:30.662956+00:00"
+},
+{
+"id": "bcc58c76-b6ca-447e-b437-8460e76d1e08",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/bcc58c76-b6ca-447e-b437-8460e76d1e08/SUBDISTRICT",
+"sha256": "e5215b805e4afa230f55bf09c1cd1bd06eb2d26b0bf9e480bb1e0c97cc116de3",
+"bytes": 31714,
+"retrievedAt": "2026-10-22T13:30:14.413991+00:00"
+},
+{
+"id": "bd06e45f-43be-43d7-82be-0863b45acff3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/bd06e45f-43be-43d7-82be-0863b45acff3/SUBDISTRICT",
+"sha256": "77aa4f5a95806ae37c17be7519812e608c58099cd0ec59860a18b80ac2392a39",
+"bytes": 29599,
+"retrievedAt": "2026-10-22T13:30:19.326997+00:00"
+},
+{
+"id": "bd20cc63-11c9-498f-b64c-9d6fb037462c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/bd20cc63-11c9-498f-b64c-9d6fb037462c/SUBDISTRICT",
+"sha256": "3cf57539baec84e9172c6c3ed282cdc9d96b0fc88129205a6b6f588b97546d6b",
+"bytes": 9014,
+"retrievedAt": "2026-10-22T13:29:03.803795+00:00"
+},
+{
+"id": "bdfcc993-b976-4117-80a6-9649ee9c4034",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/bdfcc993-b976-4117-80a6-9649ee9c4034/SUBDISTRICT",
+"sha256": "7128fca5d8b0a208eac8fecce14f3b1add9d63058d2a5daad74d612b2845c7f9",
+"bytes": 21084,
+"retrievedAt": "2026-10-22T13:29:43.015061+00:00"
+},
+{
+"id": "bead3e16-a09c-41cb-b29b-b807398954f0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/bead3e16-a09c-41cb-b29b-b807398954f0/SUBDISTRICT",
+"sha256": "0a568374682e0d746cdebbc1e465847816c42932a7ecf378c6889342046f6cfb",
+"bytes": 29275,
+"retrievedAt": "2026-10-22T13:30:10.707100+00:00"
+},
+{
+"id": "c00f6a12-b05d-4a2c-a41b-d3e89df31810",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c00f6a12-b05d-4a2c-a41b-d3e89df31810/SUBDISTRICT",
+"sha256": "e94dea8acaa3b9d03595c9f31719ea012fd83093c046381591e7afa9b482c35d",
+"bytes": 6457,
+"retrievedAt": "2026-10-22T13:29:44.483987+00:00"
+},
+{
+"id": "c028830f-cb0e-4b14-a528-6dc029cdec21",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c028830f-cb0e-4b14-a528-6dc029cdec21/SUBDISTRICT",
+"sha256": "1ef724c58f207155d2abb478adf9ba47311ba7c6f9d4e538a20d17b243c501c5",
+"bytes": 4114,
+"retrievedAt": "2026-10-22T13:29:07.483261+00:00"
+},
+{
+"id": "c0644d8a-f964-4ce9-8f96-5e57e9a57fd5",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c0644d8a-f964-4ce9-8f96-5e57e9a57fd5/SUBDISTRICT",
+"sha256": "858989fb5be23e455c10903ba39919f534eef9e1a489e9662c3d925b37b573ef",
+"bytes": 15604,
+"retrievedAt": "2026-10-22T13:29:43.407232+00:00"
+},
+{
+"id": "c08cf573-595f-44f3-826e-3eae14a73e1f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c08cf573-595f-44f3-826e-3eae14a73e1f/SUBDISTRICT",
+"sha256": "29236475d9dcd35b6ada2fa3f26b2e1e19d0bbcd6486f3f07dc492e7cd9e14a9",
+"bytes": 22065,
+"retrievedAt": "2026-10-22T13:29:47.850755+00:00"
+},
+{
+"id": "c0c6683e-2d4d-4b4a-ab19-4acd3c9337ba",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c0c6683e-2d4d-4b4a-ab19-4acd3c9337ba/SUBDISTRICT",
+"sha256": "ffa5d968f461ee9a8443d5add69e94d8cabe7d3cb3fed1b34dc54bdb99eb72a9",
+"bytes": 11657,
+"retrievedAt": "2026-10-22T13:29:12.124536+00:00"
+},
+{
+"id": "c0d9891e-9dbc-4f3d-a147-478ae570a761",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c0d9891e-9dbc-4f3d-a147-478ae570a761/SUBDISTRICT",
+"sha256": "9ebd7f05fb88590180462b8057ee5fa1198b9213e874e673e10193fdc8e08fa4",
+"bytes": 9388,
+"retrievedAt": "2026-10-22T13:29:42.627736+00:00"
+},
+{
+"id": "c102454f-c357-437b-837e-5956efeeec77",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c102454f-c357-437b-837e-5956efeeec77/SUBDISTRICT",
+"sha256": "a91ae35070f4ea7c0a1a23fcc70cde8aca03b8de22c71849751129d66df12226",
+"bytes": 33628,
+"retrievedAt": "2026-10-22T13:29:29.089065+00:00"
+},
+{
+"id": "c1c33b45-9f61-4165-856b-af8788cb09dc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c1c33b45-9f61-4165-856b-af8788cb09dc/SUBDISTRICT",
+"sha256": "43b1cc5b1ff0a07e4237972d39d7a92ad5de385e0e459ed18f8ec1b5091c882f",
+"bytes": 10341,
+"retrievedAt": "2026-10-22T13:30:00.296823+00:00"
+},
+{
+"id": "c219da1b-78b8-4081-86aa-4440ef32841e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c219da1b-78b8-4081-86aa-4440ef32841e/SUBDISTRICT",
+"sha256": "993cc46c8cd41ea0f19d26f4e1743c8c2254f3144d1cdf512565100bbff07c7f",
+"bytes": 8071,
+"retrievedAt": "2026-10-22T13:29:27.876792+00:00"
+},
+{
+"id": "c2306f77-55aa-4369-9ede-7d44be704aa4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c2306f77-55aa-4369-9ede-7d44be704aa4/SUBDISTRICT",
+"sha256": "0b8e67a0ea6a0171eac70720c36d38f606724037963bdc0818d4329c4a27da5f",
+"bytes": 13600,
+"retrievedAt": "2026-10-22T13:30:03.357023+00:00"
+},
+{
+"id": "c2408110-f1c3-455c-99bd-f4a4efe021f9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c2408110-f1c3-455c-99bd-f4a4efe021f9/SUBDISTRICT",
+"sha256": "86929e45edd2dc8f2db5122ef6330d62e32c10e1061ee880150a13e00d767a0b",
+"bytes": 15433,
+"retrievedAt": "2026-10-22T13:30:00.672212+00:00"
+},
+{
+"id": "c2cb0d45-8de9-4ca4-bf3a-24f943d47e54",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c2cb0d45-8de9-4ca4-bf3a-24f943d47e54/SUBDISTRICT",
+"sha256": "880cafa728c3517b97ff6b582cf7cdfae02f3165d47117be8ddd484e1e70e914",
+"bytes": 16997,
+"retrievedAt": "2026-10-22T13:29:24.935158+00:00"
+},
+{
+"id": "c3b5baa8-0b0b-44a5-ac1d-0832ecb4b42d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c3b5baa8-0b0b-44a5-ac1d-0832ecb4b42d/SUBDISTRICT",
+"sha256": "b29dde3bd797035cc9d018f41e17eed49010296e217c9dd62c0cddcf29da2a2e",
+"bytes": 22479,
+"retrievedAt": "2026-10-22T13:30:13.997341+00:00"
+},
+{
+"id": "c3e290c2-918c-4e8c-8dba-dd47c273b589",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c3e290c2-918c-4e8c-8dba-dd47c273b589/SUBDISTRICT",
+"sha256": "59b24ba1f81af1ba786bb329df8bc7794371cc47cf5c59baf875497af4c4b821",
+"bytes": 3674,
+"retrievedAt": "2026-10-22T13:30:08.929501+00:00"
+},
+{
+"id": "c493b704-9463-4aad-8650-b24f3dcd0bab",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c493b704-9463-4aad-8650-b24f3dcd0bab/SUBDISTRICT",
+"sha256": "22484e57dafcc92ff1995eeaaea6f1a443879df8808a4031922956abbf8616f1",
+"bytes": 16515,
+"retrievedAt": "2026-10-22T13:29:54.317703+00:00"
+},
+{
+"id": "c4f3d22a-4fe5-4e86-8031-28e808435efb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c4f3d22a-4fe5-4e86-8031-28e808435efb/SUBDISTRICT",
+"sha256": "4b215100045e3f544747c15218982eea0ecc9bcd6d9a2751184a1c2e358114c1",
+"bytes": 3921,
+"retrievedAt": "2026-10-22T13:29:44.645176+00:00"
+},
+{
+"id": "c5113ec6-ed7a-46ae-bc54-09898ef79c83",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c5113ec6-ed7a-46ae-bc54-09898ef79c83/SUBDISTRICT",
+"sha256": "2427226e3e860ea53257146dbc71723b4edbec73738cfb7aeeaf3aaf448c44ee",
+"bytes": 12005,
+"retrievedAt": "2026-10-22T13:29:29.012942+00:00"
+},
+{
+"id": "c6b8a943-75c2-4907-841a-2c639f381d54",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c6b8a943-75c2-4907-841a-2c639f381d54/SUBDISTRICT",
+"sha256": "51b38594e7a321c328fea8194292337a9c80ac20c453ce8296a39a8577005523",
+"bytes": 8383,
+"retrievedAt": "2026-10-22T13:29:18.270378+00:00"
+},
+{
+"id": "c755c175-5956-43ed-a6a8-33ec8870dbfc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c755c175-5956-43ed-a6a8-33ec8870dbfc/SUBDISTRICT",
+"sha256": "ee747c6ba0fe3a6911b252b3495b7f7a88a26ac98a8add81d924bef9e2991b56",
+"bytes": 37177,
+"retrievedAt": "2026-10-22T13:30:16.759237+00:00"
+},
+{
+"id": "c79e273f-3afb-4b82-a872-e24240230de8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c79e273f-3afb-4b82-a872-e24240230de8/SUBDISTRICT",
+"sha256": "bbf842422a0d62f2e744990de91a3f84302a6a15d282143443f7a6e4a82cf200",
+"bytes": 40643,
+"retrievedAt": "2026-10-22T13:29:48.337225+00:00"
+},
+{
+"id": "c7f05f7d-40f0-47f3-976d-87a23d8f24b4",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c7f05f7d-40f0-47f3-976d-87a23d8f24b4/SUBDISTRICT",
+"sha256": "b6cdf939a7d7ad5254bad84e73f7197b58043afd584cc03e233d64762abcae37",
+"bytes": 11133,
+"retrievedAt": "2026-10-22T13:29:05.913120+00:00"
+},
+{
+"id": "c83e834b-fa9b-4c3e-b1d3-7d34c1b17616",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c83e834b-fa9b-4c3e-b1d3-7d34c1b17616/SUBDISTRICT",
+"sha256": "98cf36b0197f4a26c8de6bf7845165b286afc6f5664de2139561b720f36b928f",
+"bytes": 2413,
+"retrievedAt": "2026-10-22T13:30:08.692238+00:00"
+},
+{
+"id": "c89588b2-2702-4c78-9db7-203b6e863c27",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c89588b2-2702-4c78-9db7-203b6e863c27/SUBDISTRICT",
+"sha256": "8a1401769e70add9c164185780d3a92334fab30c80febdfeb7e534a86e18bf81",
+"bytes": 16202,
+"retrievedAt": "2026-10-22T13:29:06.804513+00:00"
+},
+{
+"id": "c9011d2a-0a3b-4af2-b5a4-6915a28d0b78",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c9011d2a-0a3b-4af2-b5a4-6915a28d0b78/SUBDISTRICT",
+"sha256": "76396a3c085a755e4f9405892465c999c39d566b38afdcaaf003a0f93ea984f9",
+"bytes": 64467,
+"retrievedAt": "2026-10-22T13:29:11.706993+00:00"
+},
+{
+"id": "c935b79f-a612-40bd-97e1-bd4d2e3eae8d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c935b79f-a612-40bd-97e1-bd4d2e3eae8d/SUBDISTRICT",
+"sha256": "fab860194a2232d0bfa3785f98acd53b3cbee871cd90d7db0d8ab1565a4ed66f",
+"bytes": 30572,
+"retrievedAt": "2026-10-22T13:29:08.882461+00:00"
+},
+{
+"id": "cb45c198-cd13-460f-bb94-e55b177f16c2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/cb45c198-cd13-460f-bb94-e55b177f16c2/SUBDISTRICT",
+"sha256": "e37f527539e7a5e793a9a3580c1bafd2293f3d1fba628c9ccfac53b925145fa2",
+"bytes": 3351,
+"retrievedAt": "2026-10-22T13:29:45.474652+00:00"
+},
+{
+"id": "cca19365-db38-4219-b473-afce3aebf2b7",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/cca19365-db38-4219-b473-afce3aebf2b7/SUBDISTRICT",
+"sha256": "a97507274f718df429012dc932ec4f3cf8c22a1e7bd83d7fedb7b6f7bd8045ec",
+"bytes": 10623,
+"retrievedAt": "2026-10-22T13:30:09.775652+00:00"
+},
+{
+"id": "ccaa007d-9abf-4afc-8897-9846076cfb68",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ccaa007d-9abf-4afc-8897-9846076cfb68/SUBDISTRICT",
+"sha256": "901d2407c92d27d377adfa48ed5733180dd1933078f996da847bca13e9c56a66",
+"bytes": 24060,
+"retrievedAt": "2026-10-22T13:29:21.881754+00:00"
+},
+{
+"id": "cd28224d-59a5-415c-b255-055edcc6cae1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/cd28224d-59a5-415c-b255-055edcc6cae1/SUBDISTRICT",
+"sha256": "086d6f256d25151e112bf764d479fe2919b169293335acf11046413c19cedc35",
+"bytes": 19845,
+"retrievedAt": "2026-10-22T13:30:10.311056+00:00"
+},
+{
+"id": "cdb319fa-230d-4ff9-81b9-ec7edb2d8685",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/cdb319fa-230d-4ff9-81b9-ec7edb2d8685/SUBDISTRICT",
+"sha256": "984c862534aba5a879e891171964f31e87407b241d5190480bfe369c74148fbd",
+"bytes": 64965,
+"retrievedAt": "2026-10-22T13:30:12.120983+00:00"
+},
+{
+"id": "ceb4298c-81c3-4416-85c8-a1738216c784",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ceb4298c-81c3-4416-85c8-a1738216c784/SUBDISTRICT",
+"sha256": "1a86a7626defc550a6cc80bdc652c9dc90faa4926c239608a660899ec9fac964",
+"bytes": 19812,
+"retrievedAt": "2026-10-22T13:29:10.642470+00:00"
+},
+{
+"id": "d0ae53e1-7bdf-4a27-857a-3f9c2e032c25",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d0ae53e1-7bdf-4a27-857a-3f9c2e032c25/SUBDISTRICT",
+"sha256": "121bb3fe3841fef75ff7fabe108e98022566c0ec92e216b943db308b1716f53b",
+"bytes": 5478,
+"retrievedAt": "2026-10-22T13:29:54.826594+00:00"
+},
+{
+"id": "d0ec861e-9c9a-4147-8a56-9b053dd405c6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d0ec861e-9c9a-4147-8a56-9b053dd405c6/SUBDISTRICT",
+"sha256": "0d4a71d59e8b11d4987d525db6a604725fdcc1f97df91a00ccd32b33f5aeadd9",
+"bytes": 2399,
+"retrievedAt": "2026-10-22T13:29:50.225411+00:00"
+},
+{
+"id": "d0f048c1-72f4-4d86-b243-31a608f03957",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d0f048c1-72f4-4d86-b243-31a608f03957/SUBDISTRICT",
+"sha256": "6de4e04414c0009f400b1e6dc009a545e0f54ad9874d8e4e093b05b94faccec7",
+"bytes": 10443,
+"retrievedAt": "2026-10-22T13:30:07.918347+00:00"
+},
+{
+"id": "d279e6fd-af62-42aa-bffd-f7a69c18513e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d279e6fd-af62-42aa-bffd-f7a69c18513e/SUBDISTRICT",
+"sha256": "4ac24d9e36e962305d198a3a4cb91bf59d4f4f371cc3d18f14adf7cd2ede54a5",
+"bytes": 2607,
+"retrievedAt": "2026-10-22T13:30:00.720171+00:00"
+},
+{
+"id": "d3003fb3-afdf-446b-822d-c4fb2a23883d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d3003fb3-afdf-446b-822d-c4fb2a23883d/SUBDISTRICT",
+"sha256": "9d09a314d8f6a91d6223e6abc9addc61f4c83a8558a9cf67d7a5a10484805ba4",
+"bytes": 9413,
+"retrievedAt": "2026-10-22T13:30:09.915837+00:00"
+},
+{
+"id": "d3599ed3-c73d-40f6-b4c3-65bf2be3bb5e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d3599ed3-c73d-40f6-b4c3-65bf2be3bb5e/SUBDISTRICT",
+"sha256": "9b6974bc74fbe5ad7c4903b8557eb889ddb8b3fde0a16dba51324a00f5727058",
+"bytes": 13822,
+"retrievedAt": "2026-10-22T13:30:03.135588+00:00"
+},
+{
+"id": "d46ecac1-c89a-4613-b697-c7d415d259c6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d46ecac1-c89a-4613-b697-c7d415d259c6/SUBDISTRICT",
+"sha256": "3007874955225be66c80e71eaa2e7fa178daa304727d0eb299269442444745c3",
+"bytes": 16461,
+"retrievedAt": "2026-10-22T13:29:31.035224+00:00"
+},
+{
+"id": "d54df8f7-2444-4f41-b7c3-358f9f637f16",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d54df8f7-2444-4f41-b7c3-358f9f637f16/SUBDISTRICT",
+"sha256": "59b3d4b6d1fe8b5b4a6d9549d52efa6cf17d67b90a5007d6778e7f39461b14d4",
+"bytes": 8621,
+"retrievedAt": "2026-10-22T13:29:30.738325+00:00"
+},
+{
+"id": "d75a1a9f-1293-411d-b277-c331df95226e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d75a1a9f-1293-411d-b277-c331df95226e/SUBDISTRICT",
+"sha256": "c77e6325ad21b50bd08687ef8c7e5ea073bd2c08de834b3af349a62aced880db",
+"bytes": 10287,
+"retrievedAt": "2026-10-22T13:30:18.030885+00:00"
+},
+{
+"id": "d7834999-b9df-4b78-ad63-a7345e63b5c8",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d7834999-b9df-4b78-ad63-a7345e63b5c8/SUBDISTRICT",
+"sha256": "9b74f417e1809f82a9b88719e77e5a7eb298efdfe668bfd2a10fe92d16cfd38e",
+"bytes": 11065,
+"retrievedAt": "2026-10-22T13:30:08.003540+00:00"
+},
+{
+"id": "d78c9785-ab77-4187-a55c-3bbe3cf7a939",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d78c9785-ab77-4187-a55c-3bbe3cf7a939/SUBDISTRICT",
+"sha256": "d57a4c3f0c2b1617f7588ad6220ec48f86396fc5114359cfa51674325b9262a8",
+"bytes": 22964,
+"retrievedAt": "2026-10-22T13:29:25.142058+00:00"
+},
+{
+"id": "d85b93a0-3c1f-4d2c-9c61-d65a970a04cf",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d85b93a0-3c1f-4d2c-9c61-d65a970a04cf/SUBDISTRICT",
+"sha256": "815fc59a0546e07a91778dad4fb180e797919c3f5f86f6cb5cd9f4f4cccb57b1",
+"bytes": 23228,
+"retrievedAt": "2026-10-22T13:30:11.967776+00:00"
+},
+{
+"id": "d8b75c8b-96da-45b8-b70f-55e522482637",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d8b75c8b-96da-45b8-b70f-55e522482637/SUBDISTRICT",
+"sha256": "baefcaa5d9184a0e8170964981e25d48ae44dc3ac38cb88d26d4780230b16950",
+"bytes": 23809,
+"retrievedAt": "2026-10-22T13:30:18.564620+00:00"
+},
+{
+"id": "d8d0b523-98e4-4d12-8896-784f6273b9fe",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d8d0b523-98e4-4d12-8896-784f6273b9fe/SUBDISTRICT",
+"sha256": "1a923a29c0a97d29324bcb5ba2fe79ef001e2021d4a94fce58c8a2fcd86bbc48",
+"bytes": 19853,
+"retrievedAt": "2026-10-22T13:29:56.861895+00:00"
+},
+{
+"id": "d939889c-f840-4bf3-85bd-a7e5d1f67dc3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d939889c-f840-4bf3-85bd-a7e5d1f67dc3/SUBDISTRICT",
+"sha256": "13af415b2cd503c5e76bda18955a6a28b93585ded6d46602047f653b8719de3d",
+"bytes": 12792,
+"retrievedAt": "2026-10-22T13:30:08.352790+00:00"
+},
+{
+"id": "db032c0b-6742-4c1b-83c6-7971b1cb8a47",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/db032c0b-6742-4c1b-83c6-7971b1cb8a47/SUBDISTRICT",
+"sha256": "b49985ccf53f7277210602430a5be8d905c0346548d406b328dd73b03c7418f1",
+"bytes": 6400,
+"retrievedAt": "2026-10-22T13:29:17.537068+00:00"
+},
+{
+"id": "dba9da8c-c00a-41d7-a664-7535607cf029",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/dba9da8c-c00a-41d7-a664-7535607cf029/SUBDISTRICT",
+"sha256": "f2fab2eb79e2059d3be1ba33215e076004b4be318ffca26e8287b51e8136746a",
+"bytes": 15149,
+"retrievedAt": "2026-10-22T13:29:09.760711+00:00"
+},
+{
+"id": "dcfedc26-758f-4929-8eaa-1fec69ee037a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/dcfedc26-758f-4929-8eaa-1fec69ee037a/SUBDISTRICT",
+"sha256": "eb583f03d355ed148bc455bf4b5e6562714eea69c60e2c43407a51ed584fc8df",
+"bytes": 12253,
+"retrievedAt": "2026-10-22T13:29:10.597782+00:00"
+},
+{
+"id": "deef251a-71fd-4cba-bc3f-f283abaddd8d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/deef251a-71fd-4cba-bc3f-f283abaddd8d/SUBDISTRICT",
+"sha256": "79aa9156ac6ae37c1f18c7aab1826100a23a681281650c4cc64d714c1a2c748d",
+"bytes": 19571,
+"retrievedAt": "2026-10-22T13:29:58.060899+00:00"
+},
+{
+"id": "dfec4480-8d93-42a7-8a54-4a37c2c4c42d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/dfec4480-8d93-42a7-8a54-4a37c2c4c42d/SUBDISTRICT",
+"sha256": "3e860575241f40ba9768b2e3dde6b97273ba9e7292af959bc35d5bc8b750ec22",
+"bytes": 45816,
+"retrievedAt": "2026-10-22T13:29:17.082971+00:00"
+},
+{
+"id": "e034273d-46cb-453e-9a43-59be84ba6343",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e034273d-46cb-453e-9a43-59be84ba6343/SUBDISTRICT",
+"sha256": "e59db556e2d7676b2e3325e610eb35ee59b74e22f991b2a775926b7df11a3100",
+"bytes": 3362,
+"retrievedAt": "2026-10-22T13:29:47.046144+00:00"
+},
+{
+"id": "e1ca1873-69db-4142-ae97-f8ba84e796dc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e1ca1873-69db-4142-ae97-f8ba84e796dc/SUBDISTRICT",
+"sha256": "5d4033df97c248cee60fca80e19d86fc1c5b4e54867754f7f066d1cff2f805fb",
+"bytes": 16207,
+"retrievedAt": "2026-10-22T13:29:12.244920+00:00"
+},
+{
+"id": "e1ed93c6-8777-492d-aca3-1b8f945659cb",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e1ed93c6-8777-492d-aca3-1b8f945659cb/SUBDISTRICT",
+"sha256": "aa85d2a9b2f86e859f0666626097f82ed6b3f63053b19397704209da9a39bc01",
+"bytes": 25832,
+"retrievedAt": "2026-10-22T13:30:11.222204+00:00"
+},
+{
+"id": "e2e9a0ac-fbb0-47d9-bcd7-6a0ce3a9fd9d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e2e9a0ac-fbb0-47d9-bcd7-6a0ce3a9fd9d/SUBDISTRICT",
+"sha256": "d1e808bf03d1d741d374356e36e01d677afada84f1670af30f89125d319a4cfa",
+"bytes": 18423,
+"retrievedAt": "2026-10-22T13:29:11.305272+00:00"
+},
+{
+"id": "e341fdd2-1ace-4041-8612-67896318c7b6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e341fdd2-1ace-4041-8612-67896318c7b6/SUBDISTRICT",
+"sha256": "7d04321af34c788eeb7beb20a02f6a2cef01008453cf133c3c78ae8e46084a72",
+"bytes": 32417,
+"retrievedAt": "2026-10-22T13:30:06.402398+00:00"
+},
+{
+"id": "e410b743-0a45-4e86-a0f8-55df5c1b4753",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e410b743-0a45-4e86-a0f8-55df5c1b4753/SUBDISTRICT",
+"sha256": "a8847214c57f73f590b1a9997f0b9a50bbf4def6ea2b4a096103210d1112a829",
+"bytes": 13078,
+"retrievedAt": "2026-10-22T13:29:52.483937+00:00"
+},
+{
+"id": "e47a132e-f39a-4871-b570-26c07b41c0af",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e47a132e-f39a-4871-b570-26c07b41c0af/SUBDISTRICT",
+"sha256": "15a46fad60f07311e3b1c21492dad5e5ec6abb2904f7c5316364ab4c776db3d8",
+"bytes": 6373,
+"retrievedAt": "2026-10-22T13:29:48.722767+00:00"
+},
+{
+"id": "e4f8b4de-a14e-469d-8260-c901ae88f66e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e4f8b4de-a14e-469d-8260-c901ae88f66e/SUBDISTRICT",
+"sha256": "97c1fd83f041b8ea952f4a2aa4ca5b00bcfe05f960625eb97f758560761e7f80",
+"bytes": 34535,
+"retrievedAt": "2026-10-22T13:30:11.696324+00:00"
+},
+{
+"id": "e5426f51-6ac2-4269-9217-80afd1f1e16d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e5426f51-6ac2-4269-9217-80afd1f1e16d/SUBDISTRICT",
+"sha256": "5275f62956a65d6041d76a9ab27e5059734e557a9b3323064f2c8547b4e41345",
+"bytes": 26606,
+"retrievedAt": "2026-10-22T13:30:11.226749+00:00"
+},
+{
+"id": "e560599c-2fc3-41c1-8e37-631de50869e0",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e560599c-2fc3-41c1-8e37-631de50869e0/SUBDISTRICT",
+"sha256": "b04ffe7ff506080de890369c3e1b07a0de6aba8c560f869466723b5d03c53526",
+"bytes": 25193,
+"retrievedAt": "2026-10-22T13:30:15.378661+00:00"
+},
+{
+"id": "e58bd17a-d303-4000-af92-1999aaafec9e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e58bd17a-d303-4000-af92-1999aaafec9e/SUBDISTRICT",
+"sha256": "7a0a422395b048a11c25cffc125b9dd5f0090c14fe563fd1f9e09d1e321b9e1f",
+"bytes": 5614,
+"retrievedAt": "2026-10-22T13:29:44.044701+00:00"
+},
+{
+"id": "e5e54c6f-3b76-43ba-8c1b-0e3a02a68fac",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e5e54c6f-3b76-43ba-8c1b-0e3a02a68fac/SUBDISTRICT",
+"sha256": "949d952c608149a5f7b5e1c3aed56fb2c58deb843f825b827943d9846de65413",
+"bytes": 19933,
+"retrievedAt": "2026-10-22T13:30:14.141053+00:00"
+},
+{
+"id": "e63789b8-9d43-4b4f-af50-e99a25cb98da",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e63789b8-9d43-4b4f-af50-e99a25cb98da/SUBDISTRICT",
+"sha256": "71d2e955b9fbadccc3988171a4104d3bd0e9440f864f2f14e44420efc79c739e",
+"bytes": 22303,
+"retrievedAt": "2026-10-22T13:29:08.321770+00:00"
+},
+{
+"id": "e6e02eff-201e-4019-aa6c-1b63f0ed6870",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e6e02eff-201e-4019-aa6c-1b63f0ed6870/SUBDISTRICT",
+"sha256": "3951ff2cba1aa4ae72964f8e92e961d8a5c0dd2407ef082e828f3be51d818e75",
+"bytes": 5888,
+"retrievedAt": "2026-10-22T13:29:51.920066+00:00"
+},
+{
+"id": "e75973ff-3fec-4b1c-a12b-5f5dd328240e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e75973ff-3fec-4b1c-a12b-5f5dd328240e/SUBDISTRICT",
+"sha256": "663999cc8455cf9ed8c9bd07a264d7eff0a08ccaaae6ce84784b256f0588c198",
+"bytes": 10973,
+"retrievedAt": "2026-10-22T13:29:08.061924+00:00"
+},
+{
+"id": "e7b9a124-eb30-482d-97c9-d66f5f44c26f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e7b9a124-eb30-482d-97c9-d66f5f44c26f/SUBDISTRICT",
+"sha256": "8656aee6c7f136c2de097c44277d48b68dcec15e074cb46195c04f1e76b0ed77",
+"bytes": 34499,
+"retrievedAt": "2026-10-22T13:30:15.387216+00:00"
+},
+{
+"id": "e7d8c562-d38b-4e68-b2d7-3424548fc602",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e7d8c562-d38b-4e68-b2d7-3424548fc602/SUBDISTRICT",
+"sha256": "0807fdf9c8aa0a127fb0d3372cf802cdbfc5288acb9c8b07b86e303cb3386337",
+"bytes": 201921,
+"retrievedAt": "2026-10-22T13:29:13.039212+00:00"
+},
+{
+"id": "e80ab576-683f-4fb0-b5f7-56b5dde65751",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e80ab576-683f-4fb0-b5f7-56b5dde65751/SUBDISTRICT",
+"sha256": "9e25b70ed337f08f4086bcc0717dc716e8647fd61d6030804448a1fc9ba86768",
+"bytes": 8207,
+"retrievedAt": "2026-10-22T13:30:01.522391+00:00"
+},
+{
+"id": "e8f7e423-c551-4101-bd57-848633ff1a03",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e8f7e423-c551-4101-bd57-848633ff1a03/SUBDISTRICT",
+"sha256": "3546a1474fb3e07298d653bfc425fddf96d28b3d3e0b54cf360fb04b4736d87a",
+"bytes": 21904,
+"retrievedAt": "2026-10-22T13:29:24.858298+00:00"
+},
+{
+"id": "e9ecaeab-79e5-4e78-9400-bcb415b89f19",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e9ecaeab-79e5-4e78-9400-bcb415b89f19/SUBDISTRICT",
+"sha256": "9f07d3e16d4c5cec9cbe47b42775e9b5a5145a41293cab6bd43ef970b23a1c47",
+"bytes": 17115,
+"retrievedAt": "2026-10-22T13:30:01.159461+00:00"
+},
+{
+"id": "ea39e734-b91e-4c43-a179-515fb191adf9",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ea39e734-b91e-4c43-a179-515fb191adf9/SUBDISTRICT",
+"sha256": "966185e74396a5f4267bc3dda756c2b3e052e3df876bd096a3fe7566b3d224aa",
+"bytes": 7845,
+"retrievedAt": "2026-10-22T13:29:59.751325+00:00"
+},
+{
+"id": "ea6c0b25-9236-47e0-8530-c008f4f049f2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ea6c0b25-9236-47e0-8530-c008f4f049f2/SUBDISTRICT",
+"sha256": "a184393b38ca3361d6b6697e73f17e9ec90c293108b616a4683b57ab27f6ccf2",
+"bytes": 937,
+"retrievedAt": "2026-10-22T13:29:42.240527+00:00"
+},
+{
+"id": "ea9410e1-6e81-431a-be90-f09dc40d60dc",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ea9410e1-6e81-431a-be90-f09dc40d60dc/SUBDISTRICT",
+"sha256": "fe09df61e2e45dfa8f2ec2fe1dd4bb83603fa738bc73b78e61ee229ce41501b3",
+"bytes": 23146,
+"retrievedAt": "2026-10-22T13:29:19.620618+00:00"
+},
+{
+"id": "eafd6621-4a17-4315-aba2-038a0d00ea86",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/eafd6621-4a17-4315-aba2-038a0d00ea86/SUBDISTRICT",
+"sha256": "840fedfd9c938a556b2c8ed91cc7dbd897e2a47962edcf3a0430cd9d0a2cd4b3",
+"bytes": 12074,
+"retrievedAt": "2026-10-22T13:29:54.710365+00:00"
+},
+{
+"id": "eb02bc1d-42bd-4725-bb8c-f6ab2dcb86f3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/eb02bc1d-42bd-4725-bb8c-f6ab2dcb86f3/SUBDISTRICT",
+"sha256": "810b83342fa509c4d5362d33c5b338a0bdb21611c17eebf01fa64477d2b0e1bd",
+"bytes": 10050,
+"retrievedAt": "2026-10-22T13:29:30.163805+00:00"
+},
+{
+"id": "ebe161c7-8cce-4b21-a472-28005a96f741",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ebe161c7-8cce-4b21-a472-28005a96f741/SUBDISTRICT",
+"sha256": "2ccf6f91ac7fb7e7ebd03f9903d927e92266f16c39f2c7386a4e5f77a53efbeb",
+"bytes": 19227,
+"retrievedAt": "2026-10-22T13:29:23.562432+00:00"
+},
+{
+"id": "ec53049b-89a3-4e74-bed4-cdd8566e233b",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ec53049b-89a3-4e74-bed4-cdd8566e233b/SUBDISTRICT",
+"sha256": "c9de7cbef7fd9e1c2a3eb87046f4513d246d5b8e178489bcaed0cd98a2f41b09",
+"bytes": 33801,
+"retrievedAt": "2026-10-22T13:29:24.003344+00:00"
+},
+{
+"id": "ec6ffb1d-b504-409f-9cb0-160d08f2207d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ec6ffb1d-b504-409f-9cb0-160d08f2207d/SUBDISTRICT",
+"sha256": "2a5cdc567eafe0e409b41c7b9f0761c57890699fb3cfb3e0890ada39450f9347",
+"bytes": 8734,
+"retrievedAt": "2026-10-22T13:29:50.299376+00:00"
+},
+{
+"id": "ecd9b4df-152b-45d9-9cdf-25073d74cf77",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ecd9b4df-152b-45d9-9cdf-25073d74cf77/SUBDISTRICT",
+"sha256": "d8af51b654f541d6f4f1c300e6c1b14281d26caa48553ac1295af23a0c4124a3",
+"bytes": 17365,
+"retrievedAt": "2026-10-22T13:29:49.501374+00:00"
+},
+{
+"id": "ececd582-abea-459b-a9fc-5a26830e7c58",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ececd582-abea-459b-a9fc-5a26830e7c58/SUBDISTRICT",
+"sha256": "4105e1fa01c54c95a2ecb76fedbc4ac474c4f46c913e1ae7dafc037517eedeb3",
+"bytes": 22130,
+"retrievedAt": "2026-10-22T13:29:57.058753+00:00"
+},
+{
+"id": "eced8856-0013-451a-8356-eabc20104f3f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/eced8856-0013-451a-8356-eabc20104f3f/SUBDISTRICT",
+"sha256": "60e48a9bca8c6c8051e28deaeedb889ebb8b4e2d928a9331f08379af8356ff74",
+"bytes": 13984,
+"retrievedAt": "2026-10-22T13:29:16.452403+00:00"
+},
+{
+"id": "ed41726d-f98a-45b0-a254-158940d52b3d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ed41726d-f98a-45b0-a254-158940d52b3d/SUBDISTRICT",
+"sha256": "bb4274b78a61e843be4e71fffbb161fd293328561bc39c3d56b8052d4287ac92",
+"bytes": 13499,
+"retrievedAt": "2026-10-22T13:30:12.102622+00:00"
+},
+{
+"id": "ed7a7b11-2f75-42f4-8f24-24dd8fc5b930",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ed7a7b11-2f75-42f4-8f24-24dd8fc5b930/SUBDISTRICT",
+"sha256": "f12f718f60638daeeb60f63d256f6573296309db965910c1681606f1fcaf1686",
+"bytes": 3337,
+"retrievedAt": "2026-10-22T13:29:50.778466+00:00"
+},
+{
+"id": "ee4cd3e1-aad9-4c5d-bf03-e9d9b27211b2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ee4cd3e1-aad9-4c5d-bf03-e9d9b27211b2/SUBDISTRICT",
+"sha256": "958226e4eb67dc7e8a00cd2211e51cbb66d4f909ffbe0a7426d547e486fc2901",
+"bytes": 10851,
+"retrievedAt": "2026-10-22T13:30:09.335329+00:00"
+},
+{
+"id": "ee538038-d2c5-460e-9619-1574b1ec043f",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ee538038-d2c5-460e-9619-1574b1ec043f/SUBDISTRICT",
+"sha256": "e6ff2fce51865c56e3b22492c62a908345a83b1bbbe9fa42549ec21abd152769",
+"bytes": 7901,
+"retrievedAt": "2026-10-22T13:29:47.059546+00:00"
+},
+{
+"id": "ee943966-4e0f-43b4-a55b-37c6302ae8e1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ee943966-4e0f-43b4-a55b-37c6302ae8e1/SUBDISTRICT",
+"sha256": "1993f9fffa1f0cff97cf7e76ee0dee8275c9513e662c05a4ff08416b264e3ce0",
+"bytes": 2245,
+"retrievedAt": "2026-10-22T13:29:38.040160+00:00"
+},
+{
+"id": "eec70491-c851-4526-9b48-a05e7625a0dd",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/eec70491-c851-4526-9b48-a05e7625a0dd/SUBDISTRICT",
+"sha256": "eae5272b6a27cad159b3da64df9b6ea49f5d02abeee45516da79b00d853bbeea",
+"bytes": 4135,
+"retrievedAt": "2026-10-22T13:29:56.642157+00:00"
+},
+{
+"id": "eee089f2-5b94-428a-b9a2-8d8c16b8078e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/eee089f2-5b94-428a-b9a2-8d8c16b8078e/SUBDISTRICT",
+"sha256": "6bddcf7d3faa554a846eff60ce559e707699d4a4122534a6bb21bd90b8a8ec5c",
+"bytes": 10179,
+"retrievedAt": "2026-10-22T13:29:48.681333+00:00"
+},
+{
+"id": "ef44980b-9aaa-4700-960c-1179a640085e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ef44980b-9aaa-4700-960c-1179a640085e/SUBDISTRICT",
+"sha256": "7bc4d96a9449ac39d8e1f9c184158acf93ce9f2ff10795ef5ed634b71b9a883e",
+"bytes": 11255,
+"retrievedAt": "2026-10-22T13:29:31.192730+00:00"
+},
+{
+"id": "efe6d580-b705-4759-a6da-690f851a3864",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/efe6d580-b705-4759-a6da-690f851a3864/SUBDISTRICT",
+"sha256": "f9fd94ff158da165882288ba9f31ccb74645142dd7c7accd58ed1ba3d038836e",
+"bytes": 14304,
+"retrievedAt": "2026-10-22T13:29:07.217503+00:00"
+},
+{
+"id": "f011fd58-66c2-4e61-b5c5-6f9551d47c70",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f011fd58-66c2-4e61-b5c5-6f9551d47c70/SUBDISTRICT",
+"sha256": "f6c3a726f1a7edb7e06936c77c4a3316268cf493e7a760e6d3c9f519f077a3a2",
+"bytes": 13882,
+"retrievedAt": "2026-10-22T13:29:08.749387+00:00"
+},
+{
+"id": "f03cd6c2-6424-47c1-b8f4-6ad6d1cebf03",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f03cd6c2-6424-47c1-b8f4-6ad6d1cebf03/SUBDISTRICT",
+"sha256": "75f0ae9e65fab819e43a26375ed0b011c06c6a5a492207e75925748d5ae753dd",
+"bytes": 9933,
+"retrievedAt": "2026-10-22T13:29:28.302544+00:00"
+},
+{
+"id": "f095ddac-8ce5-41d4-87ea-cd7044666e36",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f095ddac-8ce5-41d4-87ea-cd7044666e36/SUBDISTRICT",
+"sha256": "9e15915ccee6ea0e9c027a396bfe12aab5fd36de069b21d4c15b2a77cbd64dfb",
+"bytes": 5892,
+"retrievedAt": "2026-10-22T13:29:20.881713+00:00"
+},
+{
+"id": "f0ef8883-f4ba-4477-9aa6-149d42081627",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f0ef8883-f4ba-4477-9aa6-149d42081627/SUBDISTRICT",
+"sha256": "f754a1e5f55fc8dc64505f4d9927789121bf983480ff1b0584e4ef7223c3b3d7",
+"bytes": 14786,
+"retrievedAt": "2026-10-22T13:29:55.586250+00:00"
+},
+{
+"id": "f18cf228-e053-49a4-9bf6-a960a4d2274d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f18cf228-e053-49a4-9bf6-a960a4d2274d/SUBDISTRICT",
+"sha256": "beb4723ca2e49e40bd9bbbb7c6b927e092c0c84554cc3b3167116f3039b8d720",
+"bytes": 12333,
+"retrievedAt": "2026-10-22T13:29:32.389545+00:00"
+},
+{
+"id": "f1bf94d2-5b25-4a65-9e66-6b53656e9cc6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f1bf94d2-5b25-4a65-9e66-6b53656e9cc6/SUBDISTRICT",
+"sha256": "e9ab286329e7dd44001f888a026730989786431f869494400482caf2ab8060b6",
+"bytes": 1516,
+"retrievedAt": "2026-10-22T13:29:41.197938+00:00"
+},
+{
+"id": "f227ec6b-9d55-4958-be67-dea9f68b36a3",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f227ec6b-9d55-4958-be67-dea9f68b36a3/SUBDISTRICT",
+"sha256": "e455315d549ad9acd2e6e142eab7f99722dfda928e067e6215ff0aaf1ac3ba4e",
+"bytes": 12074,
+"retrievedAt": "2026-10-22T13:29:24.753351+00:00"
+},
+{
+"id": "f3920f19-1925-4c95-9c7b-eb4c06a70c1a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f3920f19-1925-4c95-9c7b-eb4c06a70c1a/SUBDISTRICT",
+"sha256": "2e986b5adf335b80f5388564ce537b2ababb5e0b3dd2ad602feaeab9478ac3a0",
+"bytes": 13139,
+"retrievedAt": "2026-10-22T13:29:08.461486+00:00"
+},
+{
+"id": "f47d9543-002c-44dc-adbb-30582923aa8a",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f47d9543-002c-44dc-adbb-30582923aa8a/SUBDISTRICT",
+"sha256": "2362b2d10a894139ec7fd1f8429950437f6374807f1f9b27fac2e5cd94528692",
+"bytes": 1370,
+"retrievedAt": "2026-10-22T13:29:42.439338+00:00"
+},
+{
+"id": "f537d42b-3699-4862-9c58-7f4930343e02",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f537d42b-3699-4862-9c58-7f4930343e02/SUBDISTRICT",
+"sha256": "e5064171022c15757f053ab054c09162e42a64fa9d3cb848028dc51734c2fa66",
+"bytes": 25755,
+"retrievedAt": "2026-10-22T13:30:02.336536+00:00"
+},
+{
+"id": "f5bc2010-9a08-41de-a268-9ce44116199d",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f5bc2010-9a08-41de-a268-9ce44116199d/SUBDISTRICT",
+"sha256": "b166643f0e9a59bf83fb8dc6f6af6c92f5f59b1a74af1cecaaf5043b69a8232f",
+"bytes": 9240,
+"retrievedAt": "2026-10-22T13:29:22.772772+00:00"
+},
+{
+"id": "f5e1c27e-8a38-4dd3-b719-0bee20be3510",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f5e1c27e-8a38-4dd3-b719-0bee20be3510/SUBDISTRICT",
+"sha256": "9e3c608307116b814a8a27181f3e0d851afc4e802d2e45c719be2df300f57d8a",
+"bytes": 26052,
+"retrievedAt": "2026-10-22T13:30:12.373796+00:00"
+},
+{
+"id": "f6d15915-eb55-42a3-9b97-db4cb09433ef",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f6d15915-eb55-42a3-9b97-db4cb09433ef/SUBDISTRICT",
+"sha256": "377091bb5bb7e23280026a4da3eb9ec640edb36590c8f13270f6c001268aaf85",
+"bytes": 11081,
+"retrievedAt": "2026-10-22T13:30:10.494179+00:00"
+},
+{
+"id": "f84be509-81e7-4d21-bad7-2470c845b228",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f84be509-81e7-4d21-bad7-2470c845b228/SUBDISTRICT",
+"sha256": "129ed05d95f64bae1931ccc8bbe1327ae1ea3b8cb98f73db5766550919d0f412",
+"bytes": 20130,
+"retrievedAt": "2026-10-22T13:29:28.252581+00:00"
+},
+{
+"id": "f8fe2677-2952-44ad-82ca-1b64bcfbd630",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f8fe2677-2952-44ad-82ca-1b64bcfbd630/SUBDISTRICT",
+"sha256": "94d6e6a18f6e5c1cca6bb126f53541d3fd030556537822d50cef655d99336322",
+"bytes": 9616,
+"retrievedAt": "2026-10-22T13:29:07.611770+00:00"
+},
+{
+"id": "f95e9248-f1d9-417d-b58c-968d6a700ff2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f95e9248-f1d9-417d-b58c-968d6a700ff2/SUBDISTRICT",
+"sha256": "d39593d1d4c40960a8b44f99c48d924d5e897cb65f382c12bd72b5703fa40233",
+"bytes": 14679,
+"retrievedAt": "2026-10-22T13:29:26.147349+00:00"
+},
+{
+"id": "f976632c-39fe-4e8e-91e5-0956cbd31b9e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f976632c-39fe-4e8e-91e5-0956cbd31b9e/SUBDISTRICT",
+"sha256": "dd23651bb81b589aa5d195f60d1663c9864f09d6963863181e2c03bf8f8d65c3",
+"bytes": 21076,
+"retrievedAt": "2026-10-22T13:29:29.381312+00:00"
+},
+{
+"id": "f98ff072-ca57-4172-9f29-50da01a2bb58",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/f98ff072-ca57-4172-9f29-50da01a2bb58/SUBDISTRICT",
+"sha256": "02fb823cdb656072783220f6998ba9d75daf6ed01c733eddbb85a6742514367d",
+"bytes": 8115,
+"retrievedAt": "2026-10-22T13:29:17.959301+00:00"
+},
+{
+"id": "fa057a4d-0c30-4b86-bf73-78a79d1ffaae",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fa057a4d-0c30-4b86-bf73-78a79d1ffaae/SUBDISTRICT",
+"sha256": "7043b0f592f67c67f447b88d42d66e658300465556905e5aec49413ef667a6b7",
+"bytes": 4314,
+"retrievedAt": "2026-10-22T13:29:47.150831+00:00"
+},
+{
+"id": "fa0fec9e-3148-42bb-b553-4850c90525d6",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fa0fec9e-3148-42bb-b553-4850c90525d6/SUBDISTRICT",
+"sha256": "8007191e89ec9ab569ffcd492d957190a6b4cd3173bac124809e0035252a2d78",
+"bytes": 6388,
+"retrievedAt": "2026-10-22T13:29:59.865007+00:00"
+},
+{
+"id": "fa6ea8c9-be8e-470d-85da-453afbc99f2e",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fa6ea8c9-be8e-470d-85da-453afbc99f2e/SUBDISTRICT",
+"sha256": "0043159cef5bf2e671903a780b377d52a16596a98c195ae358305378cf5cd131",
+"bytes": 8014,
+"retrievedAt": "2026-10-22T13:30:15.229104+00:00"
+},
+{
+"id": "fa8c519f-159d-4347-8dc4-c212919cd6ec",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fa8c519f-159d-4347-8dc4-c212919cd6ec/SUBDISTRICT",
+"sha256": "64a0e75f2f97e1f0df3f14e04310bac60237cb3157975d9623e0ac245f2bfbd2",
+"bytes": 7798,
+"retrievedAt": "2026-10-22T13:29:51.507984+00:00"
+},
+{
+"id": "faa98203-6b35-4525-ab77-6613b558384c",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/faa98203-6b35-4525-ab77-6613b558384c/SUBDISTRICT",
+"sha256": "dab9fee8c4605318abe476dd3da460dd48c8fa5a28a46d000a6a81a023d78f4b",
+"bytes": 5121,
+"retrievedAt": "2026-10-22T13:29:51.518199+00:00"
+},
+{
+"id": "fabd7da3-5053-467d-9c20-1d4b15eb3954",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fabd7da3-5053-467d-9c20-1d4b15eb3954/SUBDISTRICT",
+"sha256": "0f547f3a62ec814b676ad36c6789cd7f29123f555591db37a52199478a115df1",
+"bytes": 7553,
+"retrievedAt": "2026-10-22T13:29:25.559796+00:00"
+},
+{
+"id": "fb328bd5-c072-4db2-91c1-5ff4140b9bfa",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fb328bd5-c072-4db2-91c1-5ff4140b9bfa/SUBDISTRICT",
+"sha256": "316fb336657fa9c4b3c2834d80607fe341c72eea7d81693f63bf396fd7287f2b",
+"bytes": 4133,
+"retrievedAt": "2026-10-22T13:30:02.663206+00:00"
+},
+{
+"id": "fba6cf15-a78b-4f62-8400-6aa9d37860a1",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fba6cf15-a78b-4f62-8400-6aa9d37860a1/SUBDISTRICT",
+"sha256": "4faa3f72a802252d601dc3e05d5aa09707b2e0bbf7504cbfca2017c06f498c20",
+"bytes": 2893,
+"retrievedAt": "2026-10-22T13:29:44.520468+00:00"
+},
+{
+"id": "fd390fb8-589c-45fd-b73c-32d820716fe7",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fd390fb8-589c-45fd-b73c-32d820716fe7/SUBDISTRICT",
+"sha256": "d21cd96d8cafb27d2716dce2d973fb9fb19fc04a99e61204ca90b4f4b1d9a295",
+"bytes": 30501,
+"retrievedAt": "2026-10-22T13:29:17.329135+00:00"
+},
+{
+"id": "fd9ef472-b368-49e5-8627-1211bd2acad2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fd9ef472-b368-49e5-8627-1211bd2acad2/SUBDISTRICT",
+"sha256": "f984832044cfb0cc3cc4ac234e5d4aa14d2a6c85b02f205a2d1bdc9e909dcc9e",
+"bytes": 12956,
+"retrievedAt": "2026-10-22T13:29:25.717783+00:00"
+},
+{
+"id": "fe6511ae-4cb1-467b-ab36-76a7d792ad45",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fe6511ae-4cb1-467b-ab36-76a7d792ad45/SUBDISTRICT",
+"sha256": "41eb0dd28450ea5025538608b6929a05f72dd6fce231df6ae320f8f7a59e8200",
+"bytes": 8770,
+"retrievedAt": "2026-10-22T13:29:18.341937+00:00"
+},
+{
+"id": "ff7693c1-61ce-4590-8c80-a50f598084e2",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ff7693c1-61ce-4590-8c80-a50f598084e2/SUBDISTRICT",
+"sha256": "0d497b20e91985092945f0c40d4121ed12e5b9375bfc1e30bc3ae2e37f32afad",
+"bytes": 10224,
+"retrievedAt": "2026-10-22T13:29:31.997807+00:00"
+}
+]
+}

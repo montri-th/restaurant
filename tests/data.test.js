@@ -1,0 +1,121 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {load, readJSON, sha256} from './helpers.js';
+import {PROVINCES, PRICE_BUCKETS, GRID, gridToLngLat, sourceTile, hasPoint} from '../js/model.js';
+import {hostedVenueIds} from '../js/buildings.js';
+
+test('restaurants.json decodes to the 70,214 observations of the snapshot, nothing dropped, ids unique', () => {
+  const {raw, data} = load();
+  assert.equal(raw.meta.schema, 'citymeter-restaurants-rows-1');
+  assert.equal(raw.meta.rows, 70214);
+  assert.equal(raw.cols.key.length, 70214);
+  assert.equal(data.rows.length, 70214);
+  assert.equal(data.dropped, 0, 'every row resolves to a subdistrict frame');
+  assert.equal(new Set(data.rows.map(r => r.id)).size, data.rows.length, 'row keys are unique');
+  for (const k of Object.keys(raw.cols)) assert.equal(raw.cols[k].length, 70214, `column ${k} is complete`);
+});
+
+test('decoded rows reconcile with the build receipt: provinces, price buckets, reviews, ratings, prices', () => {
+  const {raw, data} = load();
+  const byProvince = {}, byPrice = Object.fromEntries(PRICE_BUCKETS.map(b => [b, 0]));
+  let reviews = 0, rated = 0, priced = 0;
+  for (const r of data.rows) {
+    byProvince[r.province] = (byProvince[r.province] || 0) + 1;
+    byPrice[r.price]++;
+    if (Number.isFinite(r.reviews)) reviews += r.reviews;
+    if (Number.isFinite(r.rating)) rated++;
+    if (r.price !== 'UNSPECIFIED') priced++;
+  }
+  assert.deepEqual(byProvince, raw.meta.rowsByProvince);
+  assert.deepEqual(byPrice, raw.meta.priceBuckets);
+  assert.equal(reviews, raw.meta.reviewsTotal);
+  assert.equal(rated, raw.meta.rowsWithRating);
+  assert.equal(priced, raw.meta.rowsWithPrice);
+  // Snapshot values (regression fixtures, never UI constants).
+  assert.deepEqual(raw.meta.rowsByProvince, {BKK: 44086, NBI: 11532, SPK: 11505, PTE: 1999, SKN: 883, CCO: 189, NPT: 20});
+  assert.equal(raw.meta.reviewsTotal, 6185635);
+  assert.equal(byPrice.OVER_1000, 0, 'the > 1,000 baht bucket exists in the source vocabulary but holds no row');
+});
+
+test('membership is the source subdistrict: every row sits in an existing frame of its own district and province', () => {
+  const {data, index} = load();
+  for (const r of data.rows) {
+    const a = index.byId.get(r.area);
+    assert.ok(a, `area ${r.area}`);
+    assert.equal(r.district, a.district);
+    assert.equal(r.province, a.province);
+    assert.ok(PROVINCES.some(p => p.code === r.province));
+  }
+});
+
+test('coordinates decode with the research formula on the z10 × 4096 grid and stay display positions', () => {
+  const {raw, data} = load();
+  const research = (gx, gy) => [gx / GRID * 360 - 180, Math.atan(Math.sinh(Math.PI * (1 - 2 * gy / GRID))) * 180 / Math.PI];
+  for (let i = 0; i < data.rows.length; i += 997) {
+    const r = data.rows[i];
+    const [lon, lat] = research(r.gx, r.gy);
+    assert.ok(Math.abs(lon - r.longitude) < 1e-9 && Math.abs(lat - r.latitude) < 1e-9);
+    assert.deepEqual(gridToLngLat(r.gx, r.gy), [r.longitude, r.latitude]);
+    assert.ok(hasPoint(r));
+    assert.ok(r.longitude > 97 && r.longitude < 106 && r.latitude > 5 && r.latitude < 21, 'inside Thailand');
+    const t = sourceTile(r);
+    assert.equal(t.z, 10);
+    assert.ok(t.x >= 0 && t.x < 1024 && t.y >= 0 && t.y < 1024);
+  }
+  assert.equal(raw.meta.coordinate.role, 'mvt_display_position_z10');
+  assert.equal(raw.meta.geometryRole.mvt_geometry_tile_quantized_not_source_exact, 70214);
+});
+
+test('brand and venue links stay name-based candidates; holds carry no logo; hosted venues match the building set', () => {
+  const {raw, data} = load();
+  assert.match(raw.meta.brandRule, /not a verified branch relationship/);
+  assert.match(raw.meta.venueRule, /not a verified located-inside relationship/);
+  for (const b of data.brands) {
+    assert.ok(typeof b.link === 'string' && b.link.length);
+    if (b.hold) assert.equal(b.logo, '', `${b.name} is on identity hold: no logo`);
+  }
+  const holds = data.brands.filter(b => b.hold);
+  assert.equal(holds.length, 3, 'three brand identity holds in this release');
+  const logos = readJSON('data/brand-logos.json');
+  const linked = new Set(logos.brands.map(b => b.id));
+  for (const h of holds) assert.ok(!linked.has(h.id));
+  const hosted = hostedVenueIds(readJSON('data/venue-buildings.geojson'));
+  assert.deepEqual([...hosted].sort(), data.venues.filter(v => v.host).map(v => v.id).sort());
+  assert.equal(hosted.size, 25);
+  const counts = new Map();
+  for (const r of data.rows) if (r.venue) counts.set(r.venue.id, (counts.get(r.venue.id) || 0) + 1);
+  for (const v of data.venues) assert.equal(counts.get(v.id) || 0, v.rows, `${v.name} row count`);
+});
+
+test('boundaries: 581 subdistrict frames with production areas, 90 districts, 7 provinces, receipts bound by hash', () => {
+  const {areasGeo, districtsGeo, provincesGeo, index} = load();
+  assert.equal(areasGeo.features.length, 581);
+  assert.equal(districtsGeo.features.length, 90);
+  assert.equal(provincesGeo.features.length, 7);
+  const ids = areasGeo.features.map(f => f.properties.id);
+  assert.equal(new Set(ids).size, ids.length);
+  for (const f of areasGeo.features) {
+    const p = f.properties;
+    assert.ok(p.areaSqm > 0, `${p.id} has a production area`);
+    assert.ok(Array.isArray(p.label) && p.label.length === 2);
+    assert.ok(['Polygon', 'MultiPolygon'].includes(f.geometry.type));
+    assert.ok(index.districtById.has(p.district), `${p.id} → district ${p.district}`);
+  }
+  const total = index.districts.reduce((s, d) => s + d.areas.length, 0);
+  assert.equal(total, 581, 'every subdistrict belongs to exactly one district');
+  const receipts = readJSON('data/boundary-receipts.json');
+  assert.equal(receipts.receipts.length, 581);
+  assert.equal(areasGeo.metadata.receipts, 581);
+  for (const r of receipts.receipts) { assert.match(r.sha256, /^[a-f0-9]{64}$/); assert.match(r.url, /^https:\/\/landometer\.com\/api\/v2\/citymeter-v3\/restaurant\/info\/geom\//); }
+  // Same recipe as scripts/build-boundaries.py: sha256(json.dumps(sorted((id, sha256) …))) with Python's default separators.
+  const pairs = receipts.receipts.map(r => [r.id, r.sha256]).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : 1));
+  const python = `[${pairs.map(([id, h]) => `["${id}", "${h}"]`).join(', ')}]`;
+  assert.equal(sha256(Buffer.from(python)), areasGeo.metadata.receiptsSha256);
+});
+
+test('coverage: 308 frames hold rows; the other 273 are no-data, never zero', () => {
+  const {covered, coverage, index} = load();
+  assert.equal(covered.size, 308);
+  assert.equal(index.areas.length - covered.size, 273);
+  assert.ok(Math.abs(coverage.km2 - 3899.11) < 0.01, `coverage ${coverage.km2}`);
+});

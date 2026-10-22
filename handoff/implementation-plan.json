@@ -1,0 +1,611 @@
+{
+  "$schema": "./handoff.schema.json",
+  "schemaVersion": "1.4.0",
+  "documentType": "implementation-plan",
+  "productId": "citymeter-restaurants",
+  "productVersion": "0.1.0",
+  "updatedOn": "2026-10-22",
+  "brief": "product-brief.json",
+  "statement": "product-statement.json",
+  "humanPlan": "IMPLEMENTATION_PLAN.md",
+  "architecture": {
+    "runtime": "static HTML/CSS/JavaScript ES modules",
+    "framework": null,
+    "buildStep": null,
+    "nodeEngine": ">=20",
+    "commands": {
+      "start": "npm start",
+      "test": "npm test",
+      "handoffManifest": "npm run handoff:manifest",
+      "handoffBundle": "npm run handoff:bundle",
+      "verifyLive": "npm run verify:live"
+    },
+    "libraries": {
+      "maplibre": "5.6.2 (unpkg, pinned in js/vendors.js)",
+      "earcut": "3.2.4 (vendored, venue x-ray)"
+    },
+    "dataBuild": {
+      "python": "3.11+ with openpyxl and Pillow",
+      "node": "mapshaper 0.6 for boundaries"
+    },
+    "externalServices": {
+      "tiles": {
+        "url": "https://tiles.openfreemap.org/planet",
+        "role": "basemap + city massing",
+        "offlineSubstitute": "stub TileJSON with empty tiles in the Playwright harness"
+      },
+      "glyphs": {
+        "url": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf"
+      }
+    },
+    "coreDataTimeoutMs": 45000,
+    "optionalVendorTimeoutMs": 20000,
+    "modules": [
+      {
+        "path": "js/app.js",
+        "role": "orchestration: row scopes (scopeRows/baseRows/rows/venue rows), focus modes, scoped coverage, panel modes and back stack, URL state, map lifecycle and theme reinstall, camera calls, single map click priority (x-ray → host → pin → province → area), legend switch by zoom, counter/table sync"
+      },
+      {
+        "path": "js/model.js",
+        "role": "decode data/restaurants.json (grid → lon/lat), PROVINCES, price buckets and labels, GROUP_SHORT, filterRows, summarize, mixOf, productionLink"
+      },
+      {
+        "path": "js/areas.js",
+        "role": "index of แขวง/ตำบล, เขต/อำเภอ, จังหวัด; level words; summarizeAreas/Districts; combinedDensity (Σ/Σ)"
+      },
+      {
+        "path": "js/area-insight.js",
+        "role": "first Aha (≥ 30 rows, density, Σ/Σ, coverage baseline, most reviewed) and filterAreaRows"
+      },
+      {
+        "path": "js/scales.js",
+        "role": "density.area / count / price LUTs (41 samples), classColors, buildDensityClasses (precision by magnitude), buildCountClasses, classify (EVID-05), priceColors, inkFor, contrastRatio"
+      },
+      {
+        "path": "js/cues.js",
+        "role": "group id → LDS series + shape cue; cueMarkup (SVG) and cueImage (map icon)"
+      },
+      {
+        "path": "js/map-layers.js",
+        "role": "แขวง/ตำบล choropleth (feature-state fill/zero/nodata/quiet/selected), hatch image, district outlines, buildAreaModel, HTML label chips with collision"
+      },
+      {
+        "path": "js/provinces.js",
+        "role": "province frames (count) below zoom 8.5, outlines, selection; buildProvinceModel"
+      },
+      {
+        "path": "js/pins.js",
+        "role": "focus cue symbol layer, grey context circles (first large draw deferred), selection ring, HTML pins from zoom 15.5 with keyboard tour, co-located slots and leader line, chain logos ≤ 250"
+      },
+      {
+        "path": "js/buildings.js",
+        "role": "host buildings of the open venue (fill-extrusion + footprint outline), hitTest, displayedFeatures"
+      },
+      {
+        "path": "js/venue-xray.js",
+        "role": "venue solid drawn on top of the 3D pass (custom layer), hit-test on its triangles (carried over unchanged)"
+      },
+      {
+        "path": "js/massing.js · js/geometry.js · js/mvt.js",
+        "role": "quiet city massing + rounded focus massing from OpenFreeMap tiles (carried over unchanged)"
+      },
+      {
+        "path": "js/map-style.js",
+        "role": "generated paper basemap on OpenFreeMap (carried over unchanged)"
+      },
+      {
+        "path": "js/camera.js",
+        "role": "presets plan/city/model/eye, applyPreset, fitPitched, framePoint (carried over unchanged)"
+      },
+      {
+        "path": "js/breadcrumb.js",
+        "role": "ประเทศไทย › จังหวัด › เขต/อำเภอ › แขวง/ตำบล with production deep links; venue mode; folding"
+      },
+      {
+        "path": "js/profile-model.js",
+        "role": "overview, district, area, venue and store view models; describeGeometry, describePrice"
+      },
+      {
+        "path": "js/panel.js",
+        "role": "panel HTML (pure), metric tiles, rankings (eligible ranked, others unranked), provenance()"
+      },
+      {
+        "path": "js/chart-model.js · js/charts.js",
+        "role": "density bars / matrix / price stacked bars as HTML, no chart vendor"
+      },
+      {
+        "path": "js/brand-logos.js · js/venue-logos.js",
+        "role": "logo registries (sha256-checked files, lookup by id, backplate, role captions)"
+      },
+      {
+        "path": "js/navigation.js · js/launch.js · js/vendors.js",
+        "role": "nav-7 glyphs and help dialog; launch/slow/error overlay and file:// bridge; pinned MapLibre loader"
+      },
+      {
+        "path": "scripts/build-boundaries.py",
+        "role": "production geometry responses + receipts → areas/districts/provinces GeoJSON (mapshaper)"
+      },
+      {
+        "path": "scripts/build-data.py",
+        "role": "research sheet + logo manifest + files → restaurants.json, logo registries, assets, venue-buildings.geojson"
+      },
+      {
+        "path": "scripts/build-handoff.mjs · scripts/verify-live.mjs",
+        "role": "manifest/bundle from git ls-files; live byte attestation"
+      }
+    ]
+  },
+  "selection": {
+    "filterFields": [
+      "search",
+      "group",
+      "price",
+      "province",
+      "brand"
+    ],
+    "queryFields": [
+      "search",
+      "group",
+      "price",
+      "province",
+      "brand",
+      "district",
+      "area",
+      "areas",
+      "view",
+      "store",
+      "place",
+      "view3d",
+      "cam"
+    ],
+    "rowScopes": {
+      "scopeRows": "filters only",
+      "baseRows": "scopeRows ∩ selected district or area",
+      "rows": "baseRows ∩ area focus",
+      "venueRows": "scopeRows naming the open venue"
+    },
+    "panelActions": [
+      "select-area",
+      "select-district",
+      "select-store",
+      "select-venue",
+      "select-province",
+      "filter-brand",
+      "back",
+      "explore-top",
+      "clear-focus",
+      "open-charts",
+      "open-table",
+      "clear-filter",
+      "crumb-country",
+      "crumb-province",
+      "crumb-district",
+      "crumb-area",
+      "crumb-venue",
+      "crumb-expand",
+      "toggle-3d"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "P01",
+      "title": "Reproduce the public snapshot and verify the research sheet against it",
+      "dependsOn": [],
+      "acceptanceCriteria": [
+        "AC20"
+      ],
+      "files": [
+        "(internal) repro/, scripts/build-data.py"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P02",
+      "title": "Fetch production boundaries with receipts; build areas/districts/provinces",
+      "dependsOn": [
+        "P01"
+      ],
+      "acceptanceCriteria": [
+        "AC20",
+        "AC11"
+      ],
+      "files": [
+        "scripts/build-boundaries.py",
+        "data/areas.geojson",
+        "data/districts.geojson",
+        "data/provinces.geojson",
+        "data/boundary-receipts.json"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P03",
+      "title": "Build data, logo registries and host buildings from the sheet of record",
+      "dependsOn": [
+        "P01"
+      ],
+      "acceptanceCriteria": [
+        "AC20"
+      ],
+      "files": [
+        "scripts/build-data.py",
+        "data/restaurants.json",
+        "data/brand-logos.json",
+        "data/venue-logos.json",
+        "data/venue-buildings.geojson",
+        "assets/brand-logos/",
+        "assets/venue-logos/"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P04",
+      "title": "Model, areas, scales, cues and first Aha",
+      "dependsOn": [
+        "P02",
+        "P03"
+      ],
+      "acceptanceCriteria": [
+        "AC02",
+        "AC05",
+        "AC06",
+        "AC21"
+      ],
+      "files": [
+        "js/model.js",
+        "js/areas.js",
+        "js/scales.js",
+        "js/cues.js",
+        "js/area-insight.js"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P05",
+      "title": "Map layers: choropleth, provinces, cue symbols, labels, host buildings",
+      "dependsOn": [
+        "P04"
+      ],
+      "acceptanceCriteria": [
+        "AC03",
+        "AC06",
+        "AC12",
+        "AC15"
+      ],
+      "files": [
+        "js/map-layers.js",
+        "js/provinces.js",
+        "js/pins.js",
+        "js/buildings.js"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P06",
+      "title": "Panel views, breadcrumb and provenance",
+      "dependsOn": [
+        "P04"
+      ],
+      "acceptanceCriteria": [
+        "AC07",
+        "AC08",
+        "AC09",
+        "AC10",
+        "AC11"
+      ],
+      "files": [
+        "js/profile-model.js",
+        "js/panel.js",
+        "js/breadcrumb.js"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P07",
+      "title": "Charts and table",
+      "dependsOn": [
+        "P04"
+      ],
+      "acceptanceCriteria": [
+        "AC13",
+        "AC14"
+      ],
+      "files": [
+        "js/chart-model.js",
+        "js/charts.js",
+        "js/app.js"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P08",
+      "title": "App orchestration, URL state, themes, mobile sheet, failure paths",
+      "dependsOn": [
+        "P05",
+        "P06",
+        "P07"
+      ],
+      "acceptanceCriteria": [
+        "AC01",
+        "AC04",
+        "AC16",
+        "AC17",
+        "AC18",
+        "AC19"
+      ],
+      "files": [
+        "js/app.js",
+        "index.html",
+        "styles.css",
+        "logos.css",
+        "navigation.css",
+        "js/navigation.js",
+        "js/launch.js"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P09",
+      "title": "Unit tests on real data, LDS parity script, rendered harness",
+      "dependsOn": [
+        "P08"
+      ],
+      "acceptanceCriteria": [
+        "AC20",
+        "AC21"
+      ],
+      "files": [
+        "tests/",
+        "handoff/VERIFICATION.md"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "P10",
+      "title": "Docs, handoff JSON, publish to GitHub Pages and verify live",
+      "dependsOn": [
+        "P09"
+      ],
+      "acceptanceCriteria": [
+        "AC22"
+      ],
+      "files": [
+        "README.md",
+        "AGENTS.md",
+        "PRODUCT_STATEMENT.md",
+        "DATA_METHOD.md",
+        "docs/",
+        "handoff/"
+      ],
+      "status": "done"
+    }
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "AC01",
+      "scenario": "HTTP/HTTPS first load",
+      "expected": "Data and panel ready before the map; citymeter:ready dismisses the launch overlay; no console error",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC02",
+      "scenario": "Default first Aha",
+      "expected": "Panel shows 99.7 ร้าน/ตร.กม. for สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ (136 ร้าน, 1.4 ตร.กม.), baseline 18.0, the 30-row rule and two actions; values computed, not constants",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC03",
+      "scenario": "First paint in 3D",
+      "expected": "city preset (pitch 56) framing the three focused แขวง; fills, ink labels and cue symbols only there; the rest quiet",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC04",
+      "scenario": "ดูทุกพื้นที่",
+      "expected": "?areas=all; every covered frame filled; numbers unchanged; button becomes โฟกัส 3 แขวงนี้",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC05",
+      "scenario": "Filter change",
+      "expected": "Aha, focus, choropleth, charts and counters recompute; small selections switch to the count Aha and count bars and say so",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC06",
+      "scenario": "Coverage states",
+      "expected": "273 uncovered frames hatched (ไม่มีข้อมูล) and never 0; covered frames with 0 under a filter show the zero outline; legend lists 0 and ไม่มีข้อมูล only when present",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC07",
+      "scenario": "Area profile",
+      "expected": "แขวง/ตำบล panel: ร้าน, ร้าน/ตร.กม., รีวิว, คะแนนเฉลี่ย (rated rows), km², rank or ‘ไม่จัดอันดับ’, types with cues, priced buckets + ไม่ระบุ, most reviewed, chains, venues; provenance line; model camera",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC08",
+      "scenario": "District profile",
+      "expected": "เขต/อำเภอ panel with ranked eligible areas and unranked small ones; district outline selected; only its areas filled",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC09",
+      "scenario": "Store detail",
+      "expected": "rating or ‘ไม่มีคะแนนในแหล่งข้อมูล’, price bucket + stated range or ‘ไม่ระบุราคา (ไม่ใช่ราคา 0)’, chain/venue as candidates, display coordinate with tile/grid label, observation code, production link; never ‘สาขา’",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC10",
+      "scenario": "Venue with host building",
+      "expected": "only rows naming the venue carry detail; host building blue and visible at any pitch (x-ray); มุมสถาปนิก on by default; counter and table follow the venue rows",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC11",
+      "scenario": "Breadcrumb",
+      "expected": "ประเทศไทย › จังหวัด › เขต/อำเภอ › แขวง/ตำบล; every level clickable; deep links /D/ and /S/ open production; folds on 390 px",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC12",
+      "scenario": "Country view",
+      "expected": "below zoom 8.5 the seven provinces are filled by count classes with labels; clicking drills into the province filter; legend switches to the province classes",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC13",
+      "scenario": "Charts",
+      "expected": "density bars sorted with class colours; matrix cells equal with cue headers; price bars share of priced rows with ไม่ระบุ beside; every mark opens its area",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC14",
+      "scenario": "Table",
+      "expected": "rows follow the detail scope, sorted by reviews; 25 per page; logo, type, price, rating/reviews, area, chain/venue, display coordinate",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC15",
+      "scenario": "Detail zoom",
+      "expected": "from zoom 15.5 HTML pins with cue shapes and chain logos (≤ 250) inside the focus; arrow keys move between pins; context dots never focusable",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC16",
+      "scenario": "Themes",
+      "expected": "Auto/Light/Dark switch reinstalls the map layers without errors; analytical colours identical in both themes",
+      "verificationType": "unit + browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC17",
+      "scenario": "Mobile portrait 390 px",
+      "expected": "map card with the Aha; bottom sheet ≤ 64dvh with close; only focus labels; no horizontal overflow",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC18",
+      "scenario": "Map failure",
+      "expected": "MapLibre or tiles unavailable → failure card with retry; Aha, panel, charts and table usable",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC19",
+      "scenario": "URL state",
+      "expected": "search, group, price, province, brand, district, area, areas, view, store, place, view3d, cam restore the same view",
+      "verificationType": "browser",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC20",
+      "scenario": "Data integrity",
+      "expected": "70,214 rows decode with no drop; province, price, review, rating counts reconcile with meta; boundary receipts hash; logo sha256",
+      "verificationType": "unit",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC21",
+      "scenario": "LDS parity",
+      "expected": "LUTs, classes, scaleVersions, series, foundation, map roles and dataState equal the LDS 0.9.7 machine records",
+      "verificationType": "script (VERIFICATION)",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC22",
+      "scenario": "Live release",
+      "expected": "npm run verify:live passes for every published file; live checks in Chrome desktop light/dark and narrow",
+      "verificationType": "live",
+      "result": "see VERIFICATION.md"
+    }
+  ],
+  "developerWorkflow": [
+    "Read AGENTS.md, then handoff/README.md, PRODUCT_STATEMENT.md and the paired human/machine briefs",
+    "Run npm test before changes; keep the row scopes, focus modes, metric and coverage contracts and the panel action contract",
+    "Change one bounded task at a time; preserve invariant IDs INV01–INV20",
+    "Validate calculations with the real data in tests/ (tests/helpers.js loads it once)",
+    "Review rendered Thai at 390 px and desktop in both themes; use the stub-tile harness when CDN/tiles are blocked, then confirm the real-tile look live",
+    "Tune camera and layers live via window.__citymeter in the console before changing constants",
+    "Publish only authorised changes; wait for the Pages run; run npm run verify:live before reporting a release",
+    "Regenerate the manifest and bundle from a clean working tree; never hand-edit hashes"
+  ],
+  "backlog": [
+    {
+      "id": "N01",
+      "title": "Scheduled snapshot refresh with diff report (rows added/removed per แขวง) and a dated archive",
+      "ownerRole": "data engineer",
+      "status": "backlog"
+    },
+    {
+      "id": "N02",
+      "title": "Owner-authorised source export (source UUID, exact coordinates, collection date, all type tags) to replace display positions and the primary-type grouping",
+      "ownerRole": "data owner",
+      "status": "backlog"
+    },
+    {
+      "id": "N03",
+      "title": "Restaurants per 1,000 residents with CityMETER Population on the same แขวง/ตำบล frames (new metric contract; never mixed with per-km²)",
+      "ownerRole": "product + data",
+      "status": "backlog"
+    },
+    {
+      "id": "N04",
+      "title": "Web-optimised logo derivatives with recorded derivation (KFC 1.2 MB, The Circle Ratchaphruek 1.1 MB)",
+      "ownerRole": "frontend developer",
+      "status": "backlog"
+    },
+    {
+      "id": "N05",
+      "title": "Verify chain and venue candidates (branch lists, venue directories) and promote verified links with evidence",
+      "ownerRole": "research",
+      "status": "backlog"
+    },
+    {
+      "id": "N06",
+      "title": "Café comparison with the production Café category (all type tags) once the source export exists",
+      "ownerRole": "data owner",
+      "status": "backlog"
+    },
+    {
+      "id": "N07",
+      "title": "Playwright regression in CI with stub tiles and the pinned MapLibre package",
+      "ownerRole": "frontend developer",
+      "status": "backlog"
+    },
+    {
+      "id": "N08",
+      "title": "Area labels as a MapLibre symbol layer with native collision",
+      "ownerRole": "frontend developer",
+      "status": "backlog"
+    },
+    {
+      "id": "N09",
+      "title": "Extend coverage beyond the 7 provinces when the source covers more; keep no_data honest meanwhile",
+      "ownerRole": "data owner",
+      "status": "backlog"
+    },
+    {
+      "id": "N10",
+      "title": "Accessible data table per area (export-free) and Search/LLM answer blocks per PB v6 channel readiness",
+      "ownerRole": "product",
+      "status": "backlog"
+    }
+  ]
+}

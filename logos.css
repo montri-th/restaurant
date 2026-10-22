@@ -1,0 +1,42 @@
+/* Chain (brand candidate) logos and categorical series assignment.
+   Logos keep their original bytes (assets/brand-logos/, sha256 in data/brand-logos.json)
+   on the backplate the registry names (stone for transparent marks, dark for light
+   marks, white for opaque files); the artwork is never recoloured. A logo identifies
+   the chain only — it does not verify that a restaurant is a branch.
+   Category colours resolve the LDS series tokens by food-type group index
+   (data/restaurants.json groups order = series.01 … series.10). */
+
+.brand-logo { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; box-sizing: border-box; padding: 2px 4px; background: var(--logo-bg, #E5E9E6); border: 1px solid var(--border-hairline); border-radius: 4px; overflow: hidden; }
+.brand-logo img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.brand-logo-xs { width: 44px; height: 22px; padding: 1px 3px; }
+.brand-logo-sm { width: 56px; height: 28px; }
+.brand-logo-md { width: 72px; height: 36px; padding: 3px 6px; }
+.brand-logo-lg { height: 56px; width: clamp(56px, calc(44px * var(--logo-ratio, 2) + 16px), 180px); padding: 6px 8px; }
+.brand-row { display: flex; align-items: center; gap: 10px; white-space: normal; }
+.brand-row > span { min-width: 0; overflow-wrap: anywhere; }
+.brand-row .brand-logo { width: 56px; height: 28px; }
+.brand-chip .chip-logo { width: 44px; height: 22px; padding: 1px 3px; border-radius: 3px; }
+.logo-credit { font-size: 12px !important; }
+.row-name.brand-row { max-width: 320px; }
+
+/* Category fill variable: pins, swatches and mix bars read --pin-fill. */
+.store-pin[data-category="1"], .category-1 { --pin-fill: var(--series-1-fill); }
+.store-pin[data-category="2"], .category-2 { --pin-fill: var(--series-2-fill); }
+.store-pin[data-category="3"], .category-3 { --pin-fill: var(--series-3-fill); }
+.store-pin[data-category="4"], .category-4 { --pin-fill: var(--series-4-fill); }
+.store-pin[data-category="5"], .category-5 { --pin-fill: var(--series-5-fill); }
+.store-pin[data-category="6"], .category-6 { --pin-fill: var(--series-6-fill); }
+.store-pin[data-category="7"], .category-7 { --pin-fill: var(--series-7-fill); }
+.store-pin[data-category="8"], .category-8 { --pin-fill: var(--series-8-fill); }
+.store-pin[data-category="9"], .category-9 { --pin-fill: var(--series-9-fill); }
+.store-pin[data-category="10"], .category-10 { --pin-fill: var(--series-10-fill); }
+.mix-fill.category-1 { background: var(--series-1-fill); }
+.mix-fill.category-2 { background: var(--series-2-fill); }
+.mix-fill.category-3 { background: var(--series-3-fill); }
+.mix-fill.category-4 { background: var(--series-4-fill); }
+.mix-fill.category-5 { background: var(--series-5-fill); }
+.mix-fill.category-6 { background: var(--series-6-fill); }
+.mix-fill.category-7 { background: var(--series-7-fill); }
+.mix-fill.category-8 { background: var(--series-8-fill); }
+.mix-fill.category-9 { background: var(--series-9-fill); }
+.mix-fill.category-10 { background: var(--series-10-fill); }

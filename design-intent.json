@@ -1,0 +1,74 @@
+{
+  "artifact": "CityMETER Restaurants — 3D-first, subdistrict-first restaurant density map",
+  "productVersion": "0.1.0",
+  "updatedOn": "2026-10-22",
+  "ldsVersion": "0.9.7",
+  "release": "v0.9.7-owner.1",
+  "revision": "standalone-0.9.7-r1",
+  "colorSetId": "color-srgb-10",
+  "baseDocumentSha256": "d3085cbc0a50195f1cbf0c77b1d77c0d19b84364daf2948eb367348d65432d96",
+  "locationIntelligenceProfile": "not applied — restaurant observations are not a supply-capacity, demand or market measure; the product uses base analytical families only",
+  "layoutReference": "https://landometer.com/v3/citymeter?d=restaurant",
+  "fontRoles": {
+    "body": "Bai Jamjuree 400/600",
+    "thaiHeadings": "IBM Plex Sans Thai Looped 700",
+    "latinHeadings": "Arvo 700",
+    "dataAndMetrics": "JetBrains Mono 400; tabular numerals; normal tracking",
+    "navigation": "Material Symbols Rounded approved nav-7 subset; FILL 0 / wght 300 / GRAD 0 / opsz 24",
+    "pictograms": "Material Symbols Rounded 8-glyph pictogram subset reused byte-for-byte from Luxury Brands 0.5 (owner test exception 2026-10-22)"
+  },
+  "colors": {
+    "applied": "assets/theme.css — foundation pairs, semantic states, map roles, dataState (noData, zero), categorical series 1–10 (landometer-series-10-v8 soft fill + ink), count classes (province swatches), basemap-only tokens",
+    "analytical": "js/scales.js — density.area (scaleVersion 554812a7c19107b3a9b8658ba541fc8e13519cb19708e885a425f32d5b30f101), count (4ff5c1fb4be71ecd13c48685b38371b528bcd4ce369ce964a75354c2eb4d0980), price (a4fcda655f3e10c43e8deab212d7da20335392a87c823a390ab81a69d38cfccc); exact 41-sample LUTs; identical HEX on both themes",
+    "categorical": "js/cues.js — food-type group id → series 1–10 with the LDS shape cue (circle, square, triangle, diamond, cross, star, hexagon, ring, dash, plus)",
+    "reportedDifference": "LDS analytical scale records list dark noData #3B4849 / zeroOutline #BAC6C0, while machine.tokens.dataState (referenced by the EVID-05 treatments) lists dark #404844 / #93A398; the map follows the EVID-05 treatment (dataState) and the difference is reported to the owner",
+    "notDistributed": "full LDS library, other analytical families, Location Intelligence profile scales"
+  },
+  "firstAha": "combined restaurants per km² of the three densest แขวง/ตำบล (≥ 30 rows) against the coverage baseline, computed per selection; the map opens in the 3D city preset with those three areas focused automatically and the rest quiet",
+  "focusAndQuiet": {
+    "implementation": "app.js focus modes (auto/explicit/none) and row scopes (scopeRows/baseRows/rows); map-layers.js filled/quiet feature-state; pins.js cue symbols vs grey context dots; massing.js quiet city tier vs rounded focus tier; camera.js presets; venue-xray.js keeps the venue solid visible; provinces.js frames below zoom 8.5"
+  },
+  "geometryAndMetricContract": "one observation per symbol; membership by the source subdistrict code; density = rows ÷ production km²; combined density Σ/Σ; coordinates are MVT display positions (z10, 9.55 m) and never upgraded",
+  "accessibility": [
+    "native form labels and disclosure",
+    "visible focus on every control including pins, area labels and chart marks",
+    "keyboard pin tour (arrow keys) at detail zoom, excluding quiet context dots",
+    "roving tablist for the chart views",
+    "reduced motion respected",
+    "table equivalent for every map view",
+    "categorical shape cues beside colour; text labels in every legend and list",
+    "empty, map-failure and load-error paths with actions"
+  ],
+  "validation": {
+    "status": "release 0.1 verification recorded in handoff/VERIFICATION.md",
+    "renderedHarness": "Playwright + MapLibre 5.6.2 from the npm package + stub TileJSON (empty basemap tiles); 1440×900, 1180×760 and 390×844; light and dark",
+    "scope": "Applied LDS values, fonts and actual rendered interfaces. No blanket LDS, CVD, native-device or market-completeness claim."
+  },
+  "layoutContract": {
+    "headerPx": 48,
+    "readingPanelWidth": "min(max(300px, 28%), 440px)",
+    "map": "full remaining viewport below header",
+    "chartTray": "collapsible bottom overlay, 52 px collapsed, 360 px / ≤58% open",
+    "mobilePortrait": "full map, bottom sheet ≤ 64dvh with sticky close, compact Aha card on the map while the sheet is closed, only focus labels on the map"
+  },
+  "mapContract": {
+    "basemap": "generated at runtime by js/map-style.js on https://tiles.openfreemap.org/planet with --basemap-* tokens; no hosted style URL",
+    "choropleth": "density.area, five equal-interval classes over (0, rounded max], [lower, upper) with the last closed, precision by magnitude; opacity 1 beneath the basemap's first line layer; off at zoom ≥ 14.5; EVID-05 measured / measured_zero (lowest class + 2 px zero outline) / no_data (135° hatch on dataState.noData + border.emphasis) / out_of_scope (not drawn)",
+    "provinces": "count family per province frame below zoom 8.5, outlines to zoom 12, ink-chip labels to zoom 9, panel list; drill-down into the จังหวัด filter",
+    "symbols": "focus rows as cue icons (series fill + shape, marker-stroke outline) in a symbol layer, never clustered; context rows as grey circles; HTML pins with logos from zoom 15.5 (≤ 320 pins, ≤ 250 logos)",
+    "labels": "ink chips for the focus/selection, light chips for the rest (≤ 12 desktop, none on a phone in focus mode); swatch = the area's class colour; value = ร้าน/ตร.กม.",
+    "venues": "host buildings of 25 venue candidates (exact name match with the Luxury Brands host set) in map.activeLayer, drawn only at venue level; x-ray keeps them visible and clickable",
+    "breadcrumb": "ประเทศไทย › จังหวัด › เขต/อำเภอ › แขวง/ตำบล with production codes and /D/ /S/ deep links; venue mode ประเทศไทย › จังหวัด › venue; store is the heading"
+  },
+  "brandIdentity": {
+    "sources": "155 chain logo files and 157 venue logo files from the research logo manifest; original bytes, sha256-checked; backplate from the registry",
+    "fallback": "visible names and accessible labels retained; logos are identity, not a metric, endorsement or branch verification",
+    "registries": ["data/brand-logos.json", "data/venue-logos.json"]
+  },
+  "chartContract": {
+    "density": "sorted bars, density class colour, value beside the bar; count bars when no area reaches the eligibility threshold",
+    "matrix": "table-layout fixed with a colgroup; every cell the same size; cell tint = count class; column headers carry the series cue",
+    "price": "100% stacked bars of priced rows in the price family; unspecified counted beside the bar"
+  },
+  "copy": "short natural Thai: ร้าน / เครือร้าน / สถานที่ / แขวง·ตำบล / เขต·อำเภอ; units on every number; provenance line (dataset · source · date · boundary) at the end of every panel view"
+}

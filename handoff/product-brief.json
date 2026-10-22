@@ -1,0 +1,770 @@
+{
+  "$schema": "./handoff.schema.json",
+  "schemaVersion": "1.4.0",
+  "documentType": "product-brief",
+  "productId": "citymeter-restaurants",
+  "productVersion": "0.1.0",
+  "updatedOn": "2026-10-22",
+  "datasetCheckedOn": "2026-10-22",
+  "language": "th",
+  "productName": "CityMETER · Restaurants",
+  "repository": "https://github.com/montri-th/restaurant",
+  "liveUrl": "https://montri-th.github.io/restaurant/",
+  "productStatement": {
+    "human": "../PRODUCT_STATEMENT.md",
+    "machine": "product-statement.json",
+    "question": "ร้านอาหารแน่นที่สุดอยู่ตรงไหน และเป็นร้านแบบไหน"
+  },
+  "job": "Screen and compare แขวง/ตำบล by restaurant density, food type, price level and chains before a location decision, with dataset · source · date · boundary on every number",
+  "audiences": [
+    {
+      "id": "chain-expansion",
+      "label": "ทีมขยายสาขาและแฟรนไชส์ร้านอาหาร",
+      "evidence": "hypothesis"
+    },
+    {
+      "id": "leasing",
+      "label": "ทีม leasing/asset ของศูนย์การค้า community mall และอาคารพาณิชย์",
+      "evidence": "hypothesis"
+    },
+    {
+      "id": "analyst",
+      "label": "นักวิเคราะห์ ที่ปรึกษา และหน่วยงานท้องถิ่น",
+      "evidence": "hypothesis"
+    }
+  ],
+  "journey": [
+    "3D first Aha (three densest แขวง/ตำบล focused)",
+    "แขวง/ตำบล profile (type, price, most reviewed, chains, venues named)",
+    "เขต/อำเภอ profile",
+    "store detail (rating, price, chain/venue candidates, display coordinate, source)",
+    "venue with host building (x-ray, มุมสถาปนิก)",
+    "compare areas (density · type · price) and table",
+    "open the same area in CityMETER production"
+  ],
+  "changesSince": {
+    "base": "CityMETER Luxury Brands 0.5 (same camera, basemap, massing, venue x-ray, pictogram and handoff contracts)",
+    "new": [
+      "administrative areas (แขวง/ตำบล, เขต/อำเภอ) from production instead of self-defined neighborhoods",
+      "density.area metric with eligibility threshold",
+      "coverage states (no_data hatch vs measured_zero)",
+      "categorical cue symbols on the map",
+      "price family",
+      "provenance line in every panel view",
+      "name-based chain/venue candidates"
+    ]
+  },
+  "rowScopes": {
+    "scopeRows": {
+      "definition": "rows after search/group/price/province/brand filters, before any area selection or area focus",
+      "consumers": [
+        "first Aha (no district selected)",
+        "choropleth",
+        "charts",
+        "area/district/venue/store profiles (ranks keep the whole selection as reference)",
+        "quiet context dots",
+        "province frames (without the province filter)"
+      ]
+    },
+    "baseRows": {
+      "definition": "scopeRows narrowed by the selected เขต/อำเภอ or แขวง/ตำบล",
+      "consumers": [
+        "first Aha when a district is selected",
+        "counters and table when an area/district is selected"
+      ]
+    },
+    "rows": {
+      "definition": "baseRows narrowed by the area focus (auto top-3, explicit ?areas=, or none with ?areas=all)",
+      "consumers": [
+        "focused cue symbols",
+        "counters (labelled ในโฟกัส when narrowed)",
+        "table",
+        "focus massing regions"
+      ]
+    },
+    "venueRows": {
+      "definition": "scopeRows whose name refers to the open venue (venue mode, or a store naming a hosted venue)",
+      "consumers": [
+        "cue symbols with detail",
+        "counter and table at venue level"
+      ]
+    },
+    "focusModes": {
+      "auto": {
+        "default": true,
+        "focusIds": "summarizeAreaInsight(...).areaIds (≤ 3) when no area/district is selected",
+        "url": "no areas parameter"
+      },
+      "explicit": {
+        "focusIds": "user-chosen subdistrict codes (≤ 3)",
+        "url": "?areas=100204,101303"
+      },
+      "none": {
+        "focusIds": "[]",
+        "url": "?areas=all"
+      }
+    }
+  },
+  "firstAha": {
+    "scope": "scopeRows, or baseRows when a เขต/อำเภอ is selected",
+    "ranking": "แขวง/ตำบล with ≥ 30 rows (MIN_AREA_ROWS), by restaurants per km² of the production area, then rows, then code; top three",
+    "headlineTemplate": "{density} ร้าน/ตร.กม. — ร้านอาหารแน่นที่สุดใน {areaCount} {แขวง|ตำบล|พื้นที่}นี้",
+    "numerator": "rows in the three areas (source subdistrict membership)",
+    "denominator": "sum of the three areas' production km² (Σrows ÷ Σkm², never an average of ratios)",
+    "baseline": "rows in the selection ÷ km² of the covered frames (≥ 1 row in the full dataset) inside the province/district filter",
+    "secondaryFinding": "area with the most reviews in the selection (popularity proxy, rows with a review count only)",
+    "eligibilityCopy": "จัดอันดับเฉพาะพื้นที่ที่มีอย่างน้อย 30 ร้าน",
+    "defaultFocus": "auto",
+    "defaultCamera": "city preset, fitPitched over the union of the focused polygons with every vertex inside the padded viewport",
+    "action": "ดูทุกพื้นที่ (?areas=all); เปรียบเทียบพื้นที่ (opens charts); area names are links",
+    "explicitAction": "โฟกัส {areaCount} {แขวง|ตำบล}นี้ (when focus mode is none)",
+    "model": "js/area-insight.js#summarizeAreaInsight",
+    "filter": "js/area-insight.js#filterAreaRows",
+    "defaultSnapshot": {
+      "asOf": "2026-10-22",
+      "areaIds": [
+        "100204",
+        "101303",
+        "100403"
+      ],
+      "names": [
+        "สี่แยกมหานาค",
+        "ตลาดน้อย",
+        "สุริยวงศ์"
+      ],
+      "rows": [
+        40,
+        39,
+        57
+      ],
+      "km2": 1.3647,
+      "density": 99.66,
+      "baselineDensity": 18.01,
+      "coverage": {
+        "areas": 308,
+        "km2": 3899.11
+      },
+      "mostReviewed": {
+        "id": "103902",
+        "name": "คลองตันเหนือ",
+        "reviews": 217736
+      },
+      "status": "regression fixture — never a UI constant"
+    },
+    "fallbacks": {
+      "noRows": "ไม่พบร้านตามตัวกรองนี้ + ล้างตัวกรอง",
+      "smallSelection": "fewer than 1,000 rows or fewer than 3 eligible areas → count mode: {share}% ของร้านตามตัวกรองอยู่ใน 3 พื้นที่นี้",
+      "mapUnavailable": "Aha, panel, charts and table stay usable; map failure card with retry"
+    }
+  },
+  "metricContract": {
+    "areas": {
+      "family": "density.area",
+      "unit": "ร้าน/ตร.กม.",
+      "formula": "rows ÷ (areaSqm / 1e6) of the production frame",
+      "classes": "5 equal-interval classes over (0, top] with top = max rounded up at the label precision (integers ≥ 20, one decimal ≥ 2, two decimals below); [lower, upper) with the last closed"
+    },
+    "provinces": {
+      "family": "count",
+      "unit": "ร้าน",
+      "reason": "outside BKK/NBI/SPK the source covers only some ตำบล; a per-km² province value would measure coverage",
+      "classes": "5 closed integer intervals over [1, max]"
+    },
+    "matrix": {
+      "family": "count",
+      "unit": "ร้าน",
+      "cells": "rows per area × food-type group"
+    },
+    "price": {
+      "family": "price",
+      "buckets": "≤100, >100–300, >300–500, >500–1,000, >1,000 baht by COALESCE(end_price, start_price) as in the source; unspecified counted apart, never a price"
+    },
+    "eligibility": {
+      "minRows": 30,
+      "smallSelection": 1000,
+      "rationale": "a density on a handful of rows is not a finding (random error ≈ 1/√n)"
+    },
+    "combined": "Σrows ÷ Σkm² for any set of areas",
+    "popularity": "reviews = Σ rating_count of rows that state it; rating mean over rated rows only; both are popularity proxies, not sales"
+  },
+  "coverageContract": {
+    "covered": "แขวง/ตำบล with ≥ 1 row in the full dataset (308 of 581 in the snapshot)",
+    "states": {
+      "measured": "class fill",
+      "measured_zero": "covered frame with no row under the filter — lowest class fill + 2 px dataState.zero outline",
+      "no_data": "frame with no row in the full dataset — 135° hatch on dataState.noData + border.emphasis; copy “ไม่มีข้อมูล / แหล่งข้อมูลไม่มีร้านในพื้นที่นี้ ไม่ได้แปลว่าไม่มีร้านอาหาร”",
+      "out_of_scope": "provinces without rows — not drawn"
+    },
+    "legend": "density classes + 0 (when present) + ไม่มีข้อมูล (when present); province classes at country zoom"
+  },
+  "categoricalCueContract": {
+    "registry": "landometer-series-10-v8 (soft fill + ink per theme from assets/theme.css)",
+    "bindBy": "food-type group id (js/cues.js#GROUP_SERIES), stable through filtering and sorting",
+    "groups": {
+      "general": {
+        "series": 8,
+        "cue": "ring",
+        "th": "ร้านอาหารทั่วไป"
+      },
+      "thai": {
+        "series": 1,
+        "cue": "circle",
+        "th": "อาหารไทย"
+      },
+      "fastfood": {
+        "series": 3,
+        "cue": "triangle",
+        "th": "ฟาสต์ฟู้ด"
+      },
+      "japanese": {
+        "series": 6,
+        "cue": "star",
+        "th": "ญี่ปุ่น"
+      },
+      "cafe": {
+        "series": 2,
+        "cue": "square",
+        "th": "คาเฟ่และของหวาน"
+      },
+      "asian": {
+        "series": 4,
+        "cue": "diamond",
+        "th": "จีนและเอเชีย"
+      },
+      "grill": {
+        "series": 5,
+        "cue": "cross",
+        "th": "ปิ้งย่าง บุฟเฟต์ ซีฟู้ด"
+      },
+      "western": {
+        "series": 7,
+        "cue": "hexagon",
+        "th": "ตะวันตกและนานาชาติ"
+      },
+      "other": {
+        "series": 10,
+        "cue": "plus",
+        "th": "อื่น ๆ"
+      },
+      "unspecified": {
+        "series": 9,
+        "cue": "dash",
+        "th": "ไม่ระบุประเภท"
+      }
+    },
+    "uses": [
+      "map symbol layer (cue icon = series fill + shape, marker-stroke outline)",
+      "HTML pins at detail zoom",
+      "legend “ประเภทร้าน (สีและรูปทรง)”",
+      "type bars in profiles",
+      "matrix column headers",
+      "store eyebrow"
+    ],
+    "rationale": "the dominant general group (≈72% of rows) takes the open ring so specific types read as filled shapes"
+  },
+  "mapFocusContract": {
+    "principle": "Show detail only for the focused part; keep everything else quiet (carried over from Luxury Brands, owner 2026-10-22)",
+    "states": {
+      "overviewAuto": {
+        "focus": "top-3 แขวง: density fill, ink label chips with value and class swatch, cue symbols, rounded focus massing (zoom ≥ 13)",
+        "quiet": "other frames outline-only with light label chips (≤ 12 on desktop, none on a phone); rows outside focus are grey context dots; city massing quiet"
+      },
+      "overviewAll": {
+        "focus": "every frame filled by density class; up to 30 labels (10 on a phone)",
+        "quiet": "none"
+      },
+      "district": {
+        "focus": "the district's แขวง/ตำบล filled, district outline selected, their labels",
+        "quiet": "other frames outline-only"
+      },
+      "area": {
+        "focus": "selected frame fill below zoom 14.5, selected outline, cue symbols, HTML pins and logos from zoom 15.5",
+        "quiet": "as overviewAuto"
+      },
+      "store": {
+        "focus": "selected ring, leader line to the source display position, desktop popup",
+        "quiet": "inherits current focus"
+      },
+      "venue": {
+        "focus": "only rows naming the venue carry detail; host building(s) in map.activeLayer drawn by the venue x-ray (always visible, clickable); มุมสถาปนิก by default when a host building exists",
+        "quiet": "everything else"
+      }
+    },
+    "choropleth": "density.area classes, opacity 1 beneath the basemap's first line layer, hard switch off at zoom ≥ 14.5, EVID-05 states per coverageContract",
+    "symbols": "symbol layer of cue icons for focus rows; grey circle layer for context rows (first draw of > 5,000 context rows deferred 0.9 s so focus and fills are not queued behind it)",
+    "labels": "HTML chips collision-managed against each other and the map chrome; area labels from zoom 11.5, province labels below zoom 9"
+  },
+  "basemapContract": {
+    "generator": "js/map-style.js#buildMapStyle(theme, {palette, tileJSON, glyphs}) — a MapLibre style v8 object built at runtime; no hosted style URL",
+    "tiles": {
+      "tileJson": "https://tiles.openfreemap.org/planet",
+      "schema": "OpenMapTiles (OpenFreeMap build)",
+      "sourceId": "openmaptiles",
+      "maxzoom": 14,
+      "buildingLayer": "building (fields render_height, render_min_height, hide_3d; available z13–14)",
+      "glyphs": "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf (Noto Sans Regular / Italic)",
+      "attribution": "© OpenMapTiles © OpenStreetMap contributors (OpenFreeMap)",
+      "labels": "name:th preferred, then name; no POI, housenumber or boundary labels"
+    },
+    "palette": {
+      "source": "assets/theme.css --basemap-* tokens (light and dark declared once each; basemap-only, not data colours)",
+      "resolver": "js/map-style.js#basemapPalette(theme)",
+      "light": {
+        "ground": "#EEF1EE",
+        "water": "#E2E9ED",
+        "park": "#DCE6D4",
+        "building": "#DFE2DD",
+        "massingQuiet": "#ECEDE8",
+        "massingFocus": "#D9D7CD",
+        "road": "#FFFFFF",
+        "roadCasing": "#DCE1DD",
+        "label": "#5F635A",
+        "halo": "#F6F7F3",
+        "sky": "#F6F7F3",
+        "fog": "#EEF1EE"
+      },
+      "dark": {
+        "ground": "#11191D",
+        "water": "#18333E",
+        "park": "#16251F",
+        "building": "#1C262B",
+        "massingQuiet": "#2A343A",
+        "massingFocus": "#4A5760",
+        "road": "#293337",
+        "roadCasing": "#33403D",
+        "label": "#A6B5B1",
+        "halo": "#11191D",
+        "sky": "#0D1418",
+        "fog": "#11191D"
+      }
+    },
+    "layerOrder": [
+      "background / landcover / park / water",
+      "data fill (inserted before DATA_FILL_BEFORE = waterway)",
+      "2D building footprints",
+      "roads, rail, paths",
+      "massing + host buildings (inserted before MASSING_BEFORE = water-name, the first symbol layer)",
+      "labels",
+      "area outlines, selection outline, pins, logos"
+    ],
+    "atmosphere": "sky + fog blend the far ground into the paper colour; viewport-anchored light (#FFFFFF, intensity 0.32) gives massing a soft shade; both are quiet context, never data",
+    "themeSwitch": "map.setStyle(buildMapStyle(theme)) then re-install spatial layers; data layers keep the same HEX on both themes"
+  },
+  "massingContract": {
+    "module": "js/massing.js#installMassing(map, {sourceId, beforeId, colors, tileUrl, fetchImpl}) → {update, retheme, dispose, layerIds}",
+    "cityTier": {
+      "layer": "city-massing (fill-extrusion, source openmaptiles, source-layer building, minzoom 13)",
+      "height": "render_height / render_min_height from the tile; hide_3d features excluded",
+      "colour": "--basemap-massing-quiet, vertical gradient, no outline",
+      "visibility": "3D view only; hidden in plan",
+      "filter": "['all', ['!=', ['get','hide_3d'], true], ['!', ['in', ['id'], ['literal', hiddenIds]]]] — OSM twins of host buildings hidden by feature id"
+    },
+    "focusTier": {
+      "source": "focus-massing (GeoJSON built from the same tile URLs MapLibre loads, decoded by js/mvt.js; z14, ≤ 9 tiles per update, tiles touching the focus regions only)",
+      "layer": "focus-massing-3d (fill-extrusion, minzoom 13)",
+      "selection": "buildings overlapping a focus polygon (point-in-ring or ring intersection), clipped to the tile box with buffer, host-overlapping buildings dropped",
+      "shape": "js/geometry.js: cleanRing → clipRingToBox → offsetRing(+d) → roundRing(r, 3 segments, encloseOffset d)",
+      "height": "render_height + 0.35 m (HEIGHT_LIFT_M); base = render_min_height",
+      "colour": "--basemap-massing-focus, vertical gradient",
+      "visibility": "3D and plan (plan shows the rounded footprints flat)",
+      "cacheKey": "regions + hosts + zoom bucket (full zoom level) + tile availability"
+    },
+    "hostTier": {
+      "source": "data/venue-buildings.geojson via js/buildings.js (controller exposes displayedFeatures())",
+      "colour": "map.activeLayer; outline map.selectedStroke",
+      "visibility": "extrusion zoom ≥ 14, outline zoom ≥ 12, rows in focus only; before MASSING_BEFORE"
+    },
+    "rounding": {
+      "radiusMetres": "roundingRadiusM(zoom, lat) = clamp(4 px in metres at max(zoom, 14.5), 3, 12)",
+      "segmentsPerCorner": 3,
+      "reference": "maplibre/maplibre-style-spec#1047 (polygon corner radius) is unsupported in MapLibre; rounding is done in geometry, display only"
+    },
+    "enclosure": {
+      "offsetMetres": "encloseOffsetM(r) = max(1, r / 2.5)",
+      "radiusCap": "radius ≤ 0.95 · d / (1 − sin(θ/2)) so the rounded ring still encloses the original polygon at every corner",
+      "purpose": "the quiet city twin stays fully inside the rounded focus solid → no z-fighting without hiding it; host twins are hidden instead because the host solid is the data layer"
+    },
+    "provenance": "building heights and footprints are OSM via OpenFreeMap (defaults when no height tag); context only, never a claim of this dataset; OpenFreeMap merges same-height buildings into MultiPolygons, so single roofs cannot be picked",
+    "scene": {
+      "module": "massing.setScene('default'|'eye', targets)",
+      "opacities": {
+        "default": {
+          "city": 0.22,
+          "focus": 1,
+          "occluder": 0.18
+        },
+        "eye": {
+          "city": 0.16,
+          "focus": 0.62,
+          "occluder": 0.14
+        }
+      },
+      "occluderLayer": "focus-massing-occluding (same source as the focus tier; filter by unique feature ids; the focus tier excludes them)",
+      "occlusionTest": "screen-space: a focus building whose box (ground vertices + tops lifted by height × local px/m × sin(pitch)) overlaps a target's box and whose mean ground y is larger (nearer the camera) is an occluder; recomputed on moveend and after each tile update; targets = the venue's host rings (buildings.js displayedFeatures filtered by mall_ids / venue_names) with display_height_m",
+      "hostStaysOpaque": true
+    },
+    "distanceFade": {
+      "rule": "city-tier colour interpolates from --basemap-massing-quiet (fade 0) to --basemap-ground (fade 1, invisible) by distance from the nearest focus anchor (area centroid; every area when nothing is focused)",
+      "nearMetres": 500,
+      "farMetres": 2200,
+      "mechanism": "feature-state `fade` written once per building id after tiles load (querySourceFeatures on sourcedata/moveend); anchors change → states rebuilt",
+      "why": "MapLibre has no camera-distance expression and fill-extrusion-opacity is not data-driven"
+    }
+  },
+  "cameraContract": {
+    "module": "js/camera.js (CAMERA, presetFor, applyPreset, fitPitched, framePoint, shiftPadding)",
+    "presets": {
+      "plan": {
+        "pitch": 0,
+        "bearing": 0,
+        "fov": 36.87,
+        "when": "view3d off (3D toggle / ?view3d=0) or bounds wider than 0.3°"
+      },
+      "city": {
+        "pitch": 56,
+        "bearing": 28,
+        "fov": 36.87,
+        "fitShift": 0.2,
+        "when": "overview in 3D (first Aha)"
+      },
+      "model": {
+        "pitch": 60,
+        "bearing": 28,
+        "fov": 14,
+        "fitShift": 0.16,
+        "when": "แขวง/ตำบล in 3D (and venue level when มุมสถาปนิก is switched off) — near-axonometric, verticals upright"
+      },
+      "eye": {
+        "pitch": 75,
+        "bearing": 28,
+        "fov": 24,
+        "fitShift": 0.1,
+        "when": "venue level only (venue mode, or a store inside a venue): on by default, ?cam=model opts out; disabled elsewhere and in 2D; on mobile portrait it waits until the sheet closes",
+        "constraint": "MapLibre 5.6.2 draws fill-extrusion displaced or not at all once the horizon enters the viewport (pitch > 90 − fov/2) — verified live 2026-10-22 (pitch 73 ok, 76 displaced, 82 missing); the eye preset keeps the horizon just outside the frame (90 − 12 − 3 = 75)"
+      }
+    },
+    "fitting": {
+      "function": "fitPitched(map, bounds, {preset, padding, maxZoom 16, minZoom 10, points, shift})",
+      "method": "start from cameraForBounds (flat), apply preset pitch/bearing/FOV, zoom out in 0.1 steps until every point (polygon vertices when given, else bbox corners) projects inside the padded viewport, then zoom in while they still fit; jumps are computed without rendering and the final camera is animated",
+      "padding": "desktop 3D padding ignores the legend; mobile portrait with the sheet open uses plan, then re-frames in 3D on sheet close",
+      "bearing": "28° (carried over from Luxury Brands; the first-paint frame is fitted to the focused areas whatever their axis)",
+      "venue": "frameVenue: fitPitched over the host footprint vertices AND roof vertices (vertex + display_height_m, projected with camera.projectPoint through transform.modelViewProjectionMatrix), top padding 12% (eye) / 10% (model), maxZoom 17.6, minZoom = max(14.5, footprint-only fit − 1) so a very tall tower cannot push the pins out of reading range; falls back to framePoint(zoom 16) when no host building is displayed or on mobile portrait",
+      "แขวง/ตำบล": "fitFeature: fitPitched over the แขวง/ตำบล or เขต/อำเภอ outline vertices (maxZoom 17.5 / 16) so the outline fills the frame"
+    },
+    "maplibre": {
+      "version": "5.6.2",
+      "requires": "setVerticalFieldOfView (≥ 4.7), maxPitch 85; keep pitch ≤ 90 − fov/2 − 3 for any fill-extrusion view",
+      "orthographic": "not available in MapLibre; narrow FOV is the standard substitute"
+    },
+    "alternatives": "deck.gl custom projectionMatrix or three.js camera.setViewOffset give a true two-point camera; not adopted to keep a single MapLibre scene"
+  },
+  "breadcrumbContract": {
+    "module": "js/breadcrumb.js (buildBreadcrumb, renderBreadcrumb, breadcrumbText, productionHref) + js/model.js PROVINCES, productionLink",
+    "levels": [
+      "ประเทศไทย",
+      "จังหวัด (Thai name; production code in URL)",
+      "เขต/อำเภอ (DOPA district code)",
+      "แขวง/ตำบล (DOPA subdistrict code)"
+    ],
+    "venueMode": "ประเทศไทย › จังหวัด (when every row naming the venue is in one province) › venue — a venue is never placed under a แขวง because the link is name-based",
+    "productionPath": {
+      "observed": "https://landometer.com/v3/citymeter/{PROVINCE_CODE}[/D/{district code}|/S/{subdistrict code}]?d=restaurant (route scheme read from the production bundle, ViewMode D/S/M/L; HTTP 200 checked 2026-10-22)",
+      "status": "Observed fact"
+    },
+    "demoQuery": "?province=BKK&district=1002&area=100204 (+ store, place, areas, view, view3d, cam)",
+    "provinceCodes": {
+      "BKK": "กรุงเทพมหานคร",
+      "NBI": "นนทบุรี",
+      "SPK": "สมุทรปราการ",
+      "PTE": "ปทุมธานี",
+      "SKN": "สมุทรสาคร",
+      "CCO": "ฉะเชิงเทรา",
+      "NPT": "นครปฐม"
+    },
+    "folding": "four levels fold the upper two behind “…” on narrow screens"
+  },
+  "panel": {
+    "modes": [
+      "overview",
+      "district",
+      "area",
+      "venue",
+      "store"
+    ],
+    "navigation": "back stack (max 20); mode and id restored from URL (?district, ?area, ?place, ?store)",
+    "actions": [
+      "select-area",
+      "select-district",
+      "select-store",
+      "select-venue",
+      "select-province",
+      "filter-brand",
+      "back",
+      "explore-top",
+      "clear-focus",
+      "open-charts",
+      "open-table",
+      "clear-filter",
+      "crumb-country",
+      "crumb-province",
+      "crumb-district",
+      "crumb-area",
+      "crumb-venue",
+      "crumb-expand",
+      "toggle-3d"
+    ],
+    "models": {
+      "overview": "js/profile-model.js#buildOverview + js/area-insight.js#summarizeAreaInsight",
+      "district": "js/profile-model.js#buildDistrictProfile",
+      "area": "js/profile-model.js#buildAreaProfile",
+      "venue": "js/profile-model.js#buildVenueProfile",
+      "store": "js/profile-model.js#buildStoreDetail (+ describeGeometry, describePrice)"
+    },
+    "renderer": "js/panel.js (pure HTML strings, delegated data-action clicks); provenance() ends every view: ชุดข้อมูล · แหล่ง · ดึงข้อมูล · ขอบเขต + popularity caveat"
+  },
+  "data": {
+    "observationGrain": "one observation of the public CityMETER Restaurants overlay (owning-tile view); never merged by name or coordinate",
+    "core": "data/restaurants.json (columnar; meta, priceBuckets, groups, types, typeGroup, areas, brands, venues, cols, brand, venue, venueEntity)",
+    "areas": "data/areas.geojson (581), data/districts.geojson (90), data/provinces.geojson (7), data/boundary-receipts.json (581 receipts)",
+    "hostBuildings": "data/venue-buildings.geojson (25 venues, 58 features)",
+    "logos": "data/brand-logos.json (155), data/venue-logos.json (157)",
+    "snapshot": {
+      "rows": 70214,
+      "provinces": 7,
+      "coveredAreas": 308,
+      "noDataAreas": 273,
+      "reviewsTotal": 6185635,
+      "rowsWithRating": 53703,
+      "rowsWithPrice": 19999,
+      "brands": 167,
+      "brandHolds": 3,
+      "venues": 1016,
+      "hostedVenues": 25
+    },
+    "verification": "fresh reproduction of the public API matched all 70,214 rows on every compared field (handoff/VERIFICATION.md)",
+    "coordinatePolicy": "MVT display positions (z10, extent 4096, 9.55 m) stored as grid integers; decoded with the research formula; screen-space displacement only; precision described, never upgraded",
+    "membershipPolicy": "source subdistrict code; no point-in-polygon on display positions; no name matching"
+  },
+  "visualSystem": {
+    "release": "LDS 0.9.7",
+    "releaseId": "v0.9.7-owner.1",
+    "revision": "standalone-0.9.7-r1",
+    "colorSetId": "color-srgb-10",
+    "normativeSha256": "d3085cbc0a50195f1cbf0c77b1d77c0d19b84364daf2948eb367348d65432d96",
+    "appliedTokens": "assets/theme.css (foundation pairs, semantic states, map roles, dataState, series 1–10, count classes, basemap-only tokens)",
+    "analyticalScales": {
+      "density.area": "554812a7c19107b3a9b8658ba541fc8e13519cb19708e885a425f32d5b30f101",
+      "count": "4ff5c1fb4be71ecd13c48685b38371b528bcd4ce369ce964a75354c2eb4d0980",
+      "price": "a4fcda655f3e10c43e8deab212d7da20335392a87c823a390ab81a69d38cfccc",
+      "lutSamples": 41,
+      "themePolicy": "identical light HEX on both themes",
+      "source": "js/scales.js"
+    },
+    "categoricalSeries": {
+      "registry": "landometer-series-10-v8",
+      "variant": "soft",
+      "assignment": "categoricalCueContract"
+    },
+    "locationProfile": {
+      "document": "Location-Intelligence-Profile-for-LDS-v0.9.7.md",
+      "applied": false,
+      "reason": "restaurant observations are not a supply-capacity, demand or market measure"
+    },
+    "fonts": {
+      "body": "Bai Jamjuree 400/600",
+      "headingLatin": "Arvo 700",
+      "headingThai": "IBM Plex Sans Thai Looped 700",
+      "numbers": "JetBrains Mono 400 tabular"
+    },
+    "reportedDifference": "dark no-data/zero colours differ between the analytical scale records (#3B4849 / #BAC6C0) and machine.tokens.dataState (#404844 / #93A398); the EVID-05 treatments reference dataState, which the map uses"
+  },
+  "invariants": [
+    {
+      "id": "INV01",
+      "rule": "One observation owns one symbol; no clustering or aggregation, including quiet context dots"
+    },
+    {
+      "id": "INV02",
+      "rule": "Membership is the source subdistrict code; never re-assign by point-in-polygon on display coordinates or by name"
+    },
+    {
+      "id": "INV03",
+      "rule": "Density = rows ÷ production km²; combined density Σrows ÷ Σkm²; never average ratios"
+    },
+    {
+      "id": "INV04",
+      "rule": "Never rank by density below MIN_AREA_ROWS (30); small selections switch to counts and say so"
+    },
+    {
+      "id": "INV05",
+      "rule": "Missing is never zero: no rating, no price, no type and uncovered frames stay missing / no_data"
+    },
+    {
+      "id": "INV06",
+      "rule": "no_data (uncovered frame) ≠ measured_zero (covered frame, 0 under the filter); hatch vs zero outline"
+    },
+    {
+      "id": "INV07",
+      "rule": "Every panel view ends with dataset · source · date · boundary"
+    },
+    {
+      "id": "INV08",
+      "rule": "Ratings and reviews are popularity proxies; never called sales, demand or quality"
+    },
+    {
+      "id": "INV09",
+      "rule": "Chain and venue links are name-based candidates: no “สาขา”, no “ตั้งอยู่ใน”, no proximity inference"
+    },
+    {
+      "id": "INV10",
+      "rule": "Coordinates are display positions; displacement is screen-space only; precision label kept"
+    },
+    {
+      "id": "INV11",
+      "rule": "Analytical colours are exact LDS LUT values, identical on both themes; categorical colours keep their shape cue"
+    },
+    {
+      "id": "INV12",
+      "rule": "The first paint is the 3D city preset with the auto focus; numbers never change with the camera"
+    },
+    {
+      "id": "INV13",
+      "rule": "scopeRows drive the Aha, choropleth and charts; rows drive symbols with detail, counters and table"
+    },
+    {
+      "id": "INV14",
+      "rule": "Province frames use counts, not density"
+    },
+    {
+      "id": "INV15",
+      "rule": "Breadcrumb levels and deep links follow production codes; a venue never sits under a แขวง; a store is never a crumb"
+    },
+    {
+      "id": "INV16",
+      "rule": "Logos keep original bytes (sha256), lookup by id only, ≤ 250 on screen, only at detail zoom inside the focus; holds have none"
+    },
+    {
+      "id": "INV17",
+      "rule": "Host building is the only building layer with a data colour; drawn only at venue level and kept visible by the x-ray"
+    },
+    {
+      "id": "INV18",
+      "rule": "Matrix cells are equal in size; price shares are of priced rows only"
+    },
+    {
+      "id": "INV19",
+      "rule": "Core value (Aha, panel, charts, table) works without the map"
+    },
+    {
+      "id": "INV20",
+      "rule": "No private Drive/Sheet URLs, credentials, internal sheet or full LDS library in the repository"
+    }
+  ],
+  "chartContracts": [
+    {
+      "viewKey": "density",
+      "title": "ความหนาแน่น",
+      "question": "แขวง/ตำบลไหนร้านแน่นที่สุด",
+      "encoding": "sorted horizontal bars; fill = density.area class (map legend); count bars when no area is eligible",
+      "metric": "ร้าน/ตร.กม. (+ ร้าน)",
+      "scope": "scopeRows",
+      "action": {
+        "type": "area",
+        "id": "subdistrict code"
+      }
+    },
+    {
+      "viewKey": "mix",
+      "title": "ประเภทร้าน",
+      "question": "พื้นที่ที่แน่นที่สุดมีร้านประเภทไหน",
+      "encoding": "equal-cell matrix area × 10 groups; tint = count class; headers carry the series cue",
+      "metric": "ร้านต่อช่อง",
+      "scope": "scopeRows (12 densest areas)",
+      "action": {
+        "type": "area",
+        "id": "subdistrict code"
+      }
+    },
+    {
+      "viewKey": "price",
+      "title": "ระดับราคา",
+      "question": "พื้นที่เหล่านั้นอยู่ในระดับราคาแบบไหน",
+      "encoding": "100% stacked bars of priced rows in the price family; unspecified counted beside the bar",
+      "metric": "share of priced rows per bucket",
+      "scope": "scopeRows (12 densest areas)",
+      "action": {
+        "type": "area",
+        "id": "subdistrict code"
+      }
+    }
+  ],
+  "venueXrayContract": {
+    "module": "js/venue-xray.js#installVenueXray(map, {beforeId, toMercator, colors}) → {update(features, {colors}), setEnabled, hitTest(point), dispose, count, enabled, failed}",
+    "layer": "venue-xray (type custom, renderingMode 3d), inserted before water-name after every fill-extrusion layer",
+    "input": "host features of the venue being looked at (mall_ids / venue_names match) with render_as = extrusion; display_base_m / display_height_m",
+    "geometry": "walls (two triangles per edge), roof via earcut (holes supported; js/vendor/earcut.js 3.2.4 ISC), edge lines; mercator coordinates relative to the centroid origin; z = MercatorCoordinate.z of the altitude",
+    "matrix": "options.defaultProjectionData.mainMatrix (64-bit) × translate(origin) multiplied on the CPU, Float32 to the shader",
+    "depth": "scissored depth clear inside the venue screen box (device pixels, padded 4 px), then LEQUAL read-write depth test against itself only; polygon offset keeps edges on top",
+    "visibility": "3D only (pitch > 0) and zoom ≥ 13 (XRAY_MIN_ZOOM); hidden with the 3D toggle; disabled at non-venue levels (empty feature set)",
+    "colours": "faces map.activeLayer × shade (roof 1, walls 0.66–0.92 by orientation), edges map.selectedStroke — map roles, not data colours",
+    "interaction": "two paths: the style layer restaurant-venue-buildings-3d (MapLibre hit-test, reliable near the footprint) and xray.hitTest(point) — point-in-triangle against the solid projected with the last frame matrix — wired in app.js on map click (opens the venue when not already there) and mousemove (pointer cursor); MapLibre alone misses tall walls away from the footprint (observed live 2026-10-22)",
+    "failSafe": "a GL error disables the layer (failed = true) and the style host layer keeps drawing",
+    "references": [
+      "MapLibre GL JS CustomLayerInterface (renderingMode 3d, defaultProjectionData.mainMatrix)",
+      "MapLibre src/render/draw_fill_extrusion.ts — translucent extrusions drawn depth-first, then colour with depth EQUAL",
+      "three.js material.depthTest = false selection highlight",
+      "Cesium Entity.disableDepthTestDistance"
+    ],
+    "knownTradeOff": "inside the cleared box a translucent 2D layer that sits below an opaque fill in style order may draw over it; none of the generated paper style layers are ordered that way"
+  },
+  "provinceContract": {
+    "data": "data/provinces.geojson — 7 provinces holding rows; id = production code (BKK …), code = DOPA two-digit; dissolved from the production subdistrict frames and simplified at 120 m (scripts/build-boundaries.py)",
+    "module": "js/provinces.js#installProvinceLayers(map, geojson) → {update({rows, selectedCode, visible}), dispose, model}; buildProvinceModel(rows, geojson)",
+    "rows": "filterRows(data.rows, {...filters, province: ''}) so each frame keeps its own count",
+    "metric": "rows per province (count family, 5 equal-interval classes); measured_zero = lowest fill + zero outline; out_of_scope (70 provinces) not drawn",
+    "zoomWindows": {
+      "fill": "< 8.5",
+      "outline": "< 12",
+      "selected": "< 13",
+      "labels": "< 9"
+    },
+    "panel": "overview list จังหวัดที่มีร้านในชุดข้อมูล (count, class swatch) — each a drill-down into the จังหวัด filter"
+  },
+  "pictogramContract": {
+    "status": "test exception to LDS nav-7 approved by the owner 2026-10-22 — evaluate here first, register in LDS if it proves itself; nav-7 subset bytes unchanged",
+    "font": "assets/icons/material-pictogram-300.woff2 (1732 bytes, sha256 33d9084bbd26b976d5c42002a0c669618573c21123567247816e9e694671c7b0), manifest assets/icons/material-pictogram-300.json, built by scripts/build-pictogram-font.py from google/material-design-icons MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf (Apache-2.0)",
+    "axes": {
+      "FILL": 0,
+      "wght": 300,
+      "GRAD": 0,
+      "opsz": 24
+    },
+    "glyphs": {
+      "brand": "diamond U+EAD5",
+      "store": "storefront U+EA12",
+      "venue": "local_mall U+E54C",
+      "area": "map U+E55B",
+      "province": "location_city U+E7F1",
+      "exclusive": "star U+F09A",
+      "gla": "square_foot U+EA49",
+      "segment": "category U+E72C"
+    },
+    "usage": "metric tiles (js/panel.js#metricTile), section headings (js/panel.js#heading), province label chips; CSS .pictogram / .pic-<role>; text colour except venue = host building colour",
+    "accessibility": "aria-hidden decorative glyphs; the text label is the meaning; hidden until document.fonts reports the face (pictograms-ready), display:none when unavailable",
+    "meanings": {
+      "brand": "เครือร้าน",
+      "store": "ร้าน",
+      "venue": "สถานที่",
+      "area": "แขวง/ตำบล",
+      "province": "จังหวัด",
+      "exclusive": "รีวิว / คะแนน",
+      "gla": "ร้าน/ตร.กม.",
+      "segment": "ประเภทร้าน"
+    }
+  },
+  "delivery": {
+    "site": "GitHub Pages from main /root",
+    "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
+    "liveCheck": "npm run verify:live"
+  }
+}
