@@ -347,9 +347,10 @@ export function installMassing(map, {sourceId = 'openmaptiles', beforeId, colors
     for (const a of anchors) d = Math.min(d, metresBetween(point, a));
     return Math.min(1, Math.max(0, (d - FADE_NEAR_M) / (FADE_FAR_M - FADE_NEAR_M)));
   }
-  /** Write fade for buildings in the loaded tiles that have not been stated yet (cheap, incremental). */
+  /** Write fade for buildings in the loaded tiles that have not been stated yet (incremental; never during a camera move). */
   function updateFade() {
     if (disposed || !map.getLayer(CITY_LAYER) || !map.getSource(sourceId)) return 0;
+    if (typeof map.isMoving === 'function' && map.isMoving()) return 0; // moveend schedules it again
     let features;
     try { features = map.querySourceFeatures(sourceId, {sourceLayer: 'building'}); } catch { return 0; }
     let n = 0;
@@ -363,14 +364,16 @@ export function installMassing(map, {sourceId = 'openmaptiles', beforeId, colors
     }
     return n;
   }
-  /** New anchors (focus centroids) invalidate every stated value. */
+  /**
+   * New anchors (focus centroids) invalidate every stated value. The states are rewritten after the
+   * camera stops (the old ones stay until then, so the city tier never blinks out during a move).
+   */
   function setAnchors(next = []) {
     const key = next.map(a => a.map(v => +v.toFixed(5)).join(',')).join('|');
     if (key === anchorKey) return;
     anchorKey = key; anchors = next.filter(a => Array.isArray(a) && a.length >= 2);
     stated.clear();
-    try { map.removeFeatureState({source: sourceId, sourceLayer: 'building'}); } catch {}
-    updateFade();
+    if (typeof map.isMoving === 'function') scheduleFade(); else updateFade();
   }
   let fadeTimer = 0;
   const scheduleFade = () => { clearTimeout(fadeTimer); fadeTimer = setTimeout(updateFade, 120); };
@@ -434,17 +437,23 @@ export function installMassing(map, {sourceId = 'openmaptiles', beforeId, colors
     if (map.getLayer(CITY_LAYER)) map.setPaintProperty(CITY_LAYER, 'fill-extrusion-opacity', o.city);
     if (map.getLayer(FOCUS_LAYER)) map.setPaintProperty(FOCUS_LAYER, 'fill-extrusion-opacity', o.focus);
     if (map.getLayer(OCCLUDER_LAYER)) map.setPaintProperty(OCCLUDER_LAYER, 'fill-extrusion-opacity', o.occluder);
-    updateOcclusion();
+    // On a live map the occluders are computed once the selection's work is done (and again when the
+    // camera stops); a stand-in map without isMoving computes them at once.
+    if (typeof map.isMoving === 'function') { if (scene !== 'eye') setOccluders([]); onMoveEnd(); }
+    else updateOcclusion();
     return {scene, targets: targets.length, occluders: occluderIds.length};
   }
-  const onMoveEnd = () => { if (scene === 'eye' && targets.length) updateOcclusion(); };
+  // Coalesced: a camera fit jumps the map many times in one task (each jump fires moveend/zoomend);
+  // occlusion and the zoom re-shape run once, after the last one.
+  let occlusionTimer = 0, zoomTimer = 0;
+  const onMoveEnd = () => { clearTimeout(occlusionTimer); occlusionTimer = setTimeout(() => { if (!disposed && scene === 'eye' && targets.length) updateOcclusion(); }, 40); };
   map.on('moveend', onMoveEnd);
-  const onZoomEnd = () => { if (enabled && lastInput.regions.length && Math.floor(map.getZoom()) !== lastBucket) update({zoom: map.getZoom()}); };
+  const onZoomEnd = () => { clearTimeout(zoomTimer); zoomTimer = setTimeout(() => { if (!disposed && enabled && lastInput.regions.length && Math.floor(map.getZoom()) !== lastBucket) update({zoom: map.getZoom()}); }, 40); };
   map.on('zoomend', onZoomEnd);
 
   function dispose() {
     disposed = true;
-    clearTimeout(fadeTimer);
+    clearTimeout(fadeTimer); clearTimeout(occlusionTimer); clearTimeout(zoomTimer);
     map.off('zoomend', onZoomEnd);
     map.off('moveend', onMoveEnd);
     map.off('moveend', scheduleFade);

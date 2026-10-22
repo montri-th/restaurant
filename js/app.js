@@ -974,7 +974,8 @@ function initMap() {
     state.labels = installAreaLabels(state.map, $('map'), {className: 'neighborhood-label', hostId: 'area-labels', hostLabel: 'แขวง/ตำบลบนแผนที่', minZoom: 11.5, verb: 'กดเพื่อสำรวจพื้นที่', onSelect: id => selectArea(id, {fromMap: true}), reservedBottom: labelBottomSpace, maxLabels: 40});
     state.provinceLabels = installAreaLabels(state.map, $('map'), {className: 'province-label', hostId: 'province-labels', hostLabel: 'จังหวัดบนแผนที่', minZoom: 0, maxZoom: PROVINCE_LABEL_MAX_ZOOM, verb: 'กดเพื่อดูจังหวัด', detailZoomClass: false, onSelect: code => selectProvince(code), reservedBottom: labelBottomSpace});
     state.map.on('zoomend', () => { if (state.loaded) renderLegend(); });
-    state.map.on('moveend', () => { if (state.loaded) refreshLabelView(); });
+    // Coalesced: a camera fit jumps the map many times in one task; the labels follow the last position.
+    state.map.on('moveend', () => { clearTimeout(refreshLabelView.timer); refreshLabelView.timer = setTimeout(() => { if (state.loaded) refreshLabelView(); }, 60); });
     state.map.on('mouseout', () => { state.areaLayers?.hover(''); });
     state.map.on('style.load', installSpatialLayers);
     state.map.on('click', onMapClick);

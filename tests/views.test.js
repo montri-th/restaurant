@@ -187,7 +187,7 @@ test('venue and store copy say how the name link was made; spatial results say �
   assert.ok(ts.includes('อาคารสีน้ำเงินคืออาคารที่จุดของร้านเหล่านี้ตกอยู่'));
   const r0 = data.rows.find(r => r.area === '100204');
   const tb = text(renderStore(buildStoreDetail(r0, {scopeRows: data.rows, index, groups: data.groups, building: {key: 'osm:7', others: 4}}), {...meta, index}));
-  assert.ok(tb.includes('จุดตกในอาคารเดียวกับอีก 4 ร้าน'));
+  assert.ok(tb.includes('จุดของร้านตกในอาคารเดียวกับอีก 4 ร้าน'));
   const b = buildBuildingProfile({key: 'osm:1', kind: 'osm', rows: data.rows.filter(r => r.area === '100204').slice(0, 5), height: 24.4}, index, data.groups);
   const tbu = text(renderBuilding(b, {...meta, index}));
   assert.ok(tbu.includes('ร้านที่จุดตกในอาคารนี้') && tbu.includes('ไม่ได้ยืนยันว่าร้านตั้งอยู่ในอาคารนี้') && tbu.includes('ความสูงบนแผนที่ราว 24 ม.'));
