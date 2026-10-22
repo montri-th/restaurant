@@ -73,8 +73,12 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
    specificity, later in the cascade) cannot pull them back under the tray: the attribution must stay visible. */
 .map-panel .maplibregl-ctrl-bottom-right, .map-panel .maplibregl-ctrl-bottom-left { bottom: var(--bottom-panel-height); }
 .maplibregl-ctrl-attrib { font: 11px/18px var(--font-body); }
-.map-panel .maplibregl-ctrl-attrib { background: color-mix(in srgb, var(--surface-card) 85%, transparent); color: var(--text-metadata); }
-.map-panel .maplibregl-ctrl-attrib a { color: var(--text-secondary); }
+/* Themed attribution: three classes so the vendor's compact rule (#fff on .maplibregl-ctrl-attrib.maplibregl-compact,
+   loaded later) cannot leave light theme links on a white chip in the dark theme. */
+.map-panel .maplibregl-ctrl.maplibregl-ctrl-attrib { background-color: color-mix(in srgb, var(--surface-card) 92%, transparent); color: var(--text-metadata); }
+.map-panel .maplibregl-ctrl.maplibregl-ctrl-attrib a { color: var(--text-secondary); }
+/* The vendor (i) glyph is black: invert it on the dark chip. */
+:root[data-theme="dark"] .map-panel .maplibregl-ctrl-attrib-button { filter: invert(1); }
 
 /* 4. Reading panel -------------------------------------------------------- */
 .panel { position: absolute; right: 0; top: 0; bottom: 0; width: var(--panel-width); background: var(--surface-card); border-left: 1px solid var(--border-default); overflow: auto; scrollbar-width: thin; z-index: 10; overscroll-behavior: contain; }
