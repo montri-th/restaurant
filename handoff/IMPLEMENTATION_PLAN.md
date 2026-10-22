@@ -42,7 +42,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 
 ตัวกรอง: `search` `group` `price` `province` `brand` · URL: + `district` `area` `areas` `view` `store` `place` `view3d` `cam` · Row scopes: scopeRows → baseRows → rows (+ ร้านของสถานที่) · Panel actions: `select-area` `select-district` `select-store` `select-venue` `select-province` `filter-brand` `back` `explore-top` `clear-focus` `open-charts` `open-table` `clear-filter` `crumb-*` `toggle-3d`
 
-## 4. งาน (ทำแล้วในรุ่น 0.1)
+## 4. งาน (ทำแล้วในรุ่น 0.1 และ 0.1.1)
 
 | ID | งาน | ขึ้นกับ | Acceptance |
 |---|---|---|---|

@@ -73,9 +73,10 @@ const values = () => Object.fromEntries(FIELDS.map(k => [k, $(k).value]));
 const rowById = id => state.rowById.get(id) || null;
 const areaById = id => state.index.byId.get(id) || null;
 const districtById = id => state.index.districtById.get(id) || null;
-const bottomSpace = () => $('insights').getBoundingClientRect().height + 12;
+// Null-safe: an embedding page or extension may detach the tray while map callbacks are still queued.
+const bottomSpace = () => ($('insights')?.getBoundingClientRect().height ?? 0) + 12;
 /** Area/province labels also keep clear of the map attribution (its live height is --attrib-height on .map-panel). */
-const labelBottomSpace = () => bottomSpace() + (parseFloat(getComputedStyle(document.querySelector('.map-panel')).getPropertyValue('--attrib-height')) || 0);
+const labelBottomSpace = () => { const panel = document.querySelector('.map-panel'); return bottomSpace() + (panel ? parseFloat(getComputedStyle(panel).getPropertyValue('--attrib-height')) || 0 : 0); };
 const activeFilterCount = f => FIELDS.filter(k => f[k]).length;
 const overviewPanel = () => ({mode: 'overview', id: ''});
 const sheetOffset = () => (mobilePortrait() ? [0, -Math.round(window.innerHeight * 0.2)] : [0, 0]);
@@ -519,7 +520,9 @@ function openInsights(open) {
 }
 
 function syncBottomPanel() {
-  document.documentElement.style.setProperty('--bottom-panel-height', `${$('insights').getBoundingClientRect().height}px`);
+  const tray = $('insights');
+  if (!tray) return;
+  document.documentElement.style.setProperty('--bottom-panel-height', `${tray.getBoundingClientRect().height}px`);
   state.pins?.layout();
   state.labels?.layout();
 }

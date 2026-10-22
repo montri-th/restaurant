@@ -1,6 +1,6 @@
 {
   "name": "citymeter-restaurants",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "CityMETER · Restaurants — subdistrict-first 3D map of restaurant density, food types and price levels from the public CityMETER Restaurants overlay",

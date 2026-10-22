@@ -1,6 +1,6 @@
 {
   "artifact": "CityMETER Restaurants — 3D-first, subdistrict-first restaurant density map",
-  "productVersion": "0.1.0",
+  "productVersion": "0.1.1",
   "updatedOn": "2026-10-22",
   "ldsVersion": "0.9.7",
   "release": "v0.9.7-owner.1",
@@ -40,7 +40,7 @@
     "empty, map-failure and load-error paths with actions"
   ],
   "validation": {
-    "status": "release 0.1 verification recorded in handoff/VERIFICATION.md",
+    "status": "release 0.1.1 verification recorded in handoff/VERIFICATION.md",
     "renderedHarness": "Playwright + MapLibre 5.6.2 from the npm package + stub TileJSON (empty basemap tiles); 1440×900, 1180×760 and 390×844; light and dark",
     "scope": "Applied LDS values, fonts and actual rendered interfaces. No blanket LDS, CVD, native-device or market-completeness claim."
   },
@@ -63,7 +63,10 @@
   "brandIdentity": {
     "sources": "155 chain logo files and 157 venue logo files from the research logo manifest; original bytes, sha256-checked; backplate from the registry",
     "fallback": "visible names and accessible labels retained; logos are identity, not a metric, endorsement or branch verification",
-    "registries": ["data/brand-logos.json", "data/venue-logos.json"]
+    "registries": [
+      "data/brand-logos.json",
+      "data/venue-logos.json"
+    ]
   },
   "chartContract": {
     "density": "sorted bars, density class colour, value beside the bar; count bars when no area reaches the eligibility threshold",

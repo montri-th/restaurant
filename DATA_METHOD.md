@@ -1,6 +1,6 @@
 # Data and method
 
-ข้อมูลและวิธีของ CityMETER · Restaurants รุ่น 0.1 (22 ตุลาคม 2569) ป้ายหลักฐานตาม Landometer Master Brand Brief v0.5.3 §3.7: **Observed fact** · **Inference** · **Hypothesis** · **Owner-stated** · **Project evidence** ตัวเลขทุกตัวในเอกสารนี้มาจากไฟล์ใน repository และอ้าง field path ได้
+ข้อมูลและวิธีของ CityMETER · Restaurants รุ่น 0.1.1 (22 ตุลาคม 2569; ข้อมูลชุดเดียวกับรุ่น 0.1) ป้ายหลักฐานตาม Landometer Master Brand Brief v0.5.3 §3.7: **Observed fact** · **Inference** · **Hypothesis** · **Owner-stated** · **Project evidence** ตัวเลขทุกตัวในเอกสารนี้มาจากไฟล์ใน repository และอ้าง field path ได้
 
 ## 1. แหล่งข้อมูลและวันที่
 

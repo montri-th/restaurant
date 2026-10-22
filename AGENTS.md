@@ -19,3 +19,12 @@ Set 2026-10-22 (release 0.1), carried over from CityMETER · Luxury Brands 0.5 w
 - Copy: short, natural Thai — ร้าน / เครือร้าน / สถานที่ / แขวง·ตำบล / เขต·อำเภอ; units on every number (ร้าน, ร้าน/ตร.กม., รีวิว, บาท).
 - Charts: matrix cells are equal in size; the stacked price bar is a share of priced rows only. No CSV download. No decorative brackets or coloured left rails. Visible focus everywhere.
 - Never commit the internal research sheet, private Drive/Sheet URLs, credentials or the full LDS library. Review Thai at desktop and 390 px in light and dark before claiming done; local renders are not proof of a live release — run `npm run verify:live`.
+
+Added 2026-10-22 (release 0.1.1), after walking the published site in Chrome; each rule names the files it binds:
+
+- Map attribution (OpenStreetMap, OpenMapTiles/OpenFreeMap, CityMETER) stays readable above the charts tray in both themes (INV21, AC23). MapLibre's CSS loads after `styles.css`, so control and attribution rules must be scoped under `.map-panel` with enough specificity; the phone legend and Aha card sit above `--attrib-height` (`js/app.js#trackAttribution`), and area labels keep clear of it (`labelBottomSpace`).
+- One density format for labels, panel and charts (`dens` in `js/panel.js` and `js/charts.js`): a measured non-zero density never prints as 0 (INV22).
+- Empty selections (AC24, `js/profile-model.js#selectionState`, `js/panel.js#selectionNote`): a hatched no_data area or district shows a note and no zero tiles; a covered one left at 0 by the filters shows measured zero and offers `leave-area` to the areas where the same filters match.
+- A venue total says how many rows and reviews are the venue's own listing, e.g. the mall row (INV23); rows stay as the source lists them.
+- Releases bump one cache tag `?v=YYYYMMDD-rN` on every entry in `index.html` and, through the import map there, on every ES module, together with `package.json` version and the handoff JSON `productVersion` (`tests/release.test.js`). A new module must be added to the import map.
+

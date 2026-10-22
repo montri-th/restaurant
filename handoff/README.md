@@ -1,6 +1,6 @@
 # เริ่มงานต่อ — CityMETER Restaurants
 
-รุ่นส่งต่อ 0.1 · 22 ตุลาคม 2569 · ข้อมูลดึงและตรวจ 22 ตุลาคม 2569
+รุ่นส่งต่อ 0.1.1 · 22 ตุลาคม 2569 · ข้อมูลดึงและตรวจ 22 ตุลาคม 2569
 
 ชุดนี้ส่งต่อให้ developer หรือ coding agent พัฒนาต่อจาก repository ที่ใช้งานจริง หลักของรุ่นนี้คือ **เห็นเมือง 3 มิติที่โฟกัส 3 แขวง/ตำบลที่ร้านอาหารแน่นที่สุดก่อน (ร้าน/ตร.กม.) แสดงรายละเอียดเฉพาะส่วนที่โฟกัส ส่วนอื่นเงียบ และบอกความครอบคลุมของข้อมูลบนแผนที่** โดยคงสัญญากล้อง basemap มวลอาคาร และ venue x-ray ของ CityMETER · Luxury Brands 0.5
 
@@ -47,6 +47,7 @@ npm test       # unit tests บนข้อมูลจริง
 - หนึ่งสัญลักษณ์ต่อหนึ่ง observation ไม่ cluster; โลโก้ ≤ 250 เฉพาะ zoom ≥ 15.5 ในโฟกัส; โลโก้คงไบต์เดิม
 - LDS 0.9.7 tokens เท่านั้น สีข้อมูลเหมือนกันสองธีม; nav-7 FILL 0 / wght 300; ไม่มี decorative bracket หรือ colored left rail; focus ring มองเห็น; reduced motion
 - ข้อมูลหลักต้องใช้ได้เมื่อแผนที่ไม่พร้อม; มี loading/slow/error/retry
+- ออกรุ่นใหม่: เปลี่ยน cache tag `?v=` ทุกจุดใน `index.html` (entry + import map ของทุกโมดูล) พร้อม `package.json` version และ `productVersion` ใน handoff JSON — `tests/release.test.js` ตรวจให้; โมดูลใหม่ต้องเพิ่มใน import map
 - attribution ของแผนที่ (OpenStreetMap, OpenMapTiles/OpenFreeMap, CityMETER) ต้องอ่านได้เหนือถาดกราฟ: กฎ CSS ของ control ต้อง scope ใต้ `.map-panel` เพราะ CSS ของ MapLibre โหลดทีหลัง และ `--attrib-height` ดัน legend/การ์ด Aha บนมือถือขึ้นเหนือมัน
 
 ## เริ่มด้วยงานหนึ่งชิ้น

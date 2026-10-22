@@ -1,6 +1,6 @@
 # Product Brief — CityMETER · Restaurants 0.1
 
-รุ่น 0.1 · 22 ตุลาคม 2569 · ข้อมูลดึงและตรวจ 22 ตุลาคม 2569 · คู่กับ [product-brief.json](product-brief.json) (schema 1.4.0) · winning strategy อยู่ใน [../PRODUCT_STATEMENT.md](../PRODUCT_STATEMENT.md)
+รุ่น 0.1.1 · 22 ตุลาคม 2569 · ข้อมูลดึงและตรวจ 22 ตุลาคม 2569 · คู่กับ [product-brief.json](product-brief.json) (schema 1.4.0) · winning strategy อยู่ใน [../PRODUCT_STATEMENT.md](../PRODUCT_STATEMENT.md)
 
 ## 1. งานของผลิตภัณฑ์
 
