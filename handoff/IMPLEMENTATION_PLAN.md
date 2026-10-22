@@ -1,6 +1,6 @@
 # Implementation Plan — CityMETER · Restaurants 0.2
 
-รุ่น 0.2.0 · 23 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.4.0) · อ่าน [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) ก่อน
+รุ่น 0.2.1 · 23 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.4.0) · อ่าน [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) ก่อน
 
 ## 1. สถาปัตยกรรม
 
@@ -45,7 +45,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 
 ตัวกรอง: `search` `group` `price` `province` `brand` · URL: + `district` `area` `areas` `view` `store` `place` `view3d` `cam` · Row scopes: scopeRows → baseRows → rows (+ ร้านของสถานที่, ร้านในอาคาร) · Panel actions: `select-area` `select-district` `select-store` `select-venue` `select-building` `select-province` `filter-brand` `back` `explore-top` `clear-focus` `open-charts` `open-table` `clear-filter` `crumb-*` `toggle-3d`
 
-## 4. งาน (ทำแล้วในรุ่น 0.1, 0.1.1 และ 0.2.0)
+## 4. งาน (ทำแล้วในรุ่น 0.1, 0.1.1, 0.2.0 และ 0.2.1)
 
 | ID | งาน | ขึ้นกับ | Acceptance |
 |---|---|---|---|
@@ -59,7 +59,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | P08 | app, URL, ธีม, มือถือ, failure paths | P05–P07 | AC01, AC04, AC16–AC19 |
 | P09 | tests, LDS parity, harness | P08 | AC20, AC21 |
 | P10 | เอกสาร handoff เผยแพร่ ตรวจ live | P09 | AC22, AC23 |
-| P11 | 0.2.0: สถานที่จากท้ายชื่อร้าน, จับจุดกับอาคารและกดอาคาร, ย้ายไปแขวงข้าง ๆ และกล้องลื่น (เจ้าของสั่ง 23 ต.ค. 2569) | P10 | AC25, AC26, AC27, AC22 |
+| P11 | 0.2: สถานที่จากท้ายชื่อร้าน, จับจุดกับอาคารและกดอาคาร, ย้ายไปแขวงข้าง ๆ และกล้องลื่น (เจ้าของสั่ง 23 ต.ค. 2569) | P10 | AC25, AC26, AC27, AC22 |
 
 ## 5. Acceptance criteria
 
@@ -121,4 +121,4 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | N11 | มือถือขณะเปิดแผงข้อมูล: แสดง attribution แบบย่อเหนือแผง (ตอนนี้อยู่ใต้แผงจนกด “กลับไปแผนที่”) | frontend |
 | N12 | แผงอาคารใน URL (ต้องมี key อาคารที่คงที่จากแหล่งขอบอาคารที่เจ้าของอนุมัติ — id ของ OSM tile เป็นรายแผ่น) | frontend + data |
 | N13 | เทียบผล join กับขอบอาคารของ CityMETER production (building/detailMvt) และพิกัดต้นทางเมื่อมี N02 รายงานสัดส่วนจุดต่อประเภทอาคาร | data |
-| N14 | ตรวจสถานที่จากชื่อร้าน (RX-…) แล้วยกเข้าชีตสถานที่พร้อมหลักฐาน | research |
+| N14 | ตรวจสถานที่จากชื่อร้าน (RX-…) และคำสะกดต่างของชื่อสถานที่ (เช่น เกตเวย์ / เกทเวย์) แล้วยกสถานที่และชื่อเรียกที่ยืนยันแล้วเข้าชีตพร้อมหลักฐาน | research |

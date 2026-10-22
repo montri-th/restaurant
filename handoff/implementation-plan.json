@@ -3,7 +3,7 @@
   "schemaVersion": "1.4.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.2.0",
+  "productVersion": "0.2.1",
   "updatedOn": "2026-10-23",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -389,7 +389,7 @@
     },
     {
       "id": "P11",
-      "title": "0.2.0: name-ending venues, display-time building join and building clicks, neighbour moves and smooth camera (owner 2026-10-23)",
+      "title": "0.2: name-ending venues, display-time building join and building clicks, neighbour moves and smooth camera (owner 2026-10-23)",
       "dependsOn": [
         "P10"
       ],
@@ -698,7 +698,7 @@
     },
     {
       "id": "N14",
-      "title": "Verify name-derived places (RX-…) and promote confirmed ones into the venue sheet with evidence",
+      "title": "Verify name-derived places (RX-…) and spelling variants of venue names (e.g. เกตเวย์ / เกทเวย์), then promote confirmed places and aliases into the venue sheet with evidence",
       "ownerRole": "research",
       "status": "backlog"
     }
