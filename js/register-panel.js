@@ -86,11 +86,16 @@ export function renderRegisterInArea({outlets, brands, place, loading = false}) 
 }
 
 /** Area / district / venue: Land hosts with restaurant points in or at the edge of their building. */
+/** One row per Land building: main host, other registry names on the same footprint, and — for a nested outline —
+ * the listed building whose restaurant points it repeats. */
 export function renderLandHostsIn(list, {title = 'อาคารในทะเบียน Land'} = {}) {
   if (!list?.length) return '';
-  return `<section class="panel-section land-hosts"><div class="section-heading">${heading('venue', title)}<span class="hint">${num(list.length)} แห่ง</span></div>
-    <ul class="venue-list">${list.map(x => `<li><button type="button" class="venue-row" data-action="select-land" data-id="${esc(x.host.id)}" aria-label="${esc(x.host.name)} ${num(x.rows)} ร้านจุดตกในอาคาร"><span class="venue-name">${esc(x.host.name)}<small>${esc(x.host.typeTh)} · ${esc(x.host.datasetTh)}</small></span><span class="venue-count data-number">${num(x.rows)}<small>ร้าน${x.outlets ? ` · ${num(x.outlets)} สาขาเครือ` : ''}</small></span></button></li>`).join('')}</ul>
-    <p class="hint">เรียงตามจำนวนร้านที่จุดตกในหรือติดขอบอาคาร (ร้านตามตัวกรอง) · สาขาเครือนับจากทะเบียนร้านเครือแยกต่างหาก · ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร</p></section>`;
+  const names = hs => (hs.length > 2 ? `${hs.slice(0, 2).map(h => h.name).join(', ')} และอีก ${num(hs.length - 2)} ชื่อ` : hs.map(h => h.name).join(', '));
+  const note = x => [x.cohosts?.length ? `อาคารเดียวกับ ${names(x.cohosts)}` : '', x.repeats ? `นับร้านซ้ำกับ ${x.repeats.host.name} ${num(x.repeats.rows)} ร้าน` : ''].filter(Boolean);
+  const repeats = list.some(x => x.repeats);
+  return `<section class="panel-section land-hosts"><div class="section-heading">${heading('venue', title)}<span class="hint">${num(list.length)} อาคาร</span></div>
+    <ul class="venue-list">${list.map(x => `<li><button type="button" class="venue-row" data-action="select-land" data-id="${esc(x.host.id)}" aria-label="${esc(x.host.name)} ${num(x.rows)} ร้านจุดตกในหรือติดขอบอาคาร"><span class="venue-name">${esc(x.host.name)}<small>${esc([`${x.host.typeTh} · ${x.host.datasetTh}`, ...note(x)].join(' · '))}</small></span><span class="venue-count data-number">${num(x.rows)}<small>ร้าน${x.outlets ? ` · ${num(x.outlets)} สาขาเครือ` : ''}</small></span></button></li>`).join('')}</ul>
+    <p class="hint">เรียงตามจำนวนร้านที่จุดตกในหรือติดขอบอาคาร (ร้านตามตัวกรอง) · ชื่อในทะเบียนที่ใช้อาคารเดียวกันรวมเป็นแถวเดียว${repeats ? ' · อาคารที่ซ้อนหรือชิดกันอาจนับร้านเดียวกัน จึงรวมแถวกันไม่ได้' : ''} · สาขาเครือนับจากทะเบียนร้านเครือแยกต่างหาก · ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร</p></section>`;
 }
 
 /** Store panel: the Land building its display point falls in / touches. */

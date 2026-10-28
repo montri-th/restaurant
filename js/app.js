@@ -323,15 +323,36 @@ function landScopeCounts() {
   return m;
 }
 
-/** Land hosts whose source point lies in the given subdistricts, with the scope rows and register outlets in/at their building. */
+/** One Land building as a list entry: its main host (or `host`), the other registry names on the same footprint,
+ * and the scope rows / register outlets in or at it. Hosts sharing a footprint are one building, never repeated rows. */
+function landEntry(building, host = null) {
+  const hosts = hostsOf(state.land, building), main = host || hosts[0];
+  return {host: main, cohosts: hosts.filter(h => h !== main), building,
+    rows: landScopeCounts().get(building) || 0, outlets: (state.land.outletsByBuilding.get(building) || []).length};
+}
+
+/** Land buildings with a host whose source point lies in the given subdistricts, one entry per building. Nested or
+ * touching outlines (a complex around a mall) can hold the same points: a later entry names the listed building it
+ * repeats, so nobody adds the two rows. Ties list the registry's reviewed geometry and shopping hosts first. */
 function landHostsIn(areaIds, {limit = 12} = {}) {
   if (!state.land) return [];
-  const counts = landScopeCounts(), ids = areaIds instanceof Set ? areaIds : new Set(areaIds);
-  return state.land.hosts.filter(h => h.fp >= 0 && (!ids.size || ids.has(h.area)))
-    .map(h => ({host: h, rows: counts.get(h.fp) || 0, outlets: (state.land.outletsByBuilding.get(h.fp) || []).length}))
+  const ids = areaIds instanceof Set ? areaIds : new Set(areaIds);
+  const buildings = new Set(state.land.hosts.filter(h => h.fp >= 0 && (!ids.size || ids.has(h.area))).map(h => h.fp));
+  const rank = h => (String(h.fpBy || '').startsWith('registry') ? 0 : 10) + ({shopping: 0, office: 1, hotel: 2}[h.ds] ?? 3);
+  const list = [...buildings].map(b => landEntry(b))
     .filter(x => x.rows > 0 || x.outlets > 0)
-    .sort((a, b) => b.rows - a.rows || b.outlets - a.outlets || a.host.name.localeCompare(b.host.name, 'th'))
+    .sort((a, b) => b.rows - a.rows || rank(a.host) - rank(b.host) || b.outlets - a.outlets || a.host.name.localeCompare(b.host.name, 'th'))
     .slice(0, limit);
+  const scope = scopeKeySet();
+  const keys = list.map(x => new Set([...(state.land.rowsByBuilding.get(x.building) || [])].filter(k => scope.has(k))));
+  list.forEach((x, i) => {
+    for (let j = 0; j < i && !x.repeats; j++) {
+      let n = 0;
+      for (const k of keys[i]) if (keys[j].has(k)) n++;
+      if (n) x.repeats = {host: list[j].host, rows: n};
+    }
+  });
+  return list;
 }
 
 /** The main Land host of a building (shopping, then office, then hotel). */
@@ -461,12 +482,10 @@ function placeExtras(outlets, place, areaIds) {
   return (state.register ? renderRegisterInArea({outlets, brands: brandsIn(outlets, 16), place}) : '') + renderLandHostsIn(landHostsIn(areaIds, {limit: 10}));
 }
 
-const landEntry = h => ({host: h, rows: landScopeCounts().get(h.fp) || 0, outlets: (state.land.outletsByBuilding.get(h.fp) || []).length});
-
 /** Venue: the Land host recording the same CityMETER venue uuid. */
 function venueExtras(id) {
   const h = state.venueLand.get(id);
-  return h ? renderLandHostsIn([landEntry(h)], {title: 'สถานที่นี้ในทะเบียน Land'}) : '';
+  return h ? renderLandHostsIn([landEntry(h.fp, h)], {title: 'สถานที่นี้ในทะเบียน Land'}) : '';
 }
 
 /** Building (display-time join): the Land building most of its rows' points fall in, by the build-time join. */
@@ -476,7 +495,7 @@ function buildingExtras() {
   const tally = new Map();
   for (const r of b.rows) for (const rel of state.land.rowLinks.get(r.id) || []) if (rel.rel === 'in') tally.set(rel.building, (tally.get(rel.building) || 0) + 1);
   const best = [...tally].sort((x, y) => y[1] - x[1])[0];
-  return best ? renderLandHostsIn(hostsOf(state.land, best[0]).map(landEntry), {title: 'อาคารในทะเบียน Land ที่จุดของร้านเหล่านี้ตก'}) : '';
+  return best ? renderLandHostsIn([landEntry(best[0])], {title: 'อาคารในทะเบียน Land ที่จุดของร้านเหล่านี้ตก'}) : '';
 }
 
 /** Store: the Land building its point falls in / touches, and its links to the chain register. */

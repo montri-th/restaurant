@@ -259,4 +259,10 @@ test('register and Land views: dataset · source · date · boundary, separate u
   const moved = data.rows.find(r => r.register === 1);
   assert.ok(text(renderStoreRegister({row: moved, register: moved.register})).includes('ยังนับเป็น 1 ร้านในชุดข้อมูลนี้ตามเดิม'));
   assert.ok(text(renderLandHostsIn([{host, rows: 3, outlets: 1}])).includes('ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร'));
+  // One row per building: other registry names on the same footprint ride along; a nested outline says what it repeats.
+  const co = [{...host, id: 'OFF-1', name: 'Tower A'}, {...host, id: 'OFF-2', name: 'Tower B'}, {...host, id: 'OFF-3', name: 'Tower C'}];
+  const listed = text(renderLandHostsIn([{host, cohosts: co, rows: 20, outlets: 35}, {host: {...host, id: 'OFF-9', name: 'Complex'}, cohosts: [], rows: 20, outlets: 36, repeats: {host, rows: 20}}]));
+  assert.ok(listed.includes('อาคารเดียวกับ Tower A, Tower B และอีก 1 ชื่อ'), listed);
+  assert.ok(listed.includes(`นับร้านซ้ำกับ ${host.name} 20 ร้าน`) && listed.includes('รวมแถวกันไม่ได้'), listed);
+  assert.equal((renderLandHostsIn([{host, cohosts: co, rows: 20, outlets: 35}]).match(/data-action="select-land"/g) || []).length, 1, 'co-hosts are not separate rows');
 });
