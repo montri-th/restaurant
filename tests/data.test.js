@@ -2,16 +2,25 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {load, readJSON, sha256} from './helpers.js';
 import {PROVINCES, PRICE_BUCKETS, GRID, gridToLngLat, sourceTile, hasPoint} from '../js/model.js';
+
+// One population since 0.6.0 (owner 2026-10-28 22:36): data.rows = sheet-1 restaurants + register outlets; the rows the
+// owner moved to the register (data.moved) are counted there and stay reachable by id. The snapshot itself is still
+// 70,214 observations = restaurants + moved.
+const snapshotRows = data => [...data.restaurants, ...data.moved];
 import {hostedVenueIds} from '../js/buildings.js';
 
 test('restaurants.json decodes to the 70,214 observations of the snapshot, nothing dropped, ids unique', () => {
-  const {raw, data} = load();
+  const {raw, data, register} = load();
   assert.equal(raw.meta.schema, 'citymeter-restaurants-rows-2');
   assert.equal(raw.meta.rows, 70214);
   assert.equal(raw.cols.key.length, 70214);
-  assert.equal(data.rows.length, 70214);
+  assert.equal(snapshotRows(data).length, 70214);
+  assert.equal(data.restaurants.length, 68980, 'sheet 1');
+  assert.equal(data.moved.length, 1234, 'rows moved to the chain register, counted there');
+  assert.equal(data.outlets.length, register.outlets.length);
+  assert.equal(data.rows.length, 68980 + 26819, 'one population: sheet 1 + the register (owner 2026-10-28 22:36)');
   assert.equal(data.dropped, 0, 'every row resolves to a subdistrict frame');
-  assert.equal(new Set(data.rows.map(r => r.id)).size, data.rows.length, 'row keys are unique');
+  assert.equal(new Set([...data.rows, ...data.moved].map(r => r.id)).size, data.rows.length + data.moved.length, 'row keys are unique across both sheets');
   for (const k of Object.keys(raw.cols)) assert.equal(raw.cols[k].length, 70214, `column ${k} is complete`);
 });
 
@@ -19,7 +28,7 @@ test('decoded rows reconcile with the build receipt: provinces, price buckets, r
   const {raw, data} = load();
   const byProvince = {}, byPrice = Object.fromEntries(PRICE_BUCKETS.map(b => [b, 0]));
   let reviews = 0, rated = 0, priced = 0;
-  for (const r of data.rows) {
+  for (const r of snapshotRows(data)) {
     byProvince[r.province] = (byProvince[r.province] || 0) + 1;
     byPrice[r.price]++;
     if (Number.isFinite(r.reviews)) reviews += r.reviews;
@@ -39,20 +48,27 @@ test('decoded rows reconcile with the build receipt: provinces, price buckets, r
 
 test('membership is the source subdistrict: every row sits in an existing frame of its own district and province', () => {
   const {data, index} = load();
-  for (const r of data.rows) {
+  for (const r of snapshotRows(data)) {
     const a = index.byId.get(r.area);
     assert.ok(a, `area ${r.area}`);
     assert.equal(r.district, a.district);
     assert.equal(r.province, a.province);
     assert.ok(PROVINCES.some(p => p.code === r.province));
   }
+  // Outlets carry the register's own derivations: a subdistrict only inside the covered provinces, a province by point or text.
+  for (const o of data.outlets) {
+    assert.equal(o.kind, 'outlet');
+    if (o.area) { const a = index.byId.get(o.area); assert.ok(a, `outlet area ${o.area}`); assert.equal(o.district, a.district); assert.equal(o.province, a.province); }
+    assert.ok(o.group >= 0 && o.groupId === 'register' && o.price === 'UNSPECIFIED' && o.rating == null && o.reviews == null);
+  }
 });
 
 test('coordinates decode with the research formula on the z10 × 4096 grid and stay display positions', () => {
   const {raw, data} = load();
   const research = (gx, gy) => [gx / GRID * 360 - 180, Math.atan(Math.sinh(Math.PI * (1 - 2 * gy / GRID))) * 180 / Math.PI];
-  for (let i = 0; i < data.rows.length; i += 997) {
-    const r = data.rows[i];
+  const snapshot = snapshotRows(data);
+  for (let i = 0; i < snapshot.length; i += 997) {
+    const r = snapshot[i];
     const [lon, lat] = research(r.gx, r.gy);
     assert.ok(Math.abs(lon - r.longitude) < 1e-9 && Math.abs(lat - r.latitude) < 1e-9);
     assert.deepEqual(gridToLngLat(r.gx, r.gy), [r.longitude, r.latitude]);
@@ -93,15 +109,21 @@ test('brand and venue links stay name-based candidates; holds carry no logo; hos
     assert.ok(f.properties.display_height_m > f.properties.display_base_m, `${f.properties.host_id}: a part has its own base and top`);
   }
   const counts = new Map();
-  for (const r of data.rows) if (r.venue) counts.set(r.venue.id, (counts.get(r.venue.id) || 0) + 1);
+  for (const r of snapshotRows(data)) if (r.venue) counts.set(r.venue.id, (counts.get(r.venue.id) || 0) + 1);
   for (const v of data.venues) assert.equal(counts.get(v.id) || 0, v.rows, `${v.name} row count`);
 });
 
-test('boundaries: 581 subdistrict frames with production areas, 90 districts, 7 provinces, receipts bound by hash', () => {
+test('boundaries: 581 subdistrict frames with production areas, 90 districts, 77 provinces, receipts bound by hash', () => {
   const {areasGeo, districtsGeo, provincesGeo, index} = load();
   assert.equal(areasGeo.features.length, 581);
   assert.equal(districtsGeo.features.length, 90);
-  assert.equal(provincesGeo.features.length, 7);
+  // 0.6.0: every province (the covered seven dissolved from their subdistricts; the others from the production PROVINCE outline).
+  assert.equal(provincesGeo.features.length, 77);
+  assert.equal(provincesGeo.features.filter(f => f.properties.frame === 'dissolved_subdistricts').length, 7);
+  for (const f of provincesGeo.features) { assert.ok(f.properties.areaSqm > 0 && f.properties.code && f.properties.name, `${f.id}`); assert.ok(Array.isArray(f.properties.label)); }
+  const prec = readJSON('data/boundary-receipts.json');
+  assert.equal(prec.provinceReceipts.length, 70);
+  for (const r of prec.provinceReceipts) { assert.match(r.sha256, /^[a-f0-9]{64}$/); assert.match(r.url, /\/restaurant\/info\/geom\/[0-9a-f-]+\/PROVINCE$/); }
   const ids = areasGeo.features.map(f => f.properties.id);
   assert.equal(new Set(ids).size, ids.length);
   for (const f of areasGeo.features) {
@@ -123,11 +145,13 @@ test('boundaries: 581 subdistrict frames with production areas, 90 districts, 7 
   assert.equal(sha256(Buffer.from(python)), areasGeo.metadata.receiptsSha256);
 });
 
-test('coverage: 308 frames hold rows; the other 273 are no-data, never zero', () => {
-  const {covered, coverage, index} = load();
-  assert.equal(covered.size, 308);
-  assert.equal(index.areas.length - covered.size, 273);
-  assert.ok(Math.abs(coverage.km2 - 3899.11) < 0.01, `coverage ${coverage.km2}`);
+test('coverage: 475 frames hold restaurants or outlets; the other 106 are no-data, never zero', () => {
+  const {covered, coverage, index, data} = load();
+  // Snapshot fixtures (one population): sheet-1 rows cover 308 frames; outlets with a point add 167 more.
+  assert.equal(new Set(data.restaurants.map(r => r.area)).size, 308);
+  assert.equal(covered.size, 475);
+  assert.equal(index.areas.length - covered.size, 106);
+  assert.ok(coverage.km2 > 3899.11, `coverage ${coverage.km2}`);
 });
 
 test('name-ending venues (owner decision 2026-10-23): sheet links first, then a sheet name at the end, then a repeated place ending', () => {
@@ -136,7 +160,7 @@ test('name-ending venues (owner decision 2026-10-23): sheet links first, then a 
   // Snapshot values (regression fixtures, never UI constants).
   // 2026-10-28: the owner's sheet now links 8 of the 0.2.1 name-ending rows itself (sheet beats suffix), so 3 remain.
   assert.deepEqual({suffixRows: s.suffixRows, autoRows: s.autoRows, autoVenues: s.autoVenues, radiusM: s.radiusM}, {suffixRows: 3, autoRows: 252, autoVenues: 84, radiusM: 200});
-  const by = m => data.rows.filter(r => r.venueMatch === m);
+  const by = m => snapshotRows(data).filter(r => r.venueMatch === m);
   assert.equal(by('suffix').length, s.suffixRows);
   assert.equal(by('auto').length, s.autoRows);
   assert.ok(data.rows.every(r => (r.venue ? ['sheet', 'suffix', 'auto'].includes(r.venueMatch) : r.venueMatch === null)));

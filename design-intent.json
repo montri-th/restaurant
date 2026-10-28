@@ -1,6 +1,6 @@
 {
   "artifact": "CityMETER Restaurants — 3D-first, subdistrict-first restaurant density map",
-  "productVersion": "0.5.1",
+  "productVersion": "0.6.0",
   "updatedOn": "2026-10-28",
   "ldsVersion": "0.9.7",
   "release": "v0.9.7-owner.1",
@@ -40,7 +40,7 @@
     "empty, map-failure and load-error paths with actions"
   ],
   "validation": {
-    "status": "release 0.5.1 verification recorded in handoff/VERIFICATION.md",
+    "status": "release 0.6.0 verification recorded in handoff/VERIFICATION.md",
     "renderedHarness": "Playwright + MapLibre 5.6.2 from the npm package + stub TileJSON (empty basemap tiles except harness building tiles for the test areas: CityMETER production footprints in the OpenMapTiles building schema); 1440×900, 1180×760 and 390×844; light and dark",
     "scope": "Applied LDS values, fonts and actual rendered interfaces. No blanket LDS, CVD, native-device or market-completeness claim."
   },

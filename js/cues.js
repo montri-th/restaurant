@@ -19,8 +19,10 @@ export const CUES = Object.freeze(['circle', 'square', 'triangle', 'diamond', 'c
 export const GROUP_SERIES = Object.freeze({
   general: 8, thai: 1, fastfood: 3, japanese: 6, cafe: 2, asian: 4, grill: 5, western: 7, other: 10, unspecified: 9,
 });
-export const seriesOf = groupId => GROUP_SERIES[groupId] || 9;
-export const cueOf = series => CUES[(series || 9) - 1];
+/** Chain-register outlets (one population with the snapshot since 0.6.0) carry the location pin, not one of the ten food cues. */
+export const REGISTER_SERIES = 'register';
+export const seriesOf = groupId => (groupId === REGISTER_SERIES ? REGISTER_SERIES : GROUP_SERIES[groupId] || 9);
+export const cueOf = series => (series === REGISTER_SERIES ? 'pin' : CUES[(series || 9) - 1]);
 
 /** 12 × 12 viewBox paths, centred on (6, 6); the ring uses the even-odd rule. */
 export const CUE_PATHS = Object.freeze({
@@ -34,6 +36,8 @@ export const CUE_PATHS = Object.freeze({
   ring: 'M6 1.2a4.8 4.8 0 1 1 0 9.6a4.8 4.8 0 1 1 0-9.6zM6 3.7a2.3 2.3 0 1 0 0 4.6a2.3 2.3 0 1 0 0-4.6z',
   dash: 'M0.8 4.4h10.4v3.2H0.8z',
   plus: 'M4.6 1h2.8v3.6H11v2.8H7.4V11H4.6V7.4H1V4.6h3.6z',
+  // Location pin (head + point), the register layer's SDF icon in 12 × 12.
+  pin: 'M6 0.9a3.6 3.6 0 0 1 3.6 3.6c0 2.6-3.6 6.6-3.6 6.6S2.4 7.1 2.4 4.5A3.6 3.6 0 0 1 6 0.9zm0 2a1.6 1.6 0 1 0 0 3.2a1.6 1.6 0 1 0 0-3.2z',
 });
 
 /** Inline SVG cue for HTML (legend swatches, list bullets, pins). Decorative: the text label carries the meaning. */

@@ -40,7 +40,8 @@ export function buildProvinceModel(rows, geojson) {
   });
   const classes = buildCountClasses(provinces.map(p => p.count), 5, {unit: 'ร้าน'});
   for (const p of provinces) { const c = classify(p.count, classes); p.state = c.state; p.fill = c.fill; p.ink = c.ink; p.outline = c.outline || null; }
-  return {provinces, classes, zeroCount: provinces.filter(p => p.state === 'measured_zero').length};
+  // Register outlets without a province (no point, no province text) are counted apart, never dropped silently.
+  return {provinces, classes, zeroCount: provinces.filter(p => p.state === 'measured_zero').length, unknown: counts.get('') || 0};
 }
 
 export function installProvinceLayers(map, geojson) {

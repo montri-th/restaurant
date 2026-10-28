@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.5.1",
+  "productVersion": "0.6.0",
   "updatedOn": "2026-10-28",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
@@ -208,7 +208,7 @@
     {
       "name": "CityMETER production boundaries",
       "owner": "Landometer · CityMETER",
-      "url_or_reference": "data/boundary-receipts.json (581 receipts)",
+      "url_or_reference": "data/boundary-receipts.json (581 subdistrict + 70 PROVINCE receipts)",
       "data_type": "official administrative frames as served by production"
     },
     {
@@ -237,15 +237,15 @@
   "update_frequency": "ad hoc",
   "last_updated": "2026-10-28",
   "key_metrics": [
-    "restaurants per km² per แขวง/ตำบล",
+    "restaurants and chain outlets per km² per แขวง/ตำบล (one population since 0.6.0)",
     "combined density of the three densest areas",
     "coverage baseline density",
-    "restaurants per province (count)",
+    "restaurants + chain outlets per province (count, all 77 provinces)",
     "rows by food-type group",
     "rows by price bucket (priced rows)",
     "reviews (popularity proxy)",
     "rating mean (rated rows)",
-    "outlets in the chain register (separate unit)",
+    "chain outlets in the register — counted with the restaurants in every ร้าน figure since 0.6.0 (owner 2026-10-28 22:36), the split ‘ร้าน = N + M’ stated once per view; evidence per outlet",
     "restaurants whose points lie in a Land building (inside or within 10 m, drawn inside)",
     "in-vs-around food types of a Land host"
   ],
@@ -279,7 +279,7 @@
       "display coordinate (z10 grid)"
     ],
     "calculated_metrics": [
-      "density (rows ÷ km²)",
+      "density (rows of the population ÷ km²: restaurants by subdistrict code, outlets by point in the frame)",
       "combined density Σ/Σ",
       "coverage baseline",
       "group and price shares",
@@ -292,18 +292,18 @@
       "venue candidate (name-based: sheet link, name ending, or a name-derived place from repeated endings within 200 m)",
       "building join (display point falls inside a drawn building footprint; display-time only)"
     ],
-    "limitation_text": "ไม่ใช่สำมะโนร้านอาหาร; 7 จังหวัด นอกสามจังหวัดหลักเพียงบางตำบล; พิกัดแสดงผลกริด 9.55 ม. จึงบอกได้เพียงว่าจุดตกในอาคารใด ไม่ใช่ที่ตั้งร้าน; คะแนน/รีวิวเป็นความนิยมตามแหล่งข้อมูล"
+    "limitation_text": "ไม่ใช่สำมะโนร้านอาหาร; ชุดข้อมูลร้าน 7 จังหวัด นอกสามจังหวัดหลักเพียงบางตำบล; สาขาในทะเบียนร้านเครือทั่วประเทศนับรวมเป็นประชากรเดียวตั้งแต่ 0.6.0 (ร้าน = ร้านในชุดข้อมูล + สาขาในทะเบียน บอกส่วนแยกทุกหน้า) แต่ไม่มีคะแนน รีวิว ราคา ประเภท; พิกัดแสดงผลกริด 9.55 ม. จึงบอกได้เพียงว่าจุดตกในอาคารใด ไม่ใช่ที่ตั้งร้าน; คะแนน/รีวิวเป็นความนิยมตามแหล่งข้อมูล"
   },
   "known_limitations": [
     "ไม่ใช่สำมะโน",
-    "ครอบคลุม 7 จังหวัด นอก กทม./นนทบุรี/สมุทรปราการ เพียงบางตำบล",
+    "ชุดข้อมูลร้าน (ชีต 1) ครอบคลุม 7 จังหวัด นอก กทม./นนทบุรี/สมุทรปราการ เพียงบางตำบล; อีก 70 จังหวัดมีเฉพาะสาขาในทะเบียนร้านเครือ",
     "ไม่มีผู้ให้ข้อมูลและวันที่เก็บต้นทาง",
     "พิกัดเป็นตำแหน่งแสดงผล (9.55 ม.)",
     "primary type เดียว รวมสถานที่ไม่ใช่อาหาร 130 แถว",
     "ราคาไม่ระบุ 71.5%",
     "เครือ/สถานที่เป็น candidate จากชื่อ",
     "ตัวหารเป็นพื้นที่ทั้งตำบล",
-    "ทะเบียนร้านเครือยังไม่ครบทุกสาขาและนับคนละหน่วย ไม่บวกกับจำนวนร้าน",
+    "ทะเบียนร้านเครือยังไม่ครบทุกสาขา; ตั้งแต่ 0.6.0 นับรวมกับร้านในชุดข้อมูลเป็นประชากรเดียวตามคำสั่งเจ้าของ (28 ต.ค. 2569 22:36) โดยบอกส่วนแยกทุกหน้า — 1,234 แถวที่ย้ายไปทะเบียนนับครั้งเดียวฝั่งทะเบียน; สาขาไม่มีคะแนน รีวิว ราคา ประเภท (แสดง — ไม่ใช่ 0); สาขา 10,091 รายการไม่มีพิกัด (3,241 ไม่ทราบจังหวัด) จึงอยู่ในยอดรวมแต่ไม่อยู่ในความหนาแน่น",
     "“จุดตกในอาคาร” ไม่ใช่การยืนยันว่าร้านตั้งอยู่ในอาคาร",
     "นิคมอุตสาหกรรมยังไม่เทียบจนกว่าขอบเขตผ่านการตรวจรับ"
   ],

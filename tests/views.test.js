@@ -39,7 +39,9 @@ test('every panel view ends with dataset · source · date · boundary and the p
     assert.ok(/ขอบเขต \S/.test(t), `${name}: boundary`);
     assert.ok(t.includes('ไม่ใช่ยอดขาย'), `${name}: rating/reviews are popularity proxies`);
   }
-  assert.ok(text(views.overview).includes('99.7 ร้าน/ตร.กม.'));
+  // One population (0.6.0): the first Aha reads restaurants and chain outlets together (fixture in tests/insight.test.js).
+  assert.ok(text(views.overview).includes('122.0 ร้าน/ตร.กม.'), text(views.overview).slice(0, 300));
+  assert.ok(text(views.overview).includes('ร้าน = ') && text(views.overview).includes('สาขาในทะเบียนร้านเครือ (ทั่วประเทศ)'), 'the one-population split is stated once');
   assert.ok(text(views.overview).includes('จัดอันดับเฉพาะพื้นที่ที่มีอย่างน้อย 30 ร้าน'));
   assert.ok(text(views.venue).includes('ไม่ได้ยืนยันว่าร้านตั้งอยู่ภายใน'));
   assert.ok(text(views.store).includes('จับคู่จากชื่อร้าน'));
@@ -125,9 +127,12 @@ test('density format: a measured non-zero density never prints as zero; labels a
 test('venue header says how much of its total is the venue\'s own listing (e.g. the mall row)', () => {
   const {data, index} = setup();
   const venue = data.venues.find(v => v.id === 'RV-02fbbcc675cf1548');
+  // 0.6.0: six of this venue's twelve rows were moved to the chain register by the owner and are counted there.
   const p = buildVenueProfile(data.rows, venue, index, data.groups, {hosted: true});
-  assert.equal(p.count, 12);
-  assert.equal(p.reviews, 30900);
+  assert.equal(p.count, 6);
+  assert.equal(p.reviews, 27167);
+  const all = buildVenueProfile([...data.restaurants, ...data.moved], venue, index, data.groups, {hosted: true});
+  assert.equal(all.count, 12); assert.equal(all.reviews, 30900);
   assert.equal(p.entityRows, 1);
   assert.equal(p.entityReviews, 24563);
   assert.ok(text(renderVenue(p, index, {})).includes('ตัวเลขรวม 1 รายการที่เป็นชื่อสถานที่เอง (24,563 รีวิว)'));
@@ -168,7 +173,7 @@ test('venue and store copy say how the name link was made; spatial results say �
   const charn = data.venues.find(v => v.name === 'Charn At The Avenue');
   const pc = buildVenueProfile(data.rows, charn, index, data.groups);
   assert.equal(pc.nameDerived, true);
-  assert.equal(pc.matched.auto, 14);
+  assert.equal(pc.matched.auto, 13, 'one of the 14 name-derived rows was moved to the register (0.6.0)');
   const tc = text(renderVenue(pc, index, meta));
   assert.ok(tc.includes('สถานที่จากชื่อร้าน') && tc.includes('ทุกจุดอยู่ในรัศมี 200 ม. จากจุดกลาง'), tc.slice(0, 400));
   // Sheet venue with rows found by their name ending.
@@ -199,4 +204,28 @@ test('venue and store copy say how the name link was made; spatial results say �
   // A building without reviewed rows shows no review total (missing ≠ 0).
   const noReviews = buildBuildingProfile({key: 'osm:2', rows: data.rows.filter(r => !Number.isFinite(r.reviews)).slice(0, 2)}, index, data.groups);
   assert.ok(text(renderBuilding(noReviews, meta)).includes('— รีวิว'));
+});
+
+test('one population (0.6.0): a จังหวัด outside the coverage reads its outlet count, dashes, no density; area views state the split; outlets open as outlets', () => {
+  const {data, index} = setup();
+  const meta = data.meta;
+  // ชลบุรี: register outlets only — no แขวง/ตำบล frames, so no density and no “0 พื้นที่”.
+  const rows = filterRows(data.rows, {province: 'CBI'});
+  assert.ok(rows.length > 0 && rows.every(r => r.kind === 'outlet'), 'CBI holds outlets only');
+  const insight = summarizeAreaInsight(rows, index, {coverage: {km2: 0, areas: 0}});
+  const html = text(renderOverview({insight, summary: summarize(rows), overview: buildOverview(rows, index), focusMode: 'auto', classOf: () => '#000', provinces: [], meta, coverage: {km2: 0, areas: 0}, province: 'CBI'}));
+  assert.ok(html.includes(`${rows.length.toLocaleString('en-US')} สาขาในทะเบียนร้านเครือในชลบุรี`), html.slice(0, 400));
+  assert.ok(html.includes('ครอบคลุม 7 จังหวัด'));
+  assert.ok(!/0% ของร้าน|0 พื้นที่นี้/.test(html), 'never a 0 % / 0 areas finding');
+  assert.ok(html.includes('— รีวิว') || html.includes('—รีวิว') || /—\s*รีวิว/.test(html), 'reviews tile shows — (outlets carry none)');
+  assert.ok(html.includes('สาขาในทะเบียน') && html.includes('ร้าน = 0 ร้านในชุดข้อมูล'));
+  // An area with both kinds states the split once and keeps the outlets out of the price bars.
+  const area = text(renderArea(buildAreaProfile(data.rows, '100703', index, data.groups), meta));
+  assert.match(area, /ร้าน = [\d,]+ ร้านในชุดข้อมูล \+ [\d,]+ สาขาในทะเบียน/);
+  assert.match(area, /สาขาในทะเบียน [\d,]+ ไม่มีข้อมูลราคา/);
+  // Lists label an outlet row as such and open it as an outlet, never as a store.
+  const b = buildBuildingProfile({key: 'osm:1', kind: 'osm', rows: data.rows.filter(r => r.area === '100703' && r.kind === 'outlet').slice(0, 3), height: 24}, index, data.groups);
+  const building = renderBuilding(b, {...meta, index});
+  assert.ok(building.includes('data-action="select-outlet"') && !building.includes('data-action="select-store"'));
+  assert.ok(text(building).includes('ร้าน = 0 ร้านในชุดข้อมูล + 3 สาขาในทะเบียน'));
 });

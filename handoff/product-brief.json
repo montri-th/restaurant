@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.5.1",
+  "productVersion": "0.6.0",
   "updatedOn": "2026-10-28",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
@@ -77,18 +77,26 @@
       "within 10 m counts as in and is drawn inside: land.json snaps carry display positions ≥ 1.5 m inside the outline (595 restaurants, 299 outlets); source coordinates stay in the data files and panels",
       "one provenance line per register / Land view (dataset · source · date · boundary + the unit once); no repeated caveats; labels ร้านในอาคาร / สาขาร้านเครือ",
       "compact layout (owner 20:06): phone header 40 px, map chips with LDS pictograms, a half-height sheet with ขยาย/แผนที่ that shows a detail first (product heading only on the overview, search/filters only on the overview on phones), attribution folded behind its button; quiet register pins small and translucent at city zoom"
+    ],
+    "release060": [
+      "one population (owner 2026-10-28 22:36): the register's 26,819 outlets join the 68,980 sheet-1 rows as rows of group ‘สาขาร้านเครือ’ (kind outlet, pin cue) — counted together in every ร้าน figure, filterable, listed in the table, in the Land lists and the chain chips; the split stated once per view; moved rows counted once on the register side",
+      "country view with all 77 provinces (production PROVINCE outlines for the 70 outside the coverage) — frames, counts and labels; the province list shows 77 + ‘ไม่ทราบจังหวัด’",
+      "a จังหวัด outside the covered seven: outlet count Aha, dashes for density and reviews, pins at every zoom, province frame fit, no Land hosts (the Land register lies in the covered provinces)",
+      "first Aha on the population: สุริยวงศ์ · สีลม · วังใหม่ 122.0 ร้าน/ตร.กม. (422 rows / 3.46 km²), baseline 9.37 over 475 covered frames",
+      "scripts/build-provinces.py + 70 PROVINCE receipts"
     ]
   },
   "rowScopes": {
     "scopeRows": {
-      "definition": "rows after search/group/price/province/brand filters, before any area selection or area focus",
+      "definition": "rows of the population (sheet-1 restaurants + register outlets) after search/group/price/province/brand filters, before any area selection or area focus; scopeRestaurants / scopeOutlets split it by kind for the two mark layers (symbols vs pins)",
       "consumers": [
         "first Aha (no district selected)",
         "choropleth",
         "charts",
         "area/district/venue/store profiles (ranks keep the whole selection as reference)",
         "quiet context dots",
-        "province frames (without the province filter)"
+        "province frames (without the province filter)",
+        "outlet pins (register layer; selection = the scoped outlets when the scope is narrower than the register)"
       ]
     },
     "baseRows": {
@@ -142,9 +150,9 @@
     "scope": "scopeRows, or baseRows when a เขต/อำเภอ is selected",
     "ranking": "แขวง/ตำบล with ≥ 30 rows (MIN_AREA_ROWS), by restaurants per km² of the production area, then rows, then code; top three",
     "headlineTemplate": "{density} ร้าน/ตร.กม. — ร้านอาหารแน่นที่สุดใน {areaCount} {แขวง|ตำบล|พื้นที่}นี้",
-    "numerator": "rows in the three areas (source subdistrict membership)",
+    "numerator": "rows of the population in the three areas (restaurants by source subdistrict membership; outlets whose point lies in the frame)",
     "denominator": "sum of the three areas' production km² (Σrows ÷ Σkm², never an average of ratios)",
-    "baseline": "rows in the selection ÷ km² of the covered frames (≥ 1 row in the full dataset) inside the province/district filter",
+    "baseline": "rows with a frame in the selection ÷ km² of the covered frames (≥ 1 row in the full population) inside the province/district filter",
     "secondaryFinding": "area with the most reviews in the selection (popularity proxy, rows with a review count only)",
     "eligibilityCopy": "จัดอันดับเฉพาะพื้นที่ที่มีอย่างน้อย 30 ร้าน",
     "defaultFocus": "auto",
@@ -154,54 +162,60 @@
     "model": "js/area-insight.js#summarizeAreaInsight",
     "filter": "js/area-insight.js#filterAreaRows",
     "defaultSnapshot": {
-      "asOf": "2026-10-22",
+      "asOf": "2026-10-28",
+      "population": "sheet 1 + register (0.6.0)",
       "areaIds": [
-        "100204",
-        "101303",
-        "100403"
+        "100403",
+        "100402",
+        "100702"
       ],
       "names": [
-        "สี่แยกมหานาค",
-        "ตลาดน้อย",
-        "สุริยวงศ์"
+        "สุริยวงศ์",
+        "สีลม",
+        "วังใหม่"
       ],
       "rows": [
-        40,
-        39,
-        57
+        80,
+        184,
+        158
       ],
-      "km2": 1.3647,
-      "density": 99.66,
-      "baselineDensity": 18.01,
+      "count": 422,
+      "km2": 3.4592,
+      "density": 121.99,
+      "baselineDensity": 9.37,
+      "framedRows": 76610,
+      "totalRows": 95799,
       "coverage": {
-        "areas": 308,
-        "km2": 3899.11
+        "areas": 475,
+        "km2": 8171.79
       },
       "mostReviewed": {
         "id": "103902",
         "name": "คลองตันเหนือ",
-        "reviews": 217736
+        "reviews": 214826
       },
+      "previous": "0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66 ร้าน/ตร.กม., baseline 18.01, coverage 308 / 3,899.11 km²",
       "status": "regression fixture — never a UI constant"
     },
     "fallbacks": {
       "noRows": "ไม่พบร้านตามตัวกรองนี้ + ล้างตัวกรอง",
       "smallSelection": "fewer than 1,000 rows or fewer than 3 eligible areas → count mode: {share}% ของร้านตามตัวกรองอยู่ใน 3 พื้นที่นี้",
-      "mapUnavailable": "Aha, panel, charts and table stay usable; map failure card with retry"
+      "mapUnavailable": "Aha, panel, charts and table stay usable; map failure card with retry",
+      "outletsOnly": "a scope with outlets and no restaurant row and no area (a จังหวัด outside the covered seven): ‘N สาขาในทะเบียนร้านเครือใน{จังหวัด}’ + the coverage sentence; never ‘0% … 0 พื้นที่’"
     }
   },
   "metricContract": {
     "areas": {
       "family": "density.area",
       "unit": "ร้าน/ตร.กม.",
-      "formula": "rows ÷ (areaSqm / 1e6) of the production frame",
+      "formula": "rows of the population with the frame's membership (restaurants by source subdistrict code; outlets by point-in-polygon of the outlet point, display only) ÷ (areaSqm / 1e6) of the production frame",
       "classes": "5 equal-interval classes over (0, top] with top = max rounded up at the label precision (integers ≥ 20, one decimal ≥ 2, two decimals below); [lower, upper) with the last closed"
     },
     "provinces": {
       "family": "count",
-      "unit": "ร้าน",
-      "reason": "outside BKK/NBI/SPK the source covers only some ตำบล; a per-km² province value would measure coverage",
-      "classes": "5 closed integer intervals over [1, max]"
+      "unit": "ร้าน (ร้านในชุดข้อมูล + สาขาในทะเบียน)",
+      "reason": "outside BKK/NBI/SPK the restaurant source covers only some ตำบล and 70 provinces hold outlets only; a per-km² province value would measure coverage",
+      "classes": "5 closed integer intervals over [1, max] across all 77 provinces (0.6.0: 1–10,199 … 40,800–50,999)"
     },
     "matrix": {
       "family": "count",
@@ -217,18 +231,18 @@
       "smallSelection": 1000,
       "rationale": "a density on a handful of rows is not a finding (random error ≈ 1/√n)"
     },
-    "combined": "Σrows ÷ Σkm² for any set of areas",
-    "popularity": "reviews = Σ rating_count of rows that state it; rating mean over rated rows only; both are popularity proxies, not sales"
+    "combined": "Σrows ÷ Σkm² for any set of areas; the baseline ‘ทั้งพื้นที่ที่มีข้อมูล’ = rows with a frame (framedRows) ÷ Σkm² of the covered frames — outlets without a point or outside the frames are in the totals, never in a density",
+    "popularity": "reviews = Σ rating_count of rows that state it; rating mean over rated rows only; both are popularity proxies, not sales; outlets carry none, so a tile shows — (never 0) when no row in the scope has a review count"
   },
   "coverageContract": {
-    "covered": "แขวง/ตำบล with ≥ 1 row in the full dataset (308 of 581 in the snapshot)",
+    "covered": "แขวง/ตำบล with ≥ 1 row (restaurant or outlet with a point in the frame) in the full population (475 of 581 since 0.6.0; 308 on restaurants alone)",
     "states": {
       "measured": "class fill",
       "measured_zero": "covered frame with no row under the filter — lowest class fill + 2 px dataState.zero outline",
       "no_data": "frame with no row in the full dataset — 135° hatch on dataState.noData + border.emphasis; copy “ไม่มีข้อมูล / แหล่งข้อมูลไม่มีร้านในพื้นที่นี้ ไม่ได้แปลว่าไม่มีร้านอาหาร”",
-      "out_of_scope": "provinces without rows — not drawn"
+      "out_of_scope": "provinces outside the covered seven — drawn since 0.6.0 with their production PROVINCE outline (data/provinces.geojson, 77 features) and counted (restaurants + outlets); they have no แขวง/ตำบล frames, so a จังหวัด filter there shows ‘N สาขาในทะเบียนร้านเครือใน{จังหวัด}’, dashes for density and reviews, pins at every zoom, and no area list"
     },
-    "legend": "density classes + 0 (when present) + ไม่มีข้อมูล (when present); province classes at country zoom"
+    "legend": "density classes + 0 (when present) + ไม่มีข้อมูล (when present); province classes (‘จังหวัด · ร้านและสาขา’, 77 frames) at country zoom; a จังหวัด outside the coverage shows ‘{จังหวัด} · สาขาในทะเบียน’ instead of an empty density scale"
   },
   "categoricalCueContract": {
     "registry": "landometer-series-10-v8 (soft fill + ink per theme from assets/theme.css)",
@@ -647,7 +661,7 @@
   "data": {
     "observationGrain": "one observation of the public CityMETER Restaurants overlay (owning-tile view); never merged by name or coordinate",
     "core": "data/restaurants.json (columnar; meta, priceBuckets, groups, types, typeGroup, areas, brands, venues, cols, brand, venue, venueEntity, venueMatch)",
-    "areas": "data/areas.geojson (581), data/districts.geojson (90), data/provinces.geojson (7), data/boundary-receipts.json (581 receipts)",
+    "areas": "data/areas.geojson (581), data/districts.geojson (90), data/provinces.geojson (77: 7 dissolved + 70 production outlines), data/boundary-receipts.json (581 subdistrict + 70 PROVINCE receipts)",
     "hostBuildings": "data/venue-buildings.geojson (26 venues, 61 features; MBK Center parts by CityMETER uuid)",
     "logos": "data/brand-logos.json (155), data/venue-logos.json (157)",
     "snapshot": {
@@ -667,7 +681,9 @@
       "autoRows": 252,
       "hostedVenues": 26,
       "sheet1Rows": 68980,
-      "movedToChainRegister": 1234
+      "movedToChainRegister": 1234,
+      "population": 95799,
+      "populationRule": "sheet1Rows 68,980 + register outlets 26,819 = 95,799 (the 1,234 moved rows counted on the register side); coveredAreas 475 and reviewsTotal 5,922,059 on this population (reviews = sheet-1 rows only)"
     },
     "verification": "fresh reproduction of the public API matched all 70,214 rows on every compared field (handoff/VERIFICATION.md)",
     "coordinatePolicy": "MVT display positions (z10, extent 4096, 9.55 m) stored as grid integers; decoded with the research formula; screen-space displacement only; precision described, never upgraded",
@@ -887,7 +903,11 @@
     },
     {
       "id": "INV33",
-      "rule": "The building being looked at is always shown under the two-point camera (eye preset), drawn on top (x-ray) with the blocks in front of it see-through, on every viewport; a phone centres it above the half sheet. What is in a Land building is one list (snapshot rows and register outlets together, each entry naming its unit, counts kept apart and never summed)."
+      "rule": "The building being looked at is always shown under the two-point camera (eye preset), drawn on top (x-ray) with the blocks in front of it see-through, on every viewport; a phone centres it above the half sheet. What is in a Land building is one list (snapshot rows and register outlets together, each entry naming its unit; the tile sums them and the hint gives the split)."
+    },
+    {
+      "id": "INV34",
+      "rule": "One population (owner 2026-10-28 22:36): every ร้าน figure = sheet-1 rows + register outlets of the same scope, the split stated once per view; the 1,234 moved rows are counted once, on the register side; ratings, reviews, prices and types exist on the sheet-1 side only and are never imputed (a tile with no such row shows —); outlets without a point count in totals and the province list, never in a density or a frame; all 77 provinces are drawn and counted"
     }
   ],
   "chartContracts": [
@@ -949,17 +969,17 @@
     "rule": "the building being looked at is never hidden by another 3D mass (owner 2026-10-28 22:03, as in CityMETER · Luxury Brands 0.5 and Shopping Center): drawn on top by the x-ray, with the focus-tier blocks in front of it see-through (massing occluder tier) under the eye camera"
   },
   "provinceContract": {
-    "data": "data/provinces.geojson — 7 provinces holding rows; id = production code (BKK …), code = DOPA two-digit; dissolved from the production subdistrict frames and simplified at 120 m (scripts/build-boundaries.py)",
+    "data": "data/provinces.geojson — 77 provinces: the 7 covered ones dissolved from the production subdistrict frames (unchanged, so the mosaic nests), the other 70 from the production PROVINCE outline (GET …/restaurant/info/geom/{uuid}/PROVINCE, receipts in data/boundary-receipts.json provinceReceipts) simplified at 300 m for the country view (scripts/build-provinces.py); id = production code (BKK …), code = DOPA two-digit, frame = dissolved_subdistricts | production_province_outline",
     "module": "js/provinces.js#installProvinceLayers(map, geojson) → {update({rows, selectedCode, visible}), dispose, model}; buildProvinceModel(rows, geojson)",
     "rows": "filterRows(data.rows, {...filters, province: ''}) so each frame keeps its own count",
-    "metric": "rows per province (count family, 5 equal-interval classes); measured_zero = lowest fill + zero outline; out_of_scope (70 provinces) not drawn",
+    "metric": "rows per province (restaurants + outlets; count family, 5 equal-interval classes over the 77); measured_zero = lowest fill + zero outline; nothing is out of scope any more",
     "zoomWindows": {
       "fill": "< 8.5",
       "outline": "< 12",
       "selected": "< 13",
       "labels": "< 9"
     },
-    "panel": "overview list จังหวัดที่มีร้านในชุดข้อมูล (count, class swatch) — each a drill-down into the จังหวัด filter"
+    "panel": "overview list ‘จังหวัดที่มีร้าน · 77 จังหวัด · ร้าน + สาขา’ (count, class swatch, ‘สาขาในทะเบียนเท่านั้น’ outside the coverage, a static ‘ไม่ทราบจังหวัด’ row for outlets with no point and no province text) — each a drill-down into the จังหวัด filter; the filter fits the province frame when it has no focus areas"
   },
   "pictogramContract": {
     "status": "test exception to LDS nav-7 approved by the owner 2026-10-22 — evaluate here first, register in LDS if it proves itself; nav-7 subset bytes unchanged",
@@ -997,20 +1017,21 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261028-r10 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
+    "cacheTag": "?v=20261028-r11 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
     "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
   },
   "registerContract": {
-    "unit": "one outlet_id per listed branch / point of sale with qualifying evidence (incl. delivery kitchens and carts with their own status) — not a field count of open shops; never added to, subtracted from or ranked with the snapshot",
-    "views": "chains (directory + search) · chain (brand) · company · outlet; the snapshot frames, labels, context dots, charts tray and table step aside; the register search replaces the snapshot filters (data-set switch)",
-    "map": "js/register-layer.js: one circle per outlet with a selected coordinate (LDS map data role), selected outlet stroke; logos as buttons from zoom 15 (≤ 60); never clustered",
+    "unit": "one outlet_id per listed branch / point of sale with qualifying evidence (incl. delivery kitchens and carts with their own status) — not a field count of open shops. ONE POPULATION since 0.6.0 (owner 2026-10-28 22:36 “จำนวนร้านต้อง 7x,xxx + 26,xxx แสดงนับรวมกัน”): the outlets are rows of the snapshot population (group REGISTER_GROUP ‘สาขาร้านเครือ’, kind outlet), counted with the sheet-1 restaurants in every ร้าน figure (overview tiles, province frames and list, แขวง/ตำบล densities, area/district/venue/building/Land panels, charts, table); the split ‘ร้าน = N ร้านในชุดข้อมูล + M สาขาในทะเบียน’ is stated once per view; the 1,234 moved rows are counted once, on the register side. This supersedes the 0.3.0 rule ‘never added to the snapshot’ for counting and presentation; the register keeps its own views, evidence and provenance.",
+    "views": "chains (directory + search) · chain (brand) · company · outlet; there the snapshot frames, labels, context dots, charts tray and table step aside and the register search replaces the snapshot filters (data-set switch). In every snapshot view the outlets are rows: filters reach them (group = สาขาร้านเครือ, province by the register's province, brand through brandKeys / 01_BRANDS.national_brand_ids, search over name · brand · company · province), cue series ‘register’ (pin path) in the legend; outlet rows carry no price, rating, reviews or type (UNSPECIFIED / null — never imputed)",
+    "map": "js/register-layer.js: one pin per outlet with a selected coordinate (16,728 of 26,819) (LDS map data role), selected outlet stroke; logos as buttons from zoom 15 (≤ 60); never clustered; from city zoom (REGISTER_MIN_ZOOM) for a full scope; a scope of outlets only (a จังหวัด outside the covered seven, ?group=register, a chain-only brand) draws its outlets at every zoom (registerSelection().scoped) and the status line counts them as ร้านในจอ",
     "derivations": {
-      "province": "point-in-polygon on the 77 production provinces (provBy point) → register province text (provBy text) → unknown, listed apart",
+      "province": "point-in-polygon on the 77 production provinces (provBy point) → register province text (provBy text) → unknown (3,241), listed apart as ‘ไม่ทราบจังหวัด’ in the province list and counted in the totals, never in a frame or a density",
       "area": "point-in-polygon on the covered subdistricts (display only)"
     },
     "links": "snapshot brand → register brands by 01_BRANDS.national_brand_ids; moved row → registerOutlets ids; names are search keys only",
     "wording": [
       "สาขาในทะเบียน",
+      "ร้าน = N ร้านในชุดข้อมูล (7 จังหวัด) + M สาขาในทะเบียนร้านเครือ (ทั่วประเทศ)",
       "แหล่งข้อมูลระบุปิด… (ยังไม่ยืนยัน)",
       "ความครบของทะเบียน",
       "บทบาทในทะเบียนไม่ได้แปลว่าเป็นผู้ประกอบการของทุกสาขา"
@@ -1024,7 +1045,7 @@
       "near": "10–100 m (report only; the app measures the ring itself)",
       "nested": "a point inside several nested buildings relates to each (smallest first)"
     },
-    "panel": "renderLand (js/register-panel.js): tiles ร้านในอาคาร · สาขาร้านเครือ · ร้านรอบ 100 ม.; in-vs-around table; ONE list ‘ร้านและสาขาในอาคาร’ (owner 2026-10-28 22:03) — snapshot rows and register outlets side by side A→Z, each entry saying ร้าน or สาขาในทะเบียน, a moved row with a recorded correspondence shown once carrying its outlet (inBuildingRows); the header keeps the two counts apart and never sums them",
+    "panel": "renderLand (js/register-panel.js): tiles ร้านในอาคาร · สาขาร้านเครือ · ร้านรอบ 100 ม.; in-vs-around table; ONE list ‘ร้านและสาขาในอาคาร’ (owner 2026-10-28 22:03) — snapshot rows and register outlets side by side A→Z, each entry saying ร้าน or สาขาในทะเบียน, a moved row with a recorded correspondence shown once carrying its outlet (inBuildingRows); since 0.6.0 the tile ร้านในอาคาร = rows + outlets with the split in its hint (one population), the list header reads ‘N ร้าน · M สาขา · K เครือ’",
     "wording": "ในอาคาร (= the point lies in the outline) / รอบอาคาร — never ตั้งอยู่ใน, tenancy or floor; no count changes; no ติดขอบ bucket",
     "registryLinks": [
       "DL-fdc869a77aca940153dd",

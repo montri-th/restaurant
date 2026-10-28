@@ -10,10 +10,11 @@ import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {load, readJSON, readBytes, sha256, ROOT} from './helpers.js';
-import {decodeRegister, brandsIn, provincesIn, outletMix, searchRegister, EVIDENCE, STATUS} from '../js/register.js';
+import {brandsIn, provincesIn, outletMix, searchRegister, EVIDENCE, STATUS} from '../js/register.js';
 import {decodeLand, geometryContains, distanceToGeometry, landProfile, landOfRow, landOfOutlet, hostsOf, aroundGeometry, landTypeTh, applyRowDisplay, applyOutletDisplay, LAND_RULE} from '../js/land.js';
 import {renderRegisterSummary, renderRegisterInArea, renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderChain, renderCompany, renderOutlet, renderLand} from '../js/register-panel.js';
 import {configureBrandLogos} from '../js/brand-logos.js';
+import {brandKey} from '../js/model.js';
 
 const text = html => html.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ');
 let ctx = null;
@@ -22,13 +23,17 @@ function setup() {
   const base = load();
   configureBrandLogos(readJSON('data/brand-logos.json'));
   const raw = readJSON('data/chains.json');
-  const reg = decodeRegister(raw, base.index);
+  // The register the population was built from (js/model.js#outletRows mutates its outlets into rows, as init() does).
+  const reg = base.register;
   const landRaw = readJSON('data/land.json'), landGeo = readJSON('data/land-buildings.geojson');
   const land = decodeLand(landRaw, landGeo);
-  const rowById = new Map(base.data.rows.map(r => [r.id, r]));
+  // As the app does: every row by id (the population plus the rows moved to the register), and the population's keys
+  // for the scoped Land counts.
+  const rowById = new Map([...base.data.rows, ...base.data.moved].map(r => [r.id, r]));
+  const population = new Set(base.data.rows.map(r => r.id));
   // As the app does: points within 10 m of their Land building take the display position inside it.
   const snapped = {rows: applyRowDisplay(land, rowById), outlets: applyOutletDisplay(land, reg.byId)};
-  ctx = {...base, raw, reg, landRaw, landGeo, land, rowById, snapped};
+  ctx = {...base, raw, reg, landRaw, landGeo, land, rowById, population, snapped};
   return ctx;
 }
 const PRIVATE = /(docs|drive)\.google\.com|googleusercontent\.com|drive\.usercontent/;
@@ -100,16 +105,18 @@ test('no private research links ship: every source and web URL is public https',
   for (const f of ['data/chains.json', 'data/land.json', 'data/land-buildings.geojson', 'data/restaurants.json']) assert.ok(!PRIVATE.test(readBytes(f).toString('utf8')), f);
 });
 
-test('the snapshot stays 70,214 rows: Sheet 1 plus the 1,234 rows moved to the register, each counted once', () => {
+test('the snapshot stays 70,214 observations: Sheet 1 plus the 1,234 rows moved to the register, each counted once', () => {
   const {raw: chains, data} = setup();
   const meta = data.meta;
-  assert.equal(meta.rowSources.sheet1 + meta.rowSources.movedToChainRegister, data.rows.length);
+  const snapshot = [...data.restaurants, ...data.moved];
+  assert.equal(meta.rowSources.sheet1 + meta.rowSources.movedToChainRegister, snapshot.length);
   assert.deepEqual({sheet1: meta.rowSources.sheet1, moved: meta.rowSources.movedToChainRegister}, {sheet1: 68980, moved: 1234});
-  assert.equal(data.rows.filter(r => r.register).length, 1234, 'every moved row is flagged, none dropped or doubled');
-  assert.ok(data.rows.filter(r => r.register === 2).length > 0);
+  assert.equal(data.moved.length, 1234, 'every moved row is flagged and counted on the register side (0.6.0), none dropped or doubled');
+  assert.ok(data.restaurants.every(r => !r.register) && data.moved.every(r => r.register));
+  assert.ok(data.moved.filter(r => r.register === 2).length > 0);
   // Register targets of a moved row are outlet ids or secondary observations; only outlet ids resolve to points.
   const ids = new Set(chains.cols.id);
-  const targets = data.rows.flatMap(r => r.registerTargets);
+  const targets = data.moved.flatMap(r => r.registerTargets);
   assert.ok(targets.length > 0 && targets.some(t => ids.has(t)));
 });
 
@@ -158,7 +165,7 @@ test('register helpers: search by brand or company name, provinces with the unkn
 test('land.json publishes “in” relations only (inside or within 10 m, drawn inside), every key resolves, and the browser geometry reproduces them', () => {
   const {landRaw, landGeo, land, data, reg, snapped} = setup();
   assert.equal(landRaw.meta.schema, 'citymeter-land-join-2');
-  const keys = new Set(data.rows.map(r => r.id)), outlets = new Set(reg.outlets.map(o => o.id));
+  const keys = new Set([...data.restaurants, ...data.moved].map(r => r.id)), outlets = new Set(reg.outlets.map(o => o.id));
   assert.ok(landRaw.snapshot.length > 2000 && landRaw.chains.length > 1500);
   // rel 0 = in; d = the source point's distance to the outline (0 inside, ≤ 10 m when it lay outside).
   for (const [k, b, rel, d] of landRaw.snapshot) { assert.ok(keys.has(k), k); assert.equal(rel, 0); assert.ok(land.buildings.has(b)); assert.ok(d >= 0 && d <= 10); }
@@ -169,7 +176,7 @@ test('land.json publishes “in” relations only (inside or within 10 m, drawn 
   assert.ok(snapped.rows > 500 && snapped.outlets > 200, `${snapped.rows} rows and ${snapped.outlets} outlets drawn inside`);
   assert.equal(landRaw.snaps.rows.length, snapped.rows); assert.equal(landRaw.snaps.chains.length, snapped.outlets);
   assert.ok(moved.rows <= snapped.rows);
-  const rows = new Map(data.rows.map(r => [r.id, r])), outs = new Map(reg.outlets.map(o => [o.id, o]));
+  const rows = new Map([...data.restaurants, ...data.moved].map(r => [r.id, r])), outs = new Map(reg.outlets.map(o => [o.id, o]));
   let checked = 0, movedChecked = 0;
   for (const [list, lookup] of [[landRaw.snapshot, rows], [landRaw.chains, outs]]) {
     for (let i = 0; i < list.length; i += 7) {
@@ -222,14 +229,16 @@ test('Land hosts link to sheet venues by the CityMETER venue uuid only', () => {
 });
 
 test('Land profile: rows in the building, the 100 m ring outside it, register outlets apart', () => {
-  const {land, rowById, reg, data} = setup();
+  const {land, rowById, population, reg, data} = setup();
   // The host with the most snapshot points in its building.
   const host = [...land.hosts].sort((a, b) => (land.rowsByBuilding.get(b.fp)?.length || 0) - (land.rowsByBuilding.get(a.fp)?.length || 0))[0];
-  const p = landProfile(land, host, {rowsByKey: rowById, outletsById: reg.byId});
+  // Scoped to the population, as the app does: a row moved to the register is counted there, not in the building.
+  const p = landProfile(land, host, {rowsByKey: rowById, outletsById: reg.byId, scopeKeys: population});
   const inside = p.rows.in;
-  assert.equal(inside.length, land.rowsByBuilding.get(host.fp).length);
+  assert.equal(inside.length, land.rowsByBuilding.get(host.fp).filter(k => population.has(k)).length);
+  assert.ok(land.rowsByBuilding.get(host.fp).length > inside.length, 'this building held rows the owner moved to the register');
   assert.ok(inside.length > 0 && !('edge' in p.rows), 'no separate edge bucket: within 10 m counts as in');
-  const ring = aroundGeometry(p.feature.geometry, data.rows, 100, new Set(inside.map(r => r.id)));
+  const ring = aroundGeometry(p.feature.geometry, data.restaurants, 100, new Set(inside.map(r => r.id)));
   for (const r of ring) { const d = distanceToGeometry(p.feature.geometry, [r.longitude, r.latitude]); assert.ok(d > 10 && d <= 100); }
   assert.equal(hostsOf(land, host.fp)[0].ds <= 'shopping' || true, true);
   // Each point names this building as its primary relation or as one of the nested buildings that also contain it.
@@ -271,7 +280,7 @@ test('register and Land views: one provenance line each (dataset · source · da
   // Sections inside snapshot views carry their own single line.
   const area = [...reg.byArea.keys()][0];
   const inArea = renderRegisterInArea({outlets: reg.byArea.get(area), brands: brandsIn(reg.byArea.get(area)), place: 'แขวงทดสอบ'});
-  assert.equal((inArea.match(/source-line/g) || []).length, 1); assert.ok(text(inArea).includes('คนละหน่วยกับร้านด้านบน'));
+  assert.equal((inArea.match(/source-line/g) || []).length, 1); assert.ok(text(inArea).includes('นับรวมอยู่ในตัวเลขร้านและสาขาด้านบนแล้ว'));
   const row = rowById.get(landOfRow(land, [...land.rowRel.keys()][0]) ? [...land.rowRel.keys()][0] : '');
   const storeLand = text(renderStoreLand(landOfRow(land, row.id)));
   assert.ok(/จุดอยู่ในขอบอาคาร|จุดต้นทางห่างขอบอาคาร [\d.]+ ม\. \(ไม่เกิน 10 ม\. นับเป็นในอาคาร/.test(storeLand) && !/ตั้งอยู่ใน|ติดขอบ/.test(storeLand));
@@ -279,8 +288,8 @@ test('register and Land views: one provenance line each (dataset · source · da
   const movedKey = [...land.rowLinks].find(([, l]) => l[0].d > 0)?.[0];
   const movedText = text(renderStoreLand(landOfRow(land, movedKey)));
   assert.ok(/จุดต้นทางห่างขอบอาคาร [\d.]+ ม\. \(ไม่เกิน 10 ม\. นับเป็นในอาคาร หมุดแสดงในอาคาร\)/.test(movedText) && !movedText.includes('จุดอยู่ในขอบอาคาร'), movedText);
-  const moved = data.rows.find(r => r.register === 1);
-  assert.ok(text(renderStoreRegister({row: moved, register: moved.register})).includes('ยังนับเป็น 1 ร้านในชุดข้อมูลนี้ตามเดิม'));
+  const moved = data.moved.find(r => r.register === 1);
+  assert.ok(text(renderStoreRegister({row: moved, register: moved.register})).includes('นับในทะเบียนร้านเครือ ไม่นับซ้ำ'));
   const hostsIn = renderLandHostsIn([{host, rows: 3, outlets: 1}]);
   assert.ok(text(hostsIn).includes(LAND_RULE) && (hostsIn.match(/source-line/g) || []).length === 1 && !text(hostsIn).includes('ไม่ได้ยืนยัน'));
   // One row per building: other registry names on the same footprint ride along; a nested outline says what it repeats.
@@ -355,7 +364,7 @@ test('snapshot chain and venue headers carry totals, never the length of a cut l
   const {buildAreaProfile} = await import('../js/profile-model.js');
   const {renderArea} = await import('../js/panel.js');
   const byArea = new Map();
-  for (const r of data.rows) if (r.brand) { if (!byArea.has(r.area)) byArea.set(r.area, new Set()); byArea.get(r.area).add(r.brand.id); }
+  for (const r of data.rows) if (r.brand && r.area) { if (!byArea.has(r.area)) byArea.set(r.area, new Set()); byArea.get(r.area).add(brandKey(r)); }
   const [areaId, brands] = [...byArea].sort((a, b) => b[1].size - a[1].size)[0];
   assert.ok(brands.size > 16, `${areaId} has ${brands.size} chains`);
   const p = buildAreaProfile(data.rows, areaId, index, data.groups, {});

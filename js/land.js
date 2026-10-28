@@ -192,7 +192,8 @@ export function landProfile(land, host, {rowsByKey, outletsById, scopeKeys = nul
     return out;
   };
   const rows = building >= 0 ? split(land.rowsByBuilding.get(building), rowsByKey, land.rowLinks, true) : {in: [], near: []};
-  const outlets = building >= 0 && outletsById ? split(land.outletsByBuilding.get(building), outletsById, land.outletLinks, false) : {in: [], near: []};
+  // One population (0.6.0): the outlets follow the filters like the rows (their ids are in scopeKeys when they are rows).
+  const outlets = building >= 0 && outletsById ? split(land.outletsByBuilding.get(building), outletsById, land.outletLinks, Boolean(scopeKeys)) : {in: [], near: []};
   return {host, building, feature: land.buildings.get(building) || null, parts: land.parts?.get(building) || [],
     cohosts: hostsOf(land, building).filter(h => h.id !== host.id), rows, outlets};
 }

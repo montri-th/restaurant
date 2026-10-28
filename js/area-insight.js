@@ -21,7 +21,7 @@ export const SMALL_SELECTION = 1000;
 
 /** Area of the dataset's coverage: subdistricts with ≥ 1 row in the full dataset. */
 export function coverageKm2(allRows, index) {
-  const ids = new Set(allRows.map(r => r.area));
+  const ids = new Set(allRows.map(r => r.area).filter(Boolean));
   let total = 0;
   for (const id of ids) total += index.byId.get(id)?.km2 || 0;
   return {areas: ids.size, km2: total};
@@ -35,7 +35,10 @@ export function summarizeAreaInsight(rows = [], index, {minRows = MIN_AREA_ROWS,
   const ranked = mode === 'density' ? eligible.sort(byDensity) : summaries.sort(byCount);
   const areas = ranked.slice(0, 3);
   const combined = combinedDensity(areas);
-  const baseline = coverage && coverage.km2 ? selected.length / coverage.km2 : null;
+  // The baseline is a density of the covered frames: rows without a frame (register outlets outside the covered
+  // provinces, or without a point) are in the population but not in any subdistrict, so they stay out of this ratio.
+  const framed = selected.reduce((n, r) => n + (r.area ? 1 : 0), 0);
+  const baseline = coverage && coverage.km2 ? framed / coverage.km2 : null;
   // Secondary finding: the area holding the most reviews (popularity proxy, rows with a review count only).
   const mostReviewed = summaries.filter(a => a.reviews > 0).sort((a, b) => b.reviews - a.reviews || String(a.id).localeCompare(String(b.id)))[0] || null;
   return {
@@ -44,7 +47,7 @@ export function summarizeAreaInsight(rows = [], index, {minRows = MIN_AREA_ROWS,
     baselineDensity: baseline, coverageKm2: coverage?.km2 || null, coverageAreas: coverage?.areas || null,
     ratio: baseline && combined.density ? combined.density / baseline : null,
     share: selected.length ? (combined.count / selected.length) * 100 : 0,
-    totalRows: selected.length, areaCount: summaries.length, eligibleCount: eligible.length,
+    totalRows: selected.length, framedRows: framed, areaCount: summaries.length, eligibleCount: eligible.length,
     mostReviewed: mostReviewed ? {id: mostReviewed.id, name: mostReviewed.name, province: mostReviewed.province, reviews: mostReviewed.reviews, count: mostReviewed.count} : null,
   };
 }

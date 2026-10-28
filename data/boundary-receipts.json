@@ -9,7 +9,9 @@
 "areaSqm": "production value from base info; never recomputed from the simplified outline",
 "receipts": 581,
 "receiptsSha256": "ddaed08c299728d67031c1aaab4b2d439a44c85de0b5f11c842d82a15b5b796a",
-"limits": "Administrative frames for navigation and aggregation of this dataset; not an official boundary certificate."
+"limits": "Administrative frames for navigation and aggregation of this dataset; not an official boundary certificate.",
+"provinceEndpoint": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/{uuid}/PROVINCE",
+"provincesRetrievedOn": "2026-10-28"
 },
 "receipts": [
 {
@@ -4078,6 +4080,568 @@
 "sha256": "0d497b20e91985092945f0c40d4121ed12e5b9375bfc1e30bc3ae2e37f32afad",
 "bytes": 10224,
 "retrievedAt": "2026-10-22T13:29:31.997807+00:00"
+}
+],
+"provinceReceipts": [
+{
+"id": "0332f2ce-d76b-48de-8e61-3c7358965fbb",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0332f2ce-d76b-48de-8e61-3c7358965fbb/PROVINCE",
+"sha256": "57c5a1055556f76dac28e278b771eed7d6863d5b2e0dde8cd92c9f2fc61b91f2",
+"bytes": 563719,
+"retrievedAt": "2026-10-28T15:44:08.805685+00:00"
+},
+{
+"id": "0482a941-1334-46e6-9b1a-b0cf99325775",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0482a941-1334-46e6-9b1a-b0cf99325775/PROVINCE",
+"sha256": "c32665f4006e7cfbd5f0eaa9fa298c510ee28840aaf30f64b57383394567af6d",
+"bytes": 585756,
+"retrievedAt": "2026-10-28T15:44:10.704150+00:00"
+},
+{
+"id": "07fdec79-2398-48e6-a76e-057270a484b3",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/07fdec79-2398-48e6-a76e-057270a484b3/PROVINCE",
+"sha256": "0d481f8cb83550c5d1625f9aabc139832cc73d9d510ee1d0042ed2f8b390826b",
+"bytes": 676089,
+"retrievedAt": "2026-10-28T15:44:23.619768+00:00"
+},
+{
+"id": "09ac5850-c073-4787-9e1d-e68712b9cd95",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/09ac5850-c073-4787-9e1d-e68712b9cd95/PROVINCE",
+"sha256": "230e4b4bf6ba2456db6293a7d5bb3f47c4bc4a7d3314c003a496bb7155d24c21",
+"bytes": 352994,
+"retrievedAt": "2026-10-28T15:44:28.463653+00:00"
+},
+{
+"id": "0bbb00f3-e81f-4a1c-8543-e34587e19299",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0bbb00f3-e81f-4a1c-8543-e34587e19299/PROVINCE",
+"sha256": "8a416913683876b1aa037edd86dd31f525fa1c304ebf4762eccef61edebe1cc5",
+"bytes": 946051,
+"retrievedAt": "2026-10-28T15:44:11.011654+00:00"
+},
+{
+"id": "0c8db10b-1e08-498b-8f9a-a017f2cea5c5",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/0c8db10b-1e08-498b-8f9a-a017f2cea5c5/PROVINCE",
+"sha256": "4189aaf6c8522c52e5f8882680b30327539f673775600b074e0c14f7326bbdd8",
+"bytes": 194432,
+"retrievedAt": "2026-10-28T15:44:34.060728+00:00"
+},
+{
+"id": "1299fa9a-ae2c-48a2-9a89-2b8988e3ea0e",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1299fa9a-ae2c-48a2-9a89-2b8988e3ea0e/PROVINCE",
+"sha256": "dc855a6897f4d34a2d08f0f2085bb81793498fbfbc709c7261fe8615e178e37c",
+"bytes": 2592224,
+"retrievedAt": "2026-10-28T15:44:14.968785+00:00"
+},
+{
+"id": "16ec39ad-b60e-4643-9adb-9833807d25c9",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/16ec39ad-b60e-4643-9adb-9833807d25c9/PROVINCE",
+"sha256": "17a5cbf049d2b52e716835fcacebc510e2438a8134666a696b77756e8a0c385c",
+"bytes": 472614,
+"retrievedAt": "2026-10-28T15:44:22.095135+00:00"
+},
+{
+"id": "1b4ab8db-f87c-4b3b-aaa7-9ba3bd61207f",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1b4ab8db-f87c-4b3b-aaa7-9ba3bd61207f/PROVINCE",
+"sha256": "200a1bf4c787e5020ba37ac363eea71b35fe5d9a8c8079e3367d67a8d85e7caf",
+"bytes": 138413,
+"retrievedAt": "2026-10-28T15:44:07.115844+00:00"
+},
+{
+"id": "1bc3f6b9-eded-40cc-a788-0991039c4a87",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1bc3f6b9-eded-40cc-a788-0991039c4a87/PROVINCE",
+"sha256": "4b4db8e7645bd9c3667815ce49b417c4fd69915e4ac9e0e8e6ba863ea19c6703",
+"bytes": 387277,
+"retrievedAt": "2026-10-28T15:44:20.508977+00:00"
+},
+{
+"id": "1fecf5e9-cd32-4b73-beaa-bb3da6687dfa",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/1fecf5e9-cd32-4b73-beaa-bb3da6687dfa/PROVINCE",
+"sha256": "7dda6f76e3d36a17d599ba5b6235a9fd2817b1b24d589bdb20489a10db04f8da",
+"bytes": 415995,
+"retrievedAt": "2026-10-28T15:44:22.692402+00:00"
+},
+{
+"id": "32b40b49-a04e-45c3-81a6-ab44b8d7f1f5",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/32b40b49-a04e-45c3-81a6-ab44b8d7f1f5/PROVINCE",
+"sha256": "216385eea7928ef7fc6c6e4a1c0990fef243857bcbd43388484c07f6f44ea9ea",
+"bytes": 150209,
+"retrievedAt": "2026-10-28T15:44:33.107518+00:00"
+},
+{
+"id": "3db48f9c-7bac-4783-aa51-fe27fb9eb726",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3db48f9c-7bac-4783-aa51-fe27fb9eb726/PROVINCE",
+"sha256": "0e68af913cbf8a9e5ef204808a5c5d93427a0ade098c72254ae3ca99c53ff5de",
+"bytes": 1406923,
+"retrievedAt": "2026-10-28T15:44:17.349856+00:00"
+},
+{
+"id": "3eefda09-ef27-43a9-86b1-c9ae6507b6f0",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/3eefda09-ef27-43a9-86b1-c9ae6507b6f0/PROVINCE",
+"sha256": "83e57fbac8f6e27a84377a6c92e87e57c0ff3049a5231343e33ac1fa2e17af69",
+"bytes": 722096,
+"retrievedAt": "2026-10-28T15:44:12.139053+00:00"
+},
+{
+"id": "45adc495-a252-4c35-bb92-dcffb2ff08fd",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/45adc495-a252-4c35-bb92-dcffb2ff08fd/PROVINCE",
+"sha256": "2f902a56b4e76865cd474408bd4aa901e768f2b45f318b5d09233dbe08a3a6a0",
+"bytes": 936596,
+"retrievedAt": "2026-10-28T15:44:25.938206+00:00"
+},
+{
+"id": "47545867-d3f1-4e13-a5d9-70021b6f8e99",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/47545867-d3f1-4e13-a5d9-70021b6f8e99/PROVINCE",
+"sha256": "6e932a96900315ce64209d46903d971a088bf79e128e0573823b4bda64a143e4",
+"bytes": 812889,
+"retrievedAt": "2026-10-28T15:44:19.986849+00:00"
+},
+{
+"id": "4995f60b-1e8b-4b27-811c-58f7328c480f",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4995f60b-1e8b-4b27-811c-58f7328c480f/PROVINCE",
+"sha256": "2f32993b1e74365236536b467807bc5a39c6ff9e3eab2cc0a38392a011d7d097",
+"bytes": 573839,
+"retrievedAt": "2026-10-28T15:44:09.531592+00:00"
+},
+{
+"id": "49b703a9-30ad-4996-ba08-ddc5cf09331e",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/49b703a9-30ad-4996-ba08-ddc5cf09331e/PROVINCE",
+"sha256": "00d7cccd7dcc56d1f6f9c6597654182195fee23480a8d1ca5ec2072b673a8bcc",
+"bytes": 823515,
+"retrievedAt": "2026-10-28T15:44:13.793346+00:00"
+},
+{
+"id": "4cc601b2-e1b1-46d4-8670-62800c323301",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4cc601b2-e1b1-46d4-8670-62800c323301/PROVINCE",
+"sha256": "2a5a62fb3c60c4ac1247d5cfb77aad8ab5ee95368f175100379ef69da93674db",
+"bytes": 270220,
+"retrievedAt": "2026-10-28T15:44:32.978067+00:00"
+},
+{
+"id": "4ce9f1d3-f2c8-4bf9-aeb8-d0d2af986185",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4ce9f1d3-f2c8-4bf9-aeb8-d0d2af986185/PROVINCE",
+"sha256": "add1c970506ecce708b6c2b47bb9dc07b1668745c8a72fb18ce8e627f040943e",
+"bytes": 1112380,
+"retrievedAt": "2026-10-28T15:44:10.991337+00:00"
+},
+{
+"id": "4d44a739-9684-41eb-8cd2-5db095589ee6",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4d44a739-9684-41eb-8cd2-5db095589ee6/PROVINCE",
+"sha256": "c6a394301ceac43c90aab7542611ab080f797daceefca4c97c306560240d4f74",
+"bytes": 620956,
+"retrievedAt": "2026-10-28T15:44:23.707487+00:00"
+},
+{
+"id": "4e3e7ed3-2d6d-4a2e-954c-0c3df600c170",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/4e3e7ed3-2d6d-4a2e-954c-0c3df600c170/PROVINCE",
+"sha256": "7afe4a02aa2eef98277058f2a4fada34d0e84c65ea4d632a03c91a9b34e442a5",
+"bytes": 561681,
+"retrievedAt": "2026-10-28T15:44:28.472674+00:00"
+},
+{
+"id": "515fca3f-a101-47c9-bf16-1c726455a13a",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/515fca3f-a101-47c9-bf16-1c726455a13a/PROVINCE",
+"sha256": "2c8f958f1a662126a0d08310ba125a2765820978dfe788c27f5a4d6ab1ad8fb4",
+"bytes": 1311424,
+"retrievedAt": "2026-10-28T15:44:17.446309+00:00"
+},
+{
+"id": "55d5edbe-592c-49d0-aca8-15d4c1b2a890",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/55d5edbe-592c-49d0-aca8-15d4c1b2a890/PROVINCE",
+"sha256": "ef525378fc2be9ee3d3683edfae9b412cafd576e64ed39339e5152fe42731b7d",
+"bytes": 387815,
+"retrievedAt": "2026-10-28T15:44:32.106807+00:00"
+},
+{
+"id": "56c25394-198a-4440-b6d7-5401247f0379",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/56c25394-198a-4440-b6d7-5401247f0379/PROVINCE",
+"sha256": "a65e60d78f581a9d424afa9c3545a006b82b8b7011092d0bce3b7406676e22ae",
+"bytes": 458548,
+"retrievedAt": "2026-10-28T15:44:21.208204+00:00"
+},
+{
+"id": "5c388e35-f85d-424c-9143-87d5c44fe9df",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5c388e35-f85d-424c-9143-87d5c44fe9df/PROVINCE",
+"sha256": "539e3646e5c567fce88a98967364419a32818c7cf1d30767ffdabb5ed52c742b",
+"bytes": 424011,
+"retrievedAt": "2026-10-28T15:44:31.730985+00:00"
+},
+{
+"id": "5c80ccc6-5f95-4fbd-83c3-226ba07cfb83",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/5c80ccc6-5f95-4fbd-83c3-226ba07cfb83/PROVINCE",
+"sha256": "247a4110f1ca4bcc56b8ec903d9495ec921c937cce7890d5141eab947895b36e",
+"bytes": 766156,
+"retrievedAt": "2026-10-28T15:44:16.151221+00:00"
+},
+{
+"id": "615e556d-70bd-4d68-b6fd-860c07d9b6a5",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/615e556d-70bd-4d68-b6fd-860c07d9b6a5/PROVINCE",
+"sha256": "1ded0d3e50ba0644c184c5545849b1af52665c40503f73e33fd1063255a4f3ef",
+"bytes": 3154632,
+"retrievedAt": "2026-10-28T15:44:15.588206+00:00"
+},
+{
+"id": "62ed900c-11ca-4206-98c4-0aadfd619518",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/62ed900c-11ca-4206-98c4-0aadfd619518/PROVINCE",
+"sha256": "a99f53a93954871f97b317dfdb85696e592abb46017c859f306020922521284d",
+"bytes": 560003,
+"retrievedAt": "2026-10-28T15:44:27.172366+00:00"
+},
+{
+"id": "69eecfa0-45c3-4c14-af23-f4d5fb38e1fb",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/69eecfa0-45c3-4c14-af23-f4d5fb38e1fb/PROVINCE",
+"sha256": "d3473d685cefdccba63fdc760ec611294dc8ea0003ef78792c01d2bbacf9119d",
+"bytes": 378980,
+"retrievedAt": "2026-10-28T15:44:32.227098+00:00"
+},
+{
+"id": "6bb69e3c-70ae-4f26-8e65-d876766de0ca",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/6bb69e3c-70ae-4f26-8e65-d876766de0ca/PROVINCE",
+"sha256": "085e542b8e125cfd3ade1b58ac6abd5dfe433f847f65f3b073e07e3ad5fe2ae7",
+"bytes": 791513,
+"retrievedAt": "2026-10-28T15:44:12.480133+00:00"
+},
+{
+"id": "747bdbc3-03f1-4156-b38a-dc664b43ae31",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/747bdbc3-03f1-4156-b38a-dc664b43ae31/PROVINCE",
+"sha256": "255f635b7a8dbb83fa3475dbb41a182dbb81c8f1fde44ac97c551514ade2d4db",
+"bytes": 762038,
+"retrievedAt": "2026-10-28T15:44:08.000773+00:00"
+},
+{
+"id": "7519a30a-dd2b-4dfb-81a3-a81a25174fbb",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7519a30a-dd2b-4dfb-81a3-a81a25174fbb/PROVINCE",
+"sha256": "8af1aee6e9a14c40f935824bd84b305dfaae5b6ec8aa6848d2a25a538738275f",
+"bytes": 901333,
+"retrievedAt": "2026-10-28T15:44:18.775610+00:00"
+},
+{
+"id": "76598456-e007-4fa4-b486-37c1053af6d9",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/76598456-e007-4fa4-b486-37c1053af6d9/PROVINCE",
+"sha256": "a75b1646d985ec5f8f76c3c729ea2af9c798a11b7f1938bbb94c323bc5fa5565",
+"bytes": 246991,
+"retrievedAt": "2026-10-28T15:44:20.205833+00:00"
+},
+{
+"id": "7e987560-fefc-4f19-b719-393d7a52f626",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/7e987560-fefc-4f19-b719-393d7a52f626/PROVINCE",
+"sha256": "661fd8a327e8454538196afaf387ceac0a1e915322490758165749fd50a71a2b",
+"bytes": 933158,
+"retrievedAt": "2026-10-28T15:44:16.539709+00:00"
+},
+{
+"id": "80a8aaec-55c3-422a-9ef2-a529b2e673b5",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/80a8aaec-55c3-422a-9ef2-a529b2e673b5/PROVINCE",
+"sha256": "d636f79d9ebdb2473e3d58ba7807fe3e5d5dff4e59ce1eba5d2e9337f3c49fcf",
+"bytes": 661217,
+"retrievedAt": "2026-10-28T15:44:12.411421+00:00"
+},
+{
+"id": "84c3797e-85af-4b0d-9b62-dc94f335a264",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/84c3797e-85af-4b0d-9b62-dc94f335a264/PROVINCE",
+"sha256": "551498d193be8398b2eb94812dc48cc291b5bc175bcfc611431d7054ea2ab5cd",
+"bytes": 681746,
+"retrievedAt": "2026-10-28T15:44:13.843870+00:00"
+},
+{
+"id": "87516089-3ba7-4587-8c45-e467c27c6e52",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/87516089-3ba7-4587-8c45-e467c27c6e52/PROVINCE",
+"sha256": "177b6ce42f52e862b080b8020492ed43205c62e9135acd7b6ec5bd1748c31ab1",
+"bytes": 925165,
+"retrievedAt": "2026-10-28T15:44:14.880560+00:00"
+},
+{
+"id": "8ba66431-92e2-4f9f-adf0-d58c406d30a4",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8ba66431-92e2-4f9f-adf0-d58c406d30a4/PROVINCE",
+"sha256": "4761e98f93256f9ae3b675985cea88e78d4a860d3a8640476bf00d10b6bffe3a",
+"bytes": 208689,
+"retrievedAt": "2026-10-28T15:44:10.137587+00:00"
+},
+{
+"id": "8d8a3dae-4a90-4429-9f43-ceabda85e127",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8d8a3dae-4a90-4429-9f43-ceabda85e127/PROVINCE",
+"sha256": "f2aff6c9a4e059657dbbc8caed2e0d27b775253e413d474331f6e6b9d3a3eed3",
+"bytes": 1920974,
+"retrievedAt": "2026-10-28T15:44:17.817680+00:00"
+},
+{
+"id": "8d9a6a2c-7885-449f-8734-9121bda74564",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8d9a6a2c-7885-449f-8734-9121bda74564/PROVINCE",
+"sha256": "dde6c5971e157f1e04afb65e699331ebaf977d8ac08c5bd43f54434dc7b047c5",
+"bytes": 377422,
+"retrievedAt": "2026-10-28T15:44:30.882022+00:00"
+},
+{
+"id": "8ea664b9-9ec4-44b5-b309-4ef863a00c80",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/8ea664b9-9ec4-44b5-b309-4ef863a00c80/PROVINCE",
+"sha256": "86fbd6081e0aeb3a6c1461982c9e1bc5db39dac0a08b106670ef7516a1a29ec2",
+"bytes": 225173,
+"retrievedAt": "2026-10-28T15:44:05.911898+00:00"
+},
+{
+"id": "91908d4e-efcb-4cc5-b01d-c98e97e71a4c",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/91908d4e-efcb-4cc5-b01d-c98e97e71a4c/PROVINCE",
+"sha256": "98bc8723a7910653ebbe41bb97725bcd423608d7f234c724aac0be04249437fd",
+"bytes": 368005,
+"retrievedAt": "2026-10-28T15:44:26.191087+00:00"
+},
+{
+"id": "92cd4502-dcb8-48e5-983c-915ac3e4f0b2",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/92cd4502-dcb8-48e5-983c-915ac3e4f0b2/PROVINCE",
+"sha256": "ea814b5cd63133c9e10b8b1a5075c0a5811503ae23ea6ed5786c803ca15d6e89",
+"bytes": 735226,
+"retrievedAt": "2026-10-28T15:44:28.666970+00:00"
+},
+{
+"id": "9a8069c4-af4a-4aae-abcf-964d188b45f6",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9a8069c4-af4a-4aae-abcf-964d188b45f6/PROVINCE",
+"sha256": "19d69269df6e3f488353826fdfdc736dce94556d46b24939aa8de0003da95577",
+"bytes": 616681,
+"retrievedAt": "2026-10-28T15:44:31.144741+00:00"
+},
+{
+"id": "9f5f73a6-a495-4306-b486-3eead6b83ab5",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/9f5f73a6-a495-4306-b486-3eead6b83ab5/PROVINCE",
+"sha256": "0329f9bec538c540f575f4475760142d480922e69f536880502f664f0652570d",
+"bytes": 763147,
+"retrievedAt": "2026-10-28T15:44:25.003394+00:00"
+},
+{
+"id": "ac5bb10a-c904-4be7-8488-9d82968cfac3",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ac5bb10a-c904-4be7-8488-9d82968cfac3/PROVINCE",
+"sha256": "a352908ecd041580a632cc855ff53267a5718513c347080753964e75fa88bd81",
+"bytes": 232416,
+"retrievedAt": "2026-10-28T15:44:29.978401+00:00"
+},
+{
+"id": "b2d392da-0b0e-4036-9369-db4a2a53ce13",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b2d392da-0b0e-4036-9369-db4a2a53ce13/PROVINCE",
+"sha256": "8e6e607558b9b33f4580ddf3de08a11881fea084f9e4b479f4fc7f8a210edcc8",
+"bytes": 1558655,
+"retrievedAt": "2026-10-28T15:44:18.590529+00:00"
+},
+{
+"id": "b3d31cad-6b6b-421e-9a38-e04a90605747",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b3d31cad-6b6b-421e-9a38-e04a90605747/PROVINCE",
+"sha256": "66de9657f02221b7059a2a79b60d8c78a164f0bc3714124a59ec601c15ee04bb",
+"bytes": 996782,
+"retrievedAt": "2026-10-28T15:44:23.395894+00:00"
+},
+{
+"id": "b9873eac-8a60-4bd8-8a7d-78d9b698a917",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/b9873eac-8a60-4bd8-8a7d-78d9b698a917/PROVINCE",
+"sha256": "d00b98b6a43cc917e3f4a886df9fa246ca0a9880f080fa21b698b73e7081b147",
+"bytes": 192324,
+"retrievedAt": "2026-10-28T15:44:05.923967+00:00"
+},
+{
+"id": "bbf00b46-5db7-4935-bc5d-477900abbb2d",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/bbf00b46-5db7-4935-bc5d-477900abbb2d/PROVINCE",
+"sha256": "c8148addbb2b982a045e5578040657811172ef1b0fbdb6c1a4ae791401ad6d98",
+"bytes": 285733,
+"retrievedAt": "2026-10-28T15:44:07.386495+00:00"
+},
+{
+"id": "c7bc471d-47d8-4645-aef6-44645c986c90",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/c7bc471d-47d8-4645-aef6-44645c986c90/PROVINCE",
+"sha256": "de96f890d1a116a44ba9c363328044f8c9a2b8382d0e8b11e944c8b41b5fce59",
+"bytes": 373732,
+"retrievedAt": "2026-10-28T15:44:21.230086+00:00"
+},
+{
+"id": "cc440fcd-c885-4e36-b781-bc57c6415b16",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/cc440fcd-c885-4e36-b781-bc57c6415b16/PROVINCE",
+"sha256": "73eecf2b6f53426eb9ecc151337b084bc9445325a78d066dd886057987602de0",
+"bytes": 693525,
+"retrievedAt": "2026-10-28T15:44:09.422358+00:00"
+},
+{
+"id": "cd320c1e-10b5-4ca8-9e50-801156fa486d",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/cd320c1e-10b5-4ca8-9e50-801156fa486d/PROVINCE",
+"sha256": "b24cef8da582a19cdd39885d8cd3e0e6d0e01add1dbda72232f37d4045b89e9e",
+"bytes": 848674,
+"retrievedAt": "2026-10-28T15:44:24.686837+00:00"
+},
+{
+"id": "cfff75fe-bcd8-4cb5-abc3-b7ccfada7863",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/cfff75fe-bcd8-4cb5-abc3-b7ccfada7863/PROVINCE",
+"sha256": "cfac42b514ccee50a0ac960ea42caacd6f0e768309a90325d2f0246e8e29c8f6",
+"bytes": 604084,
+"retrievedAt": "2026-10-28T15:44:29.778449+00:00"
+},
+{
+"id": "d0f5e997-bae2-49d8-a310-41d4ea353df1",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d0f5e997-bae2-49d8-a310-41d4ea353df1/PROVINCE",
+"sha256": "dfeca320f79089b8fa3173a1ac74e94608b2ce4e8551ed85f08399508d20a4e9",
+"bytes": 563847,
+"retrievedAt": "2026-10-28T15:44:13.389178+00:00"
+},
+{
+"id": "d17b3dd9-ef12-4698-b27f-a4c33d4fee00",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d17b3dd9-ef12-4698-b27f-a4c33d4fee00/PROVINCE",
+"sha256": "568c8dc770ee4ac4d897eb969f8443198793fbbe31dcfd0253bcccd71a5b72ec",
+"bytes": 493725,
+"retrievedAt": "2026-10-28T15:44:14.766436+00:00"
+},
+{
+"id": "d6560e2d-f5c9-4209-851c-ef1a6fd98206",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/d6560e2d-f5c9-4209-851c-ef1a6fd98206/PROVINCE",
+"sha256": "dfacf032efc725d23a25fb84b2062045893f5b319869e1b081c1818aee7fe337",
+"bytes": 722713,
+"retrievedAt": "2026-10-28T15:44:05.929669+00:00"
+},
+{
+"id": "daedc981-1ec9-4b51-8bf4-888aea45530b",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/daedc981-1ec9-4b51-8bf4-888aea45530b/PROVINCE",
+"sha256": "d2336baa3e751a586bbf660c12b376d5b514fd389327fa2c328e4b15a2bd3612",
+"bytes": 131336,
+"retrievedAt": "2026-10-28T15:44:27.443822+00:00"
+},
+{
+"id": "db443797-dbc4-4e17-9519-4d98d6b4fe8b",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/db443797-dbc4-4e17-9519-4d98d6b4fe8b/PROVINCE",
+"sha256": "9f55b5bcebb4107c4f1240441daf6e98b89df532d9f3a3b9545fd7ed3233e08b",
+"bytes": 304830,
+"retrievedAt": "2026-10-28T15:44:19.633973+00:00"
+},
+{
+"id": "dec6ef83-5e18-411a-b23c-87ef78e47e19",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/dec6ef83-5e18-411a-b23c-87ef78e47e19/PROVINCE",
+"sha256": "6047141554350ba9fd379a5d026560b0b96fc677936b987d4a3af2e4316d436e",
+"bytes": 721551,
+"retrievedAt": "2026-10-28T15:44:25.020584+00:00"
+},
+{
+"id": "e0ad2ad5-5da5-46ef-8351-c7b90f0558ed",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e0ad2ad5-5da5-46ef-8351-c7b90f0558ed/PROVINCE",
+"sha256": "925e580f2c9f2a18a61765593e7aa812619ef59cfc41712950a213baa9e7da00",
+"bytes": 200573,
+"retrievedAt": "2026-10-28T15:44:33.187177+00:00"
+},
+{
+"id": "e1f3b227-b31d-4e31-8500-f7a38586f1bb",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e1f3b227-b31d-4e31-8500-f7a38586f1bb/PROVINCE",
+"sha256": "48dceb1b7602fc076d828128b0fb53db13d1990cba948d94d75fd9cee9fd1861",
+"bytes": 637442,
+"retrievedAt": "2026-10-28T15:44:27.221880+00:00"
+},
+{
+"id": "e29b727c-76ef-473b-9ce1-a1e5abd95e4c",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/e29b727c-76ef-473b-9ce1-a1e5abd95e4c/PROVINCE",
+"sha256": "34600a59ad425e02899baba12201281a4a3afb543a3f2981f2e9f1dc0a8c5b6d",
+"bytes": 848424,
+"retrievedAt": "2026-10-28T15:44:30.854454+00:00"
+},
+{
+"id": "ea7d538e-cea8-4cc9-892e-f859f609a1f4",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/ea7d538e-cea8-4cc9-892e-f859f609a1f4/PROVINCE",
+"sha256": "99d8dd3ecfd082e00022af1603d35d47c23aa7dd6d7779aa8ed79912710843ee",
+"bytes": 551734,
+"retrievedAt": "2026-10-28T15:44:22.380014+00:00"
+},
+{
+"id": "eb4cf0c3-c4ca-4ffc-b8d0-cd28c2fb4c25",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/eb4cf0c3-c4ca-4ffc-b8d0-cd28c2fb4c25/PROVINCE",
+"sha256": "0355436847ef61b3be7032f95e2e03c0e81c80bf21b952fe3fd7518fe2d2eb2c",
+"bytes": 583105,
+"retrievedAt": "2026-10-28T15:44:25.917099+00:00"
+},
+{
+"id": "fc140349-8846-46d7-89bf-1035a92ab0b1",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fc140349-8846-46d7-89bf-1035a92ab0b1/PROVINCE",
+"sha256": "9a3a6c2b3a1cad35b5e97235de38f77f36d34449aecf5ccd6fffe1ad22a2c7f0",
+"bytes": 523034,
+"retrievedAt": "2026-10-28T15:44:08.309453+00:00"
+},
+{
+"id": "fd7a538c-451b-4415-ad93-44caa9e44c7d",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fd7a538c-451b-4415-ad93-44caa9e44c7d/PROVINCE",
+"sha256": "8b4860c6694aad150fb3b26a605f85ce24d8ba4d55e8dd1a88917a9fcafa002d",
+"bytes": 764509,
+"retrievedAt": "2026-10-28T15:44:29.533529+00:00"
+},
+{
+"id": "fdc11dc4-fdc5-44a3-9ec0-dfa455a032f6",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/fdc11dc4-fdc5-44a3-9ec0-dfa455a032f6/PROVINCE",
+"sha256": "8b8e6c982ebc0e28d53020a0b294ef091a301d3c9912ed756503731fa519d00a",
+"bytes": 444370,
+"retrievedAt": "2026-10-28T15:44:21.604314+00:00"
+},
+{
+"id": "feab952a-f61b-4236-a19d-bd0bc64da5d7",
+"level": "PROVINCE",
+"url": "https://landometer.com/api/v2/citymeter-v3/restaurant/info/geom/feab952a-f61b-4236-a19d-bd0bc64da5d7/PROVINCE",
+"sha256": "a1eef4435105501a7399c1c5ca1a4cc7d626c63b17abc1c0c702cb22416bef18",
+"bytes": 649590,
+"retrievedAt": "2026-10-28T15:44:07.605832+00:00"
 }
 ]
 }

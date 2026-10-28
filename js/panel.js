@@ -57,7 +57,7 @@ export const heading = (kind, text, id = '') => `<h3${id ? ` id="${esc(id)}"` : 
 
 /** A list cut at n says so: “แสดง n จาก N …” (a header always carries the total). */
 const shownOf = (n, total, unit, order = '') => (total > n ? `<p class="hint">แสดง ${num(n)} จาก ${num(total)} ${unit}${order ? ` (${order})` : ''}</p>` : '');
-const PROXY_NOTE = 'ร้าน = รายการในชุดข้อมูล ไม่ใช่จำนวนร้านทั้งหมดของพื้นที่ · คะแนนและรีวิวบอกความนิยมตามแหล่งข้อมูล ไม่ใช่ยอดขาย';
+const PROXY_NOTE = 'ร้าน = รายการในชุดข้อมูลและสาขาในทะเบียนร้านเครือ ไม่ใช่จำนวนร้านทั้งหมดของพื้นที่ · คะแนนและรีวิวมีเฉพาะฝั่งชุดข้อมูล บอกความนิยมตามแหล่งข้อมูล ไม่ใช่ยอดขาย';
 const provinceName = code => provinceByCode(code)?.th || code || '';
 
 /** Every view that shows numbers ends with dataset · source · date · boundary. */
@@ -92,14 +92,14 @@ function priceBars(byPrice) {
       <span class="mix-track" aria-hidden="true"><span class="mix-fill" style="width:${Math.max(3, Math.round((byPrice[b] / max) * 100))}%;background:${colors[b]}"></span></span>
       <span class="mix-value data-number">${num(byPrice[b])}</span></li>`).join('');
   return `${priced ? `<ul class="mix-list" aria-label="ระดับราคา (ร้านที่ระบุราคา)">${rows}</ul>` : '<p class="hint">ไม่มีร้านที่ระบุราคา</p>'}
-    <p class="hint">ไม่ระบุราคา ${num(byPrice.UNSPECIFIED)} ร้าน</p>`;
+    <p class="hint">ไม่ระบุราคา ${num(byPrice.UNSPECIFIED)} ร้าน${byPrice.outlets ? ` · สาขาในทะเบียน ${num(byPrice.outlets)} ไม่มีข้อมูลราคา` : ''}</p>`;
 }
 
 function restaurantList(rows, {showArea = false, index = null} = {}) {
   return `<ul class="outlet-list">${rows.map(r => {
     const area = showArea && index ? index.byId.get(r.area) : null;
-    const meta = [r.type || 'ไม่ระบุประเภท', Number.isFinite(r.rating) ? `★ ${dec(r.rating)}` : '', Number.isFinite(r.reviews) ? `${num(r.reviews)} รีวิว` : '', area ? `${areaWord(area.province)}${area.name}` : ''].filter(Boolean).join(' · ');
-    return `<li><button type="button" class="brand-row" data-action="select-store" data-id="${esc(r.id)}">${brandLogoMarkup(r.brand, {size: 'sm'})}<span><strong>${esc(r.name)}</strong><br><span class="small muted">${esc(meta)}</span></span></button></li>`;
+    const meta = [r.kind === 'outlet' ? `สาขาในทะเบียน${r.floor ? ` · ชั้น ${r.floor}` : ''}` : r.type || 'ไม่ระบุประเภท', Number.isFinite(r.rating) ? `★ ${dec(r.rating)}` : '', Number.isFinite(r.reviews) ? `${num(r.reviews)} รีวิว` : '', area ? `${areaWord(area.province)}${area.name}` : ''].filter(Boolean).join(' · ');
+    return `<li><button type="button" class="brand-row" data-action="${r.kind === 'outlet' ? 'select-outlet' : 'select-store'}" data-id="${esc(r.id)}">${brandLogoMarkup(r.brand, {size: 'sm'})}<span><strong>${esc(r.name)}</strong><br><span class="small muted">${esc(meta)}</span></span></button></li>`;
   }).join('')}</ul>`;
 }
 
@@ -144,12 +144,19 @@ function areaRanking(list, classify, {title = 'พื้นที่ที่ร
 /* ---------- Overview ---------- */
 
 /** focusMode: 'auto' (default top three) · 'explicit' (user-chosen) · 'none' (every area). */
-export function renderOverview({insight, summary, overview, focusMode = 'auto', classOf, provinces = [], meta = {}, coverage = null, province = '', extra = ''}) {
+export function renderOverview({insight, summary, overview, focusMode = 'auto', classOf, provinces = [], meta = {}, coverage = null, province = '', extra = '', population = null, unknownProvince = 0}) {
   const count = insight.areas.length;
   const w = words(insight.areas);
   const names = insight.areas.map(a => `<button type="button" class="link-button" data-action="select-area" data-id="${esc(a.id)}">${esc(a.name)}</button>`).join(' · ');
   let aha;
-  if (!summary.count) {
+  if (summary.count && !insight.areaCount && summary.outlets === summary.count) {
+    // Outside the covered provinces (or a scope of outlets only, none in a covered frame): the population here is the
+    // register's outlets, with no subdistrict frames and hence no density — said plainly, never as “0 พื้นที่”.
+    aha = `<section class="aha" aria-label="ข้อค้นพบ"><p class="eyebrow">ข้อค้นพบแรก</p>
+      <h2><span class="aha-number data-number">${num(summary.count)}</span><span class="aha-headline">สาขาในทะเบียนร้านเครือ${province ? `ใน${esc(provinceName(province))}` : ''}</span></h2>
+      <p class="aha-copy">ชุดข้อมูลร้าน (ชีต 1) ครอบคลุม 7 จังหวัด จึงไม่มีแขวง/ตำบลและความหนาแน่นที่นี่ · สาขาเหล่านี้มาจากทะเบียนร้านเครือทั่วประเทศ (หลักฐานรายสาขา)</p>
+      <div class="aha-actions"><button type="button" data-action="open-chains" class="btn">ดูทะเบียนร้านเครือ</button><button type="button" data-action="clear-filter" data-id="all" class="btn quiet">ล้างตัวกรอง</button></div></section>`;
+  } else if (!summary.count) {
     aha = `<section class="aha" aria-label="ข้อค้นพบ"><p class="eyebrow">ข้อค้นพบแรก</p><h2>ไม่พบร้านตามตัวกรองนี้</h2>
       <div class="aha-actions"><button type="button" data-action="clear-filter" data-id="all" class="btn">ล้างตัวกรอง</button></div></section>`;
   } else if (focusMode === 'explicit') {
@@ -176,24 +183,28 @@ export function renderOverview({insight, summary, overview, focusMode = 'auto', 
     }
   }
   const narrowed = focusMode !== 'none' && count > 0 && summary.count !== insight.totalRows;
-  const coverageDensity = coverage?.km2 ? insight.totalRows / coverage.km2 : null;
+  const coverageDensity = coverage?.km2 ? (insight.framedRows ?? insight.totalRows) / coverage.km2 : null;
+  // One population (owner 2026-10-28 22:36): restaurants of sheet 1 and chain outlets of the register, counted together;
+  // the split stays visible in one line because reviews, types and prices exist only on the sheet-1 side.
+  const split = summary.outlets != null ? `<p class="hint population-line">ร้าน = ${num(summary.restaurants)} ร้านในชุดข้อมูล (7 จังหวัด) + ${num(summary.outlets)} สาขาในทะเบียนร้านเครือ (ทั่วประเทศ)${population?.moved ? ` · ${num(population.moved)} แถวที่ย้ายไปทะเบียนนับฝั่งทะเบียน` : ''}</p>` : '';
   const metrics = `<section class="metrics" aria-label="${narrowed ? 'ตัวเลขของพื้นที่ที่โฟกัส' : 'ตัวเลขรวมของข้อมูลที่เลือก'}">
     ${metricTile(summary.count, `ร้าน${narrowed ? ' ในโฟกัส' : ''}`, 'store')}
     ${metricTile(narrowed ? dens(insight.density || 0) : (coverageDensity ? dens(coverageDensity) : '—'), narrowed ? 'ร้าน/ตร.กม. ในโฟกัส' : 'ร้าน/ตร.กม. พื้นที่ที่มีข้อมูล', 'gla')}
-    ${metricTile(summary.reviews, `รีวิว${narrowed ? ' ในโฟกัส' : ''}`, 'exclusive')}
+    ${metricTile(summary.reviewed ? summary.reviews : '—', `รีวิว${narrowed ? ' ในโฟกัส' : ''}`, 'exclusive')}
     ${metricTile(summary.brands, `เครือร้าน${narrowed ? ' ในโฟกัส' : ''}`, 'brand')}
-  </section>`;
-  const scope = province ? `${provinceName(province)} · ${coverage?.areas ? `${num(coverage.areas)} ` : ''}${areaWordFor(province)}ที่มีร้านในชุดข้อมูล` : `7 จังหวัด · ${coverage?.areas ? `${num(coverage.areas)} ` : ''}แขวง/ตำบลที่มีร้านในชุดข้อมูล`;
+  </section>${split}`;
+  const scope = province ? `${provinceName(province)} · ${coverage?.areas ? `${num(coverage.areas)} ` : ''}${areaWordFor(province)}ที่มีร้านหรือสาขา` : `ร้าน 7 จังหวัด + สาขาทั่วประเทศ · ${coverage?.areas ? `${num(coverage.areas)} ` : ''}แขวง/ตำบลที่มีร้านหรือสาขา`;
   const provinceList = provinces.length > 1 ? `<section class="panel-section" aria-labelledby="province-title">
-    <div class="section-heading">${heading('province', 'จังหวัดที่มีร้านในชุดข้อมูล', 'province-title')}<span class="hint">${num(provinces.length)} จังหวัด</span></div>
-    <ul class="province-list">${provinces.map(p => `<li><button type="button" class="province-row" data-action="select-province" data-id="${esc(p.code)}" aria-label="${esc(p.name)} ${num(p.count)} ร้าน กดเพื่อดูจังหวัด"><i class="province-swatch" style="background:${esc(p.fill)}" aria-hidden="true"></i><span class="province-name">${esc(p.name)}</span><span class="province-count data-number">${num(p.count)}<small>ร้าน</small></span></button></li>`).join('')}</ul>
+    <div class="section-heading">${heading('province', 'จังหวัดที่มีร้าน', 'province-title')}<span class="hint">${num(provinces.length)} จังหวัด · ร้าน + สาขา</span></div>
+    <ul class="province-list">${provinces.map(p => `<li><button type="button" class="province-row" data-action="select-province" data-id="${esc(p.code)}" aria-label="${esc(p.name)} ${num(p.count)} ร้าน กดเพื่อดูจังหวัด"><i class="province-swatch" style="background:${esc(p.fill)}" aria-hidden="true"></i><span class="province-name">${esc(p.name)}${p.covered === false ? '<small>สาขาในทะเบียนเท่านั้น</small>' : ''}</span><span class="province-count data-number">${num(p.count)}<small>ร้าน</small></span></button></li>`).join('')}${unknownProvince ? `<li class="province-row is-static"><i class="province-swatch is-none" aria-hidden="true"></i><span class="province-name">ไม่ทราบจังหวัด<small>สาขาที่ทะเบียนไม่มีพิกัดและไม่มีชื่อจังหวัด</small></span><span class="province-count data-number">${num(unknownProvince)}<small>สาขา</small></span></li>` : ''}</ul>
   </section>` : '';
   const eligible = overview.ranking.eligible.length > 0;
   const rank = areaRanking(eligible ? overview.ranking.eligible : overview.ranking.small, classOf,
     {title: eligible ? 'พื้นที่ที่ร้านแน่นที่สุด' : 'พื้นที่ที่มีร้านมากที่สุด', minRows: overview.ranking.minRows, byCount: !eligible,
       note: eligible ? `${num(overview.ranking.eligible.length)} พื้นที่ ≥ ${num(overview.ranking.minRows)} ร้าน · ร้าน/ตร.กม.` : `ไม่มีพื้นที่ใดถึง ${num(overview.ranking.minRows)} ร้าน · เรียงตามจำนวน`});
-  const chains = overview.chains.length ? `<section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้านที่พบมากที่สุด')}<span class="hint">ชื่อร้านตรงกับเครือ</span></div>${chainChips(overview.chains)}</section>` : '';
-  return `${aha}${metrics}${provinceList}${rank}${chains}${extra}${provenance(meta, `${scope} (ขอบเขตแขวง/ตำบลของ CityMETER)`)}`;
+  const chains = overview.chains.length ? `<section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้านที่พบมากที่สุด')}<span class="hint">${summary.restaurants ? 'ชื่อร้านตรงกับเครือ + สาขาในทะเบียน' : 'สาขาในทะเบียน'}</span></div>${chainChips(overview.chains)}</section>` : '';
+  const boundary = province && !coverage?.areas ? `${provinceName(province)} (ขอบเขตจังหวัดของ CityMETER · สาขาจากทะเบียนร้านเครือ)` : `${scope} (ขอบเขตแขวง/ตำบลของ CityMETER)`;
+  return `${aha}${metrics}${provinceList}${rank}${chains}${extra}${provenance(meta, boundary)}`;
 }
 
 const areaWordFor = province => (province === 'BKK' ? 'แขวง' : 'ตำบล');
@@ -230,9 +241,9 @@ export function renderDistrict(p, classOf, meta = {}, extra = '') {
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
       <p class="eyebrow">${esc(w.district)} · ${esc(provinceName(d.province))} · ${esc(rankText)}</p>
       <h2>${esc(w.district)}${esc(d.name)}</h2>${d.nameEn ? `<p class="subtle">${esc(d.nameEn)}</p>` : ''}
-      ${p.coverageState === 'no_data' ? '' : `<div class="metrics compact">${metricTile(p.count, 'ร้าน', 'store')}${metricTile(dens(p.density), 'ร้าน/ตร.กม.', 'gla')}${metricTile(p.reviews, 'รีวิว', 'exclusive')}${metricTile(`${num(ranked.length)}/${num(p.areaTotal)}`, `${w.area}ที่มีร้าน`, 'area')}</div>`}
+      ${p.coverageState === 'no_data' ? '' : `<div class="metrics compact">${metricTile(p.count, 'ร้าน', 'store')}${metricTile(dens(p.density), 'ร้าน/ตร.กม.', 'gla')}${metricTile(p.reviewed ? p.reviews : '—', 'รีวิว', 'exclusive')}${metricTile(`${num(ranked.length)}/${num(p.areaTotal)}`, `${w.area}ที่มีร้าน`, 'area')}</div>`}
       ${selectionNote(p, place)}
-      <p class="hint">${km(p.km2 || 0)} ตร.กม.${p.coverageState === 'no_data' ? '' : ' · ความหนาแน่น = ร้าน ÷ พื้นที่ตามขอบเขต CityMETER'}</p>
+      <p class="hint">${km(p.km2 || 0)} ตร.กม.${p.coverageState === 'no_data' ? '' : ` · ความหนาแน่น = ร้าน ÷ พื้นที่ตามขอบเขต CityMETER${p.outlets ? ` · ร้าน = ${num(p.count - p.outlets)} ร้านในชุดข้อมูล + ${num(p.outlets)} สาขาในทะเบียน` : ''}`}</p>
       <div class="detail-actions">${p.count ? '<button type="button" class="btn" data-action="open-table">ดูร้าน</button><button type="button" class="btn quiet" data-action="open-charts">เปรียบเทียบพื้นที่</button>' : ''}${link(productionLink({province: d.province, district: d.id}), 'ดูใน CityMETER', 'btn quiet source-link')}</div>
     </section>
 `;
@@ -256,9 +267,9 @@ export function renderArea(p, meta = {}, extra = '') {
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
       <p class="eyebrow">${esc(w.area)} · <button type="button" class="link-button" data-action="select-district" data-id="${esc(a.district)}">${esc(w.district)}${esc(a.districtName)}</button> · ${esc(rankText)}</p>
       <h2>${esc(w.area)}${esc(a.name)}</h2>${a.nameEn ? `<p class="subtle">${esc(a.nameEn)}</p>` : ''}
-      ${p.coverageState === 'no_data' ? '' : `<div class="metrics compact">${metricTile(p.count, 'ร้าน', 'store')}${metricTile(dens(p.density), 'ร้าน/ตร.กม.', 'gla')}${metricTile(p.reviews, 'รีวิว', 'exclusive')}${metricTile(ratingText(p.ratingMean, p.rated), 'คะแนนเฉลี่ย', 'exclusive')}</div>`}
+      ${p.coverageState === 'no_data' ? '' : `<div class="metrics compact">${metricTile(p.count, 'ร้าน', 'store')}${metricTile(dens(p.density), 'ร้าน/ตร.กม.', 'gla')}${metricTile(p.reviewed ? p.reviews : '—', 'รีวิว', 'exclusive')}${metricTile(ratingText(p.ratingMean, p.rated), 'คะแนนเฉลี่ย', 'exclusive')}</div>`}
       ${selectionNote(p, place)}
-      <p class="hint">${km(p.km2 || 0)} ตร.กม.${p.count ? ` · ความหนาแน่น = ร้าน ÷ พื้นที่ตามขอบเขต CityMETER · คะแนนเฉลี่ยจาก ${num(p.rated)} ร้านที่มีคะแนน` : ''}</p>
+      <p class="hint">${km(p.km2 || 0)} ตร.กม.${p.count ? ` · ความหนาแน่น = ร้าน ÷ พื้นที่ตามขอบเขต CityMETER${p.outlets ? ` · ร้าน = ${num(p.count - p.outlets)} ร้านในชุดข้อมูล + ${num(p.outlets)} สาขาในทะเบียน` : ''} · คะแนนเฉลี่ยจาก ${num(p.rated)} ร้านที่มีคะแนน` : ''}</p>
       <div class="detail-actions">${p.count ? '<button type="button" class="btn" data-action="open-table">ดูร้าน</button><button type="button" class="btn quiet" data-action="open-charts">เปรียบเทียบพื้นที่</button>' : ''}${link(productionLink({province: a.province, area: a.id}), 'ดูใน CityMETER', 'btn quiet source-link')}</div>
     </section>
 `;
@@ -314,7 +325,7 @@ export function renderBuilding(b, meta = {}, extra = '') {
       <p class="eyebrow">อาคารบนแผนที่${area ? ` · ${b.area ? `<button type="button" class="link-button" data-action="select-area" data-id="${esc(b.area.id)}">${esc(area)}</button>` : ''}` : ''}</p>
       <h2>ร้านที่จุดตกในอาคารนี้</h2>
       <div class="metrics compact">${metricTile(b.count, 'ร้าน', 'store')}${metricTile(b.reviewed ? b.reviews : '—', 'รีวิว', 'exclusive')}${b.ratingMean != null ? metricTile(dec(b.ratingMean), 'คะแนนเฉลี่ย', 'plain') : ''}</div>
-      <p class="hint">จุดของร้านตกในขอบอาคารที่แผนที่วาด ไม่ได้ยืนยันว่าร้านตั้งอยู่ในอาคารนี้หรือชั้นใด${height ? ` · ${esc(height)}` : ''}</p>
+      <p class="hint">จุดของร้านตกในขอบอาคารที่แผนที่วาด ไม่ได้ยืนยันว่าร้านตั้งอยู่ในอาคารนี้หรือชั้นใด${b.outlets ? ` · ร้าน = ${num(b.count - b.outlets)} ร้านในชุดข้อมูล + ${num(b.outlets)} สาขาในทะเบียน` : ''}${height ? ` · ${esc(height)}` : ''}</p>
     </section>
     <section class="panel-section"><div class="section-heading">${heading('store', 'ร้าน')}<span class="hint">${num(b.count)}</span></div>${restaurantList(b.rows.slice(0, 40), {showArea: b.areaCount > 1, index: meta.index})}
       ${b.count > 40 ? `<p class="hint">แสดง ${num(40)} จาก ${num(b.count)} ร้าน (รีวิวมากก่อน) · ดูทั้งหมดในตาราง</p>` : ''}</section>

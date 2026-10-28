@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.5.1",
+  "productVersion": "0.6.0",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -197,7 +197,7 @@
       "land"
     ],
     "rowScopes": {
-      "scopeRows": "filters only",
+      "scopeRows": "filters only, over the population (sheet-1 restaurants + register outlets); scopeRestaurants / scopeOutlets split it by kind",
       "baseRows": "scopeRows ∩ selected district or area",
       "rows": "baseRows ∩ area focus",
       "venueRows": "scopeRows naming the open venue",
@@ -568,6 +568,34 @@
         "handoff/VERIFICATION.md"
       ],
       "status": "done"
+    },
+    {
+      "id": "P16",
+      "title": "0.6.0: one population — the register's outlets counted with the restaurants everywhere (owner 2026-10-28 22:36 “ทำไมทั่วประเทศไม่เห็นทุกจังหวัด … จำนวนร้านต้อง 7x,xxx + 26,xxx แสดงนับรวมกันนะ”); all 77 provinces on the country view (production PROVINCE outlines + receipts, scripts/build-provinces.py); provinces outside the coverage: outlet Aha, pins at every zoom, frame fit; tiles show — where no row carries the value",
+      "dependsOn": [
+        "P15"
+      ],
+      "acceptanceCriteria": [
+        "AC42",
+        "AC43",
+        "AC44"
+      ],
+      "files": [
+        "js/model.js",
+        "js/app.js",
+        "js/panel.js",
+        "js/register-panel.js",
+        "js/provinces.js",
+        "js/area-insight.js",
+        "js/profile-model.js",
+        "js/cues.js",
+        "data/provinces.geojson",
+        "data/boundary-receipts.json",
+        "scripts/build-provinces.py",
+        "tests/*.test.js",
+        "handoff/VERIFICATION.md"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -857,6 +885,27 @@
       "expected": "the Land panel shows one section ‘ร้านและสาขาในอาคาร’ with snapshot rows and register outlets together A→Z, each entry marked ร้าน or สาขาในทะเบียน (brand, floor, evidence), a moved row with a recorded correspondence once; the header reads ‘N ร้าน · M สาขา · K เครือ’ and no summed total appears anywhere; brand chips stay above the list",
       "verificationType": "unit + live",
       "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC42",
+      "scenario": "One population in every count",
+      "expected": "with no filter the overview reads 95,799 ร้าน with the line ‘ร้าน = 68,980 ร้านในชุดข้อมูล (7 จังหวัด) + 26,819 สาขาในทะเบียนร้านเครือ (ทั่วประเทศ) · 1,234 แถวที่ย้ายไปทะเบียนนับฝั่งทะเบียน’; the first Aha is สุริยวงศ์ · สีลม · วังใหม่ 122.0 ร้าน/ตร.กม. (422 rows / 3.46 km²) over a 9.4 baseline; ?group=register scopes 26,819, ?brand=RBR-kfc 1,274 (328 + 946); the table lists outlets as ‘สาขาในทะเบียน’ with — for price and rating; the Land panel tile ร้านในอาคาร = rows + outlets with the split in its hint; no ร้าน figure anywhere counts the register apart",
+      "verificationType": "unit (tests/data, insight, views, register) + harness (probe-pop) + live",
+      "result": "see VERIFICATION.md R10"
+    },
+    {
+      "id": "AC43",
+      "scenario": "All 77 provinces on the country view",
+      "expected": "zoomed out, every province has a frame (7 dissolved + 70 production outlines), a count label (restaurants + outlets) and a class fill (‘จังหวัด · ร้านและสาขา’ legend, 5 classes over the 77); the province list shows 77 rows + ‘ไม่ทราบจังหวัด 3,241 สาขา’; clicking a province fits its frame",
+      "verificationType": "harness + live (desktop and 390 px)",
+      "result": "see VERIFICATION.md R10"
+    },
+    {
+      "id": "AC44",
+      "scenario": "A จังหวัด outside the covered seven",
+      "expected": "?province=CBI reads ‘1,279 สาขาในทะเบียนร้านเครือในชลบุรี’ with the coverage sentence, tiles 1,279 ร้าน · — ร้าน/ตร.กม. · — รีวิว · 114 เครือร้าน, the scoped chain list, no area list, no Land hosts, the camera on the province frame, the 980 outlets with a point drawn at every zoom and counted as ร้านในจอ; the legend says ‘ชลบุรี · สาขาในทะเบียน’; the filter chip names the province",
+      "verificationType": "harness (probe-pop) + live",
+      "result": "see VERIFICATION.md R10"
     }
   ],
   "developerWorkflow": [
@@ -987,6 +1036,12 @@
     {
       "id": "N20",
       "title": "Land hosts with no OpenStreetMap building at their point (markets, night markets, fuel stations, small shops) have no join; a reviewed host geometry in the registry would attach them — research decision, not a web fix",
+      "ownerRole": "research",
+      "priority": "P3"
+    },
+    {
+      "id": "N21",
+      "title": "Outlets without a coordinate (10,091; 3,241 with no province either) sit in the totals but on no map and in no density — a coordinate pass on the register would move them into the frames (research task)",
       "ownerRole": "research",
       "priority": "P3"
     }

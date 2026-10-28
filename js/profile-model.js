@@ -7,26 +7,27 @@
  * missing. Brand and venue links are name-based candidates and are described as
  * such; coordinates are the overlay's display positions and are never upgraded.
  */
-import {PRICE_BUCKETS, PRICED, GRID_METRES, sourceTile, mixOf} from './model.js';
+import {PRICE_BUCKETS, PRICED, GRID_METRES, sourceTile, mixOf, brandKey} from './model.js';
 import {summarizeAreas, summarizeDistricts, byDensity, byCount, combinedDensity, levelWords} from './areas.js';
 import {MIN_AREA_ROWS} from './area-insight.js';
 
 const byReviews = (a, b) => (b.reviews ?? -1) - (a.reviews ?? -1) || (b.rating ?? -1) - (a.rating ?? -1) || a.name.localeCompare(b.name, 'th') || a.id.localeCompare(b.id);
 
 function stats(rows) {
-  let reviews = 0, reviewed = 0, ratingSum = 0, rated = 0, priced = 0;
+  let reviews = 0, reviewed = 0, ratingSum = 0, rated = 0, priced = 0, outlets = 0;
   for (const r of rows) {
     if (Number.isFinite(r.reviews)) { reviews += r.reviews; reviewed++; }
     if (Number.isFinite(r.rating)) { ratingSum += r.rating; rated++; }
     if (r.price !== 'UNSPECIFIED') priced++;
+    if (r.kind === 'outlet') outlets++;
   }
-  return {reviews, reviewed, rated, ratingMean: rated ? ratingSum / rated : null, priced};
+  return {reviews, reviewed, rated, ratingMean: rated ? ratingSum / rated : null, priced, outlets};
 }
 
-/** Chains (brand candidates) present in rows, most rows first. */
+/** Chains present in rows (snapshot candidates and register brands of the same chain under one key), most rows first. */
 export function chainsIn(rows, limit = 12) {
   const m = new Map();
-  for (const r of rows) if (r.brand) { const e = m.get(r.brand.id) || {brand: r.brand, count: 0}; e.count++; m.set(r.brand.id, e); }
+  for (const r of rows) if (r.brand) { const k = brandKey(r); const e = m.get(k) || {brand: r.brand, count: 0}; e.count++; m.set(k, e); }
   return [...m.values()].sort((a, b) => b.count - a.count || a.brand.name.localeCompare(b.brand.name)).slice(0, limit);
 }
 
