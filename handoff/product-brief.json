@@ -683,7 +683,9 @@
       "sheet1Rows": 68980,
       "movedToChainRegister": 1234,
       "population": 95799,
-      "populationRule": "sheet1Rows 68,980 + register outlets 26,819 = 95,799 (the 1,234 moved rows counted on the register side); coveredAreas 475 and reviewsTotal 5,922,059 on this population (reviews = sheet-1 rows only)"
+      "populationRule": "sheet1Rows 68,980 + register outlets 26,819 = 95,799 (the 1,234 moved rows counted on the register side); coveredAreas 475 and reviewsTotal 5,922,059 on this population (reviews = sheet-1 rows only)",
+      "noDataAreasOnPopulation": 106,
+      "coveredAreasOnPopulation": 475
     },
     "verification": "fresh reproduction of the public API matched all 70,214 rows on every compared field (handoff/VERIFICATION.md)",
     "coordinatePolicy": "MVT display positions (z10, extent 4096, 9.55 m) stored as grid integers; decoded with the research formula; screen-space displacement only; precision described, never upgraded",

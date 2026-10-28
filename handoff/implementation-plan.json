@@ -637,7 +637,7 @@
     {
       "id": "AC06",
       "scenario": "Coverage states",
-      "expected": "273 uncovered frames hatched (ไม่มีข้อมูล) and never 0; covered frames with 0 under a filter show the zero outline; legend lists 0 and ไม่มีข้อมูล only when present",
+      "expected": "uncovered frames hatched (ไม่มีข้อมูล) and never 0 — 106 on the 0.6 population, 273 on restaurants alone; covered frames with 0 under a filter show the zero outline; legend lists 0 and ไม่มีข้อมูล only when present",
       "verificationType": "unit + browser",
       "result": "see VERIFICATION.md"
     },
