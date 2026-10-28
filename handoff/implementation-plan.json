@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.3.1",
+  "productVersion": "0.3.2",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -493,7 +493,7 @@
     },
     {
       "id": "P13",
-      "title": "0.3.1: one map for both data sets (owner 2026-10-28 16:56 “ผมอยากให้แสดงร่วมกัน”, “ลองร้านเครือแล้วไม่เห็นตึก”) and the fixes of the independent Who review",
+      "title": "0.3.1–0.3.2: one map for both data sets (owner 2026-10-28 16:56 “ผมอยากให้แสดงร่วมกัน”, “ลองร้านเครือแล้วไม่เห็นตึก”) and the fixes of two independent Who reviews",
       "dependsOn": [
         "P12"
       ],
@@ -501,7 +501,8 @@
         "AC29",
         "AC32",
         "AC33",
-        "AC34"
+        "AC34",
+        "AC35"
       ],
       "files": [
         "js/app.js",
@@ -511,7 +512,9 @@
         "js/camera.js",
         "index.html",
         "styles.css",
-        "tests/register.test.js"
+        "tests/register.test.js",
+        "js/profile-model.js",
+        "js/panel.js"
       ],
       "status": "done"
     }
@@ -752,6 +755,13 @@
       "id": "AC34",
       "scenario": "Registry and evidence honesty",
       "expected": "a multi-banner point-of-sale registry (Five Star network) is not counted or ranked as a chain and is named apart; records sharing a name show the operator (KFC × 3); a cart or secondary-source majority is flagged in chips and rows; the in-vs-around table prints a share only for a column of ≥ 30 rows and says why; the Land panel says rows are not every restaurant",
+      "verificationType": "unit + harness + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC35",
+      "scenario": "Two units on one map stay legible",
+      "expected": "register outlets are diamonds (key and map), never round like restaurant symbols; the map chip ‘ร้านเครือ’ (aria-pressed, ?rdots=0) hides every-outlet dots while a register or Land view keeps its selection; a register view shows the snapshot as quiet context only (no snapshot focus symbols, no province count labels over the selection) and its status line reads ‘สาขาในทะเบียนที่เลือก N ทั้งประเทศ (คนละหน่วย) · ร้านในชุดข้อมูลเป็นจุดบริบท …’; a disabled map chip stays opaque; snapshot chain and venue headers carry totals with ‘แสดง n จาก N’",
       "verificationType": "unit + harness + live",
       "result": "see VERIFICATION.md"
     }

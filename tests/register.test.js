@@ -312,3 +312,18 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   assert.ok(landHtml.includes('ร้อยละแสดงเฉพาะคอลัมน์ที่มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่จำนวนร้านทั้งหมดของพื้นที่หรืออาคาร'));
   assert.ok(landHtml.includes('สาขาเครือจุดตกใน/ติดขอบ') && !landHtml.includes('สาขาเครือในอาคาร'));
 });
+
+test('snapshot chain and venue headers carry totals, never the length of a cut list (review 2, 0.3.2)', async () => {
+  const {data, index} = setup();
+  const {buildAreaProfile} = await import('../js/profile-model.js');
+  const {renderArea} = await import('../js/panel.js');
+  const byArea = new Map();
+  for (const r of data.rows) if (r.brand) { if (!byArea.has(r.area)) byArea.set(r.area, new Set()); byArea.get(r.area).add(r.brand.id); }
+  const [areaId, brands] = [...byArea].sort((a, b) => b[1].size - a[1].size)[0];
+  assert.ok(brands.size > 16, `${areaId} has ${brands.size} chains`);
+  const p = buildAreaProfile(data.rows, areaId, index, data.groups, {});
+  assert.equal(p.chainTotal, brands.size);
+  assert.equal(p.chains.length, 16);
+  const html = text(renderArea(p, data.meta || {}));
+  assert.ok(html.includes(`${brands.size.toLocaleString('th-TH')} เครือ`) && html.includes(`แสดง 16 จาก ${brands.size.toLocaleString('th-TH')} เครือ`), html.slice(0, 200));
+});

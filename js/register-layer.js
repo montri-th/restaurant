@@ -6,14 +6,15 @@
  * outlet from REGISTER_MIN_ZOOM as a dot in the snapshot's own views, and the selection of a
  * register view (brand, company, outlet) or of a Land host at every zoom. The two data sets keep
  * their own units — the layer never feeds a snapshot count. Dots use the LDS map data role
- * (`--map-active-layer`, halo `--map-marker-halo`); the selected outlet adds the selected stroke.
+ * (`--map-active-layer`, halo `--map-marker-halo`) drawn as a diamond, so an outlet never reads as a restaurant
+ * symbol (round); the selected outlet adds the selected stroke.
  * With `logos`, from LOGO_MIN_ZOOM up to MAX_LOGOS visible outlets carry their brand logo as a
  * keyboard-reachable button (identity only — a logo does not verify a branch).
  */
 import {brandLogoMarkup, getBrandLogo} from './brand-logos.js';
 
-const SOURCE = 'register-outlets', DOTS = 'register-dots', SELECTED = 'register-selected';
-export const REGISTER_LAYERS = Object.freeze({source: SOURCE, dots: DOTS, selected: SELECTED});
+const SOURCE = 'register-outlets', DOTS = 'register-dots', SELECTED = 'register-selected', HIT = 'register-hit', ICON = 'register-diamond';
+export const REGISTER_LAYERS = Object.freeze({source: SOURCE, dots: DOTS, selected: SELECTED, hit: HIT});
 export const LOGO_MIN_ZOOM = 15;
 /** Every outlet shows from this zoom in the snapshot's own views (city scale; the selection of a register view at every zoom). */
 export const REGISTER_MIN_ZOOM = 11;
@@ -34,11 +35,26 @@ export function registerFilter({brand = null, company = null, ids = null} = {}) 
   return true;
 }
 
-/** Dot sizes: a register selection reads at country zoom; every outlet in the snapshot's views stays smaller than a restaurant symbol. */
-const RADIUS = Object.freeze({
-  selection: ['interpolate', ['linear'], ['zoom'], 4, 1.6, 9, 2.6, 13, 4, 16, 5.5, 18, 7],
-  quiet: ['interpolate', ['linear'], ['zoom'], 11, 1.8, 14, 2.6, 16, 3.4, 18, 4.4],
+/** Diamond sizes: a register selection reads at country zoom; every outlet in the snapshot's views stays smaller than a restaurant symbol. */
+const SIZE = Object.freeze({
+  selection: ['interpolate', ['linear'], ['zoom'], 4, 0.32, 9, 0.48, 13, 0.7, 16, 0.92, 18, 1.15],
+  quiet: ['interpolate', ['linear'], ['zoom'], 11, 0.36, 14, 0.5, 16, 0.62, 18, 0.8],
 });
+
+/**
+ * Signed-distance diamond for an SDF icon (MapLibre reads alpha as distance: edge at 0.75, 8 px per 0.25 step, as
+ * TinySDF writes it), so the halo and the colour come from the paint properties of either theme.
+ */
+function diamondImage(size = 40, half = 12) {
+  const data = new Uint8ClampedArray(size * size * 4), c = (size - 1) / 2;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const outside = (Math.abs(x - c) + Math.abs(y - c) - half) / Math.SQRT2;
+    const i = (y * size + x) * 4;
+    data[i] = data[i + 1] = data[i + 2] = 255;
+    data[i + 3] = Math.max(0, Math.min(255, Math.round(255 * (0.75 - outside / 8))));
+  }
+  return {width: size, height: size, data};
+}
 
 export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
   const features = [];
@@ -49,13 +65,21 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
   }
   const before = beforeId && map.getLayer(beforeId) ? beforeId : undefined;
   map.addSource(SOURCE, {type: 'geojson', data: {type: 'FeatureCollection', features}});
+  if (!map.hasImage(ICON)) map.addImage(ICON, diamondImage(), {sdf: true, pixelRatio: 2});
   const c = colors();
-  map.addLayer({id: DOTS, type: 'circle', source: SOURCE, filter: NONE, layout: {visibility: 'none'},
-    paint: {'circle-color': c.fill, 'circle-stroke-color': c.halo, 'circle-stroke-width': 1,
-      'circle-radius': RADIUS.selection}}, before);
+  // The selected outlet: a ring in the selected stroke under its diamond.
   map.addLayer({id: SELECTED, type: 'circle', source: SOURCE, filter: NONE, layout: {visibility: 'none'},
-    paint: {'circle-color': c.fill, 'circle-stroke-color': c.selected, 'circle-stroke-width': 3,
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 5, 13, 7, 18, 10]}}, before);
+    paint: {'circle-color': c.fill, 'circle-opacity': 0, 'circle-stroke-color': c.selected, 'circle-stroke-width': 3,
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 6, 13, 9, 18, 13]}}, before);
+  // Diamonds that ignore placement are not in the query index: an invisible circle per outlet carries clicks and
+  // the logo layout (same filter and zoom range as the diamonds).
+  map.addLayer({id: HIT, type: 'circle', source: SOURCE, filter: NONE, layout: {visibility: 'none'},
+    paint: {'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 3, 13, 5, 18, 8], 'circle-opacity': 0, 'circle-stroke-width': 0}}, before);
+  // One diamond per outlet: overlap allowed and placement ignored, so no outlet is ever dropped or merged.
+  map.addLayer({id: DOTS, type: 'symbol', source: SOURCE, filter: NONE,
+    layout: {visibility: 'none', 'icon-image': ICON, 'icon-size': SIZE.selection, 'icon-allow-overlap': true, 'icon-ignore-placement': true},
+    paint: {'icon-color': c.fill, 'icon-halo-color': c.halo, 'icon-halo-width': 1.2}}, before);
+
 
   let visible = false, selected = null, markers = [], disposed = false, filter = NONE, logosOn = true;
   const outlets = register.outlets;
@@ -65,7 +89,7 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
     clearMarkers();
     if (!visible || !logosOn || disposed || map.getZoom() < LOGO_MIN_ZOOM || typeof maplibregl === 'undefined') return;
     const seen = new Set();
-    const hits = map.queryRenderedFeatures({layers: [DOTS]}).map(f => outlets[f.properties.i]).filter(o => o && !seen.has(o.id) && seen.add(o.id) && getBrandLogo(o.brand));
+    const hits = map.queryRenderedFeatures({layers: [HIT]}).map(f => outlets[f.properties.i]).filter(o => o && !seen.has(o.id) && seen.add(o.id) && getBrandLogo(o.brand));
     for (const o of hits.slice(0, MAX_LOGOS)) {
       const el = document.createElement('button');
       el.type = 'button';
@@ -93,18 +117,18 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
     selected = Number.isInteger(selectedIndex) ? selectedIndex : null;
     filter = registerFilter(selection);
     const col = colors();
-    for (const id of [DOTS, SELECTED]) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
-    if (map.getLayer(DOTS)) { map.setLayerZoomRange(DOTS, Math.max(0, minZoom), 24); map.setPaintProperty(DOTS, 'circle-radius', logosOn ? RADIUS.selection : RADIUS.quiet); }
-    if (map.getLayer(DOTS)) { map.setFilter(DOTS, filter); map.setPaintProperty(DOTS, 'circle-color', col.fill); map.setPaintProperty(DOTS, 'circle-stroke-color', col.halo); }
-    if (map.getLayer(SELECTED)) { map.setFilter(SELECTED, selected == null ? NONE : ['==', ['get', 'i'], selected]); map.setPaintProperty(SELECTED, 'circle-color', col.fill); map.setPaintProperty(SELECTED, 'circle-stroke-color', col.selected); }
+    for (const id of [DOTS, SELECTED, HIT]) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+    for (const id of [DOTS, HIT]) if (map.getLayer(id)) { map.setLayerZoomRange(id, Math.max(0, minZoom), 24); map.setFilter(id, filter); }
+    if (map.getLayer(DOTS)) { map.setLayoutProperty(DOTS, 'icon-size', logosOn ? SIZE.selection : SIZE.quiet); map.setPaintProperty(DOTS, 'icon-color', col.fill); map.setPaintProperty(DOTS, 'icon-halo-color', col.halo); }
+    if (map.getLayer(SELECTED)) { map.setFilter(SELECTED, selected == null ? NONE : ['==', ['get', 'i'], selected]); map.setPaintProperty(SELECTED, 'circle-stroke-color', col.selected); }
     layoutLogos();
     if (visible) relayout();
   }
   /** Outlet under a screen point (6 px tolerance), nearest first; null when the layer is hidden. */
   function hitTest(point) {
-    if (!visible || disposed || !map.getLayer(DOTS)) return null;
+    if (!visible || disposed || !map.getLayer(HIT)) return null;
     const box = [[point.x - 6, point.y - 6], [point.x + 6, point.y + 6]];
-    const hits = map.queryRenderedFeatures(box, {layers: [SELECTED, DOTS].filter(id => map.getLayer(id))});
+    const hits = map.queryRenderedFeatures(box, {layers: [SELECTED, HIT].filter(id => map.getLayer(id))});
     if (!hits.length) return null;
     let best = null, bd = Infinity;
     for (const f of hits) {
@@ -122,8 +146,9 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
     clearMarkers();
     map.off('moveend', onMoveEnd);
     map.off('sourcedata', onSourceData);
-    for (const id of [SELECTED, DOTS]) if (map.getLayer(id)) map.removeLayer(id);
+    for (const id of [SELECTED, DOTS, HIT]) if (map.getLayer(id)) map.removeLayer(id);
     if (map.getSource(SOURCE)) map.removeSource(SOURCE);
+    if (map.hasImage?.(ICON)) map.removeImage(ICON);
   }
   return {update, hitTest, dispose, get visible() { return visible; }, get minZoom() { return map.getLayer(DOTS)?.minzoom ?? 0; }};
 }

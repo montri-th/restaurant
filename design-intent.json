@@ -1,6 +1,6 @@
 {
   "artifact": "CityMETER Restaurants — 3D-first, subdistrict-first restaurant density map",
-  "productVersion": "0.3.1",
+  "productVersion": "0.3.2",
   "updatedOn": "2026-10-28",
   "ldsVersion": "0.9.7",
   "release": "v0.9.7-owner.1",
@@ -40,7 +40,7 @@
     "empty, map-failure and load-error paths with actions"
   ],
   "validation": {
-    "status": "release 0.3.1 verification recorded in handoff/VERIFICATION.md",
+    "status": "release 0.3.2 verification recorded in handoff/VERIFICATION.md",
     "renderedHarness": "Playwright + MapLibre 5.6.2 from the npm package + stub TileJSON (empty basemap tiles except harness building tiles for the test areas: CityMETER production footprints in the OpenMapTiles building schema); 1440×900, 1180×760 and 390×844; light and dark",
     "scope": "Applied LDS values, fonts and actual rendered interfaces. No blanket LDS, CVD, native-device or market-completeness claim."
   },
@@ -75,7 +75,7 @@
   },
   "copy": "short natural Thai: ร้าน / เครือร้าน / สถานที่ / แขวง·ตำบล / เขต·อำเภอ; units on every number; provenance line (dataset · source · date · boundary) at the end of every panel view",
   "registerAndLand": {
-    "register": "national chain register (data/chains.json) on the same map as the snapshot (owner 2026-10-28 “แสดงร่วมกัน”): every outlet with a coordinate as a small dot from zoom 11 under the restaurant symbols, and the selection of a register view (chains/chain/company/outlet) at every zoom with logos from zoom 15, in the LDS map data role (--map-active-layer, halo --map-marker-halo, selected --map-selected-stroke); the snapshot frames, labels, context dots, massing, buildings, charts and table stay in every view; an outlet opens with its Land building in the data colour; never summed with the snapshot",
+    "register": "national chain register (data/chains.json) on the same map as the snapshot (owner 2026-10-28 “แสดงร่วมกัน”): every outlet with a coordinate as a small diamond (SDF icon, never round like a restaurant symbol) from zoom 11 under the restaurant symbols, hidden or shown with the map chip ‘ร้านเครือ’ (?rdots=0); a register view (chains/chain/company/outlet) draws its selection at every zoom with logos from zoom 15 while the snapshot stays as quiet context (frames, context dots, massing, buildings; no province counts over the selection); LDS map data role (--map-active-layer, halo --map-marker-halo, selected --map-selected-stroke); an outlet opens with its Land building in the data colour; never summed with the snapshot",
     "land": "Land host view (shopping centres, hotels, offices): the host building drawn in the data colour at venue level (x-ray, eye camera); LOD2 building parts drawn when the registry has them, the footprint as an outline; in-vs-around food types table (counts + column share, series cue + label per row)",
     "switch": "no data-set tabs since 0.3.1: one map and one panel flow; the register directory opens from the overview, area and Land sections and keeps its own search (names only)"
   }

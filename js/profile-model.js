@@ -72,7 +72,8 @@ export function buildAreaProfile(scopeRows, areaId, index, groups, {covered = nu
     coverageState, scopeCount: scopeRows.length,
     rank: pos >= 0 ? pos + 1 : null, rankOf: ranking.eligible.length, minRows: ranking.minRows,
     ...stats(mine), ...mixOf(mine, groups), topReviewed: mine.filter(r => Number.isFinite(r.reviews)).sort(byReviews).slice(0, 8),
-    chains: chainsIn(mine, 16), venues: venuesIn(mine, 10), rows: mine,
+    // Lists are cut for the panel; the totals travel with them so a header never shows a list length as a count.
+    chains: chainsIn(mine, 16), venues: venuesIn(mine, 10), chainTotal: chainsIn(mine, Infinity).length, venueTotal: venuesIn(mine, Infinity).length, rows: mine,
   };
 }
 
@@ -90,7 +91,7 @@ export function buildDistrictProfile(scopeRows, districtId, index, groups, {cove
     density: coverageState === 'no_data' || !district.km2 ? null : mine.length / district.km2,
     coverageState, scopeCount: scopeRows.length,
     rank: pos >= 0 ? pos + 1 : null, rankOf: all.length, minRows: MIN_AREA_ROWS, areas: ranking.all, areaTotal: district.areas.length,
-    ...stats(mine), ...mixOf(mine, groups), chains: chainsIn(mine, 16), venues: venuesIn(mine, 8), rows: mine,
+    ...stats(mine), ...mixOf(mine, groups), chains: chainsIn(mine, 16), venues: venuesIn(mine, 8), chainTotal: chainsIn(mine, Infinity).length, venueTotal: venuesIn(mine, Infinity).length, rows: mine,
   };
 }
 
@@ -126,7 +127,7 @@ export function buildBuildingProfile(sel, index, groups) {
   const area = index.byId.get(rows[0].area) || null;
   const areaIds = [...new Set(rows.map(r => r.area))];
   return {key: sel.key, kind: sel.kind || 'osm', rows, count: rows.length, area, areaCount: areaIds.length, words: levelWords(rows[0].province),
-    height: Number.isFinite(sel.height) ? sel.height : null, venues: venuesIn(rows, 6), ...stats(rows), ...mixOf(rows, groups)};
+    height: Number.isFinite(sel.height) ? sel.height : null, venues: venuesIn(rows, 6), venueTotal: venuesIn(rows, Infinity).length, ...stats(rows), ...mixOf(rows, groups)};
 }
 
 /** Coordinate precision, read from the encoding — never upgraded. */

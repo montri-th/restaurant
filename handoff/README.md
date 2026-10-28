@@ -1,6 +1,6 @@
 # เริ่มงานต่อ — CityMETER Restaurants
 
-รุ่นส่งต่อ 0.3.1 · 28 ตุลาคม 2569 · ร้านดึงและตรวจ 22 ตุลาคม 2569 · ทะเบียนร้านเครือตรวจ 25–28 ตุลาคม · Land join 28 ตุลาคม 2569
+รุ่นส่งต่อ 0.3.2 · 28 ตุลาคม 2569 · ร้านดึงและตรวจ 22 ตุลาคม 2569 · ทะเบียนร้านเครือตรวจ 25–28 ตุลาคม · Land join 28 ตุลาคม 2569
 
 ชุดนี้ส่งต่อให้ developer หรือ coding agent พัฒนาต่อจาก repository ที่ใช้งานจริง หลักของรุ่นนี้คือ **เห็นเมือง 3 มิติที่โฟกัส 3 แขวง/ตำบลที่ร้านอาหารแน่นที่สุดก่อน (ร้าน/ตร.กม.) แสดงรายละเอียดเฉพาะส่วนที่โฟกัส ส่วนอื่นเงียบ และบอกความครอบคลุมของข้อมูลบนแผนที่** โดยคงสัญญากล้อง basemap มวลอาคาร และ venue x-ray ของ CityMETER · Luxury Brands 0.5 รุ่น 0.2 เพิ่มสถานที่จากท้ายชื่อร้าน การจับจุดของร้านกับอาคาร 3 มิติ (กดอาคารได้) และการย้ายไปแขวง/ตำบลข้าง ๆ ด้วยการกดบนแผนที่ รุ่น 0.3 เพิ่มทะเบียนร้านเครือทั่วประเทศ (มุมมองแยก คนละหน่วย) อาคารในทะเบียน Land (ในอาคารเทียบรอบอาคาร) และส่วนอาคาร LOD2 จากชุดเดียวกับเว็บ shoppingcenter
 
@@ -12,7 +12,7 @@ Live: [Restaurants](https://montri-th.github.io/restaurant/) · Source: [GitHub]
 |---|---|---|
 | [../PRODUCT_STATEMENT.md](../PRODUCT_STATEMENT.md) | [product-statement.json](product-statement.json) | Winning strategy: Who / What / Which / How, quality bar, ป้ายหลักฐาน, hypotheses — อ่านก่อนเปลี่ยนสิ่งที่หน้าแรกบอก |
 | [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) | [product-brief.json](product-brief.json) | row scopes + focus modes, first Aha, สัญญาตัวชี้วัด ความครอบคลุม รูปทรงประเภท แผนที่ focus/quiet, breadcrumb, แผงหกโหมด, สัญญาจับคู่สถานที่ อาคาร และการกด, กราฟ, invariants INV01–INV32, registerContract, landJoinContract, lodContract |
-| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [implementation-plan.json](implementation-plan.json) | โมดูล งาน P01–P13 acceptance AC01–AC34 backlog N01–N19 วิธีทำงานต่อ |
+| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [implementation-plan.json](implementation-plan.json) | โมดูล งาน P01–P13 acceptance AC01–AC35 backlog N01–N19 วิธีทำงานต่อ |
 | [VERIFICATION.md](VERIFICATION.md) | `handoff-manifest.json` (ใน bundle) | ผลตรวจแยกระดับ (unit / LDS parity / rendered / live) และ hash ของทุกไฟล์ |
 | README นี้ | [handoff.schema.json](handoff.schema.json) | สัญญาโครงสร้างของ JSON (schema 1.5.0) |
 

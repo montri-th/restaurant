@@ -1,6 +1,6 @@
 # Product Brief — CityMETER · Restaurants 0.3
 
-รุ่น 0.3.1 · 28 ตุลาคม 2569 · ร้านดึงและตรวจ 22 ตุลาคม 2569 (อ่านชีต 1 และชีต 2 ฉบับ 28 ต.ค.) · ทะเบียนร้านเครือตรวจ 25–28 ต.ค. · Land join 28 ต.ค. · คู่กับ [product-brief.json](product-brief.json) (schema 1.5.0)
+รุ่น 0.3.2 · 28 ตุลาคม 2569 · ร้านดึงและตรวจ 22 ตุลาคม 2569 (อ่านชีต 1 และชีต 2 ฉบับ 28 ต.ค.) · ทะเบียนร้านเครือตรวจ 25–28 ต.ค. · Land join 28 ต.ค. · คู่กับ [product-brief.json](product-brief.json) (schema 1.5.0)
 
 > **รุ่น 0.3 (owner 28 ต.ค. 2569):** (1) snapshot = ชีต 1 68,980 แถว + 1,234 แถวที่ย้ายไปทะเบียนร้านเครือ นับครั้งเดียว · (2) ทะเบียนร้านเครือทั่วประเทศ 26,819 สาขา 756 เครือ ในมุมมองของตัวเอง (สลับเหนือช่องค้นหา) — คนละหน่วย ไม่บวกกับร้าน · (3) จุดของร้านและสาขา × อาคารของ host ในทะเบียน Land (ศูนย์การค้า โรงแรม สำนักงาน) — แผง “อาคารในทะเบียน Land” เทียบประเภทร้านในอาคารกับรอบ 100 ม. · (4) LOD > 1 ชนะ: ส่วนอาคารของทะเบียน (ชุดเดียวกับเว็บ shoppingcenter) แทนก้อน LOD1 — สัญญาเต็มใน `registerContract`, `landJoinContract`, `lodContract`, INV27–INV32 ของ product-brief.json และ [../docs/LAND_JOIN_CHECK.md](../docs/LAND_JOIN_CHECK.md) · winning strategy อยู่ใน [../PRODUCT_STATEMENT.md](../PRODUCT_STATEMENT.md)
 

@@ -100,6 +100,7 @@ const state = {
   // paint (or before it when the URL opens one of their views). Separate units: never added to the snapshot's counts.
   register: null, land: null, landGeo: null, extras: null, extrasState: 'idle', registerLayer: null, landBuildings: null, registerQuery: '',
   landByUuid: new Map(), venueLand: new Map(), landVenue: new Map(), nationalOf: new Map(), snapshotOf: new Map(), registerShown: 0,
+  showRegister: true, // every register outlet as a dot from city zoom (map chip “ร้านเครือ”; ?rdots=0 hides them)
 };
 /** Panel modes of the chain register (the snapshot keeps overview/district/area/venue/building/store; land is a snapshot view). */
 const REGISTER_MODES = new Set(['chains', 'chain', 'company', 'outlet']);
@@ -151,6 +152,7 @@ function saveURL() {
   if (state.focusAreaIds.length) p.set('areas', state.focusAreaIds.join(','));
   else if (!state.autoFocus) p.set('areas', 'all');
   if (state.view !== 'density') p.set('view', state.view);
+  if (!state.showRegister) p.set('rdots', '0');
   if (state.panel.mode === 'store' && state.panel.id) p.set('store', state.panel.id);
   if (state.panel.mode === 'venue' && state.panel.id) p.set('place', state.panel.id);
   if (state.panel.mode === 'chains') { p.set('chains', '1'); if (state.registerQuery.trim()) p.set('rq', state.registerQuery.trim()); }
@@ -244,6 +246,8 @@ function update({fit = false} = {}) {
  * (restaurants whose name refers to it) at venue level, else the focused rows.
  */
 function detailRows() {
+  // Register views: the register selection is the focus; the snapshot stays on the map as quiet context.
+  if (registerMode()) return [];
   if (state.panel.mode === 'land') {
     const key = `${state.panel.id}|${state.scopeKey}`;
     if (detailRows.landKey !== key) { detailRows.landKey = key; detailRows.landRows = landRows(state.panel.id); }
@@ -372,7 +376,7 @@ function registerPlace() {
 }
 
 /** The table and its counter: the snapshot rows that carry detail (register views keep the filtered rows). */
-const tableRows = () => detailRows();
+const tableRows = () => (registerMode() ? state.rows : detailRows());
 function syncList() {
   const rows = tableRows(), b = currentBuilding(), v = rows === state.rows || b ? null : currentVenue();
   $('result-count').textContent = num(rows.length);
@@ -811,7 +815,7 @@ function registerFocusFeatures() {
 }
 
 /** Register dots are on screen: a selection (every zoom), or every outlet from city zoom. */
-const registerDotsShown = () => Boolean(state.registerLayer) && (registerSelection().show || (state.map?.getZoom?.() ?? 0) >= REGISTER_MIN_ZOOM);
+const registerDotsShown = () => Boolean(state.registerLayer) && (registerSelection().show || (state.showRegister && (state.map?.getZoom?.() ?? 0) >= REGISTER_MIN_ZOOM));
 
 /** Camera for register / Land views: the outlet, the brand's or company's outlets, the whole register, or the host building. */
 function frameExtras({instant = false} = {}) {
@@ -1252,8 +1256,9 @@ function updateSpatialLayers() {
   // counts another unit and never feeds them).
   const pm = state.provinceLayers?.update({rows: provinceScopeRows(), selectedCode: code, visible: true}) || null;
   state.provinceModel = pm;
-  state.provinceLabels?.update(pm ? pm.provinces.filter(p => p.count > 0 || p.code === code).sort((a, b) => (b.code === code) - (a.code === code) || b.count - a.count)
-    .map(p => ({id: p.code, name: p.name, value: num(p.count), state: p.state, quiet: Boolean(code) && p.code !== code, selected: p.code === code, center: p.label, swatch: p.fill || '', title: `${p.name} · ${num(p.count)} ร้านในชุดข้อมูล`})) : [], {visible: true});
+  // Province labels print snapshot counts: under a register selection they would read as the chain's count.
+  state.provinceLabels?.update(pm && !reg ? pm.provinces.filter(p => p.count > 0 || p.code === code).sort((a, b) => (b.code === code) - (a.code === code) || b.count - a.count)
+    .map(p => ({id: p.code, name: p.name, value: num(p.count), state: p.state, quiet: Boolean(code) && p.code !== code, selected: p.code === code, center: p.label, swatch: p.fill || '', title: `${p.name} · ${num(p.count)} ร้านในชุดข้อมูล`})) : [], {visible: !reg});
   const districtAreas = state.selectedDistrict ? (districtById(state.selectedDistrict)?.areas || []).map(a => a.id) : [];
   state.areaLayers?.update({model: state.areaModel, selectedId: state.selectedArea, focusIds: state.selectedDistrict ? districtAreas : state.focusIds, outlineFocus: !state.selectedDistrict, districtId: state.selectedDistrict, visible: areasShown()});
   state.labels?.update(areasShown() ? areaLabelItems() : [], {visible: areasShown()});
@@ -1287,7 +1292,7 @@ function updateSpatialLayers() {
   const sel = registerSelection();
   state.registerShown = sel.show ? sel.count : 0;
   state.registerLayer?.update(sel.show ? {show: true, selection: sel.selection || {}, selectedIndex: sel.selectedIndex ?? null, minZoom: 0, logos: true}
-    : {show: true, selection: {}, minZoom: REGISTER_MIN_ZOOM, logos: false});
+    : {show: state.showRegister, selection: {}, minZoom: REGISTER_MIN_ZOOM, logos: false});
   document.querySelector('.map-panel')?.classList.toggle('has-register-dots', registerDotsShown());
   state.pins?.layout();
 }
@@ -1396,8 +1401,11 @@ function installSpatialLayers() {
     onSelect: r => selectStore(r.id, {fly: false, showPopup: true, fromPin: true}),
     onLayout: stats => {
       const logos = stats.htmlPins ? ` · โลโก้ ${num(stats.visibleLogos)}/${num(stats.logoLimit)}` : '';
-      // Two units side by side, never summed: snapshot rows on screen, and the register selection when one is open.
-      $('map-status').textContent = `${num(stats.focusInView)} ร้านในจอ${logos} · บริบท ${num(stats.contextRows)}${state.registerShown ? ` · สาขาในทะเบียน ${num(state.registerShown)} (คนละหน่วย)` : ''}`;
+      // Two units, each with its own scope and never summed: in a register view the selection (national) and the
+      // snapshot as context; elsewhere the snapshot's focus rows on screen and its context.
+      $('map-status').textContent = registerMode()
+        ? `สาขาในทะเบียนที่เลือก ${num(state.registerShown)} ทั้งประเทศ (คนละหน่วย) · ร้านในชุดข้อมูลเป็นจุดบริบท ${num(stats.contextRows)}`
+        : `${num(stats.focusInView)} ร้านในจอ${logos} · บริบท ${num(stats.contextRows)}`;
     },
   });
   installExtraLayers();
@@ -1578,6 +1586,8 @@ function restoreFromURL() {
   const p = new URLSearchParams(location.search);
   for (const f of FIELDS) if (p.has(f)) { const v = f === 'province' ? provinceCodeFrom(p.get(f)) : p.get(f); if ([...$(f).options].some(o => o.value === v) || f === 'search') $(f).value = v; }
   if (['density', 'mix', 'price'].includes(p.get('view'))) state.view = p.get('view');
+  state.showRegister = p.get('rdots') !== '0';
+  $('toggle-register')?.setAttribute('aria-pressed', String(state.showRegister));
   if (p.get('district') && districtById(p.get('district'))) state.selectedDistrict = p.get('district');
   if (p.get('area') && areaById(p.get('area'))) { state.selectedArea = p.get('area'); state.selectedDistrict = ''; }
   const areas = p.get('areas') || '';
@@ -1651,6 +1661,13 @@ function wireEvents() {
   $('toggle-3d').onclick = toggle3d;
   $('toggle-eye').onclick = toggleTwoPoint;
   $('toggle-neighborhoods').onclick = () => { state.showAreas = !state.showAreas; $('toggle-neighborhoods').setAttribute('aria-pressed', String(state.showAreas)); updateSpatialLayers(); };
+  // Every register outlet on the snapshot's map (from city zoom); a register or Land view still draws its own selection.
+  $('toggle-register').onclick = () => {
+    state.showRegister = !state.showRegister;
+    $('toggle-register').setAttribute('aria-pressed', String(state.showRegister));
+    announce(state.showRegister ? 'แสดงจุดสาขาร้านเครือทุกสาขาจากซูมระดับเมือง' : 'ซ่อนจุดสาขาร้านเครือ (ยกเว้นเครือหรืออาคารที่เปิดอยู่)');
+    updateSpatialLayers(); saveURL();
+  };
   $('mobile-panel').onclick = () => { $('panel').classList.contains('is-open') ? closeMobilePanel() : openMobilePanel(); };
   $('close-mobile-panel').onclick = closeMobilePanel;
   document.querySelector('.skip').onclick = () => { openMobilePanel(); $('dataset-title').focus(); };

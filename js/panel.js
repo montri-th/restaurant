@@ -55,6 +55,8 @@ export function metricTile(value, label, kind = '') {
 }
 export const heading = (kind, text, id = '') => `<h3${id ? ` id="${esc(id)}"` : ''}><i class="pictogram pic-${esc(kind)}" aria-hidden="true"></i>${esc(text)}</h3>`;
 
+/** A list cut at n says so: “แสดง n จาก N …” (a header always carries the total). */
+const shownOf = (n, total, unit, order = '') => (total > n ? `<p class="hint">แสดง ${num(n)} จาก ${num(total)} ${unit}${order ? ` (${order})` : ''}</p>` : '');
 const PROXY_NOTE = 'ร้าน = รายการในชุดข้อมูล ไม่ใช่จำนวนร้านทั้งหมดของพื้นที่ · คะแนนและรีวิวบอกความนิยมตามแหล่งข้อมูล ไม่ใช่ยอดขาย';
 const provinceName = code => provinceByCode(code)?.th || code || '';
 
@@ -238,8 +240,8 @@ export function renderDistrict(p, classOf, meta = {}, extra = '') {
   return `${head}    ${areaRanking(ranked, classOf, {title: `${w.area}ใน${w.district}นี้`, note: `${num(ranked.length)} ${w.area} · ร้าน/ตร.กม.`, limit: 40, minRows: p.minRows})}
     <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}<span class="hint">ร้าน</span></div>${groupBars(p.byGroup, p.count)}</section>
     <section class="panel-section"><div class="section-heading">${heading('plain', 'ระดับราคา')}<span class="hint">ร้านที่ระบุราคา</span></div>${priceBars(p.byPrice)}</section>
-    <section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้าน')}<span class="hint">${num(p.chains.length)}</span></div>${chainChips(p.chains)}</section>
-    ${p.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(p.venues.length)} แห่ง</span></div>${venueRows(p.venues)}</section>` : ''}
+    <section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้าน')}<span class="hint">${num(p.chainTotal ?? p.chains.length)} เครือ</span></div>${chainChips(p.chains)}${shownOf(p.chains.length, p.chainTotal ?? p.chains.length, 'เครือ', 'ร้านมากก่อน')}</section>
+    ${p.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(p.venueTotal ?? p.venues.length)} แห่ง</span></div>${venueRows(p.venues)}${shownOf(p.venues.length, p.venueTotal ?? p.venues.length, 'แห่ง', 'ร้านมากก่อน')}</section>` : ''}
     ${extra}${provenance(meta, `${w.district}${d.name} ${provinceName(d.province)} (ขอบเขต CityMETER)`)}`;
 }
 
@@ -264,8 +266,8 @@ export function renderArea(p, meta = {}, extra = '') {
   return `${head}    <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}<span class="hint">ร้าน</span></div>${groupBars(p.byGroup, p.count)}</section>
     <section class="panel-section"><div class="section-heading">${heading('plain', 'ระดับราคา')}<span class="hint">ร้านที่ระบุราคา</span></div>${priceBars(p.byPrice)}</section>
     ${p.topReviewed.length ? `<section class="panel-section"><div class="section-heading">${heading('exclusive', 'รีวิวมากที่สุด')}<span class="hint">${num(p.topReviewed.length)} ร้าน</span></div>${restaurantList(p.topReviewed)}</section>` : ''}
-    <section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้านในพื้นที่')}<span class="hint">${num(p.chains.length)}</span></div>${chainChips(p.chains)}</section>
-    ${p.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(p.venues.length)} แห่ง</span></div>${venueRows(p.venues)}</section>` : ''}
+    <section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้านในพื้นที่')}<span class="hint">${num(p.chainTotal ?? p.chains.length)} เครือ</span></div>${chainChips(p.chains)}${shownOf(p.chains.length, p.chainTotal ?? p.chains.length, 'เครือ', 'ร้านมากก่อน')}</section>
+    ${p.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(p.venueTotal ?? p.venues.length)} แห่ง</span></div>${venueRows(p.venues)}${shownOf(p.venues.length, p.venueTotal ?? p.venues.length, 'แห่ง', 'ร้านมากก่อน')}</section>` : ''}
     ${extra}${provenance(meta, `${w.area}${a.name} ${w.district}${a.districtName} ${provinceName(a.province)} (ขอบเขต CityMETER)`)}`;
 }
 
@@ -316,7 +318,7 @@ export function renderBuilding(b, meta = {}, extra = '') {
     </section>
     <section class="panel-section"><div class="section-heading">${heading('store', 'ร้าน')}<span class="hint">${num(b.count)}</span></div>${restaurantList(b.rows.slice(0, 40), {showArea: b.areaCount > 1, index: meta.index})}
       ${b.count > 40 ? `<p class="hint">แสดง ${num(40)} จาก ${num(b.count)} ร้าน (รีวิวมากก่อน) · ดูทั้งหมดในตาราง</p>` : ''}</section>
-    ${b.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(b.venues.length)} แห่ง</span></div>${venueRows(b.venues)}</section>` : ''}
+    ${b.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(b.venueTotal ?? b.venues.length)} แห่ง</span></div>${venueRows(b.venues)}${shownOf(b.venues.length, b.venueTotal ?? b.venues.length, 'แห่ง', 'ร้านมากก่อน')}</section>` : ''}
     <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}</div>${groupBars(b.byGroup, b.count)}</section>
     ${extra}${provenance(meta, `จุดของร้านที่ตกในขอบอาคาร OpenStreetMap หนึ่งหลัง${area ? ` · ${area} (ขอบเขต CityMETER)` : ''}`)}`;
 }

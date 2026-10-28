@@ -1,7 +1,9 @@
 # Implementation Plan — CityMETER · Restaurants 0.3
 
-รุ่น 0.3.1 · 28 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
+รุ่น 0.3.2 · 28 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
 
+> **รุ่น 0.3.2 (P13, AC35):** จุดสาขาร้านเครือเป็นรูปข้าวหลามตัด · ปุ่ม “ร้านเครือ” บนแผนที่ซ่อน/แสดงจุดสาขาทุกสาขา (`?rdots=0`) · มุมมองทะเบียนให้ชุดร้านเป็นบริบทเงียบ ไม่มีป้ายตัวเลขจังหวัดทับสาขา และแถบสถานะบอกขอบเขตของแต่ละหน่วย · หัวข้อเครือ/สถานที่ของชุดร้านนับยอดรวมจริง
+>
 > **รุ่น 0.3.1 (P13, AC29 ปรับ, AC32–AC34):** ร้าน 7 จังหวัดกับสาขาร้านเครืออยู่บนแผนที่เดียวกัน ไม่มี tab แยกชุดข้อมูล · มุมมองเครือ/สาขามีตึก 3 มิติ (แขวงใต้กลางจอเมื่อซูม ≥ 13.5 · สาขาเปิดพร้อมอาคาร Land) · ตัวเลขเป็นยอดรวมจริงพร้อม “แสดง n จาก N” · ส่วนทะเบียน/Land มีแหล่งและวันที่ของตัวเอง · ทะเบียนจุดขายหลายแบรนด์ไม่นับเป็นเครือ · ร้อยละเฉพาะคอลัมน์ ≥ 30 ร้าน
 >
 > **รุ่น 0.3 (P12, AC28–AC31):** โมดูลใหม่ `js/register.js` · `js/register-layer.js` · `js/register-panel.js` · `js/land.js` และสคริปต์ `scripts/build-chains.py` · `scripts/build-land.py` · `scripts/xlsx-dump.py`; ข้อมูลใหม่ `data/chains.json` · `data/land.json` · `data/land-buildings.geojson` โหลดหลังภาพแรก (`loadExtras` ใน `js/app.js`); panel modes เพิ่ม land · chains · chain · company · outlet; URL `?chains=1&rq=…` `?chain` `?company` `?outlet` `?land`; ลำดับสร้างข้อมูล build-data → build-chains → build-land (DATA_METHOD §11); backlog ใหม่ N15–N17 · อ่าน [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) ก่อน
