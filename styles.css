@@ -255,6 +255,12 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .brand-chip .chip-logo { width: 34px; height: 17px; border-radius: 2px; }
 .brand-chip.chip-exclusive { border-color: var(--border-emphasis); }
 .brand-chip:hover { background: var(--surface-alt); }
+/* Flag on a register record (multi-banner registry, cart or secondary-source majority): words, not colour. */
+.brand-chip .chip-flag { font-style: normal; font-size: 11px; color: var(--text-secondary); padding: 0 5px; border: 1px solid var(--border-default); border-radius: 999px; white-space: nowrap; }
+/* Source line closing a register / Land section inside another view (dataset · source · date · boundary). */
+.source-line { margin-top: 6px; }
+.source-line span { white-space: normal; }
+.source-line a { color: inherit; }
 
 /* 5. Map chrome ----------------------------------------------------------- */
 .map-toolbar { position: absolute; left: 8px; top: 8px; right: 52px; display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; z-index: 5; }
@@ -529,14 +535,6 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 /* 8. Chain register and Land hosts (release 0.3) --------------------------- */
 /* Data-set switch: the snapshot (filters apply) or the national chain register (its own search). Two units,
    never summed: the switch replaces the snapshot's filters while the register is shown. */
-.view-switch { display: inline-flex; margin-top: 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); overflow: hidden; max-width: 100%; }
-.view-switch button { border: 0; border-radius: 0; min-height: 36px; padding: 6px 12px; font-size: 12px; font-weight: 600; background: transparent; color: var(--text-secondary); white-space: nowrap; }
-.view-switch button + button { border-left: 1px solid var(--border-default); }
-.view-switch button[aria-pressed="true"] { background: var(--surface-alt); color: var(--text-primary); box-shadow: inset 0 -2px 0 var(--text-primary); }
-.view-switch button:disabled { opacity: .55; cursor: progress; }
-.view-switch button:focus-visible { outline: 2px solid var(--interaction-focus-ring); outline-offset: -2px; }
-.panel[data-dataset="register"] #filters, .panel[data-dataset="register"] #filter-chips { display: none; }
-.workspace.is-register #insights, .workspace.is-register #results { display: none; }
 .register-lede { font-size: 14px; line-height: 1.5; }
 .register-lede strong { font-size: 18px; font-weight: 400; }
 .register-search input { width: 100%; }
@@ -554,15 +552,10 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 .compare-table td small { color: var(--text-metadata); font-size: 11px; margin-left: 2px; }
 /* Map: one register dot = one listed outlet with a coordinate; logos from zoom 15 as buttons (identity only). */
 .legend-step .legend-register, .legend-register { display: inline-block; width: 10px; height: 10px; flex: 0 0 10px; border-radius: 50%; background: var(--map-active-layer); border: 1px solid var(--map-marker-halo); box-shadow: 0 0 0 1px var(--map-active-layer); }
-.map-panel.is-register .legend-step { flex-direction: row; gap: 6px; min-width: 0; }
 .map-panel:not(.has-register-dots) .legend-register-item { display: none; }
-.map-panel.is-register .legend-marks { display: none; }
-.map-panel.is-register.is-detail-zoom #legend-areas { display: flex; }
 .register-logo-pin { display: inline-flex; align-items: center; justify-content: center; padding: 2px; min-width: 0; min-height: 0; border: 1px solid var(--border-default); border-radius: 4px; background: var(--surface-card); box-shadow: 0 1px 2px rgba(0, 0, 0, .18); cursor: pointer; }
 .register-logo-pin .brand-logo { width: 40px; height: 20px; }
 .register-logo-pin.is-selected { border: 2px solid var(--map-selected-stroke); }
 .register-logo-pin:focus-visible { outline: 2px solid var(--interaction-focus-ring); outline-offset: 2px; }
 @media (max-width: 760px) and (orientation: portrait) {
-  .view-switch { margin-top: 6px; }
-  .view-switch button { min-height: 34px; padding: 5px 10px; }
 }

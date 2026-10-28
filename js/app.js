@@ -44,8 +44,9 @@
  * Two more data sets (release 0.3, owner request 2026-10-28), loaded after the first paint:
  *   chain register (data/chains.json, js/register.js) — the national register of chain outlets. Its unit
  *     (one outlet_id per listed branch) differs from the snapshot's (one overlay observation), so its numbers
- *     are never added to the snapshot's. Panel modes chains | chain | company | outlet show it alone: the
- *     snapshot frames, labels and dots step aside and the register's own dots carry the map.
+ *     are never added to the snapshot's. Both are drawn on one map (owner 2026-10-28: “แสดงร่วมกัน”): every
+ *     outlet as a dot from city zoom, the snapshot's frames, labels, dots, massing and buildings in every view;
+ *     panel modes chains | chain | company | outlet highlight the register selection on top of that.
  *   Land join (data/land.json + land-buildings.geojson, js/land.js) — registry Land hosts (shopping centres,
  *     hotels, offices) and the restaurant points / register outlets that fall in or touch their building.
  *     Panel mode land opens one host at venue level (its building in the data colour, x-ray, eye camera).
@@ -59,9 +60,9 @@ import {loadMapLibrary} from './vendors.js';
 import {installRestaurantPins, PIN_LAYERS} from './pins.js';
 import {installVenueBuildings, hostedVenueIds, HOST_LAYERS, LAND_LAYERS} from './buildings.js';
 import {decodeRegister, brandsIn, provincesIn, outletMix, searchRegister} from './register.js';
-import {installRegisterLayer} from './register-layer.js';
+import {installRegisterLayer, REGISTER_MIN_ZOOM} from './register-layer.js';
 import {decodeLand, landOfRow, landOfOutlet, landProfile, hostsOf, aroundGeometry, geometryBounds} from './land.js';
-import {renderRegisterSummary, renderRegisterInArea, renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderChain, renderCompany, renderOutlet, renderLand} from './register-panel.js';
+import {renderRegisterSummary, renderRegisterInArea, renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderChain, renderCompany, renderOutlet, renderLand, setSourceDates} from './register-panel.js';
 import {installVenueXray} from './venue-xray.js';
 import {configureBrandLogos, brandLogoMarkup} from './brand-logos.js';
 import {configureVenueLogos} from './venue-logos.js';
@@ -103,8 +104,8 @@ const state = {
 /** Panel modes of the chain register (the snapshot keeps overview/district/area/venue/building/store; land is a snapshot view). */
 const REGISTER_MODES = new Set(['chains', 'chain', 'company', 'outlet']);
 const registerMode = () => REGISTER_MODES.has(state.panel.mode);
-/** Area frames, labels and context dots of the snapshot are shown (not in the register's own views). */
-const areasShown = () => state.showAreas && !registerMode();
+/** Area frames, labels and context dots of the snapshot are shown in every view (the register shares the map). */
+const areasShown = () => state.showAreas;
 
 /* ---------- helpers ---------- */
 const values = () => Object.fromEntries(FIELDS.map(k => [k, $(k).value]));
@@ -243,8 +244,6 @@ function update({fit = false} = {}) {
  * (restaurants whose name refers to it) at venue level, else the focused rows.
  */
 function detailRows() {
-  // Register views draw the register's own dots; the snapshot stays quiet context there.
-  if (registerMode()) return [];
   if (state.panel.mode === 'land') {
     const key = `${state.panel.id}|${state.scopeKey}`;
     if (detailRows.landKey !== key) { detailRows.landKey = key; detailRows.landRows = landRows(state.panel.id); }
@@ -285,7 +284,7 @@ function loadExtras() {
     } else console.warn('Land join', land.reason || landGeo.reason || 'invalid building outlines');
     linkExtras();
     state.extrasState = state.register || state.land ? 'ready' : 'failed';
-    syncViewSwitch();
+    setSourceDates({snapshot: state.data.meta?.retrievedOn || state.data.meta?.asOf || '', registerFrom: state.register?.meta.checkedFrom || '', registerTo: state.register?.meta.checkedTo || '', land: state.land?.meta?.checkedOn || ''});
     return true;
   });
   return state.extras;
@@ -339,10 +338,12 @@ function landHostsIn(areaIds, {limit = 12} = {}) {
   const ids = areaIds instanceof Set ? areaIds : new Set(areaIds);
   const buildings = new Set(state.land.hosts.filter(h => h.fp >= 0 && (!ids.size || ids.has(h.area))).map(h => h.fp));
   const rank = h => (String(h.fpBy || '').startsWith('registry') ? 0 : 10) + ({shopping: 0, office: 1, hotel: 2}[h.ds] ?? 3);
-  const list = [...buildings].map(b => landEntry(b))
+  const all = [...buildings].map(b => landEntry(b))
     .filter(x => x.rows > 0 || x.outlets > 0)
-    .sort((a, b) => b.rows - a.rows || rank(a.host) - rank(b.host) || b.outlets - a.outlets || a.host.name.localeCompare(b.host.name, 'th'))
-    .slice(0, limit);
+    .sort((a, b) => b.rows - a.rows || rank(a.host) - rank(b.host) || b.outlets - a.outlets || a.host.name.localeCompare(b.host.name, 'th'));
+  // The header counts every building; the list shows the first `limit` (a list length is never shown as a total).
+  const list = all.slice(0, limit);
+  list.total = all.length;
   const scope = scopeKeySet();
   const keys = list.map(x => new Set([...(state.land.rowsByBuilding.get(x.building) || [])].filter(k => scope.has(k))));
   list.forEach((x, i) => {
@@ -371,7 +372,7 @@ function registerPlace() {
 }
 
 /** The table and its counter: the snapshot rows that carry detail (register views keep the filtered rows). */
-const tableRows = () => (registerMode() ? state.rows : detailRows());
+const tableRows = () => detailRows();
 function syncList() {
   const rows = tableRows(), b = currentBuilding(), v = rows === state.rows || b ? null : currentVenue();
   $('result-count').textContent = num(rows.length);
@@ -449,43 +450,31 @@ const densityClassOf = a => {
 
 const extrasPending = () => state.extrasState === 'idle' || state.extrasState === 'loading';
 
-/** Data-set switch above the filters: the snapshot (filters apply) or the register (its own search). */
-function syncViewSwitch() {
-  const reg = registerMode(), a = $('view-snapshot'), b = $('view-register');
-  if (!a || !b) return;
-  a.setAttribute('aria-pressed', String(!reg));
-  b.setAttribute('aria-pressed', String(reg));
-  b.disabled = !state.register;
-  b.title = state.register ? `${num(state.register.meta.outlets)} สาขาในทะเบียน · นับคนละหน่วยกับร้านอาหาร` : extrasPending() ? 'กำลังโหลดทะเบียนร้านเครือ' : 'โหลดทะเบียนร้านเครือไม่สำเร็จ';
-  $('panel').dataset.dataset = reg ? 'register' : 'snapshot';
-  $('dataset-intro').textContent = reg ? 'ร้านเครือมีสาขาที่ไหนบ้างทั่วประเทศ' : 'ร้านอาหารแน่นที่สุดอยู่ตรงไหน และเป็นร้านแบบไหน';
-  // The charts tray and the table describe the snapshot: they step aside with its frames while the register is shown.
-  document.querySelector('.workspace')?.classList.toggle('is-register', reg);
-  $('toggle-neighborhoods').disabled = reg;
-}
 const extrasNote = () => `<section class="panel-section"><p class="hint">${extrasPending() ? 'กำลังโหลดทะเบียนร้านเครือและข้อมูลอาคาร…' : 'โหลดทะเบียนร้านเครือหรือข้อมูลอาคารไม่สำเร็จ ข้อมูลร้านอาหารยังใช้งานได้'}</p></section>`;
 
 /** Overview: the register at a glance and the Land hosts holding the most restaurant points (scope = filters). */
 function overviewExtras() {
   if (extrasPending()) return renderRegisterSummary({loading: true});
   const reg = state.register;
-  if (reg && !overviewExtras.top) overviewExtras.top = [...reg.brands].sort((a, b) => b.outlets - a.outlets || a.name.localeCompare(b.name)).slice(0, 10);
+  if (reg && !overviewExtras.top) overviewExtras.top = reg.brands.filter(b => !b.registry).sort((a, b) => b.outlets - a.outlets || a.name.localeCompare(b.name)).slice(0, 10);
   const province = $('province').value;
   const areaIds = province ? new Set([...state.coveredIds].filter(a => areaById(a)?.province === province)) : new Set();
-  return (reg ? renderRegisterSummary({meta: reg.meta, brands: overviewExtras.top}) : '') +
-    renderLandHostsIn(landHostsIn(areaIds, {limit: 8}));
+  const p = province ? provinceByCode(province) : null;
+  return (reg ? renderRegisterSummary({meta: reg.meta, brands: overviewExtras.top, chainCount: reg.chainCount, registries: reg.registries}) : '') +
+    renderLandHostsIn(landHostsIn(areaIds, {limit: 8}), {boundary: p ? `host ใน${p.th}` : 'host ใน 7 จังหวัดที่ข้อมูลร้านครอบคลุม'});
 }
 
 /** Area / district: register outlets whose points lie in the frame, and the Land hosts there. */
 function placeExtras(outlets, place, areaIds) {
   if (extrasPending()) return renderRegisterInArea({loading: true});
-  return (state.register ? renderRegisterInArea({outlets, brands: brandsIn(outlets, 16), place}) : '') + renderLandHostsIn(landHostsIn(areaIds, {limit: 10}));
+  return (state.register ? renderRegisterInArea({outlets, brands: brandsIn(outlets, Infinity), place, meta: state.register.meta}) : '') +
+    renderLandHostsIn(landHostsIn(areaIds, {limit: 10}), {boundary: `host ใน${place}`});
 }
 
 /** Venue: the Land host recording the same CityMETER venue uuid. */
 function venueExtras(id) {
   const h = state.venueLand.get(id);
-  return h ? renderLandHostsIn([landEntry(h.fp, h)], {title: 'สถานที่นี้ในทะเบียน Land'}) : '';
+  return h ? renderLandHostsIn([landEntry(h.fp, h)], {title: 'สถานที่นี้ในทะเบียน Land', boundary: `อาคารของ ${h.name}`}) : '';
 }
 
 /** Building (display-time join): the Land building most of its rows' points fall in, by the build-time join. */
@@ -495,7 +484,7 @@ function buildingExtras() {
   const tally = new Map();
   for (const r of b.rows) for (const rel of state.land.rowLinks.get(r.id) || []) if (rel.rel === 'in') tally.set(rel.building, (tally.get(rel.building) || 0) + 1);
   const best = [...tally].sort((x, y) => y[1] - x[1])[0];
-  return best ? renderLandHostsIn([landEntry(best[0])], {title: 'อาคารในทะเบียน Land ที่จุดของร้านเหล่านี้ตก'}) : '';
+  return best ? renderLandHostsIn([landEntry(best[0])], {title: 'อาคารในทะเบียน Land ที่จุดของร้านเหล่านี้ตก', boundary: 'อาคารที่จุดของร้านในแผงนี้ตกมากที่สุด'}) : '';
 }
 
 /** Store: the Land building its point falls in / touches, and its links to the chain register. */
@@ -518,12 +507,13 @@ function scopeKeySet() {
 /** Other outlets of the same brand in the same province, nearest first when the outlet has a point. */
 function sameBrandNear(o, limit = 8) {
   const list = (state.register.byBrand.get(o.brand.id) || []).filter(x => x !== o && x.province && x.province === o.province);
+  const total = list.length;
   if (o.hasPoint) {
     const kx = Math.cos((o.latitude * Math.PI) / 180);
     const d = x => (x.hasPoint ? ((x.longitude - o.longitude) * kx) ** 2 + (x.latitude - o.latitude) ** 2 : Infinity);
     list.sort((a, b) => d(a) - d(b));
   }
-  return list.slice(0, limit);
+  return {list: list.slice(0, limit), total, nearest: o.hasPoint};
 }
 
 /** Register views and the Land host view. */
@@ -542,7 +532,7 @@ function renderExtraView(mode, id) {
   if (mode === 'chains') {
     if (!renderExtraView.mix) renderExtraView.mix = outletMix(reg.outlets);
     return renderChains({reg, query: state.registerQuery, results: searchRegister(reg, state.registerQuery), mix: renderExtraView.mix,
-      area: place, areaOutlets: place?.outlets || null, areaBrands: place ? brandsIn(place.outlets, 16) : []});
+      area: place, areaOutlets: place?.outlets || null, areaBrands: place ? brandsIn(place.outlets, Infinity) : []});
   }
   if (mode === 'chain') {
     const brand = reg.brandById.get(id);
@@ -572,7 +562,6 @@ function renderPanel(summary = summarize(state.rows)) {
   const {mode, id} = state.panel;
   renderCrumbs();
   syncEyeToggle();
-  syncViewSwitch();
   let html = '';
   const groups = state.data.groups;
   const meta = state.data.meta || {};
@@ -774,13 +763,6 @@ function selectLand(id, {fromMap = false} = {}) {
   if (h) openExtra({mode: 'land', id}, {fromMap, text: `${h.name} · ${num(landRows(id).length)} ร้านจุดตกในหรือติดขอบอาคาร`});
 }
 
-/** Back to the snapshot: the selected area / district when one is kept, else the overview. */
-function leaveRegister() {
-  state.panel = state.selectedArea ? {mode: 'area', id: state.selectedArea} : state.selectedDistrict ? {mode: 'district', id: state.selectedDistrict} : overviewPanel();
-  state.history = [];
-  update({fit: true});
-}
-
 /** Points of the register selection on the map (outlets with a selected coordinate). */
 function registerSelection() {
   const reg = state.register, {mode, id} = state.panel;
@@ -796,6 +778,40 @@ function registerSelection() {
   }
   return {show: false};
 }
+
+/** The Land host whose building an open outlet's point falls in or touches (drawn in the data colour), or null. */
+function outletLand() {
+  if (state.panel.mode !== 'outlet' || !state.land) return null;
+  const rel = landOfOutlet(state.land, state.panel.id);
+  return rel && (rel.rel === 'in' || rel.rel === 'edge') ? rel.hosts[0] || null : null;
+}
+
+/** Massing focus around an open outlet: its Land building, else a 250 m box around the point. */
+function outletRegion(landFeatures = []) {
+  if (state.panel.mode !== 'outlet') return null;
+  if (outletLand() && landFeatures.length) return landRegionFor(landFeatures);
+  const o = state.register?.byId.get(state.panel.id);
+  return o?.hasPoint ? venueRegion([[o.longitude, o.latitude]], {bufferM: 250}) : null;
+}
+
+/** Register directory / brand / company views: when zoomed in, the แขวง/ตำบล under the map centre carries the
+ * full massing, so the buildings around the outlets read like the snapshot's own focus. */
+const REGISTER_FOCUS_ZOOM = 13.5;
+function registerFocusKey() {
+  const map = state.map;
+  if (!map || !state.index || !registerMode() || state.panel.mode === 'outlet' || map.getZoom() < REGISTER_FOCUS_ZOOM) return '';
+  state.locateArea ||= areaLocator(state.index);
+  return state.locateArea(map.getCenter().toArray()) || '';
+}
+function registerFocusFeatures() {
+  const id = registerFocusKey();
+  state.registerFocus = id;
+  const a = id ? areaById(id) : null;
+  return a?.feature ? [a.feature] : [];
+}
+
+/** Register dots are on screen: a selection (every zoom), or every outlet from city zoom. */
+const registerDotsShown = () => Boolean(state.registerLayer) && (registerSelection().show || (state.map?.getZoom?.() ?? 0) >= REGISTER_MIN_ZOOM);
 
 /** Camera for register / Land views: the outlet, the brand's or company's outlets, the whole register, or the host building. */
 function frameExtras({instant = false} = {}) {
@@ -831,7 +847,8 @@ const polygonsOf = f => (f.geometry?.type === 'Polygon' ? [f.geometry.coordinate
 function refreshJoin() {
   if (!state.loaded) return false;
   const osm = state.massing?.buildings() || [];
-  const hosts = state.buildings?.displayedFeatures() || [];
+  // LOD2 parts sit inside their footprint: the join counts the footprint once (a mall with 7 parts is 1 building).
+  const hosts = (state.buildings?.displayedFeatures() || []).filter(f => f.properties?.geometry_role !== 'host_building_part_not_shop_unit');
   const key = `${state.massing?.version ?? 0}|${hosts.map(f => f.id ?? f.properties?.host_id).join(',')}|${state.scopeKey}`;
   if (key === refreshJoin.key && state.join) return false;
   refreshJoin.key = key;
@@ -890,10 +907,10 @@ function applyJoin() {
   refreshJoin();
   const n = state.massing?.setHighlight(highlightIds()) || 0;
   // The legend's "อาคารของสถานที่" entry shows whenever a building is drawn in the data colour.
-  state.blueBuildings = !registerMode() && (n > 0 || (state.buildings?.displayedFeatures() || []).length > 0 || (state.landBuildings?.displayedFeatures() || []).length > 0);
+  state.blueBuildings = n > 0 || (state.buildings?.displayedFeatures() || []).length > 0 || (state.landBuildings?.displayedFeatures() || []).length > 0;
   document.querySelector('.map-panel')?.classList.toggle('has-venue-building', state.blueBuildings);
   const label = $('legend-building-label');
-  if (label) label.textContent = currentLand() ? 'อาคารในทะเบียน Land' : currentBuilding() ? 'อาคารที่เปิดอยู่' : 'อาคารของสถานที่';
+  if (label) label.textContent = currentLand() || outletLand() ? 'อาคารในทะเบียน Land' : currentBuilding() ? 'อาคารที่เปิดอยู่' : 'อาคารของสถานที่';
   if (['venue', 'store'].includes(state.panel.mode) && panelSpatialSig() !== state.renderedSig) renderPanel();
 }
 
@@ -1028,17 +1045,8 @@ function renderLegend() {
   const atProvince = provinceZoom();
   const steps = $('legend-steps');
   const panelEl = document.querySelector('.map-panel');
-  panelEl.classList.toggle('is-register', registerMode());
-  if (registerMode()) {
-    // The register's own key: one dot = one listed outlet with a selected coordinate (no density, no frames).
-    $('legend-title').textContent = 'ทะเบียนร้านเครือ';
-    steps.innerHTML = '<span class="legend-step"><i class="legend-register" aria-hidden="true"></i>1 จุด = 1 สาขาที่มีพิกัด</span>';
-    $('legend-areas').title = 'สาขาในทะเบียนร้านเครือที่มีพิกัดที่ทะเบียนเลือกใช้ สาขาที่ไม่มีพิกัดไม่แสดงบนแผนที่ · นับคนละหน่วยกับร้านในชุดข้อมูล CityMETER Restaurants';
-    panelEl.classList.toggle('is-3d', state.view3d);
-    panelEl.classList.toggle('has-venue-building', false);
-    panelEl.classList.toggle('is-province-zoom', false);
-    return;
-  }
+  // Register dots share the map: their key shows whenever they are drawn (a selection, or every outlet from city zoom).
+  panelEl.classList.toggle('has-register-dots', registerDotsShown());
   if (atProvince) {
     const m = state.provinceModel;
     $('legend-title').textContent = 'จังหวัด · ร้านในชุดข้อมูล';
@@ -1239,17 +1247,17 @@ function landRegionFor(features) {
 
 function updateSpatialLayers() {
   if (!state.loaded) return;
-  const code = $('province').value, reg = registerMode(), landHost = currentLand();
-  // The register is national and counts another unit: its own views hide the snapshot's province and area
-  // frames, labels and context dots, so no snapshot number sits under a register dot.
-  const pm = state.provinceLayers?.update({rows: provinceScopeRows(), selectedCode: code, visible: !reg}) || null;
+  const code = $('province').value, reg = registerMode(), landHost = currentLand(), outletHost = outletLand();
+  // One map for both data sets: the snapshot's frames, labels and context dots stay in every view (the register
+  // counts another unit and never feeds them).
+  const pm = state.provinceLayers?.update({rows: provinceScopeRows(), selectedCode: code, visible: true}) || null;
   state.provinceModel = pm;
-  state.provinceLabels?.update(pm && !reg ? pm.provinces.filter(p => p.count > 0 || p.code === code).sort((a, b) => (b.code === code) - (a.code === code) || b.count - a.count)
-    .map(p => ({id: p.code, name: p.name, value: num(p.count), state: p.state, quiet: Boolean(code) && p.code !== code, selected: p.code === code, center: p.label, swatch: p.fill || '', title: `${p.name} · ${num(p.count)} ร้านในชุดข้อมูล`})) : [], {visible: !reg});
+  state.provinceLabels?.update(pm ? pm.provinces.filter(p => p.count > 0 || p.code === code).sort((a, b) => (b.code === code) - (a.code === code) || b.count - a.count)
+    .map(p => ({id: p.code, name: p.name, value: num(p.count), state: p.state, quiet: Boolean(code) && p.code !== code, selected: p.code === code, center: p.label, swatch: p.fill || '', title: `${p.name} · ${num(p.count)} ร้านในชุดข้อมูล`})) : [], {visible: true});
   const districtAreas = state.selectedDistrict ? (districtById(state.selectedDistrict)?.areas || []).map(a => a.id) : [];
   state.areaLayers?.update({model: state.areaModel, selectedId: state.selectedArea, focusIds: state.selectedDistrict ? districtAreas : state.focusIds, outlineFocus: !state.selectedDistrict, districtId: state.selectedDistrict, visible: areasShown()});
   state.labels?.update(areasShown() ? areaLabelItems() : [], {visible: areasShown()});
-  if (state.map.getLayer(PIN_LAYERS.context)) state.map.setLayoutProperty(PIN_LAYERS.context, 'visibility', reg ? 'none' : 'visible');
+  if (state.map.getLayer(PIN_LAYERS.context)) state.map.setLayoutProperty(PIN_LAYERS.context, 'visibility', 'visible');
   renderLegend();
   const v = currentVenue(), b = currentBuilding();
   // Official host buildings: the venue being looked at (venue level); in the area view every hosted venue
@@ -1258,13 +1266,13 @@ function updateSpatialLayers() {
   const hostIds = reg || landHost ? [] : venueLevel() ? [v.id] : b ? (b.kind === 'host' ? b.footprint.venueIds || [] : []) : (state.panel.mode === 'venue' || (state.panel.mode === 'store' && v)) ? []
     : [...new Set(detailRows().map(r => r.venue?.id).filter(id => id && state.hosted.has(id)))];
   state.buildings?.update({venueIds: hostIds, enabled: true, theme: theme()});
-  // Land host building: only the host being looked at (its own venue level).
-  state.landBuildings?.update({venueIds: landHost ? [landHost.id] : [], enabled: true, theme: theme()});
-  const focusFeatures = reg ? [] : state.selectedArea ? [areaById(state.selectedArea)?.feature].filter(Boolean) : state.selectedDistrict ? [] : state.focusIds.map(id => areaById(id)?.feature).filter(Boolean);
+  // Land host building: the host being looked at (its own venue level), or the one an open outlet's point falls in.
+  state.landBuildings?.update({venueIds: landHost ? [landHost.id] : outletHost ? [outletHost.id] : [], enabled: true, theme: theme()});
+  const focusFeatures = reg ? registerFocusFeatures() : state.selectedArea ? [areaById(state.selectedArea)?.feature].filter(Boolean) : state.selectedDistrict ? [] : state.focusIds.map(id => areaById(id)?.feature).filter(Boolean);
   const hostFeatures = state.buildings?.displayedFeatures() || [];
   const landFeatures = state.landBuildings?.displayedFeatures() || [];
   // Venue / Land mode: the focus tier (and the join) follow the place's surroundings, wherever the area focus is.
-  const region = state.panel.mode === 'venue' && v ? venueRegionFor(v, hostFeatures) : landHost ? landRegionFor(landFeatures) : null;
+  const region = state.panel.mode === 'venue' && v ? venueRegionFor(v, hostFeatures) : landHost ? landRegionFor(landFeatures) : outletRegion(landFeatures);
   const anchorFeatures = focusFeatures.length ? focusFeatures : (state.selectedDistrict && !reg ? [districtById(state.selectedDistrict)?.feature].filter(Boolean) : []);
   const anchors = region ? [[(region[0][0] + region[2][0]) / 2, (region[0][1] + region[2][1]) / 2]]
     : anchorFeatures.length ? anchorFeatures.map(f => featureBounds(f, maplibregl.LngLatBounds).getCenter().toArray()) : [state.map.getCenter().toArray()];
@@ -1274,11 +1282,13 @@ function updateSpatialLayers() {
   const hostColors = () => { const s = getComputedStyle(document.documentElement); return {fill: s.getPropertyValue('--map-active-layer').trim(), stroke: s.getPropertyValue('--map-selected-stroke').trim()}; };
   state.xray?.update(venueLevel() ? levelFeatures().filter(f => f.properties?.render_as === 'extrusion') : [], {colors: hostColors()});
   state.xray?.setEnabled(state.view3d);
-  // Register dots: the register views, and the outlets in / at the edge of an open Land host's building.
+  // Register dots on the same map: a register view's or a Land host's selection at every zoom (with logos), else
+  // every outlet from city zoom as plain dots under the snapshot's symbols.
   const sel = registerSelection();
   state.registerShown = sel.show ? sel.count : 0;
-  state.registerLayer?.update({show: sel.show, selection: sel.selection || {}, selectedIndex: sel.selectedIndex ?? null});
-  document.querySelector('.map-panel')?.classList.toggle('has-register-dots', Boolean(state.registerLayer && sel.show && !reg));
+  state.registerLayer?.update(sel.show ? {show: true, selection: sel.selection || {}, selectedIndex: sel.selectedIndex ?? null, minZoom: 0, logos: true}
+    : {show: true, selection: {}, minZoom: REGISTER_MIN_ZOOM, logos: false});
+  document.querySelector('.map-panel')?.classList.toggle('has-register-dots', registerDotsShown());
   state.pins?.layout();
 }
 
@@ -1327,8 +1337,6 @@ function onMapClick(e) {
   if (r) { selectStore(r.id, {fly: false, showPopup: true, fromPin: true}); return; }
   const o = state.registerLayer?.hitTest(point);
   if (o) { if (state.panel.mode !== 'outlet' || state.panel.id !== o.id) selectOutlet(o.id, {fromMap: true}); return; }
-  // The register's own views have no snapshot targets underneath (frames and context dots step aside).
-  if (registerMode()) return;
   const landIds = state.landBuildings?.hitTest(point) || [];
   if (landIds.length) { const h = mainLandHost(state.land.hostById.get(landIds[0])?.fp); if (h && (state.panel.mode !== 'land' || state.panel.id !== h.id)) selectLand(h.id, {fromMap: true}); return; }
   const hit = buildingTarget(point);
@@ -1353,7 +1361,7 @@ function onMapMove(e) {
     const map = state.map, p = onMapMove.point;
     if (!map || !state.loaded || !p) return;
     let over = Boolean(state.xray?.hitTest([p.x, p.y])) || Boolean(scopedVenue(state.buildings?.hitTest(p) || [])) || Boolean(state.pins?.hitTest(p)) ||
-      Boolean(state.registerLayer?.hitTest(p)) || Boolean((state.landBuildings?.hitTest(p) || []).length) || (!registerMode() && Boolean(buildingTarget(p)));
+      Boolean(state.registerLayer?.hitTest(p)) || Boolean((state.landBuildings?.hitTest(p) || []).length) || Boolean(buildingTarget(p));
     let area = '';
     if (!over && areasShown() && !provinceZoom() && map.getZoom() >= AREA_MIN_ZOOM) {
       area = state.areaLayers?.hitTest(p) || '';
@@ -1388,9 +1396,8 @@ function installSpatialLayers() {
     onSelect: r => selectStore(r.id, {fly: false, showPopup: true, fromPin: true}),
     onLayout: stats => {
       const logos = stats.htmlPins ? ` · โลโก้ ${num(stats.visibleLogos)}/${num(stats.logoLimit)}` : '';
-      // The register's own views count register points (another unit), never snapshot rows.
-      $('map-status').textContent = registerMode() ? `${num(state.registerShown)} สาขาในทะเบียนที่มีพิกัด`
-        : `${num(stats.focusInView)} ร้านในจอ${logos} · บริบท ${num(stats.contextRows)}`;
+      // Two units side by side, never summed: snapshot rows on screen, and the register selection when one is open.
+      $('map-status').textContent = `${num(stats.focusInView)} ร้านในจอ${logos} · บริบท ${num(stats.contextRows)}${state.registerShown ? ` · สาขาในทะเบียน ${num(state.registerShown)} (คนละหน่วย)` : ''}`;
     },
   });
   installExtraLayers();
@@ -1458,7 +1465,15 @@ function initMap() {
     state.provinceLabels = installAreaLabels(state.map, $('map'), {className: 'province-label', hostId: 'province-labels', hostLabel: 'จังหวัดบนแผนที่', minZoom: 0, maxZoom: PROVINCE_LABEL_MAX_ZOOM, verb: 'กดเพื่อดูจังหวัด', detailZoomClass: false, onSelect: code => selectProvince(code), reservedBottom: labelBottomSpace});
     state.map.on('zoomend', () => { if (state.loaded) renderLegend(); });
     // Coalesced: a camera fit jumps the map many times in one task; the labels follow the last position.
-    state.map.on('moveend', () => { clearTimeout(refreshLabelView.timer); refreshLabelView.timer = setTimeout(() => { if (state.loaded) refreshLabelView(); }, 60); });
+    state.map.on('moveend', () => {
+      clearTimeout(refreshLabelView.timer);
+      refreshLabelView.timer = setTimeout(() => {
+        if (!state.loaded) return;
+        refreshLabelView();
+        // Register views: the massing follows the แขวง/ตำบล under the centre once zoomed in (coalesced, after the move).
+        if (registerMode() && registerFocusKey() !== (state.registerFocus || '')) updateSpatialLayers();
+      }, 60);
+    });
     state.map.on('mouseout', () => { state.areaLayers?.hover(''); });
     state.map.on('style.load', installSpatialLayers);
     state.map.on('click', onMapClick);
@@ -1618,9 +1633,6 @@ function wireEvents() {
     if (registerMode() || state.panel.mode === 'land') { frameExtras(); return; }
     if (state.selectedArea || state.selectedDistrict || state.rows.length) fitMap();
   };
-  // Two data sets, two units: the switch moves between the snapshot and the register's own views.
-  $('view-snapshot').onclick = () => { if (registerMode()) leaveRegister(); };
-  $('view-register').onclick = () => { if (!registerMode()) openChains(); };
   let searchTimer;
   $('panel-view').addEventListener('input', event => {
     if (event.target.id !== 'register-search') return;
@@ -1690,7 +1702,6 @@ async function init() {
     options('province', PROVINCES.map(p => [p.code, provinceCounts[p.code] ? `${p.th} (${num(provinceCounts[p.code])})` : p.th]));
     options('brand', [...state.data.brands].sort((a, b) => b.rows - a.rows || a.name.localeCompare(b.name)).map(b => [b.id, `${b.name} (${num(b.rows)})`]));
     $('category-items').innerHTML = state.data.groups.map(g => `<span>${cueMarkup(g.series)}${esc(g.th)}</span>`).join('');
-    $('view-snapshot').textContent = `ร้านอาหาร · ${num(PROVINCES.length)} จังหวัด`;
 
     // A link into a register or Land view waits for that data; otherwise the snapshot paints first.
     const opensExtra = EXTRA_PARAMS.some(k => new URLSearchParams(location.search).has(k));

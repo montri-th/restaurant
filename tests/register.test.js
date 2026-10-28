@@ -266,3 +266,49 @@ test('register and Land views: dataset · source · date · boundary, separate u
   assert.ok(listed.includes(`นับร้านซ้ำกับ ${host.name} 20 ร้าน`) && listed.includes('รวมแถวกันไม่ได้'), listed);
   assert.equal((renderLandHostsIn([{host, cohosts: co, rows: 20, outlets: 35}]).match(/data-action="select-land"/g) || []).length, 1, 'co-hosts are not separate rows');
 });
+
+test('counts are totals, never list lengths; registers and carts are named; small samples print no share (review 2026-10-28)', () => {
+  const {reg, land, rowById, data, index} = setup();
+  // A multi-banner point-of-sale registry is a record, not a chain: out of the chain count and the ranking.
+  const registry = reg.brands.find(b => b.id === 'ROOT-BR-cpf-pos-network');
+  assert.ok(registry?.registry, 'Five Star network is flagged as a registry');
+  assert.equal(reg.chainCount, reg.brands.filter(b => b.outlets > 0).length - reg.registries.length);
+  assert.ok(!searchRegister(reg, '').brands.some(b => b.registry), 'the ranking lists chains only');
+  assert.ok(searchRegister(reg, 'five star').brands.some(b => b.registry), 'search still reaches it');
+  const summary = text(renderRegisterSummary({meta: reg.meta, brands: searchRegister(reg, '').brands.slice(0, 10), chainCount: reg.chainCount, registries: reg.registries}));
+  assert.ok(summary.includes(`${reg.chainCount.toLocaleString('th-TH')} เครือ`) && summary.includes('ไม่นับ Five Star network'), summary.slice(0, 300));
+  assert.ok(/ชุดข้อมูล \S/.test(summary) && /แหล่ง \S/.test(summary) && /ตรวจ \d/.test(summary) && /ขอบเขต \S/.test(summary), 'the overview section cites its own source and date');
+  // Shared names show the operator; a cart or secondary-source majority is flagged in lists.
+  const kfc = reg.brands.filter(b => b.name === 'KFC');
+  assert.equal(kfc.length, 3);
+  assert.ok(kfc.every(b => b.sharedName));
+  assert.equal(reg.brands.find(b => b.name === 'Chaysee Bamee Kiew').evidenceTag?.short, 'รถเข็น');
+  assert.equal(reg.brands.find(b => b.name === 'MIXUE').evidenceTag?.short, 'แหล่งรอง');
+  assert.equal(reg.brands.find(b => b.name === 'Café Amazon').evidenceTag, null);
+  // An area header counts every chain; the chips stop at 16 and say so.
+  const [areaId, outlets] = [...reg.byArea].sort((a, b) => brandsIn(b[1], Infinity).length - brandsIn(a[1], Infinity).length)[0];
+  const all = brandsIn(outlets, Infinity);
+  assert.ok(all.length > 16, `${areaId} has ${all.length} chains`);
+  const areaHtml = text(renderRegisterInArea({outlets, brands: all, place: 'แขวงทดสอบ', meta: reg.meta}));
+  assert.ok(areaHtml.includes(`${all.filter(x => !x.brand.registry).length.toLocaleString('th-TH')} เครือ`) && areaHtml.includes(`แสดง 16 จาก ${all.length.toLocaleString('th-TH')} เครือ`), areaHtml.slice(0, 400));
+  assert.ok(/ชุดข้อมูล \S/.test(areaHtml) && /ตรวจ \d/.test(areaHtml) && areaHtml.includes('ขอบเขต จุดของสาขาอยู่ในแขวงทดสอบ'));
+  // Same-brand outlets: the heading carries the total, the list its own length.
+  const outlet = reg.outlets.find(o => o.hasPoint && o.brand.name === 'KFC' && o.provinceTh === 'กรุงเทพมหานคร');
+  const others = reg.byBrand.get(outlet.brand.id).filter(x => x !== outlet && x.province === outlet.province);
+  const outletHtml = text(renderOutlet({reg, outlet, area: outlet.area ? index.byId.get(outlet.area) : null, land: landOfOutlet(land, outlet.id), sameBrand: {list: others.slice(0, 8), total: others.length, nearest: true}}));
+  assert.ok(outletHtml.includes(`${others.length.toLocaleString('th-TH')} สาขา`) && outletHtml.includes(`แสดง 8 จาก ${others.length.toLocaleString('th-TH')} สาขา`), outletHtml.slice(-600));
+  // Land lists: the header is the number of buildings, not the rows shown; the section cites all three inputs.
+  const host = land.hosts.find(h => (land.rowsByBuilding.get(h.fp) || []).length > 3);
+  const list = [{host, rows: 3, outlets: 1}]; list.total = 1399;
+  const landList = text(renderLandHostsIn(list, {boundary: 'host ในแขวงทดสอบ'}));
+  assert.ok(landList.includes('1,399 อาคาร') && landList.includes('แสดง 1 จาก 1,399 อาคาร'));
+  assert.ok(landList.includes('CityMETER Restaurants API') && landList.includes('ทะเบียนร้านเครือ ตรวจ') && landList.includes('ขอบเขต host ในแขวงทดสอบ'));
+  // Shares only for a column of at least 30 rows; the panel says why and that rows are not every restaurant.
+  const paragon = land.hosts.find(h => h.id === 'SC-001244');
+  const profile = landProfile(land, paragon, {rowsByKey: rowById, outletsById: reg.byId});
+  const around = data.rows.slice(0, 4).map(r => ({...r}));
+  const landHtml = text(renderLand({land, profile, around, groups: data.groups, index}));
+  assert.ok(!/\d+%/.test(landHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1].split('เครือในทะเบียน')[0]), 'no share on a handful of rows');
+  assert.ok(landHtml.includes('ร้อยละแสดงเฉพาะคอลัมน์ที่มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่จำนวนร้านทั้งหมดของพื้นที่หรืออาคาร'));
+  assert.ok(landHtml.includes('สาขาเครือจุดตกใน/ติดขอบ') && !landHtml.includes('สาขาเครือในอาคาร'));
+});

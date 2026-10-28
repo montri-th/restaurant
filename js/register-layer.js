@@ -2,17 +2,21 @@
  * Chain-register outlets on the map: one dot per outlet with a selected coordinate — never
  * clustered or aggregated, no point for an outlet without one.
  *
- * Shown only while a register view (directory, brand, company, outlet) or a Land host is open,
- * so the restaurant snapshot keeps its own focus + quiet reading elsewhere. Dots use the LDS map
- * data role (`--map-active-layer`, halo `--map-marker-halo`); the selected outlet adds the
- * selected stroke. From LOGO_MIN_ZOOM, up to MAX_LOGOS visible outlets carry their brand logo
- * as a keyboard-reachable button (identity only — a logo does not verify a branch).
+ * Drawn on the same map as the restaurant snapshot (owner 2026-10-28: show both together): every
+ * outlet from REGISTER_MIN_ZOOM as a dot in the snapshot's own views, and the selection of a
+ * register view (brand, company, outlet) or of a Land host at every zoom. The two data sets keep
+ * their own units — the layer never feeds a snapshot count. Dots use the LDS map data role
+ * (`--map-active-layer`, halo `--map-marker-halo`); the selected outlet adds the selected stroke.
+ * With `logos`, from LOGO_MIN_ZOOM up to MAX_LOGOS visible outlets carry their brand logo as a
+ * keyboard-reachable button (identity only — a logo does not verify a branch).
  */
 import {brandLogoMarkup, getBrandLogo} from './brand-logos.js';
 
 const SOURCE = 'register-outlets', DOTS = 'register-dots', SELECTED = 'register-selected';
 export const REGISTER_LAYERS = Object.freeze({source: SOURCE, dots: DOTS, selected: SELECTED});
 export const LOGO_MIN_ZOOM = 15;
+/** Every outlet shows from this zoom in the snapshot's own views (city scale; the selection of a register view at every zoom). */
+export const REGISTER_MIN_ZOOM = 11;
 export const MAX_LOGOS = 60;
 const NONE = ['==', ['get', 'i'], -1];
 
@@ -30,6 +34,12 @@ export function registerFilter({brand = null, company = null, ids = null} = {}) 
   return true;
 }
 
+/** Dot sizes: a register selection reads at country zoom; every outlet in the snapshot's views stays smaller than a restaurant symbol. */
+const RADIUS = Object.freeze({
+  selection: ['interpolate', ['linear'], ['zoom'], 4, 1.6, 9, 2.6, 13, 4, 16, 5.5, 18, 7],
+  quiet: ['interpolate', ['linear'], ['zoom'], 11, 1.8, 14, 2.6, 16, 3.4, 18, 4.4],
+});
+
 export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
   const features = [];
   for (const o of register.outlets) {
@@ -42,18 +52,18 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
   const c = colors();
   map.addLayer({id: DOTS, type: 'circle', source: SOURCE, filter: NONE, layout: {visibility: 'none'},
     paint: {'circle-color': c.fill, 'circle-stroke-color': c.halo, 'circle-stroke-width': 1,
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 1.6, 9, 2.6, 13, 4, 16, 5.5, 18, 7]}}, before);
+      'circle-radius': RADIUS.selection}}, before);
   map.addLayer({id: SELECTED, type: 'circle', source: SOURCE, filter: NONE, layout: {visibility: 'none'},
     paint: {'circle-color': c.fill, 'circle-stroke-color': c.selected, 'circle-stroke-width': 3,
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 5, 13, 7, 18, 10]}}, before);
 
-  let visible = false, selected = null, markers = [], disposed = false, filter = NONE;
+  let visible = false, selected = null, markers = [], disposed = false, filter = NONE, logosOn = true;
   const outlets = register.outlets;
 
   function clearMarkers() { for (const m of markers) m.remove(); markers = []; }
   function layoutLogos() {
     clearMarkers();
-    if (!visible || disposed || map.getZoom() < LOGO_MIN_ZOOM || typeof maplibregl === 'undefined') return;
+    if (!visible || !logosOn || disposed || map.getZoom() < LOGO_MIN_ZOOM || typeof maplibregl === 'undefined') return;
     const seen = new Set();
     const hits = map.queryRenderedFeatures({layers: [DOTS]}).map(f => outlets[f.properties.i]).filter(o => o && !seen.has(o.id) && seen.add(o.id) && getBrandLogo(o.brand));
     for (const o of hits.slice(0, MAX_LOGOS)) {
@@ -76,13 +86,15 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
   const onSourceData = e => { if (e.sourceId === SOURCE && e.isSourceLoaded && visible && !disposed) relayout(); };
   map.on('sourcedata', onSourceData);
 
-  function update({show = false, selection = {}, selectedIndex = null} = {}) {
+  function update({show = false, selection = {}, selectedIndex = null, minZoom = 0, logos = true} = {}) {
     if (disposed) return;
     visible = Boolean(show);
+    logosOn = Boolean(logos);
     selected = Number.isInteger(selectedIndex) ? selectedIndex : null;
     filter = registerFilter(selection);
     const col = colors();
     for (const id of [DOTS, SELECTED]) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+    if (map.getLayer(DOTS)) { map.setLayerZoomRange(DOTS, Math.max(0, minZoom), 24); map.setPaintProperty(DOTS, 'circle-radius', logosOn ? RADIUS.selection : RADIUS.quiet); }
     if (map.getLayer(DOTS)) { map.setFilter(DOTS, filter); map.setPaintProperty(DOTS, 'circle-color', col.fill); map.setPaintProperty(DOTS, 'circle-stroke-color', col.halo); }
     if (map.getLayer(SELECTED)) { map.setFilter(SELECTED, selected == null ? NONE : ['==', ['get', 'i'], selected]); map.setPaintProperty(SELECTED, 'circle-color', col.fill); map.setPaintProperty(SELECTED, 'circle-stroke-color', col.selected); }
     layoutLogos();
@@ -113,5 +125,5 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
     for (const id of [SELECTED, DOTS]) if (map.getLayer(id)) map.removeLayer(id);
     if (map.getSource(SOURCE)) map.removeSource(SOURCE);
   }
-  return {update, hitTest, dispose, get visible() { return visible; }};
+  return {update, hitTest, dispose, get visible() { return visible; }, get minZoom() { return map.getLayer(DOTS)?.minzoom ?? 0; }};
 }

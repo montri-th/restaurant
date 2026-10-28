@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.3.0",
+  "productVersion": "0.3.1",
   "updatedOn": "2026-10-28",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",

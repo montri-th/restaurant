@@ -55,12 +55,36 @@ export function decodeRegister(json, index = null) {
     o.nameLower = lower(o.name);
     outlets.push(o);
   }
+  // Per-record facts the lists need: the evidence mix (a cart or secondary-source majority is flagged), whether the
+  // record is a multi-banner point-of-sale registry rather than one chain, and whether another record shares its name
+  // (KFC is three operator networks).
+  const names = new Map();
+  for (const b of brands) {
+    b.evidenceMix = Object.fromEntries(EVIDENCE.map(k => [k, 0]));
+    b.registry = isRegistry(b);
+    names.set(lower(b.name), (names.get(lower(b.name)) || 0) + 1);
+  }
+  for (const o of outlets) if (o.brand) o.brand.evidenceMix[o.evidence]++;
+  for (const b of brands) { b.sharedName = names.get(lower(b.name)) > 1; b.evidenceTag = evidenceTag(b.evidenceMix); }
   const byId = new Map(outlets.map(o => [o.id, o]));
   const group = key => { const m = new Map(); for (const o of outlets) { const k = key(o); if (k === '' || k == null) continue; if (!m.has(k)) m.set(k, []); m.get(k).push(o); } return m; };
   return {meta: json.meta || {}, provinces, companies, brands, outlets, byId,
+    chainCount: brands.filter(b => !b.registry && (b.outlets || 0) > 0).length, registries: brands.filter(b => b.registry && (b.outlets || 0) > 0),
     brandById: new Map(brands.map(b => [b.id, b])), companyById: new Map(companies.map(x => [x.id, x])),
     byBrand: group(o => o.brand?.id), byCompany: group(o => o.company?.id), byArea: group(o => o.area), byDistrict: group(o => o.district),
     byProvince: group(o => o.province)};
+}
+
+/** A source registry of points of sale across several banners (format marked by the register) — a record, not one chain. */
+export const isRegistry = b => /registry|not_consumer_brand/.test(String(b?.format || ''));
+
+/** Short flag when most of a record's outlets do not come from the brand's own source: carts, or secondary sources. */
+export function evidenceTag(mix = {}) {
+  const total = EVIDENCE.reduce((n, k) => n + (mix[k] || 0), 0);
+  if (!total || (mix.primary || 0) / total > 0.5) return null;
+  if ((mix.cart || 0) / total > 0.5) return {short: 'รถเข็น', th: 'ส่วนใหญ่เป็นจุดขายรถเข็น'};
+  if ((mix.secondary || 0) / total > 0.5) return {short: 'แหล่งรอง', th: 'ส่วนใหญ่มาจากแหล่งรอง รอยืนยันจากแบรนด์'};
+  return {short: 'ยังไม่ยืนยัน', th: 'ส่วนใหญ่ยังไม่ใช่แหล่งของแบรนด์'};
 }
 
 /** Brands present in a list of outlets, most outlets first. */
@@ -100,7 +124,8 @@ export function outletMix(outlets) {
  */
 export function searchRegister(reg, query, limit = 30) {
   const q = lower(query).trim();
-  if (!q) return {brands: reg.brands.slice().sort((a, b) => b.outlets - a.outlets).slice(0, limit), companies: []};
+  // The ranking lists chains only; a multi-banner registry is reachable by search and is named apart.
+  if (!q) return {brands: reg.brands.filter(b => !b.registry).sort((a, b) => b.outlets - a.outlets).slice(0, limit), companies: []};
   // Brand name first (prefix before substring), then the brand family, then the company that holds it.
   const rank = b => { const n = lower(b.name); return n.startsWith(q) ? 0 : n.includes(q) ? 1 : lower(b.family).includes(q) ? 2 : lower(b.companyRecord?.name).includes(q) ? 3 : 9; };
   const direct = reg.brands.map(b => [b, rank(b)]).filter(([, r]) => r < 9).sort((a, b) => a[1] - b[1] || b[0].outlets - a[0].outlets).map(([b]) => b);

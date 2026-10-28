@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.3.0",
+  "productVersion": "0.3.1",
   "updatedOn": "2026-10-28",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
@@ -66,7 +66,7 @@
     ],
     "release030": [
       "two sheets, one snapshot: Sheet 1 (68,980) + the 1,234 rows the owner moved to the chain register on 2026-10-25, each snapshot_observation_id once; moved rows carry register (1 held / 2 with correspondence) and registerOutlets",
-      "national chain register (data/chains.json): 26,819 outlet_ids, 756 brands with outlets, 311 company records; its own views and map dots; province by point-in-polygon or register text; แขวง/ตำบล only in the covered provinces",
+      "national chain register (data/chains.json): 26,819 outlet_ids, 756 brands with outlets, 311 company records; on the same map as the snapshot (dots from zoom 11, a register view's selection at every zoom); province by point-in-polygon or register text; แขวง/ตำบล only in the covered provinces",
       "Land join (data/land.json, data/land-buildings.geojson): restaurant display points and register outlets in / at the edge of the buildings of Land hosts; in-vs-around compare; industrial estates not compared until boundaries are accepted",
       "LOD > 1 wins (owner 2026-10-28): registry building parts drawn instead of one LOD1 block, for Land buildings (18) and for sheet venues linked by CityMETER uuid (MBK Center)",
       "extras load after the first paint (or before it for a deep link into their views); failure leaves the snapshot unchanged"
@@ -982,7 +982,7 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261028-r2 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
+    "cacheTag": "?v=20261028-r3 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
     "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
   },
   "registerContract": {

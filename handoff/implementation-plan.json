@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.3.0",
+  "productVersion": "0.3.1",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -490,6 +490,30 @@
         "docs/LAND_JOIN_CHECK.md"
       ],
       "status": "done"
+    },
+    {
+      "id": "P13",
+      "title": "0.3.1: one map for both data sets (owner 2026-10-28 16:56 “ผมอยากให้แสดงร่วมกัน”, “ลองร้านเครือแล้วไม่เห็นตึก”) and the fixes of the independent Who review",
+      "dependsOn": [
+        "P12"
+      ],
+      "acceptanceCriteria": [
+        "AC29",
+        "AC32",
+        "AC33",
+        "AC34"
+      ],
+      "files": [
+        "js/app.js",
+        "js/register.js",
+        "js/register-layer.js",
+        "js/register-panel.js",
+        "js/camera.js",
+        "index.html",
+        "styles.css",
+        "tests/register.test.js"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -692,7 +716,7 @@
     {
       "id": "AC29",
       "scenario": "Chain register views",
-      "expected": "ร้านเครือ · ทั่วประเทศ switch opens chains → chain → company → outlet with dots for outlets with a point; snapshot frames, labels, context dots, charts and table hidden; every view says the unit is not added to the restaurant counts; search finds brand names first, then outlet names; deep links ?chains=1&rq=…, ?chain, ?company, ?outlet restore the view",
+      "expected": "the register directory (overview / area button, ?chains=1) opens chains → chain → company → outlet on the same map as the snapshot: snapshot frames, labels, context dots, massing, buildings, charts and table stay; the register selection is drawn at every zoom (logos from 15) and every outlet as a small dot from zoom 11; every view says the unit is not added to the restaurant counts; search finds brand names first, then outlet names; deep links ?chains=1&rq=…, ?chain, ?company, ?outlet restore the view",
       "verificationType": "harness + live",
       "result": "see VERIFICATION.md"
     },
@@ -707,6 +731,27 @@
       "id": "AC31",
       "scenario": "LOD > 1",
       "expected": "registry building parts (Shopping Center release / Hotel 15_BUILDING_MASS) drawn instead of a single block (Siam Paragon 7 parts, centralwOrld 15, MBK Center 2 also in venue mode); footprint as outline; heights labelled as source values",
+      "verificationType": "unit + harness + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC32",
+      "scenario": "One map, buildings in register views",
+      "expected": "no data-set tabs; in chains/chain/company views zoomed in (≥ 13.5) the แขวง/ตำบล under the centre carries the full massing; an outlet view shows the massing around the outlet and its Land building in the data colour (legend ‘อาคารในทะเบียน Land’); the map status names snapshot rows and register outlets apart (‘สาขาในทะเบียน … (คนละหน่วย)’); an instant point frame keeps the phone sheet offset",
+      "verificationType": "harness + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC33",
+      "scenario": "Counts are totals, every number cites its source",
+      "expected": "headers count every item, lists cut at n say ‘แสดง n จาก N’ (same-brand outlets, area chains, Land buildings, Land chips and outlets); register and Land sections inside snapshot views end with dataset · source · date · boundary of their own (Land: restaurant API date, register check dates, building shapes, join date)",
+      "verificationType": "unit + harness + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC34",
+      "scenario": "Registry and evidence honesty",
+      "expected": "a multi-banner point-of-sale registry (Five Star network) is not counted or ranked as a chain and is named apart; records sharing a name show the operator (KFC × 3); a cart or secondary-source majority is flagged in chips and rows; the in-vs-around table prints a share only for a column of ≥ 30 rows and says why; the Land panel says rows are not every restaurant",
       "verificationType": "unit + harness + live",
       "result": "see VERIFICATION.md"
     }
@@ -822,6 +867,18 @@
       "id": "N17",
       "title": "Review the 18 name links whose points fall in another Land building (docs/land-join-check.json → nameLinkReview)",
       "ownerRole": "data research",
+      "priority": "P3"
+    },
+    {
+      "id": "N18",
+      "title": "Price bucket labels read ‘เกิน 100–300 บาท’ (‘over’ before a range): reword to ‘101–300 บาท’ style with the owner (pre-existing, found by the independent review)",
+      "ownerRole": "product",
+      "priority": "P3"
+    },
+    {
+      "id": "N19",
+      "title": "Phone layout: the map chip row runs under the zoom control and the last chip scrolls out of view (pre-existing, found by the independent review)",
+      "ownerRole": "frontend",
       "priority": "P3"
     }
   ]

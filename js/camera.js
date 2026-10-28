@@ -136,6 +136,7 @@ export function framePoint(map, lngLat, {preset = 'model', zoom = 16, offset = [
   const p = CAMERA[preset] || CAMERA.plan;
   setFov(map, p.fov);
   const options = {center: lngLat, zoom: Math.max(map.getZoom(), zoom), pitch: p.pitch, bearing: p.bearing, padding: shiftPadding(map, p.shift || 0), offset};
-  if (animate) map.flyTo({...options, duration}); else map.jumpTo(options);
+  // jumpTo has no offset: an instant frame is a zero-length ease, so the point still lands above a phone's sheet.
+  if (animate) map.flyTo({...options, duration}); else map.easeTo({...options, duration: 0});
   return options;
 }
