@@ -609,7 +609,7 @@
     {
       "id": "AC02",
       "scenario": "Default first Aha",
-      "expected": "Panel shows 99.7 ร้าน/ตร.กม. for สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ (136 ร้าน, 1.4 ตร.กม.), baseline 18.0, the 30-row rule and two actions; values computed, not constants",
+      "expected": "Panel shows the first Aha computed from the population, never constants — 0.6.x: 122.0 ร้าน/ตร.กม. for สุริยวงศ์ · สีลม · วังใหม่ (422 ร้านและสาขา, 3.46 ตร.กม.), baseline 9.4 over 475 covered frames, the 30-row rule and two actions (0.1–0.5 on restaurants alone: 99.7 for สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์, baseline 18.0)",
       "verificationType": "unit + browser",
       "result": "see VERIFICATION.md"
     },
@@ -679,7 +679,7 @@
     {
       "id": "AC12",
       "scenario": "Country view",
-      "expected": "below zoom 8.5 the seven provinces are filled by count classes with labels; clicking drills into the province filter; legend switches to the province classes",
+      "expected": "below zoom 8.5 every province (77 since 0.6.0; the seven covered ones before) is filled by count classes (restaurants + outlets) with labels; clicking drills into the province filter (a province outside the coverage fits its frame and shows its outlets at every zoom); legend switches to ‘จังหวัด · ร้านและสาขา’",
       "verificationType": "browser",
       "result": "see VERIFICATION.md"
     },
@@ -735,7 +735,7 @@
     {
       "id": "AC20",
       "scenario": "Data integrity",
-      "expected": "70,214 rows decode with no drop; province, price, review, rating counts reconcile with meta; boundary receipts hash; logo sha256",
+      "expected": "70,214 snapshot rows decode with no drop (68,980 sheet-1 rows + 1,234 moved rows kept apart since 0.6.0) and the population is 95,799 with the 26,819 register outlets; province, price, review, rating counts reconcile with meta; boundary receipts hash (581 subdistrict + 70 PROVINCE); logo sha256",
       "verificationType": "unit",
       "result": "see VERIFICATION.md"
     },
