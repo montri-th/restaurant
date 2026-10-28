@@ -82,11 +82,17 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 
 /* 4. Reading panel -------------------------------------------------------- */
 .panel { position: absolute; right: 0; top: 0; bottom: 0; width: var(--panel-width); background: var(--surface-card); border-left: 1px solid var(--border-default); overflow: auto; scrollbar-width: thin; z-index: 10; overscroll-behavior: contain; }
-.panel-top { position: sticky; top: 0; z-index: 2; background: var(--surface-card); padding: 12px 16px 10px; border-bottom: 1px solid var(--border-hairline); }
+.panel-top { position: sticky; top: 0; z-index: 2; background: var(--surface-card); padding: 10px 16px 8px; border-bottom: 1px solid var(--border-hairline); }
+/* Compact head (owner 2026-10-28 20:06): the product heading shows on the overview only; a detail view starts with
+   its breadcrumb and the search/filter row, so the detail itself is in view at once. */
+.panel:not([data-mode="overview"]) .dataset-heading { display: none; }
+.dataset-heading .eyebrow { margin-bottom: 2px; }
+.dataset-heading h1 { font-size: 22px; line-height: 1.2; }
+.sheet-handle { display: none; }
 .dataset-heading .intro { margin-top: 4px; font-size: 13px; line-height: 1.55; color: var(--text-secondary); }
 
 /* Breadcrumb — ประเทศไทย › จังหวัด › เขต/อำเภอ › แขวง/ตำบล (codes as in CityMETER production routes) */
-.crumbs-nav { margin-bottom: 8px; min-height: 28px; }
+.crumbs-nav { margin-bottom: 4px; min-height: 28px; }
 .crumbs { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 0; font-size: 12px; line-height: 1.4; color: var(--text-metadata); }
 .crumbs li { display: inline-flex; align-items: center; }
 .crumbs li + li::before { content: "›"; padding: 0 6px; color: var(--text-muted); }
@@ -96,9 +102,14 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .crumb-more { text-decoration: none; letter-spacing: 1px; padding: 4px 6px; }
 .crumbs .crumb-ellipsis { display: none; }
 .crumbs.is-expanded .crumb-ellipsis { display: none; }
-.filters { margin-top: 12px; display: grid; gap: 8px; }
-.search-field input { padding-left: 14px; }
-.filter-details summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.filters { margin-top: 8px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+.search-field input { padding-left: 14px; min-height: 40px; }
+/* Search and the filter toggle share one row; an opened filter set takes the full width below. */
+.filter-details { grid-column: 2; }
+.filter-details[open] { grid-column: 1 / -1; }
+.filter-details summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border: 1px solid var(--border-default); border-radius: 999px; background: var(--surface-raised); font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.filter-details summary:hover { background: var(--surface-alt); }
+.filter-details[open] summary { border-color: transparent; background: transparent; padding: 0 2px; min-height: 32px; }
 .filter-details summary::-webkit-details-marker { display: none; }
 .filter-details summary::before { content: ""; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform .15s; margin-left: 2px; }
 .filter-details[open] summary::before { transform: rotate(45deg); }
@@ -264,7 +275,9 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 
 /* 5. Map chrome ----------------------------------------------------------- */
 .map-toolbar { position: absolute; left: 8px; top: 8px; right: 52px; display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; z-index: 5; }
-.map-toolbar button { pointer-events: auto; font-size: 13px; padding: 7px 13px; min-height: 40px; background: color-mix(in srgb, var(--surface-card) 92%, transparent); }
+.map-toolbar button { pointer-events: auto; font-size: 13px; padding: 6px 12px; min-height: 38px; background: color-mix(in srgb, var(--surface-card) 92%, transparent); }
+/* A chip's pictogram (approved LDS test set) is decorative; the label carries the meaning. inline-block: never struck through. */
+.map-toolbar button .pictogram { width: 16px; height: 16px; font-size: 16px; margin-right: 4px; vertical-align: -3px; color: currentColor; }
 .map-toolbar button[aria-pressed="false"] { color: var(--text-metadata); text-decoration: line-through; text-decoration-color: var(--text-muted); }
 .map-toolbar button#toggle-3d { font-family: var(--font-mono); font-weight: 400; letter-spacing: .02em; }
 .map-toolbar button#toggle-eye[aria-pressed="false"] { text-decoration: none; }
@@ -468,7 +481,10 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 }
 @media (max-width: 760px) and (orientation: portrait) {
   :root { --panel-width: 0px; }
-  .topbar { gap: 8px; padding: 0 10px; }
+  /* Map first: chrome shrinks on a phone (owner 2026-10-28 20:06); the panel is a sheet — half height for a detail, expandable. */
+  .topbar { gap: 8px; padding: 0 10px; height: 40px; }
+  .workspace { height: calc(100dvh - 40px); }
+  .brand, .theme-control select { min-height: 36px; }
   .brand { font-size: 14px; gap: 6px; }
   .brand img { width: 22px; height: 22px; }
   .top-actions a.text-link { display: none; }
@@ -480,7 +496,9 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
     /* More chips scroll in from the right: the fade says so (the row never runs under the zoom control). */
     -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); padding-right: 24px; }
   .map-toolbar::-webkit-scrollbar { display: none; }
-  .map-toolbar button { font-size: 12px; min-height: 38px; padding: 6px 10px; flex: 0 0 auto; }
+  .map-toolbar button { font-size: 12px; min-height: 34px; padding: 5px 9px; flex: 0 0 auto; }
+  .map-toolbar button .pictogram { width: 15px; height: 15px; font-size: 15px; margin-right: 3px; }
+  .map-toolbar button#toggle-eye:disabled { display: none; }
   .map-toolbar button#mobile-panel { display: inline-flex; }
   /* --attrib-height (app.js) keeps the legend and the Aha card above the map attribution, expanded or compact. */
   .map-legend { bottom: calc(var(--bottom-panel-height) + var(--attrib-height, 32px) + 4px); max-width: calc(100% - 16px); padding: 8px 10px; gap: 4px; }
@@ -495,20 +513,26 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
   .crumbs.is-collapsible:not(.is-expanded) .crumb-ellipsis { display: inline-flex; }
   .crumbs.is-collapsible:not(.is-expanded) .crumb-ellipsis::before { content: none; padding: 0; }
   .map-aha .btn { min-height: 40px; font-size: 12px; padding: 6px 12px; }
-  .panel { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-height: 64dvh; border-left: 0; border-top: 1px solid var(--border-default); border-radius: var(--radius-md) var(--radius-md) 0 0; transform: translateY(100%); visibility: hidden; transition: transform .2s ease, visibility 0s linear .2s; z-index: 12; padding-bottom: env(safe-area-inset-bottom); }
-  .panel.is-open { transform: none; visibility: visible; transition: transform .2s ease; }
-  .panel-top { position: static; padding: 6px 14px 8px; }
-  .panel button.mobile-close { position: sticky; top: 0; z-index: 3; display: flex; width: calc(100% - 28px); margin: 8px 14px 0; justify-content: center; border-radius: var(--radius-sm); min-height: 40px; font-size: 13px; background: var(--surface-card); }
+  .panel { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-height: 50dvh; border-left: 0; border-top: 1px solid var(--border-default); border-radius: var(--radius-md) var(--radius-md) 0 0; transform: translateY(100%); visibility: hidden; transition: transform .2s ease, max-height .2s ease, visibility 0s linear .2s; z-index: 12; padding-bottom: env(safe-area-inset-bottom); }
+  .panel.is-open { transform: none; visibility: visible; transition: transform .2s ease, max-height .2s ease; }
+  .panel.is-expanded { max-height: 92dvh; }
+  .panel-top { position: static; padding: 2px 14px 8px; }
+  /* A detail on a half-height sheet starts with its breadcrumb and content; search and filters live on the overview (ข้อมูล). */
+  .panel:not([data-mode="overview"]) .filters { display: none; }
+  .sheet-handle { display: flex; position: sticky; top: 0; z-index: 3; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 10px 4px; background: var(--surface-card); }
+  .sheet-handle::before { content: ""; position: absolute; left: 50%; top: 5px; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: var(--border-emphasis); }
+  .sheet-handle button { min-height: 32px; font-size: 12px; padding: 4px 11px; background: var(--surface-card); }
+  .panel button.mobile-close { position: static; width: auto; margin: 0; }
   .map-toolbar button#mobile-panel { order: -1; }
-  .dataset-heading h1 { font-size: 20px; }
+  .dataset-heading h1 { font-size: 18px; }
   .dataset-heading .intro { display: none; }
-  .panel-view { padding: 12px 14px 20px; gap: 16px; }
+  .panel-view { padding: 10px 14px 20px; gap: 14px; }
   .insights { max-height: 56%; height: 340px; padding: 0 10px 8px; }
-  .insights.is-collapsed { height: 48px; }
-  .insight-heading { gap: 6px; min-height: 47px; }
-  .insight-heading h2 { font-size: 14px; margin-right: auto; }
+  .insights.is-collapsed { height: 42px; }
+  .insight-heading { gap: 6px; min-height: 41px; }
+  .insight-heading h2 { font-size: 13px; margin-right: auto; }
   .insight-heading .hint { display: none; }
-  .insight-heading button { padding: 5px 9px; }
+  .insight-heading button { padding: 4px 9px; min-height: 32px; }
   .results { padding: 8px 10px; max-height: min(75%, calc(100% - var(--bottom-panel-height) - 8px)); }
   .results-heading h2 { font-size: 14px; }
   .neighborhood-label, .province-label { max-width: 184px; font-size: 11px; }

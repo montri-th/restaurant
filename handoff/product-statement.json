@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.3.4",
+  "productVersion": "0.4.0",
   "updatedOn": "2026-10-28",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
@@ -225,11 +225,11 @@
       "license_or_permission": "internal research; per-outlet public source links"
     },
     {
-      "name": "Land registries (Shopping Centers & Retail Venues, Hotel, Office, Industrial Estates) + Shopping Center release building geometry + CityMETER production V4 footprints",
+      "name": "Land registries (Shopping Centers & Retail Venues, Hotel, Office, Industrial Estates) + OpenStreetMap building polygons (OpenFreeMap z14 tiles) + Shopping Center release / Hotel registry building parts",
       "owner": "Landometer · CityMETER",
       "url_or_reference": "docs/LAND_JOIN_CHECK.md; data/land.json; data/land-buildings.geojson",
       "update_frequency": "ad hoc",
-      "license_or_permission": "OSM ODbL for OSM-derived geometry; production footprints read-only"
+      "license_or_permission": "OSM ODbL (OpenFreeMap / OpenMapTiles) for building polygons and OSM-derived parts"
     }
   ],
   "spatial_granularity": "display point → แขวง/ตำบล (analytical unit) → เขต/อำเภอ → จังหวัด (production code) → ประเทศ",
@@ -246,7 +246,7 @@
     "reviews (popularity proxy)",
     "rating mean (rated rows)",
     "outlets in the chain register (separate unit)",
-    "restaurants whose points fall in / at the edge of a Land building",
+    "restaurants whose points lie in a Land building (inside or within 10 m, drawn inside)",
     "in-vs-around food types of a Land host"
   ],
   "visual_layers": [

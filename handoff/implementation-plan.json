@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.3.4",
+  "productVersion": "0.4.0",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -517,6 +517,37 @@
         "js/panel.js"
       ],
       "status": "done"
+    },
+    {
+      "id": "P14",
+      "title": "0.4.0: OpenStreetMap-only Land buildings, points within 10 m drawn inside, one provenance line per view, compact map-first layout (owner 2026-10-28 18:27 “ใช้ OSM อย่างเดียว … caveats เยอะมาก พี่ลบด้วย … จุดร้านอาหารที่ตกริม ๆ ให้รวบเข้าตึกนั้น” and 20:06 “layout หน้าให้กระชับทุก viewport … ใช้ภาพ/logo/icon … ตาม LDS เพื่อลดข้อความ”)",
+      "dependsOn": [
+        "P13"
+      ],
+      "acceptanceCriteria": [
+        "AC36",
+        "AC37",
+        "AC38",
+        "AC39"
+      ],
+      "files": [
+        "data/land-buildings.geojson",
+        "data/land.json",
+        "docs/LAND_JOIN_CHECK.md",
+        "index.html",
+        "js/app.js",
+        "js/land.js",
+        "js/massing.js",
+        "js/navigation.js",
+        "js/panel.js",
+        "js/register-layer.js",
+        "js/register-panel.js",
+        "scripts/build-land.py",
+        "styles.css",
+        "tests/massing.test.js",
+        "tests/register.test.js"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -764,6 +795,34 @@
       "expected": "register outlets are location pins (key and map), a shape outside the ten restaurant cue shapes; the map chip ‘ร้านเครือ’ (aria-pressed, ?rdots=0) hides every-outlet dots while a register or Land view keeps its selection; a register view shows the snapshot as quiet context only (no snapshot focus symbols, no province count labels over the selection) and its status line reads ‘สาขาในทะเบียนที่เลือก N ทั้งประเทศ (คนละหน่วย) · ร้านในชุดข้อมูลเป็นจุดบริบท …’; a disabled map chip stays opaque; snapshot chain and venue headers carry totals with ‘แสดง n จาก N’ ; store facts from the register and Land carry their check / join dates; the chart tray names dataset · source · date · boundary; on a phone the chip row fades at its right edge to show that more chips scroll in ; a phone keeps the chain-outlet key in view whenever outlets are drawn",
       "verificationType": "unit + harness + live",
       "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC36",
+      "scenario": "Land buildings are OpenStreetMap only and never collide with the massing",
+      "expected": "every land_host_building outline is an OpenFreeMap z14 building polygon (source openfreemap_osm, osm_id set; no CityMETER V4 footprint in land-buildings.geojson); a host's building is the polygon holding its point, else the nearest within 10 m, else the polygon overlapping the registry's reviewed OSM footprint most (IoU ≥ 0.3); registry LOD2 parts draw inside the OSM outline only when the registry footprint is the same building (IoU ≥ 0.5); in a Land or outlet view the massing drops its copy of the Land polygon (ringsOverlap on interior points; identical rings are hidden) so one building is drawn once, in the data colour, with the OSM towers beside it",
+      "verificationType": "unit + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC37",
+      "scenario": "Within 10 m counts as in, and is drawn inside",
+      "expected": "land.json publishes in relations only (rel 0; d = the source point's distance to the outline, 0–10 m); points that lay outside within 10 m get a display position ≥ 1.5 m inside the outline (snaps.rows / snaps.chains) applied at load; panels and tiles say ร้านในอาคาร / สาขาร้านเครือ with no ติดขอบ bucket; the store and outlet panels keep the source coordinate and say the pin is drawn inside; near (10–100 m) stays report-only",
+      "verificationType": "unit + harness + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC38",
+      "scenario": "One provenance line per view, no repeated caveats",
+      "expected": "every register / Land view or section ends with exactly one dataset · source · date · boundary line plus at most one clause naming the unit (REGISTER_RULE / LAND_RULE); the words ไม่ได้ยืนยัน / ไม่นำมาบวกกัน / ละเอียดราว / คนละหน่วย appear at most once per view; legend, help, chips and status carry no unit caveat; the app still never says ตั้งอยู่ใน, tenancy or floor",
+      "verificationType": "unit + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC39",
+      "scenario": "Compact, map-first layout on every viewport",
+      "expected": "phone portrait: header 40 px, map chips 34 px with LDS pictograms (กรุงเทพฯ = province, พื้นที่ = area, ร้านเครือ = brand; มุมสถาปนิก hidden while disabled), the sheet opens at half height (≤ 50 dvh) for a detail with ขยาย (92 dvh) and แผนที่ (close), a detail sheet starts with its breadcrumb and content (product heading and search/filters only on the overview), the attribution is folded behind its (i) button after load, the charts tray is 42 px when collapsed; desktop: product heading only on the overview, search and ตัวกรอง on one row; quiet register pins are small and translucent at city zoom and grow into pins from zoom 14.5; a selection stays opaque",
+      "verificationType": "harness + live (desktop and 390 px, light and dark)",
+      "result": "see VERIFICATION.md"
     }
   ],
   "developerWorkflow": [
@@ -889,6 +948,12 @@
       "id": "N19",
       "title": "Phone layout: the map chip row scrolls under a right-edge fade (0.3.3); review whether the less-used chips (มุมสถาปนิก, วิธีใช้) belong in a menu so ‘ร้านเครือ’ is always in view",
       "ownerRole": "frontend",
+      "priority": "P3"
+    },
+    {
+      "id": "N20",
+      "title": "Land hosts with no OpenStreetMap building at their point (markets, night markets, fuel stations, small shops) have no join; a reviewed host geometry in the registry would attach them — research decision, not a web fix",
+      "ownerRole": "research",
       "priority": "P3"
     }
   ]

@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.3.4",
+  "productVersion": "0.4.0",
   "updatedOn": "2026-10-28",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
@@ -67,9 +67,16 @@
     "release030": [
       "two sheets, one snapshot: Sheet 1 (68,980) + the 1,234 rows the owner moved to the chain register on 2026-10-25, each snapshot_observation_id once; moved rows carry register (1 held / 2 with correspondence) and registerOutlets",
       "national chain register (data/chains.json): 26,819 outlet_ids, 756 brands with outlets, 311 company records; on the same map as the snapshot (dots from zoom 11, a register view's selection at every zoom); province by point-in-polygon or register text; แขวง/ตำบล only in the covered provinces",
-      "Land join (data/land.json, data/land-buildings.geojson): restaurant display points and register outlets in / at the edge of the buildings of Land hosts; in-vs-around compare; industrial estates not compared until boundaries are accepted",
-      "LOD > 1 wins (owner 2026-10-28): registry building parts drawn instead of one LOD1 block, for Land buildings (18) and for sheet venues linked by CityMETER uuid (MBK Center)",
+      "Land join (data/land.json, data/land-buildings.geojson): restaurant display points and register outlets in the buildings of Land hosts (inside or within 10 m, drawn inside); in-vs-around compare; industrial estates not compared until boundaries are accepted",
+      "LOD > 1 wins (owner 2026-10-28): registry building parts drawn inside the OpenStreetMap outline instead of one LOD1 block, for Land buildings (15) and for sheet venues linked by CityMETER uuid (MBK Center)",
       "extras load after the first paint (or before it for a deep link into their views); failure leaves the snapshot unchanged"
+    ],
+    "release040": [
+      "Land buildings are OpenStreetMap only (owner 2026-10-28 18:27): the OpenFreeMap z14 building polygon the map draws — holding the host point, else nearest within 10 m, else the best overlap with the registry's reviewed OSM footprint; no CityMETER V4 footprint; registry geometry only picks the polygon and supplies LOD2 parts (15 buildings, 64 parts)",
+      "a Land building and its OSM twin never both draw: the massing drops its copy by interior-point overlap (identical rings included) and keeps the towers nested inside a LOD1 outline",
+      "within 10 m counts as in and is drawn inside: land.json snaps carry display positions ≥ 1.5 m inside the outline (595 restaurants, 299 outlets); source coordinates stay in the data files and panels",
+      "one provenance line per register / Land view (dataset · source · date · boundary + the unit once); no repeated caveats; labels ร้านในอาคาร / สาขาร้านเครือ",
+      "compact layout (owner 20:06): phone header 40 px, map chips with LDS pictograms, a half-height sheet with ขยาย/แผนที่ that shows a detail first (product heading only on the overview, search/filters only on the overview on phones), attribution folded behind its button; quiet register pins small and translucent at city zoom"
     ]
   },
   "rowScopes": {
@@ -694,23 +701,24 @@
         "hotel": 2266,
         "office": 378
       },
-      "hostsPublished": 1478,
-      "buildings": 1399,
-      "features": 1492,
-      "lod2Buildings": 18,
-      "lod2Parts": 93,
+      "hostsPublished": 1036,
+      "buildings": 942,
+      "features": 1006,
+      "lod2Buildings": 15,
+      "lod2Parts": 64,
       "snapshotPoints": {
-        "in": 1882,
-        "edge": 932,
-        "nested": 100
+        "in": 2239,
+        "inFromWithin10m": 595,
+        "nested": 11
       },
       "registerPoints": {
-        "in": 1741,
-        "edge": 389,
-        "nested": 182
+        "in": 2038,
+        "inFromWithin10m": 299,
+        "nested": 21
       },
       "checkedOn": "2026-10-28",
-      "report": "docs/LAND_JOIN_CHECK.md + docs/land-join-check.json"
+      "report": "docs/LAND_JOIN_CHECK.md + docs/land-join-check.json",
+      "source": "openfreemap_osm (OpenFreeMap planet 20261025_080012_pt z14 building layer)"
     }
   },
   "visualSystem": {
@@ -865,7 +873,7 @@
     },
     {
       "id": "INV30",
-      "rule": "Land relations are display-time candidates (in / edge ≤ 10 m); wording จุดตกในอาคาร / ติดขอบอาคาร, never ตั้งอยู่ใน; they change no count"
+      "rule": "Land relations are display-time candidates: in = inside the OpenStreetMap outline or within 10 m (such points are drawn inside it; source coordinates kept); wording ในอาคาร / รอบอาคาร, never ตั้งอยู่ใน; they change no count"
     },
     {
       "id": "INV31",
@@ -982,7 +990,7 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261028-r6 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
+    "cacheTag": "?v=20261028-r7 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
     "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
   },
   "registerContract": {
@@ -1003,21 +1011,21 @@
   },
   "landJoinContract": {
     "hosts": "Land registries R11: Shopping Centers & Retail Venues, Hotel, Office (points in the covered subdistricts); Industrial Estates not compared until boundaries are accepted (DL-2669875b0346b95e63be)",
-    "building": "registry reviewed geometry (Shopping Center release by venue_id; Hotel/Office 15_BUILDING_MASS) else CityMETER production V4 footprint containing the host point (smallest) or within 3 m; one OSM footprint = one building whichever registry names it",
+    "building": "the OpenStreetMap building polygon of the OpenFreeMap z14 tiles the map draws: holding the host point (nested polygons: the registry's reviewed footprint decides, IoU ≥ 0.3; else shopping = largest, hotel/office = smallest), else the nearest within 10 m, else the polygon overlapping the registry footprint most (IoU ≥ 0.3); registry LOD2 parts inside the outline when the registry footprint is the same building (IoU ≥ 0.5, parts ≥ 90 % inside); no CityMETER V4 footprint (owner 2026-10-28 18:27); one OSM polygon = one building whichever registry names it",
     "relations": {
-      "in": "inside the outline",
-      "edge": "≤ 10 m from it",
-      "near": "≤ 100 m (report only)",
+      "in": "inside the outline or ≤ 10 m from it (the coordinate's own uncertainty); land.json snaps give such points a display position ≥ 1.5 m inside",
+      "near": "10–100 m (report only; the app measures the ring itself)",
       "nested": "a point inside several nested buildings relates to each (smallest first)"
     },
-    "panel": "in-vs-around food types (in/edge vs 10–100 m ring of the filtered rows), register outlets in the building, co-hosts of the same building; dataset · source · date · boundary",
-    "wording": "จุดตกในอาคาร / ติดขอบอาคาร / รอบอาคาร — never ตั้งอยู่ใน, tenancy or floor; no count changes",
+    "panel": "in-vs-around food types (in vs 10–100 m ring of the filtered rows), register outlets in the building, co-hosts of the same building; one provenance line: dataset · source · date · boundary + LAND_RULE",
+    "wording": "ในอาคาร (= the point lies in the outline) / รอบอาคาร — never ตั้งอยู่ใน, tenancy or floor; no count changes; no ติดขอบ bucket",
     "registryLinks": [
       "DL-fdc869a77aca940153dd",
       "DL-8e308daca1bf455d9375",
       "DL-845a42d1d4c939aa2590",
       "DL-2669875b0346b95e63be"
-    ]
+    ],
+    "massing": "the massing drops its copy of the Land polygon (ringsOverlap on interior points) and keeps towers nested inside a LOD1 outline (keepNested); LOD2 outlines and venue buildings drop everything they overlap"
   },
   "lodContract": {
     "decision": "owner 2026-10-28 15:24: “รูปทรงอาคารถ้ามี LOD > 1 เช่นใน shoppingcenter ให้ใช้ที่ละเอียดกว่าแทน”",

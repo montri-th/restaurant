@@ -61,7 +61,7 @@ import {installRestaurantPins, PIN_LAYERS} from './pins.js';
 import {installVenueBuildings, hostedVenueIds, HOST_LAYERS, LAND_LAYERS} from './buildings.js';
 import {decodeRegister, brandsIn, provincesIn, outletMix, searchRegister} from './register.js';
 import {installRegisterLayer, REGISTER_MIN_ZOOM} from './register-layer.js';
-import {decodeLand, landOfRow, landOfOutlet, landProfile, hostsOf, aroundGeometry, geometryBounds} from './land.js';
+import {decodeLand, applyOutletDisplay, applyRowDisplay, landOfRow, landOfOutlet, landProfile, hostsOf, aroundGeometry, geometryBounds} from './land.js';
 import {renderRegisterSummary, renderRegisterInArea, renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderChain, renderCompany, renderOutlet, renderLand, setSourceDates} from './register-panel.js';
 import {installVenueXray} from './venue-xray.js';
 import {configureBrandLogos, brandLogoMarkup} from './brand-logos.js';
@@ -119,7 +119,8 @@ const bottomSpace = () => ($('insights')?.getBoundingClientRect().height ?? 0) +
 const labelBottomSpace = () => { const panel = document.querySelector('.map-panel'); return bottomSpace() + (panel ? parseFloat(getComputedStyle(panel).getPropertyValue('--attrib-height')) || 0 : 0); };
 const activeFilterCount = f => FIELDS.filter(k => f[k]).length;
 const overviewPanel = () => ({mode: 'overview', id: ''});
-const sheetOffset = () => (mobilePortrait() ? [0, -Math.round(window.innerHeight * 0.2)] : [0, 0]);
+/** Half-height sheet on a phone: frame a point above it (a quarter of the viewport up). */
+const sheetOffset = () => (mobilePortrait() ? [0, -Math.round(window.innerHeight * ($('panel').classList.contains('is-expanded') ? 0.34 : 0.22))] : [0, 0]);
 const announce = text => { $('announcement').textContent = text; };
 const theme = () => document.documentElement.dataset.theme;
 const focusMode = () => (state.focusAreaIds.length ? 'explicit' : state.focusIds.length ? 'auto' : 'none');
@@ -286,6 +287,10 @@ function loadExtras() {
     if (land.status === 'fulfilled' && landGeo.status === 'fulfilled' && validFeatureCollection(landGeo.value)) {
       try { state.landGeo = landGeo.value; state.land = decodeLand(land.value, landGeo.value); } catch (e) { state.land = null; console.warn('Land join', e); }
     } else console.warn('Land join', land.reason || landGeo.reason || 'invalid building outlines');
+    // Points that lay within 10 m of their Land building are drawn inside it (owner 2026-10-28 “จุดร้านอาหารที่ตกริม ๆ
+    // ให้รวบเข้าตึกนั้น”): outlets before the register layer is built, rows before the map re-sends them (`snapped`).
+    if (state.register && state.land) applyOutletDisplay(state.land, state.register.byId);
+    state.rowsSnapped = state.land ? applyRowDisplay(state.land, state.rowById) : 0;
     linkExtras();
     state.extrasState = state.register || state.land ? 'ready' : 'failed';
     setSourceDates({snapshot: state.data.meta?.retrievedOn || state.data.meta?.asOf || '', registerFrom: state.register?.meta.checkedFrom || '', registerTo: state.register?.meta.checkedTo || '', land: state.land?.meta?.checkedOn || ''});
@@ -315,11 +320,11 @@ function linkExtras() {
   }
 }
 
-/** Snapshot rows of the filtered scope per Land building (in or at the edge), cached per scope. */
+/** Snapshot rows of the filtered scope per Land building, cached per scope. */
 function landScopeCounts() {
   if (!state.land) return new Map();
   if (landScopeCounts.scope === state.scopeRows) return landScopeCounts.value;
-  // Every building a point falls in or touches (a point inside nested buildings counts for each of them).
+  // Every building a point falls in (a point inside nested buildings counts for each of them).
   const scope = scopeKeySet(), m = new Map();
   for (const [b, keys] of state.land.rowsByBuilding) { let n = 0; for (const k of keys) if (scope.has(k)) n++; if (n) m.set(b, n); }
   landScopeCounts.scope = state.scopeRows; landScopeCounts.value = m;
@@ -381,7 +386,7 @@ function syncList() {
   const rows = tableRows(), b = currentBuilding(), v = rows === state.rows || b ? null : currentVenue();
   $('result-count').textContent = num(rows.length);
   const land = state.panel.mode === 'land' ? state.land?.hostById.get(state.panel.id) : null;
-  $('results-title').textContent = land ? `ร้านที่จุดตกในอาคารของ ${land.name}` : registerMode() ? 'ร้านตามตัวกรอง' : b ? 'ร้านที่จุดตกในอาคารนี้' : v ? `ร้านที่ชื่ออ้างถึง ${v.name}` : 'ร้านตามตัวกรอง';
+  $('results-title').textContent = land ? `ร้านในอาคารของ ${land.name}` : registerMode() ? 'ร้านตามตัวกรอง' : b ? 'ร้านที่จุดตกในอาคารนี้' : v ? `ร้านที่ชื่ออ้างถึง ${v.name}` : 'ร้านตามตัวกรอง';
   if (syncList.last !== rows) state.page = 0;
   syncList.last = rows;
   renderTable();
@@ -491,7 +496,7 @@ function buildingExtras() {
   return best ? renderLandHostsIn([landEntry(best[0])], {title: 'อาคารในทะเบียน Land ที่จุดของร้านเหล่านี้ตก', boundary: 'อาคารที่จุดของร้านในแผงนี้ตกมากที่สุด'}) : '';
 }
 
-/** Store: the Land building its point falls in / touches, and its links to the chain register. */
+/** Store: the Land building its point falls in, and its links to the chain register. */
 function storeExtras(id) {
   const r = rowById(id);
   if (!r) return {};
@@ -527,7 +532,7 @@ function renderExtraView(mode, id) {
     const h = currentLand();
     if (!h) return extrasNote();
     const profile = landProfile(state.land, h, {rowsByKey: state.rowById, outletsById: reg?.byId, scopeKeys: scopeKeySet()});
-    const inside = new Set([...profile.rows.in, ...profile.rows.edge].map(r => r.id));
+    const inside = new Set(profile.rows.in.map(r => r.id));
     const around = profile.feature ? aroundGeometry(profile.feature.geometry, state.scopeRows, 100, inside) : [];
     return renderLand({land: state.land, profile, around, groups: state.data.groups, venue: state.landVenue.get(h.id) || null, index: state.index});
   }
@@ -595,6 +600,7 @@ function renderPanel(summary = summarize(state.rows)) {
   }
   view.innerHTML = html;
   view.dataset.mode = mode;
+  $('panel').dataset.mode = mode; // the product heading shows on the overview only (compact head, owner 2026-10-28)
   const key = `${mode}:${id}:${$('province').value}`;
   if (key !== renderPanel.lastKey) $('panel').scrollTop = 0;
   renderPanel.lastKey = key;
@@ -764,7 +770,7 @@ function selectOutlet(id, {fromMap = false} = {}) {
 }
 function selectLand(id, {fromMap = false} = {}) {
   const h = state.land?.hostById.get(id);
-  if (h) openExtra({mode: 'land', id}, {fromMap, text: `${h.name} · ${num(landRows(id).length)} ร้านจุดตกในหรือติดขอบอาคาร`});
+  if (h) openExtra({mode: 'land', id}, {fromMap, text: `${h.name} · ${num(landRows(id).length)} ร้านในอาคาร`});
 }
 
 /** Points of the register selection on the map (outlets with a selected coordinate). */
@@ -783,11 +789,11 @@ function registerSelection() {
   return {show: false};
 }
 
-/** The Land host whose building an open outlet's point falls in or touches (drawn in the data colour), or null. */
+/** The Land host whose building an open outlet's point falls in (drawn in the data colour), or null. */
 function outletLand() {
   if (state.panel.mode !== 'outlet' || !state.land) return null;
   const rel = landOfOutlet(state.land, state.panel.id);
-  return rel && (rel.rel === 'in' || rel.rel === 'edge') ? rel.hosts[0] || null : null;
+  return rel && rel.rel === 'in' ? rel.hosts[0] || null : null;
 }
 
 /** Massing focus around an open outlet: its Land building, else a 250 m box around the point. */
@@ -1132,7 +1138,7 @@ function cameraPadding() {
   const aha = $('map-aha'), legend = $('map-legend');
   const chromeTop = !aha.hidden && aha.offsetHeight ? aha.getBoundingClientRect().top : legend.offsetHeight ? legend.getBoundingClientRect().top : null;
   let bottom = chromeTop != null ? height - (chromeTop - mapTop) + 12 : panel + edge;
-  if (mobilePortrait() && $('panel').classList.contains('is-open')) bottom = Math.max(bottom, Math.round(window.innerHeight * 0.64) - (window.innerHeight - height - mapTop) + 8);
+  if (mobilePortrait() && $('panel').classList.contains('is-open')) bottom = Math.max(bottom, Math.round($('panel').getBoundingClientRect().height) - (window.innerHeight - height - mapTop) + 8);
   return {top: Math.max(edge, toolbar.bottom - mapTop + 12), left: edge, right: edge, bottom: Math.min(height * 0.7, bottom)};
 }
 
@@ -1282,7 +1288,11 @@ function updateSpatialLayers() {
   const anchorFeatures = focusFeatures.length ? focusFeatures : (state.selectedDistrict && !reg ? [districtById(state.selectedDistrict)?.feature].filter(Boolean) : []);
   const anchors = region ? [[(region[0][0] + region[2][0]) / 2, (region[0][1] + region[2][1]) / 2]]
     : anchorFeatures.length ? anchorFeatures.map(f => featureBounds(f, maplibregl.LngLatBounds).getCenter().toArray()) : [state.map.getCenter().toArray()];
-  state.massing?.update({regions: region ? [region] : focusFeatures.flatMap(outerRings), hosts: [...hostFeatures, ...landFeatures].flatMap(outerRings), anchors, enabled: true, city: state.view3d, zoom: state.map.getZoom(), latitude: state.map.getCenter().lat})?.catch(e => console.warn('Massing', e));
+  // Host rings for the massing: venue buildings and LOD2 Land outlines/parts drop every tile building they overlap; a
+  // LOD1 Land outline (one OpenStreetMap block) keeps the towers drawn inside it (keepNested).
+  const massingHosts = [...hostFeatures.flatMap(outerRings),
+    ...landFeatures.flatMap(f => outerRings(f).map(ring => (f.properties?.geometry_role === 'land_host_building' && !f.properties?.pieces ? {ring, keepNested: true} : ring)))];
+  state.massing?.update({regions: region ? [region] : focusFeatures.flatMap(outerRings), hosts: massingHosts, anchors, enabled: true, city: state.view3d, zoom: state.map.getZoom(), latitude: state.map.getCenter().lat})?.catch(e => console.warn('Massing', e));
   state.massing?.setScene(cameraPreset() === 'eye' ? 'eye' : 'default', venueTargets());
   applyJoin();
   const hostColors = () => { const s = getComputedStyle(document.documentElement); return {fill: s.getPropertyValue('--map-active-layer').trim(), stroke: s.getPropertyValue('--map-selected-stroke').trim()}; };
@@ -1405,7 +1415,7 @@ function installSpatialLayers() {
       // Two units, each with its own scope and never summed: in a register view the selection (national) and the
       // snapshot as context; elsewhere the snapshot's focus rows on screen and its context.
       $('map-status').textContent = registerMode()
-        ? `สาขาในทะเบียนที่เลือก ${num(state.registerShown)} ทั้งประเทศ (คนละหน่วย) · ร้านในชุดข้อมูลเป็นจุดบริบท ${num(stats.contextRows)}`
+        ? `สาขาที่เลือก ${num(state.registerShown)} ทั้งประเทศ · ร้านในชุดข้อมูลเป็นจุดบริบท ${num(stats.contextRows)}`
         : `${num(stats.focusInView)} ร้านในจอ${logos} · บริบท ${num(stats.contextRows)}`;
     },
   });
@@ -1452,6 +1462,12 @@ function installExtraLayers() {
  * expanded on load, compact after the first drag — becomes --attrib-height, which keeps the phone
  * legend and Aha card above it.
  */
+function foldAttribution(map) {
+  const el = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
+  if (!el || !el.classList.contains('maplibregl-compact')) return;
+  el.classList.remove('maplibregl-compact-show');
+  el.querySelector('.maplibregl-ctrl-attrib-button')?.setAttribute('aria-pressed', 'false');
+}
 function trackAttribution(map) {
   const panel = map.getContainer().closest('.map-panel');
   const el = map.getContainer().querySelector('.maplibregl-ctrl-attrib');
@@ -1485,6 +1501,9 @@ function initMap() {
     });
     state.map.on('mouseout', () => { state.areaLayers?.hover(''); });
     state.map.on('style.load', installSpatialLayers);
+    // Phones: the attribution starts folded behind its (i) button (MapLibre unfolds it until the first move);
+    // the credits stay one tap away and the map keeps its space (owner 2026-10-28 20:06).
+    state.map.once('load', () => { if (mobilePortrait()) foldAttribution(state.map); });
     state.map.on('click', onMapClick);
     state.map.on('mousemove', onMapMove);
     state.map.on('error', e => console.warn('Map resource', e.error?.message || e));
@@ -1534,15 +1553,23 @@ function syncEyeToggle() {
 }
 
 /* ---------- mobile sheet ---------- */
-function openMobilePanel() {
+function openMobilePanel({expanded = false} = {}) {
   if (!mobilePortrait()) return;
   $('panel').classList.add('is-open');
   $('mobile-panel').setAttribute('aria-expanded', 'true');
   $('map-aha').hidden = true;
+  setSheetExpanded(expanded);
+}
+/** The phone sheet has two heights: half (the map stays in view) and expanded (reading a long panel). */
+function setSheetExpanded(expanded) {
+  const b = $('expand-mobile-panel');
+  $('panel').classList.toggle('is-expanded', Boolean(expanded));
+  if (b) { b.setAttribute('aria-expanded', String(Boolean(expanded))); b.textContent = expanded ? 'ย่อ' : 'ขยาย'; }
 }
 function closeMobilePanel() {
   const wasOpen = $('panel').classList.contains('is-open');
   $('panel').classList.remove('is-open');
+  setSheetExpanded(false);
   $('mobile-panel').setAttribute('aria-expanded', 'false');
   if (mobilePortrait()) {
     $('mobile-panel').focus({preventScroll: true});
@@ -1671,6 +1698,7 @@ function wireEvents() {
   };
   $('mobile-panel').onclick = () => { $('panel').classList.contains('is-open') ? closeMobilePanel() : openMobilePanel(); };
   $('close-mobile-panel').onclick = closeMobilePanel;
+  $('expand-mobile-panel').onclick = () => setSheetExpanded(!$('panel').classList.contains('is-expanded'));
   document.querySelector('.skip').onclick = () => { openMobilePanel(); $('dataset-title').focus(); };
   $('toggle-insights').onclick = () => openInsights($('insight-content').hidden);
   if (typeof ResizeObserver === 'function') new ResizeObserver(syncBottomPanel).observe($('insights')); else window.addEventListener('resize', syncBottomPanel);
@@ -1723,7 +1751,7 @@ async function init() {
 
     // A link into a register or Land view waits for that data; otherwise the snapshot paints first.
     const opensExtra = EXTRA_PARAMS.some(k => new URLSearchParams(location.search).has(k));
-    if (opensExtra) await loadExtras();
+    if (opensExtra) { await loadExtras(); state.rowsSnapped = 0; } // the first update() below sends the moved points
     restoreFromURL();
     $('toggle-3d').setAttribute('aria-pressed', String(state.view3d));
     syncEyeToggle();
@@ -1735,7 +1763,10 @@ async function init() {
     window.dispatchEvent(new CustomEvent('citymeter:ready'));
     startMap();
     loadExtras().then(() => {
-      if (installExtraLayers()) updateSpatialLayers();
+      installExtraLayers();
+      // Rows moved into their Land building need a fresh scope array so the map re-sends every point once.
+      if (state.rowsSnapped) { state.scopeKey = ''; update(); return; }
+      updateSpatialLayers();
       renderPanel();
     }).catch(e => console.warn('Extras', e));
   } catch (e) {

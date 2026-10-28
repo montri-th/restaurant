@@ -1,6 +1,6 @@
 # CityMETER Restaurants — Developer Handoff
 
-รุ่นเผยแพร่ 0.3.4 · 28 ต.ค. 2569 · ร้านดึงและตรวจ 22 ต.ค. 2569 · ทะเบียนร้านเครือตรวจ 25–28 ต.ค. · Land join 28 ต.ค. 2569
+รุ่นเผยแพร่ 0.4.0 · 28 ต.ค. 2569 · ร้านดึงและตรวจ 22 ต.ค. 2569 · ทะเบียนร้านเครือตรวจ 25–28 ต.ค. · Land join 28 ต.ค. 2569
 
 เริ่มอ่าน `source/handoff/README.md` จากนั้น Product Statement (`source/PRODUCT_STATEMENT.md` + `source/handoff/product-statement.json`), Product Brief และ Implementation Plan ในโฟลเดอร์ `source/handoff` ทั้ง `.md` และ `.json` ใช้คู่กัน
 

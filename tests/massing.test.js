@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {parseVectorTile, tileToLonLat} from '../js/mvt.js';
-import {pointInRing, signedArea} from '../js/geometry.js';
-import {shapeTile, tilesForRegions, roundingRadiusM, encloseOffsetM, outerRings, installMassing, focusFeatureId, HEIGHT_LIFT_M, MAX_TILES, CITY_LAYER, FOCUS_LAYER, FOCUS_SOURCE, OCCLUDER_LAYER, VENUE_LAYER, SCENE, FADE_NEAR_M, FADE_FAR_M} from '../js/massing.js';
+import {pointInRing, signedArea, ringsIntersect} from '../js/geometry.js';
+import {shapeTile, tilesForRegions, roundingRadiusM, encloseOffsetM, outerRings, installMassing, focusFeatureId, interiorPoint, ringsOverlap, ringNestedIn, HEIGHT_LIFT_M, MAX_TILES, CITY_LAYER, FOCUS_LAYER, FOCUS_SOURCE, OCCLUDER_LAYER, VENUE_LAYER, SCENE, FADE_NEAR_M, FADE_FAR_M} from '../js/massing.js';
 
 const tile = {z: 14, x: 12767, y: 7560};
 const layer = parseVectorTile(readFileSync(new URL('./fixtures/mvt-sample.pbf', import.meta.url))).layers.building;
@@ -70,6 +70,39 @@ test('host overlap removes the OSM twin from the focus tier and reports its id f
   assert.ok(!out.footprints.some(b => b.osmId === 101), 'a host-covered building is not joined as OSM (the host geometry is)');
   assert.deepEqual([...out.hiddenIds], [101], 'hidden in the city tier by its tile (OSM) id');
   assert.equal(out.dropped, 1);
+});
+
+test('a host that is the very same polygon as the tile building still hides it (OpenFreeMap Land buildings, 2026-10-28)', () => {
+  // Identical rings: on-boundary vertex tests are undecidable and collinear edges never cross — the old test said
+  // "no overlap" for a diamond and for an irregular quad, so the OSM twin stayed and z-fought the Land building.
+  const diamond = [[5, 0], [10, 5], [5, 10], [0, 5], [5, 0]], quad = [[0, 0], [10, 2], [12, 9], [3, 10], [0, 0]];
+  assert.ok(!ringsIntersect(diamond, diamond) && !ringsIntersect(quad, quad), 'fixture: the vertex/crossing test misses identical rings');
+  assert.ok(ringsOverlap(diamond, diamond) && ringsOverlap(quad, quad.map(p => [p[0], p[1]])));
+  assert.ok(pointInRing(interiorPoint(diamond), diamond) && pointInRing(interiorPoint(quad), quad));
+  // Adjacent buildings sharing an edge do not overlap; nested ones do (either way round).
+  const left = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]], right = [[10, 0], [20, 0], [20, 10], [10, 10], [10, 0]], inner = [[2, 2], [4, 2], [4, 4], [2, 4], [2, 2]];
+  assert.ok(!ringsOverlap(left, right) && ringsOverlap(left, inner) && ringsOverlap(inner, left));
+  // In a tile: the host ring built from the tile polygon's own vertices (lon/lat, 7 decimals as published) drops it.
+  const ring = layer.features.find(x => x.id === 101).rings()[0].map(([px, py]) => tileToLonLat(px, py, tile).map(v => Math.round(v * 1e7) / 1e7));
+  const r = roundingRadiusM(16), d = encloseOffsetM(r);
+  const out = shapeTile(tile, layer, {regions: [whole], hosts: [ring], radiusM: r, offsetM: d});
+  assert.ok(!out.features.some(f => f.properties.osm_id === 101) && out.hiddenIds.has(101));
+  assert.ok(out.features.some(f => f.properties.osm_id === 102), 'the neighbours stay');
+  // A LOD1 Land outline keeps a building nested inside it (a tower on a podium); its twin and straddlers still go.
+  const podium = [[0, 0], [100, 0], [100, 100], [0, 100], [0, 0]], tower = [[30, 30], [50, 30], [50, 50], [30, 50], [30, 30]], straddle = [[80, 40], [130, 40], [130, 60], [80, 60], [80, 40]];
+  assert.ok(ringNestedIn(tower, podium) && !ringNestedIn(podium, podium) && !ringNestedIn(straddle, podium) && !ringNestedIn(podium, tower));
+  const sq = (x, y, w) => [[x, y], [x + w, y], [x + w, y + w], [x, y + w], [x, y]];
+  const nested = {extent: 4096, features: [
+    {type: 3, id: 1, properties: {render_height: 22}, rings: () => [sq(1000, 1000, 400)]},
+    {type: 3, id: 2, properties: {render_height: 120}, rings: () => [sq(1100, 1100, 80)]},
+    {type: 3, id: 3, properties: {render_height: 30}, rings: () => [sq(1300, 1150, 300)]},
+  ]};
+  const host = sq(1000, 1000, 400).map(([px, py]) => tileToLonLat(px, py, tile));
+  const keep = shapeTile(tile, nested, {regions: [whole], hosts: [{ring: host, keepNested: true}], radiusM: 3, offsetM: 1.2});
+  assert.deepEqual(keep.features.map(f => f.properties.osm_id), [2], 'twin (1) and straddler (3) dropped, the nested tower (2) stays');
+  assert.deepEqual([...keep.hiddenIds].sort(), [1, 3]);
+  const plain = shapeTile(tile, nested, {regions: [whole], hosts: [host], radiusM: 3, offsetM: 1.2});
+  assert.equal(plain.features.length, 0, 'a plain host ring (venue building, LOD2 outline) drops everything it overlaps');
 });
 
 test('tile planning is bounded and rounding radius follows zoom within 3–12 m', () => {

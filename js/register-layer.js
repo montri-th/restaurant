@@ -38,8 +38,12 @@ export function registerFilter({brand = null, company = null, ids = null} = {}) 
 /** Pin sizes: a register selection reads at country zoom; every outlet in the snapshot's views stays smaller than a restaurant symbol. */
 const SIZE = Object.freeze({
   selection: ['interpolate', ['linear'], ['zoom'], 4, 0.32, 9, 0.48, 13, 0.7, 16, 0.92, 18, 1.15],
-  quiet: ['interpolate', ['linear'], ['zoom'], 11, 0.36, 14, 0.5, 16, 0.62, 18, 0.8],
+  // Quiet (every outlet, snapshot views): a small mark at city zoom that grows into a pin as the streets appear —
+  // thousands of outlets never flood a phone screen (owner 2026-10-28 “ให้แสดงผลให้คลีน ๆ”).
+  quiet: ['interpolate', ['linear'], ['zoom'], 11, 0.2, 13, 0.3, 14.5, 0.46, 16, 0.6, 18, 0.8],
 });
+/** Quiet marks fade in with zoom; a selection is always fully opaque. */
+const OPACITY = Object.freeze({selection: 1, quiet: ['interpolate', ['linear'], ['zoom'], 11, 0.55, 14, 0.8, 15.5, 1]});
 
 /** Signed distance (px, negative inside) to a convex polygon given counter-clockwise or clockwise. */
 function polygonDistance(px, py, pts) {
@@ -95,7 +99,7 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
   // One pin per outlet: overlap allowed and placement ignored, so no outlet is ever dropped or merged.
   map.addLayer({id: DOTS, type: 'symbol', source: SOURCE, filter: NONE,
     layout: {visibility: 'none', 'icon-image': ICON, 'icon-size': SIZE.selection, 'icon-offset': [0, -PIN_TIP], 'icon-allow-overlap': true, 'icon-ignore-placement': true},
-    paint: {'icon-color': c.fill, 'icon-halo-color': c.halo, 'icon-halo-width': 1.2}}, before);
+    paint: {'icon-color': c.fill, 'icon-halo-color': c.halo, 'icon-halo-width': 1.2, 'icon-opacity': OPACITY.selection}}, before);
 
 
   let visible = false, selected = null, markers = [], disposed = false, filter = NONE, logosOn = true;
@@ -136,7 +140,7 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
     const col = colors();
     for (const id of [DOTS, SELECTED, HIT]) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
     for (const id of [DOTS, HIT]) if (map.getLayer(id)) { map.setLayerZoomRange(id, Math.max(0, minZoom), 24); map.setFilter(id, filter); }
-    if (map.getLayer(DOTS)) { map.setLayoutProperty(DOTS, 'icon-size', logosOn ? SIZE.selection : SIZE.quiet); map.setPaintProperty(DOTS, 'icon-color', col.fill); map.setPaintProperty(DOTS, 'icon-halo-color', col.halo); }
+    if (map.getLayer(DOTS)) { map.setLayoutProperty(DOTS, 'icon-size', logosOn ? SIZE.selection : SIZE.quiet); map.setPaintProperty(DOTS, 'icon-opacity', logosOn ? OPACITY.selection : OPACITY.quiet); map.setPaintProperty(DOTS, 'icon-color', col.fill); map.setPaintProperty(DOTS, 'icon-halo-color', col.halo); }
     if (map.getLayer(SELECTED)) { map.setFilter(SELECTED, selected == null ? NONE : ['==', ['get', 'i'], selected]); map.setPaintProperty(SELECTED, 'circle-stroke-color', col.selected); }
     layoutLogos();
     if (visible) relayout();

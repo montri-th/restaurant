@@ -1,6 +1,6 @@
 # Data and method
 
-ข้อมูลและวิธีของ CityMETER · Restaurants รุ่น 0.3.4 (28 ตุลาคม 2569; ร้านชุดเดียวกับรุ่น 0.1 ดึง 22 ต.ค. 2569 อ่านชีต 1 และชีต 2 ฉบับ 28 ต.ค. 2569 §2, ทะเบียนร้านเครือ §8.2, ตรวจ spatial join กับชุดข้อมูลกลุ่ม Land §8.3) ป้ายหลักฐานตาม Landometer Master Brand Brief v0.5.3 §3.7: **Observed fact** · **Inference** · **Hypothesis** · **Owner-stated** · **Project evidence** ตัวเลขทุกตัวในเอกสารนี้มาจากไฟล์ใน repository และอ้าง field path ได้
+ข้อมูลและวิธีของ CityMETER · Restaurants รุ่น 0.4.0 (28 ตุลาคม 2569; ร้านชุดเดียวกับรุ่น 0.1 ดึง 22 ต.ค. 2569 อ่านชีต 1 และชีต 2 ฉบับ 28 ต.ค. 2569 §2, ทะเบียนร้านเครือ §8.2, ตรวจ spatial join กับชุดข้อมูลกลุ่ม Land §8.3) ป้ายหลักฐานตาม Landometer Master Brand Brief v0.5.3 §3.7: **Observed fact** · **Inference** · **Hypothesis** · **Owner-stated** · **Project evidence** ตัวเลขทุกตัวในเอกสารนี้มาจากไฟล์ใน repository และอ้าง field path ได้
 
 ## 1. แหล่งข้อมูลและวันที่
 
@@ -9,8 +9,8 @@
 | ร้าน (แถวข้อมูล) | CityMETER Restaurants public API — overlay MVT ระดับ z10 ต่อแขวง/ตำบล (`/api/v2/citymeter-v3/restaurant/overlayMvt/{z}/{x}/{y}?inTileType=SUBDISTRICT&inTileId={id}`) ผ่านชีตวิจัย “CityMETER Restaurants Thailand — Master” (ชีต 1) แท็บ `02_STORES` และแถวที่ย้ายไปชีต 2 “CityMETER Chain Restaurants Thailand — Research Master” แท็บ `16_MASTER_OBSERVATIONS` (§2) | ร้านดึงและตรวจกับ API 22 ต.ค. 2569 · อ่านชีตทั้งสอง 28 ต.ค. 2569 | `data/restaurants.json` |
 | ทะเบียนร้านเครือ (ชุดแยก) | ชีต 2 แท็บ `02_STORES` (สาขา), `01_BRANDS`, `03_COMPANIES`, `08_COVERAGE` — หลักฐานรายสาขาจากเว็บ/แอปของแบรนด์ บริษัท สถานที่ และแหล่งรอง | ตรวจ 25–28 ต.ค. 2569 (`meta.checkedFrom/checkedTo`) | `data/chains.json` |
 | จังหวัด 77 จังหวัด (สำหรับทะเบียน) | CityMETER production `/api/v2/citymeter-v3/restaurant/info/geom/{id}/PROVINCE` (อ่านอย่างเดียว) | 28 ต.ค. 2569 | ใช้ตอน build ไม่ ship รูปทรง |
-| ทะเบียน Land | ชีตวิจัย Shopping Centers & Retail Venues (`01_VENUES`, `13_BUILDING_LINKS`), Hotel (`01_VENUES`, `13_BUILDING_LINKS`, `15_BUILDING_MASS`, `11_STORE_LINKS`), Office (`01_OFFICES`), Industrial Estates (`01_ESTATES`, `03_GEOMETRY_VERSIONS`) ตาม registry R11/R12 | อ่าน 28 ต.ค. 2569 | `data/land.json` (เฉพาะ host ที่มีจุดตกในหรือติดขอบอาคาร) |
-| อาคารของ host ใน Land | รูปทรงที่ทะเบียนตรวจแล้ว: Shopping Center release (`venue-buildings.geojson`, as_of 2026-10-23, OSM ODbL + ส่วนอาคาร CityMETER) และ Hotel `15_BUILDING_MASS` (OSM); ที่เหลือใช้ footprint CityMETER production V4 (`detailMvt` ต่อแขวง/ตำบล 2,260 tiles อ่านอย่างเดียว) | 28 ต.ค. 2569 | `data/land-buildings.geojson` |
+| ทะเบียน Land | ชีตวิจัย Shopping Centers & Retail Venues (`01_VENUES`, `13_BUILDING_LINKS`), Hotel (`01_VENUES`, `13_BUILDING_LINKS`, `15_BUILDING_MASS`, `11_STORE_LINKS`), Office (`01_OFFICES`), Industrial Estates (`01_ESTATES`, `03_GEOMETRY_VERSIONS`) ตาม registry R11/R12 | อ่าน 28 ต.ค. 2569 | `data/land.json` (เฉพาะ host ที่มีจุดในอาคาร; ตำแหน่งแสดงผลของจุดที่รวบเข้าอาคารใน `snaps`) |
+| อาคารของ host ใน Land | รูปอาคาร OpenStreetMap จาก tile OpenFreeMap z14 ชั้น `building` (planet 20261025_080012_pt; 938 tiles ครอบจุด host ดึงในเบราว์เซอร์จากชุด tile เดียวกับที่แผนที่วาด) — หลังที่มีจุดของ host หรือใกล้ไม่เกิน 10 ม.; รูปทรงที่ทะเบียนตรวจแล้ว (Shopping Center release, Hotel `15_BUILDING_MASS`) ใช้เลือกหลังและใส่ส่วนอาคาร LOD2 เท่านั้น ไม่ใช้ footprint V4 (เจ้าของ 28 ต.ค. 18:27) | 28 ต.ค. 2569 | `data/land-buildings.geojson` |
 | เครือร้าน (chain candidate) | ชีตวิจัยแท็บ `01_BRANDS` (จับคู่จากชื่อร้าน) + manifest โลโก้ | 22 ต.ค. 2569 | `data/restaurants.json → brands`, `data/brand-logos.json`, `assets/brand-logos/` |
 | สถานที่ (venue candidate) | ชีตวิจัยแท็บ `07_VENUES` (ชื่อร้านอ้างถึงสถานที่) + manifest โลโก้ | 22 ต.ค. 2569 | `data/restaurants.json → venues`, `data/venue-logos.json`, `assets/venue-logos/` |
 | ขอบเขตแขวง/ตำบล เขต/อำเภอ จังหวัด | CityMETER production public API (`/restaurant/info/geom/{uuid}/SUBDISTRICT`, `/base/info/lv1/{province uuid}`) | 22 ต.ค. 2569 | `data/areas.geojson`, `data/districts.geojson`, `data/provinces.geojson`, `data/boundary-receipts.json` |
@@ -125,20 +125,20 @@ Observed fact จาก source audit: ชุด Restaurants ของ production
 - **โลโก้:** ใช้ไฟล์ที่ตรวจแล้วชุดเดิมเมื่อ SHA-256 ตรงกับ `01_BRANDS.logo_sha256` ของทะเบียน (78 เครือ) ไม่ดาวน์โหลดไฟล์ใหม่
 - **ลิงก์แหล่ง:** เฉพาะ https สาธารณะ ไม่มีลิงก์ชีตหรือ Drive ภายใน (`tests/register.test.js`)
 
-## 8.3 จุดของร้านและสาขา × อาคารในทะเบียน Land (รุ่น 0.3)
+## 8.3 จุดของร้านและสาขา × อาคารในทะเบียน Land (รุ่น 0.3; อาคาร OpenStreetMap อย่างเดียวตั้งแต่ 0.4)
 
 ผลตรวจทั้งหมดและตัวเลขอยู่ใน [docs/LAND_JOIN_CHECK.md](docs/LAND_JOIN_CHECK.md) · สคริปต์ `scripts/build-land.py`
 
-- **host:** สถานที่ในทะเบียนศูนย์การค้าและสถานที่ค้าปลีก โรงแรม และอาคารสำนักงานที่จุดอยู่ในแขวง/ตำบลของ 7 จังหวัด (5,906 แห่ง) — `data/land.json → hosts` เผยแพร่เฉพาะ 1,478 แห่งที่มีจุดร้านหรือสาขาในหรือติดขอบอาคาร
-- **อาคารของ host:** รูปทรงที่ทะเบียนตรวจแล้วก่อน (Shopping Center release สำหรับ `venue_id` เดียวกัน; Hotel `15_BUILDING_MASS` สำหรับ hotel/office id) แล้วจึง footprint V4 ของ production ที่มีจุดของ host อยู่ข้างใน (เล็กสุด) หรือห่างขอบ ≤ 3 ม.; รูปทรง OSM เดียวที่หลายทะเบียนอ้างถึงเป็นอาคารเดียว (host รวมกัน)
-- **ความสัมพันธ์:** ในขอบอาคาร · ติดขอบ ≤ 10 ม. · รอบอาคาร ≤ 100 ม. (รายงานเท่านั้น) — วัดบนเมตริก equirectangular ที่ 13.75° N; จุดในอาคารซ้อนหลายหลังสัมพันธ์กับทุกหลัง (หลังเล็กสุดเป็นหลัก); `data/land.json → snapshot / chains` = [key, building, rel, d]
-- **ในแผง:** อาคารในทะเบียน Land เทียบประเภทร้านในอาคาร (ในขอบหรือติดขอบ) กับรอบอาคาร (ห่างขอบ > 10–100 ม. คำนวณในเบราว์เซอร์จากร้านตามตัวกรอง) เป็นจำนวนและร้อยละของแต่ละคอลัมน์ — ตอบคำถามของ registry links ที่ให้แยกร้านภายในออกจากรอบ ๆ
-- **คำ:** “จุดตกในอาคาร” / “ติดขอบอาคาร” / “รอบอาคาร” — ไม่ใช่ “ตั้งอยู่ใน” ไม่บอกชั้นหรือการเป็นผู้เช่า และไม่เปลี่ยนจำนวนร้าน สถานที่ หรือสาขาใด
+- **host:** สถานที่ในทะเบียนศูนย์การค้าและสถานที่ค้าปลีก โรงแรม และอาคารสำนักงานที่จุดอยู่ในแขวง/ตำบลของ 7 จังหวัด (5,906 แห่ง) — `data/land.json → hosts` เผยแพร่เฉพาะ 1,036 แห่งที่มีจุดร้านหรือสาขาในอาคาร
+- **อาคารของ host:** รูปอาคาร OpenStreetMap หลังเดียวกับที่แผนที่วาด — หลังที่มีจุดของ host อยู่ข้างใน (หลายหลังซ้อนกัน: รูปทรงของทะเบียนตัดสินว่าหลังไหนคืออาคารเดียวกัน IoU ≥ 0.3; ไม่เช่นนั้นศูนย์การค้าใช้หลังใหญ่สุด โรงแรม/สำนักงานหลังเล็กสุด) แล้วจึงหลังที่ใกล้ที่สุดไม่เกิน 10 ม. แล้วจึงหลังที่ซ้อนทับรูปทรงของทะเบียนมากที่สุด; รูปอาคารเดียวที่หลายทะเบียนอ้างถึงเป็นอาคารเดียว (host รวมกัน); ไม่ใช้ footprint V4
+- **ความสัมพันธ์:** ในอาคาร = ในขอบ หรือห่างขอบไม่เกิน 10 ม. (อยู่ในความคลาดของจุดเอง; จุดนอกขอบได้ตำแหน่งแสดงผลลึกเข้าไป ≥ 1.5 ม. ใน `snaps.rows` / `snaps.chains` ซึ่งแอปใช้วาดหมุด ส่วนพิกัดต้นทางยังอยู่ในไฟล์ข้อมูลและแผง) · รอบอาคาร 10–100 ม. (รายงานเท่านั้น) — วัดบนเมตริก equirectangular ที่ 13.75° N; จุดในอาคารซ้อนหลายหลังสัมพันธ์กับทุกหลัง (หลังเล็กสุดเป็นหลัก); `data/land.json → snapshot / chains` = [key, building, 0, d]
+- **ในแผง:** อาคารในทะเบียน Land เทียบประเภทร้านในอาคารกับรอบอาคาร (10–100 ม. คำนวณในเบราว์เซอร์จากร้านตามตัวกรอง) เป็นจำนวนและร้อยละของแต่ละคอลัมน์ (เมื่อมีอย่างน้อย 30 ร้าน) — ตอบคำถามของ registry links ที่ให้แยกร้านภายในออกจากรอบ ๆ; ทุกหน้าจบด้วยบรรทัดแหล่งข้อมูลบรรทัดเดียว (ชุดข้อมูล · แหล่ง · วันที่ · ขอบเขต + ความหมายของหน่วย 1 ประโยค)
+- **คำ:** “ในอาคาร” (= จุดอยู่ในขอบอาคาร) / “รอบอาคาร” — ไม่ใช่ “ตั้งอยู่ใน” ไม่บอกชั้นหรือการเป็นผู้เช่า และไม่เปลี่ยนจำนวนร้าน สถานที่ หรือสาขาใด
 - **นิคมอุตสาหกรรม:** ไม่เทียบและไม่เผยแพร่ polygon จนกว่าขอบเขต วันที่ และสิทธิ์จะผ่านการตรวจรับ (registry link `DL-2669875b0346b95e63be`)
 
 ## 8.4 รูปทรงอาคารที่ละเอียดกว่า (LOD > 1) — เจ้าของสั่ง 28 ต.ค. 2569
 
-- **อาคาร Land:** เมื่อรูปทรงของทะเบียนมีส่วนอาคาร (ฐาน–ยอดต่อส่วน) วาดส่วนอาคารแทนก้อน LOD1 และวาด footprint เป็นเส้นขอบ; การจับจุดใช้ union ของ footprint กับส่วนอาคาร — 18 อาคาร 93 ส่วนในรุ่นนี้ (`land-buildings.geojson`: `geometry_role = land_host_building` เป็นเส้นขอบ/ก้อน LOD1, `land_host_building_part` เป็นส่วนอาคาร, `properties.lod`)
+- **อาคาร Land:** เมื่อรูปทรงของทะเบียนมีส่วนอาคาร (ฐาน–ยอดต่อส่วน) และเป็นอาคารเดียวกับรูป OpenStreetMap (IoU ≥ 0.5, ส่วนอาคารอยู่ในขอบ ≥ 90%) วาดส่วนอาคารในขอบ OpenStreetMap แทนก้อน LOD1 และวาดขอบเป็นเส้น — 15 อาคาร 64 ส่วนในรุ่นนี้ (`land-buildings.geojson`: `geometry_role = land_host_building` เป็นเส้นขอบ/ก้อน LOD1, `land_host_building_part` เป็นส่วนอาคาร, `properties.lod`, `source = openfreemap_osm`)
 - **อาคารของสถานที่ (venue):** สถานที่ในชีตที่บันทึก uuid ของ CityMETER (`07_VENUES.citymeter_shopping_center_id`) ซึ่งตรงกับ `citymeter_venue_id` ของทะเบียนศูนย์การค้า ได้ส่วนอาคารของ Shopping Center release แทน footprint ที่จับจากชื่อเมื่อส่วนอาคารมากกว่า — รุ่นนี้ 1 แห่ง: เอ็ม บี เค เซ็นเตอร์ (2 ส่วน + เส้นขอบ; `venue-buildings.geojson → metadata.lodVenues`) สถานที่อื่นที่มีส่วนอาคารอยู่แล้ว (สยามพารากอน เซ็นทรัลเวิลด์ เอ็มโพเรียม เซ็นทรัล เอ็มบาสซี เซ็นทรัล ปิ่นเกล้า) ได้ชุดเดียวกันจากงานวิจัยเดิม
 - ความสูงทุกส่วนเป็นค่าตามแหล่ง (CityMETER parts / OSM) ไม่ใช่ผลรังวัด
 
@@ -171,7 +171,7 @@ python3 -I scripts/xlsx-dump.py <sheet.xlsx> <dump-dir>
 python3 -I scripts/build-data.py --sheet <sheet1-dump> --chain-sheet <sheet2-dump> --logo-manifest <dir> --brand-files <dir> --venue-files <dir> --host-buildings <venue-buildings.geojson> --lod-buildings <shoppingcenter/data/venue-buildings.geojson> --shop-registry <shopping-dump> --areas data/areas.geojson --out .
 # ทะเบียนร้านเครือ (ชีต 2 + รูปจังหวัด 77 จังหวัดของ production + ทะเบียนโลโก้จากขั้นก่อน)
 python3 -I scripts/build-chains.py --chain-dump <sheet2-dump> --provinces <province-geom-dir> --areas data/areas.geojson --brand-logos data/brand-logos.json --out .
-# จุด × อาคาร Land (ทะเบียน Land + tile footprint V4 + Shopping Center release)
+# จุด × อาคาร Land (ทะเบียน Land + รูปอาคาร OpenStreetMap จาก tile OpenFreeMap + Shopping Center release)
 python3 -I scripts/build-land.py … --out . --report docs/land-join-check.json   # อาร์กิวเมนต์ครบใน docs/LAND_JOIN_CHECK.md §8
 ```
 
@@ -190,6 +190,6 @@ python3 -I scripts/build-land.py … --out . --report docs/land-join-check.json 
 7. ความหนาแน่นใช้ตัวหารเป็นพื้นที่ทั้งตำบล รวมพื้นที่ที่อยู่อาศัยไม่ได้ (เช่น นา สวน แหล่งน้ำ)
 8. โลโก้บางไฟล์ใหญ่ (KFC 1.2 MB, The Circle Ratchaphruek 1.1 MB) — คงไบต์เดิมตาม manifest; การทำไฟล์เว็บที่เล็กลงพร้อมบันทึก derivation อยู่ใน backlog
 9. ทะเบียนร้านเครือยังไม่รับรองว่าครบทุกสาขาปัจจุบัน; 10,091 สาขาไม่มีพิกัด และ 3,241 สาขาไม่ทราบจังหวัด; สถานะปิดเป็นสิ่งที่แหล่งระบุ ไม่ได้ตรวจภาคสนาม; ทะเบียนนับคนละหน่วยกับร้านในชุดข้อมูล
-10. การจับจุดกับอาคาร Land ขึ้นกับความแม่นของจุดและรูปทรงอาคาร (footprint V4 ที่จุดของ host เมื่อทะเบียนไม่มีรูปทรง); host 1,876 แห่งไม่มีอาคารที่จุด (ตลาด ตลาดนัด ปั๊ม ฯลฯ) จึงไม่มีผลจับ ไม่ได้แปลว่าไม่มีร้าน
+10. การจับจุดกับอาคาร Land ขึ้นกับความแม่นของจุดและสิ่งที่ OpenStreetMap วาดไว้; host 3,476 แห่งไม่มีรูปอาคารที่จุด (ตลาด ตลาดนัด ปั๊ม ร้านในเครือ ฯลฯ) จึงไม่มีผลจับ ไม่ได้แปลว่าไม่มีร้าน
 11. นิคมอุตสาหกรรมยังไม่เทียบจนกว่าขอบเขตจะผ่านการตรวจรับ
 12. ไฟล์ข้อมูลใหญ่ขึ้น: chains.json 7.8 MB (gzip ≈ 1.5 MB) และ land ≈ 1.6 MB โหลดหลังภาพแรก ถ้าโหลดไม่ได้ ข้อมูลร้านยังใช้ได้ครบ

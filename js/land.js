@@ -1,19 +1,25 @@
 /**
  * Land hosts and their buildings (data/land.json + data/land-buildings.geojson, scripts/build-land.py).
  *
- * The registry's Land datasets — shopping centres & retail venues, hotels, office
- * buildings — are hosts: places that can hold restaurants. A host's building is the registry's own reviewed
- * geometry when it has one (with its building parts, LOD > 1, drawn instead of one block), else the CityMETER
- * production V4 footprint at the host's point. The 2026-10-28 check joins
- * every restaurant display point (≈ 9.55 m grid) and every chain-register outlet point
- * to the Land building outlines: in (inside), edge (≤ 10 m — within the coordinate's own
- * uncertainty) or near (≤ 100 m). Wording is always “จุดตกในอาคาร” / “ติดขอบอาคาร” /
- * “รอบอาคาร” — never “ตั้งอยู่ใน”: a point inside an outline is not a tenancy, floor or
- * located-in claim, and no count of the snapshot or the register changes because of it.
+ * The registry's Land datasets — shopping centres & retail venues, hotels, office buildings — are hosts: places
+ * that can hold restaurants. Since 2026-10-28 (owner: “ใช้ OSM อย่างเดียว”) a host's building is the OpenStreetMap
+ * building polygon the map itself draws (OpenFreeMap z14 tiles): the polygon that holds the host's point, else the
+ * nearest one within 10 m. Where the registry's reviewed OpenStreetMap geometry has building parts (LOD > 1) they
+ * are drawn inside that outline instead of one block. No CityMETER V4 footprint is used, so a Land building never
+ * collides with the city massing: the massing hides its own copy of the polygon (js/massing.js#ringsOverlap).
+ *
+ * The join tests every restaurant display point (≈ 9.55 m grid) and every chain-register outlet point against the
+ * outlines: in = inside the outline or within 10 m of it (the coordinate's own uncertainty — owner 2026-10-28
+ * “จุดร้านอาหารที่ตกริมๆ ให้รวบเข้าตึกนั้น”; such points are drawn inside the outline), near = 10–100 m (report
+ * only). A point in a building is a display fact about the point, never a tenancy, floor or located-in claim, and no
+ * count of the snapshot or the register changes because of it.
  */
 export const LAND_DATASETS = Object.freeze({shopping: 'ศูนย์การค้าและสถานที่ค้าปลีก', hotel: 'โรงแรมและที่พัก', office: 'อาคารสำนักงาน'});
-export const RELATIONS = Object.freeze(['in', 'edge', 'near']);
-export const RELATION_TH = Object.freeze({in: 'จุดตกในอาคาร', edge: 'ติดขอบอาคาร (ไม่เกิน 10 ม.)', near: 'รอบอาคาร (ไม่เกิน 100 ม.)'});
+/** Relation codes of land.json rows (1 = edge is kept for decoding older files; it reads as “in”). */
+export const RELATIONS = Object.freeze(['in', 'in', 'near']);
+export const RELATION_TH = Object.freeze({in: 'ในอาคาร', near: 'รอบอาคาร (ไม่เกิน 100 ม.)'});
+/** The in-rule in one clause, for the one provenance line of a Land view. */
+export const LAND_RULE = 'ในอาคาร = จุดของร้านอยู่ในขอบอาคาร (รวมจุดห่างขอบไม่เกิน 10 ม.) ไม่ใช่การยืนยันผู้เช่าหรือชั้น';
 
 const HOTEL_TYPES = {hotel: 'โรงแรม', resort: 'รีสอร์ต', guesthouse: 'เกสต์เฮาส์', motel: 'โมเต็ล', serviced_apartment: 'เซอร์วิสอพาร์ตเมนต์',
   homestay: 'โฮมสเตย์', bungalow: 'บังกะโล', youth_lodging: 'โฮสเทล'};
@@ -37,7 +43,8 @@ export function landTypeTh(ds, type = '') {
 /**
  * Decode the join. Returns hosts, the building of each host, and per-point relations:
  * rowLinks / outletLinks: key → [{building, rel, d}, …] (primary first, then nested buildings that also contain the
- * point); rowRel / outletRel: key → the primary relation; rowsByBuilding / outletsByBuilding: building → keys.
+ * point); rowRel / outletRel: key → the primary relation; rowsByBuilding / outletsByBuilding: building → keys;
+ * outletDisplay: outlet id → [lon, lat] inside its building for outlets whose register point lay within 10 m of it.
  */
 export function decodeLand(json, buildingsGeo) {
   if (!json || !Array.isArray(json.hosts)) return null;
@@ -52,19 +59,42 @@ export function decodeLand(json, buildingsGeo) {
   const hostById = new Map(hosts.map(h => [h.id, h]));
   const hostsByBuilding = new Map();
   for (const h of hosts) if (h.fp >= 0) { if (!hostsByBuilding.has(h.fp)) hostsByBuilding.set(h.fp, []); hostsByBuilding.get(h.fp).push(h); }
-  // One row per (point, building): the primary relation (smallest containing building, else the nearest edge) first,
-  // then every other Land building that also contains the point (an office tower or supermarket inside a mall).
+  // One row per (point, building): the primary relation (smallest containing building, else the nearest within
+  // 10 m) first, then every other Land building that also contains the point (an office tower inside a mall).
   const links = list => {
     const m = new Map();
-    for (const [k, b, r, d] of list || []) { if (!m.has(k)) m.set(k, []); m.get(k).push({building: b, rel: RELATIONS[r] || 'near', d}); }
+    for (const [k, b, r, d] of list || []) { if (!m.has(k)) m.set(k, []); m.get(k).push({building: b, rel: RELATIONS[r] || 'near', d: Number(d) || 0}); }
     return m;
   };
   const rowLinks = links(json.snapshot), outletLinks = links(json.chains);
   const first = m => new Map([...m].map(([k, v]) => [k, v[0]]));
   const byBuilding = m => { const out = new Map(); for (const [k, list] of m) for (const v of list) { if (!out.has(v.building)) out.set(v.building, []); out.get(v.building).push(k); } return out; };
-  return {meta: json.meta || {}, hosts, hostById, hostsByBuilding, buildings, parts, rowLinks, outletLinks,
+  const display = list => new Map((list || []).filter(s => Array.isArray(s) && s.length >= 3).map(([id, lon, lat]) => [id, [Number(lon), Number(lat)]]));
+  const rowDisplay = display(json.snaps?.rows), outletDisplay = display(json.snaps?.chains);
+  return {meta: json.meta || {}, hosts, hostById, hostsByBuilding, buildings, parts, rowLinks, outletLinks, rowDisplay, outletDisplay,
     rowRel: first(rowLinks), outletRel: first(outletLinks), rowsByBuilding: byBuilding(rowLinks), outletsByBuilding: byBuilding(outletLinks)};
 }
+
+/**
+ * Give points that lay within 10 m of their Land building the display position inside it (built once by
+ * scripts/build-land.py): the pin sits in the building it is counted in. The source position stays in
+ * `sourceLongitude` / `sourceLatitude` (a row's grid cell `gx`/`gy` is untouched); `snapped` marks the item.
+ */
+function applyDisplay(positions, byId) {
+  if (!positions?.size || !byId) return 0;
+  let n = 0;
+  for (const [id, [lon, lat]] of positions) {
+    const o = byId.get(id);
+    if (!o || !Number.isFinite(o.longitude) || !Number.isFinite(lon) || !Number.isFinite(lat) || o.hasPoint === false) continue;
+    if (o.sourceLongitude == null) { o.sourceLongitude = o.longitude; o.sourceLatitude = o.latitude; }
+    o.longitude = lon; o.latitude = lat; o.snapped = true; n++;
+  }
+  return n;
+}
+/** Register outlets (Map id → outlet). */
+export const applyOutletDisplay = (land, outletsById) => applyDisplay(land?.outletDisplay, outletsById);
+/** Snapshot rows (Map key → row). */
+export const applyRowDisplay = (land, rowsByKey) => applyDisplay(land?.rowDisplay, rowsByKey);
 
 /* ---------- geometry (planar, equirectangular metres at the point's latitude; buildings are small) ---------- */
 
@@ -100,7 +130,7 @@ export function geometryBounds(g) {
   for (const p of polygonsOf(g)) for (const [x, y] of p[0]) { if (x < w) w = x; if (x > e) e = x; if (y < s) s = y; if (y > n) n = y; }
   return [w, s, e, n];
 }
-/** Items (with longitude/latitude) within `metres` of the outline, outside it — the ring around a building. */
+/** Items (with longitude/latitude) within `metres` of the outline, outside its 10 m band — the ring around a building. */
 export function aroundGeometry(g, items, metres = 100, exclude = null) {
   const [w, s, e, n] = geometryBounds(g);
   const pad = metres / 108000;
@@ -144,7 +174,7 @@ export const landOfRow = (land, key) => relationOf(land, land?.rowLinks?.get(key
 export const landOfOutlet = (land, id) => relationOf(land, land?.outletLinks?.get(id));
 
 /**
- * Profile of one Land host: snapshot rows and register outlets in / at the edge of / around its building.
+ * Profile of one Land host: snapshot rows and register outlets in its building (and, when published, near it).
  * rowsByKey: Map key → snapshot row (decoded), outletsById: Map id → register outlet.
  */
 export function landProfile(land, host, {rowsByKey, outletsById, scopeKeys = null} = {}) {
@@ -152,17 +182,17 @@ export function landProfile(land, host, {rowsByKey, outletsById, scopeKeys = nul
   const building = host.fp;
   // The relation of each point to THIS building (a nested point is “in” every building that contains it).
   const split = (keys, lookup, linkMap, scoped) => {
-    const out = {in: [], edge: [], near: []};
+    const out = {in: [], near: []};
     for (const k of keys || []) {
       const item = lookup.get(k);
       if (!item || (scoped && scopeKeys && !scopeKeys.has(k))) continue;
       const link = (linkMap.get(k) || []).find(x => x.building === building);
-      if (link) out[link.rel].push(item);
+      if (link) (out[link.rel] || out.near).push(item);
     }
     return out;
   };
-  const rows = building >= 0 ? split(land.rowsByBuilding.get(building), rowsByKey, land.rowLinks, true) : {in: [], edge: [], near: []};
-  const outlets = building >= 0 && outletsById ? split(land.outletsByBuilding.get(building), outletsById, land.outletLinks, false) : {in: [], edge: [], near: []};
+  const rows = building >= 0 ? split(land.rowsByBuilding.get(building), rowsByKey, land.rowLinks, true) : {in: [], near: []};
+  const outlets = building >= 0 && outletsById ? split(land.outletsByBuilding.get(building), outletsById, land.outletLinks, false) : {in: [], near: []};
   return {host, building, feature: land.buildings.get(building) || null, parts: land.parts?.get(building) || [],
     cohosts: hostsOf(land, building).filter(h => h.id !== host.id), rows, outlets};
 }

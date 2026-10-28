@@ -15,7 +15,9 @@
  * Host buildings (buildings.js, map.activeLayer role) stay a separate layer:
  * tile buildings that overlap a host are dropped from the focus tier and hidden
  * in the city tier by feature id, so the host silhouette is never swallowed by a
- * taller OSM outline.
+ * taller OSM outline. Overlap is decided on interior points too (ringsOverlap):
+ * since 2026-10-28 the Land buildings ARE the OpenFreeMap polygons, so a host
+ * can share every vertex with its tile twin and must still hide it.
  *
  * The focus tier also keeps each building's ORIGINAL footprint (clipped to its
  * tile, before rounding/offset) so the app can join restaurant display points to
@@ -29,7 +31,7 @@
  * present, otherwise the schema's default). They are context, never a claim.
  */
 import {parseVectorTile, tileToLonLat, lonLatToTileUnits, tilesForBBox, metresPerTileUnit} from './mvt.js';
-import {clipRingToBox, offsetRing, roundRing, isClockwise, ringsIntersect, cleanRing, signedArea} from './geometry.js';
+import {clipRingToBox, offsetRing, roundRing, isClockwise, ringsIntersect, cleanRing, signedArea, pointInRing} from './geometry.js';
 
 export const CITY_LAYER = 'city-massing';
 export const FOCUS_SOURCE = 'focus-massing';
@@ -98,8 +100,59 @@ export function outerRings(feature) {
 }
 
 /**
+ * A point strictly inside a simple ring: the bbox centre when it is inside, else the first inside midpoint of a
+ * short diagonal (vertex i → i+2). Null for degenerate rings.
+ */
+export function interiorPoint(ring) {
+  if (!ring || ring.length < 4) return null;
+  const [west, south, east, north] = bboxOfRings([ring]);
+  const centre = [(west + east) / 2, (south + north) / 2];
+  if (pointInRing(centre, ring)) return centre;
+  const n = ring.length - 1;
+  for (let i = 0; i < n; i++) {
+    const a = ring[i], b = ring[(i + 2) % n];
+    const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+    if (pointInRing(m, ring)) return m;
+  }
+  return null;
+}
+
+/**
+ * True when a tile building overlaps a host building: crossing or containment either way, decided on interior
+ * points as well as vertices. A host that is the very same OpenStreetMap polygon as the tile building (the Land
+ * buildings of 2026-10-28 are the OpenFreeMap polygons themselves) shares every vertex with it — on-boundary
+ * vertex tests are undecidable and collinear edges never "cross" — so the interior points settle it.
+ */
+export function ringsOverlap(a, b, interiorA = interiorPoint(a), interiorB = interiorPoint(b)) {
+  if (ringsIntersect(a, b)) return true;
+  if (interiorA && pointInRing(interiorA, b)) return true;
+  if (interiorB && pointInRing(interiorB, a)) return true;
+  return false;
+}
+
+/**
  * Pure: turn one decoded tile into focus features for the given regions.
  * regions/hosts are arrays of lon/lat rings. Returns {features, hiddenIds, kept, dropped}.
+ */
+/**
+ * True when ring `a` sits inside ring `b` as a smaller building (a tower drawn inside a mall outline): at least 95 %
+ * of its vertices inside and its box under 90 % of the host's. Identical twins and straddling buildings are not nested.
+ */
+export function ringNestedIn(a, b, interiorA = interiorPoint(a)) {
+  if (!interiorA || !pointInRing(interiorA, b)) return false;
+  const ba = bboxOfRings([a]), bb = bboxOfRings([b]);
+  const areaA = (ba[2] - ba[0]) * (ba[3] - ba[1]), areaB = (bb[2] - bb[0]) * (bb[3] - bb[1]);
+  if (!(areaA < areaB * 0.9)) return false;
+  let inside = 0;
+  for (let i = 0; i < a.length - 1; i++) if (pointInRing(a[i], b)) inside++;
+  return inside >= (a.length - 1) * 0.95;
+}
+
+/**
+ * Pure: turn one decoded tile into focus features for the given regions.
+ * regions are lon/lat rings; hosts are lon/lat rings or {ring, keepNested}: a tile building overlapping a host is
+ * dropped (and hidden in the city tier), except a building nested inside a `keepNested` host — a LOD1 Land outline
+ * keeps the towers OpenStreetMap draws inside it (owner 2026-10-28). Returns {features, hiddenIds, kept, dropped}.
  */
 export function shapeTile(tile, layer, {regions = [], hosts = [], radiusM, offsetM, segments = 3} = {}) {
   const extent = layer.extent || 4096;
@@ -108,7 +161,9 @@ export function shapeTile(tile, layer, {regions = [], hosts = [], radiusM, offse
   const box = {minX: 0, minY: 0, maxX: extent, maxY: extent};
   const toTile = ring => ring.map(([lon, lat]) => lonLatToTileUnits(lon, lat, tile, extent));
   const toLonLat = ring => ring.map(([px, py]) => tileToLonLat(px, py, tile, extent));
-  const regionRings = regions.map(toTile), hostRings = hosts.map(toTile);
+  const regionRings = regions.map(toTile);
+  const hostRings = hosts.map(h => toTile(Array.isArray(h) ? h : h.ring)), hostKeep = hosts.map(h => !Array.isArray(h) && Boolean(h.keepNested));
+  const hostInterior = hostRings.map(interiorPoint);
   const features = [], footprints = [], hiddenIds = new Set();
   let kept = 0, dropped = 0, ordinal = 0;
   for (let fi = 0; fi < layer.features.length; fi++) {
@@ -131,7 +186,11 @@ export function shapeTile(tile, layer, {regions = [], hosts = [], radiusM, offse
       if (!outer) return;
       const inFocus = regionRings.some(region => ringsIntersect(outer, region));
       if (!inFocus) return;
-      if (hostRings.some(host => ringsIntersect(outer, host))) { if (f.id != null) hiddenIds.add(f.id); dropped++; return; }
+      if (hostRings.length) {
+        const inner = interiorPoint(outer);
+        const covered = hostRings.some((host, hi) => ringsOverlap(outer, host, inner, hostInterior[hi]) && !(hostKeep[hi] && ringNestedIn(outer, host, inner)));
+        if (covered) { if (f.id != null) hiddenIds.add(f.id); dropped++; return; }
+      }
       // Outer rings are clockwise and holes counter-clockwise (MVT, y-down), so the
       // same normal sign pushes outers outward and holes inward: the model encloses.
       const holes = poly.holes.map(h => clipRingToBox(h, box)).filter(Boolean);
@@ -258,7 +317,7 @@ export function installMassing(map, {sourceId = 'openmaptiles', beforeId, colors
     const bucket = Math.floor(zoom);
     const {tiles, truncated} = tilesForRegions(regions);
     const ready = typeof tileUrl === 'function' && tiles.length > 0 && tiles.every(t => Boolean(tileUrl(t)));
-    const ringKey = rings => `${rings.length}:${rings.map(r => r.length + ':' + r[0]?.join(',')).join('|')}`;
+    const ringKey = rings => `${rings.length}:${rings.map(h => { const r = Array.isArray(h) ? h : h.ring; return r.length + ':' + r[0]?.join(',') + (Array.isArray(h) ? '' : '+n'); }).join('|')}`;
     const key = `${enabled}|${ready}|${bucket}|${ringKey(regions)}|${ringKey(hosts)}`;
     if (key === lastKey) return {features: 0, tiles: 0, cached: true};
     lastKey = key; lastBucket = bucket;

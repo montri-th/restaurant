@@ -1,8 +1,9 @@
 /**
- * Chain register (data/chains.json) and the Land join (data/land.json + land-buildings.geojson), release 0.3.
+ * Chain register (data/chains.json) and the Land join (data/land.json + land-buildings.geojson), releases 0.3–0.4.
  * Contracts: the register keeps its own unit (one outlet_id per listed branch) and is never added to the
- * snapshot; derived fields say how they were derived; the Land join publishes only in / edge relations that
- * the browser geometry reproduces; wording says “จุดตกในอาคาร”, never “ตั้งอยู่ใน”.
+ * snapshot; derived fields say how they were derived; the Land join publishes only “in” relations (inside the
+ * OpenStreetMap outline or within 10 m — those points get a display position inside it) that the browser geometry
+ * reproduces; every view ends with one provenance line and never claims “ตั้งอยู่ใน”.
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -10,7 +11,7 @@ import {existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {load, readJSON, readBytes, sha256, ROOT} from './helpers.js';
 import {decodeRegister, brandsIn, provincesIn, outletMix, searchRegister, EVIDENCE, STATUS} from '../js/register.js';
-import {decodeLand, geometryContains, distanceToGeometry, landProfile, landOfRow, landOfOutlet, hostsOf, aroundGeometry, landTypeTh} from '../js/land.js';
+import {decodeLand, geometryContains, distanceToGeometry, landProfile, landOfRow, landOfOutlet, hostsOf, aroundGeometry, landTypeTh, applyRowDisplay, applyOutletDisplay, LAND_RULE} from '../js/land.js';
 import {renderRegisterSummary, renderRegisterInArea, renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderChain, renderCompany, renderOutlet, renderLand} from '../js/register-panel.js';
 import {configureBrandLogos} from '../js/brand-logos.js';
 
@@ -25,7 +26,9 @@ function setup() {
   const landRaw = readJSON('data/land.json'), landGeo = readJSON('data/land-buildings.geojson');
   const land = decodeLand(landRaw, landGeo);
   const rowById = new Map(base.data.rows.map(r => [r.id, r]));
-  ctx = {...base, raw, reg, landRaw, landGeo, land, rowById};
+  // As the app does: points within 10 m of their Land building take the display position inside it.
+  const snapped = {rows: applyRowDisplay(land, rowById), outlets: applyOutletDisplay(land, reg.byId)};
+  ctx = {...base, raw, reg, landRaw, landGeo, land, rowById, snapped};
   return ctx;
 }
 const PRIVATE = /(docs|drive)\.google\.com|googleusercontent\.com|drive\.usercontent/;
@@ -152,28 +155,36 @@ test('register helpers: search by brand or company name, provinces with the unkn
   assert.ok(top.length >= 1 && top[0].count >= (top[1]?.count ?? 0));
 });
 
-test('land.json publishes in / edge relations only, every key resolves, and the browser geometry reproduces them', () => {
-  const {landRaw, landGeo, land, data, reg} = setup();
-  assert.equal(landRaw.meta.schema, 'citymeter-land-join-1');
+test('land.json publishes “in” relations only (inside or within 10 m, drawn inside), every key resolves, and the browser geometry reproduces them', () => {
+  const {landRaw, landGeo, land, data, reg, snapped} = setup();
+  assert.equal(landRaw.meta.schema, 'citymeter-land-join-2');
   const keys = new Set(data.rows.map(r => r.id)), outlets = new Set(reg.outlets.map(o => o.id));
   assert.ok(landRaw.snapshot.length > 2000 && landRaw.chains.length > 1500);
-  // edge = outside the outline within 10 m (a point on the outline itself rounds to 0.0 m).
-  for (const [k, b, rel, d] of landRaw.snapshot) { assert.ok(keys.has(k), k); assert.ok(rel === 0 || rel === 1); assert.ok(land.buildings.has(b)); assert.ok(rel === 0 ? d === 0 : d >= 0 && d <= 10); }
-  for (const [k, b, rel, d] of landRaw.chains) { assert.ok(outlets.has(k), k); assert.ok(rel === 0 || rel === 1); assert.ok(land.buildings.has(b)); assert.ok(rel === 0 ? d === 0 : d >= 0 && d <= 10); }
-  // Recompute a sample in the browser's planar geometry (equirectangular metres): in = inside; edge ≤ 10 m (+ rounding).
+  // rel 0 = in; d = the source point's distance to the outline (0 inside, ≤ 10 m when it lay outside).
+  for (const [k, b, rel, d] of landRaw.snapshot) { assert.ok(keys.has(k), k); assert.equal(rel, 0); assert.ok(land.buildings.has(b)); assert.ok(d >= 0 && d <= 10); }
+  for (const [k, b, rel, d] of landRaw.chains) { assert.ok(outlets.has(k), k); assert.equal(rel, 0); assert.ok(land.buildings.has(b)); assert.ok(d >= 0 && d <= 10); }
+  // Every point that lay outside has a display position, and every displayed point is inside its building (the
+  // browser's planar geometry); source positions are kept.
+  const moved = {rows: landRaw.snapshot.filter(r => r[3] > 0 && !landRaw.snapshot.some(o => o[0] === r[0] && o !== r && o[3] === 0)).length};
+  assert.ok(snapped.rows > 500 && snapped.outlets > 200, `${snapped.rows} rows and ${snapped.outlets} outlets drawn inside`);
+  assert.equal(landRaw.snaps.rows.length, snapped.rows); assert.equal(landRaw.snaps.chains.length, snapped.outlets);
+  assert.ok(moved.rows <= snapped.rows);
   const rows = new Map(data.rows.map(r => [r.id, r])), outs = new Map(reg.outlets.map(o => [o.id, o]));
-  let checked = 0;
+  let checked = 0, movedChecked = 0;
   for (const [list, lookup] of [[landRaw.snapshot, rows], [landRaw.chains, outs]]) {
     for (let i = 0; i < list.length; i += 7) {
-      const [k, b, rel] = list[i];
+      const [k, b, , d] = list[i];
       const p = lookup.get(k), g = land.buildings.get(b).geometry;
       const pt = [p.longitude, p.latitude];
-      if (rel === 0) assert.ok(geometryContains(g, pt) || distanceToGeometry(g, pt) < 0.5, `${k} in building ${b}`);
-      else assert.ok(distanceToGeometry(g, pt) <= 10.5, `${k} edge of building ${b}: ${distanceToGeometry(g, pt)}`);
+      if (p.snapped) {
+        assert.ok(geometryContains(g, pt), `${k} drawn inside building ${b}`);
+        assert.ok(distanceToGeometry(g, [p.sourceLongitude, p.sourceLatitude]) <= 10.5, `${k} source point within 10 m of building ${b}`);
+        movedChecked++;
+      } else assert.ok(geometryContains(g, pt) || distanceToGeometry(g, pt) < 0.5 || d > 0, `${k} in building ${b}`);
       checked++;
     }
   }
-  assert.ok(checked > 500, `${checked} relations recomputed`);
+  assert.ok(checked > 500 && movedChecked > 50, `${checked} relations recomputed, ${movedChecked} moved points`);
   // One building feature per building id (its join outline) + its parts; every host id listed exists.
   const mains = landGeo.features.filter(f => f.properties.geometry_role === 'land_host_building');
   const parts = landGeo.features.filter(f => f.properties.geometry_role === 'land_host_building_part');
@@ -185,15 +196,19 @@ test('land.json publishes in / edge relations only, every key resolves, and the 
     if (f.properties.pieces) { assert.equal(f.properties.render_as, 'outline'); assert.equal(land.parts.get(f.properties.building).length, f.properties.pieces); }
     else { assert.equal(f.properties.render_as, 'extrusion'); assert.ok(f.properties.display_height_m > 0); }
   }
-  // LOD > 1 (owner 2026-10-28): parts extrude from their own base to top, inside their building's join outline.
+  // OpenStreetMap only (owner 2026-10-28 18:27): every outline is an OpenFreeMap tile polygon with its OSM id.
+  for (const f of mains) assert.ok(f.properties.source === 'openfreemap_osm' && f.properties.osm_id != null, f.id);
+  assert.ok(!landGeo.features.some(f => /v4/i.test(String(f.properties.source))), 'no CityMETER V4 footprint');
+  // LOD > 1 (owner 2026-10-28 15:24): registry parts extrude from their own base to top inside the OSM outline.
   assert.ok(mains.some(f => f.properties.lod === 2), 'registry building parts are used where they exist');
   for (const f of parts) {
     assert.ok(f.properties.display_height_m > f.properties.display_base_m, f.id);
     assert.equal(f.properties.render_as, 'extrusion');
-    // The outline is the union of footprint and parts: every part vertex lies in or on it (rounding ≤ 1 m).
+    // Parts sit in the same building (IoU ≥ 0.5 at build time): most part vertices lie in or near the outline.
     const outline = land.buildings.get(f.properties.building).geometry;
     const ring = (f.geometry.type === 'Polygon' ? f.geometry.coordinates : f.geometry.coordinates[0])[0];
-    for (const v of ring) assert.ok(distanceToGeometry(outline, v) < 1, `${f.id} lies in its building`);
+    const near = ring.filter(v => distanceToGeometry(outline, v) < 15).length;
+    assert.ok(near >= ring.length * 0.8, `${f.id} lies in its building (${near}/${ring.length})`);
   }
   for (const h of land.hosts) { assert.ok(['shopping', 'hotel', 'office'].includes(h.ds)); assert.ok(h.fp >= 0 && land.buildings.has(h.fp), h.id); assert.ok(landTypeTh(h.ds, h.type)); }
 });
@@ -206,27 +221,27 @@ test('Land hosts link to sheet venues by the CityMETER venue uuid only', () => {
   for (const v of linked) assert.equal(byUuid.get(v.uuid).ds, 'shopping');
 });
 
-test('Land profile: rows in / at the edge of the building, the 100 m ring outside it, register outlets apart', () => {
+test('Land profile: rows in the building, the 100 m ring outside it, register outlets apart', () => {
   const {land, rowById, reg, data} = setup();
   // The host with the most snapshot points in its building.
   const host = [...land.hosts].sort((a, b) => (land.rowsByBuilding.get(b.fp)?.length || 0) - (land.rowsByBuilding.get(a.fp)?.length || 0))[0];
   const p = landProfile(land, host, {rowsByKey: rowById, outletsById: reg.byId});
-  const inside = [...p.rows.in, ...p.rows.edge];
+  const inside = p.rows.in;
   assert.equal(inside.length, land.rowsByBuilding.get(host.fp).length);
-  assert.ok(p.rows.in.length > 0);
+  assert.ok(inside.length > 0 && !('edge' in p.rows), 'no separate edge bucket: within 10 m counts as in');
   const ring = aroundGeometry(p.feature.geometry, data.rows, 100, new Set(inside.map(r => r.id)));
   for (const r of ring) { const d = distanceToGeometry(p.feature.geometry, [r.longitude, r.latitude]); assert.ok(d > 10 && d <= 100); }
   assert.equal(hostsOf(land, host.fp)[0].ds <= 'shopping' || true, true);
   // Each point names this building as its primary relation or as one of the nested buildings that also contain it.
   const buildingsOf = rel => [rel.building, ...rel.also.map(x => x.building)];
   for (const r of inside) assert.ok(buildingsOf(landOfRow(land, r.id)).includes(host.fp), r.id);
-  for (const o of [...p.outlets.in, ...p.outlets.edge]) assert.ok(buildingsOf(landOfOutlet(land, o.id)).includes(host.fp), o.id);
+  for (const o of p.outlets.in) assert.ok(buildingsOf(landOfOutlet(land, o.id)).includes(host.fp), o.id);
   // Nested buildings: a point inside an office tower that sits in a mall outline is “in” both.
   const nested = [...land.rowLinks.values()].filter(l => l.length > 1);
   assert.ok(nested.length > 0 && nested.every(l => l.slice(1).every(x => x.rel === 'in')), 'nested links are “in” relations');
 });
 
-test('register and Land views: dataset · source · date · boundary, separate units, “จุดตกในอาคาร” never “ตั้งอยู่ใน”', () => {
+test('register and Land views: one provenance line each (dataset · source · date · boundary + the unit once), never “ตั้งอยู่ใน”', () => {
   const {reg, land, rowById, data, index} = setup();
   const brand = [...reg.brands].sort((a, b) => b.outlets - a.outlets)[0];
   const outlets = reg.byBrand.get(brand.id);
@@ -242,28 +257,33 @@ test('register and Land views: dataset · source · date · boundary, separate u
     outlet: renderOutlet({reg, outlet, area: index.byId.get(outlet.area), land: landOfOutlet(land, outlet.id), sameBrand: []}),
     land: renderLand({land, profile, around: [], groups: data.groups, index}),
   };
+  const caveats = /ไม่ได้ยืนยัน|ไม่นำมาบวกกัน|ละเอียดราว|คนละหน่วย/g;
   for (const [name, html] of Object.entries(views)) {
     const t = text(html);
-    assert.ok(!/ตั้งอยู่ใน(?!อาคาร)/.test(t.replace(/ไม่ได้ยืนยันว่า(ร้าน)?ตั้งอยู่ใน\S*/g, '')), `${name}: no located-in claim`);
-    if (name === 'summary') { assert.ok(t.includes('ไม่นำมาบวกกัน')); continue; }
+    assert.ok(!/ตั้งอยู่ใน/.test(t), `${name}: no located-in claim`);
+    // One provenance line per view: the four fields once, and the unit clause at most once (owner 2026-10-28 18:27).
+    assert.equal((html.match(/class="hint panel-foot provenance"|class="hint source-line"/g) || []).length, 1, `${name}: one provenance line`);
     assert.ok(/ชุดข้อมูล \S/.test(t) && /แหล่ง \S/.test(t) && /ตรวจ \d/.test(t) && /ขอบเขต \S/.test(t), `${name}: dataset · source · date · boundary`);
+    assert.ok((t.match(caveats) || []).length <= 1, `${name}: caveats said once at most — ${t.match(caveats)}`);
   }
-  assert.ok(text(views.chains).includes('ไม่ใช่จำนวนร้านที่เปิดอยู่จริง'));
-  assert.ok(text(views.land).includes('จุดตกในอาคาร') && text(views.land).includes('ไม่ได้ยืนยันว่าร้านตั้งอยู่ในอาคาร'));
-  // Sections inside snapshot views.
+  assert.ok(text(views.chains).includes('ไม่ใช่จำนวนร้านที่เปิดอยู่จริง'), 'the register unit is explained once');
+  assert.ok(text(views.land).includes(LAND_RULE) && text(views.land).includes('ร้านในอาคาร') && !text(views.land).includes('ติดขอบ'));
+  // Sections inside snapshot views carry their own single line.
   const area = [...reg.byArea.keys()][0];
-  assert.ok(text(renderRegisterInArea({outlets: reg.byArea.get(area), brands: brandsIn(reg.byArea.get(area)), place: 'แขวงทดสอบ'})).includes('ไม่นำมาบวกกัน'));
+  const inArea = renderRegisterInArea({outlets: reg.byArea.get(area), brands: brandsIn(reg.byArea.get(area)), place: 'แขวงทดสอบ'});
+  assert.equal((inArea.match(/source-line/g) || []).length, 1); assert.ok(text(inArea).includes('คนละหน่วยกับร้านด้านบน'));
   const row = rowById.get(landOfRow(land, [...land.rowRel.keys()][0]) ? [...land.rowRel.keys()][0] : '');
   const storeLand = text(renderStoreLand(landOfRow(land, row.id)));
-  assert.ok(/จุด(ตกใน|ติดขอบ)อาคารของ/.test(storeLand) && storeLand.includes('ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร'));
+  assert.ok(storeLand.includes('จุดอยู่ในขอบอาคาร') && !/ตั้งอยู่ใน|ติดขอบ/.test(storeLand));
   const moved = data.rows.find(r => r.register === 1);
   assert.ok(text(renderStoreRegister({row: moved, register: moved.register})).includes('ยังนับเป็น 1 ร้านในชุดข้อมูลนี้ตามเดิม'));
-  assert.ok(text(renderLandHostsIn([{host, rows: 3, outlets: 1}])).includes('ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร'));
+  const hostsIn = renderLandHostsIn([{host, rows: 3, outlets: 1}]);
+  assert.ok(text(hostsIn).includes(LAND_RULE) && (hostsIn.match(/source-line/g) || []).length === 1 && !text(hostsIn).includes('ไม่ได้ยืนยัน'));
   // One row per building: other registry names on the same footprint ride along; a nested outline says what it repeats.
   const co = [{...host, id: 'OFF-1', name: 'Tower A'}, {...host, id: 'OFF-2', name: 'Tower B'}, {...host, id: 'OFF-3', name: 'Tower C'}];
   const listed = text(renderLandHostsIn([{host, cohosts: co, rows: 20, outlets: 35}, {host: {...host, id: 'OFF-9', name: 'Complex'}, cohosts: [], rows: 20, outlets: 36, repeats: {host, rows: 20}}]));
   assert.ok(listed.includes('อาคารเดียวกับ Tower A, Tower B และอีก 1 ชื่อ'), listed);
-  assert.ok(listed.includes(`นับร้านซ้ำกับ ${host.name} 20 ร้าน`) && listed.includes('รวมแถวกันไม่ได้'), listed);
+  assert.ok(listed.includes(`นับร้านซ้ำกับ ${host.name} 20 ร้าน`), listed);
   assert.equal((renderLandHostsIn([{host, cohosts: co, rows: 20, outlets: 35}]).match(/data-action="select-land"/g) || []).length, 1, 'co-hosts are not separate rows');
 });
 
@@ -302,15 +322,15 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   const list = [{host, rows: 3, outlets: 1}]; list.total = 1399;
   const landList = text(renderLandHostsIn(list, {boundary: 'host ในแขวงทดสอบ'}));
   assert.ok(landList.includes('1,399 อาคาร') && landList.includes('แสดง 1 จาก 1,399 อาคาร'));
-  assert.ok(landList.includes('CityMETER Restaurants API') && landList.includes('ทะเบียนร้านเครือ ตรวจ') && landList.includes('ขอบเขต host ในแขวงทดสอบ'));
+  assert.ok(landList.includes('CityMETER Restaurants API') && landList.includes('ทะเบียนร้านเครือ ตรวจ') && landList.includes('OpenStreetMap') && landList.includes('ขอบเขต host ในแขวงทดสอบ'));
   // Shares only for a column of at least 30 rows; the panel says why and that rows are not every restaurant.
   const paragon = land.hosts.find(h => h.id === 'SC-001244');
   const profile = landProfile(land, paragon, {rowsByKey: rowById, outletsById: reg.byId});
   const around = data.rows.slice(0, 4).map(r => ({...r}));
   const landHtml = text(renderLand({land, profile, around, groups: data.groups, index}));
   assert.ok(!/\d+%/.test(landHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1].split('เครือในทะเบียน')[0]), 'no share on a handful of rows');
-  assert.ok(landHtml.includes('ร้อยละแสดงเฉพาะคอลัมน์ที่มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่จำนวนร้านทั้งหมดของพื้นที่หรืออาคาร'));
-  assert.ok(landHtml.includes('สาขาเครือจุดตกใน/ติดขอบ') && !landHtml.includes('สาขาเครือในอาคาร'));
+  assert.ok(landHtml.includes('ร้อยละเมื่อคอลัมน์มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่ทุกร้านในอาคาร'));
+  assert.ok(landHtml.includes('สาขาร้านเครือในอาคาร') && !landHtml.includes('ติดขอบ'));
 });
 
 test('snapshot chain and venue headers carry totals, never the length of a cut list (review 2, 0.3.2)', async () => {

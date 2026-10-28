@@ -1,55 +1,58 @@
 #!/usr/bin/env python3
-"""Spatial-join check of restaurants against the buildings and areas of the registry's Land datasets.
+"""Spatial-join check of restaurants against the buildings of the registry's Land datasets — OpenStreetMap only.
 
-Owner request 2026-10-28: “ฝากเช็ค spatial join กับ อาคาร/พื้นที่ ใน dataset กลุ่ม Land ใน registry sheet”.
+Owner requests 2026-10-28: “ฝากเช็ค spatial join กับ อาคาร/พื้นที่ ใน dataset กลุ่ม Land ใน registry sheet”, “รูปทรงอาคารถ้ามี
+LOD > 1 … ให้ใช้ที่ละเอียดกว่าแทน” and, at 18:27, “ใช้ OSM อย่างเดียว เหมือน web demo ของ dataset อื่น ๆ ใน registry …
+จุดร้านอาหารที่ตกริม ๆ ให้รวบเข้าตึกนั้นให้หมดเลย”.
 The registry (R11_LAND_LOCATION) lists four Land datasets — Shopping Centers & Retail Venues, Hotel, Office and
-Industrial Estates — and R12_DATASET_LINKS keeps one host_context_enrichment link from each to Restaurants, all at
-review_status = idea / pending_research. This script runs that join for the seven provinces the restaurant data covers.
+Industrial Estates — and R12_DATASET_LINKS keeps one host_context_enrichment link from each to Restaurants. This script
+runs that join for the seven provinces the restaurant data covers.
 
-Inputs (internal, never committed): JSON dumps of the research masters (scripts/xlsx-dump.py), the CityMETER production
-V4 building footprints for the tiles that hold the points (public detailMvt, per subdistrict; fetched read-only), the
-industrial-estate candidate polygons (public getIEATBoundMVT tiles), data/restaurants.json, data/chains.json and
-data/areas.geojson.
+Inputs (internal, never committed): JSON dumps of the research masters (scripts/xlsx-dump.py), the OpenStreetMap
+building polygons of the OpenFreeMap z14 tiles that hold the host points (--osm: fetched in a browser from the very
+tile set the map draws, decoded with @mapbox/vector-tile; a JSON of {tiles: {"x_y": {f: [{id, k, h, b, hide, rings}]}}}),
+the Shopping Center release geometry (--lod-buildings, OpenStreetMap-derived building parts), the industrial-estate
+candidate polygons (optional, report only), data/restaurants.json, data/chains.json and data/areas.geojson.
 
 Method (every result is a display-time candidate, never a located-in or tenancy claim):
-  1. Land building = the registry's own reviewed host geometry when it has one — Shopping: the Shopping Center
-     release's selected host geometry for the same venue_id (13_BUILDING_LINKS → research geometry bundle,
-     --lod-buildings); Hotel / Office: 15_BUILDING_MASS host_footprint (original OpenStreetMap vertices) — else the
-     production V4 footprint that contains the Land point (smallest containing; within 3 m of an edge counts as
-     “edge”). Owner rule 2026-10-28 15:24 (“รูปทรงอาคารถ้ามี LOD > 1 … ให้ใช้ที่ละเอียดกว่าแทน”): when the registry
-     geometry has building parts (base/top per part, LOD > 1) the parts are drawn instead of one LOD1 block, the
-     host footprint becomes an outline, and the join uses the union of footprint and parts. V4 footprint parts
-     clipped at tile edges are merged with their overlapping, same-height neighbours.
-  2. Each restaurant display point (≈ 9.55 m grid) and chain-register outlet point is tested against the Land
-     buildings: in (inside the outline), edge (≤ 10 m from it — within the coordinate's own uncertainty), near (≤ 100 m).
-  3. The name-based host links already in the registry (Sheet 1 citymeter_shopping_center_id / common-retail candidate
-     ids, Hotel 11_STORE_LINKS, Hotel 15_BUILDING_MASS registry_branch_keys) are compared with the spatial result.
-  4. Industrial estates: candidate polygons only (no selected geometry, rights not reviewed) — counted in the report,
+  1. Land building = the OpenStreetMap building polygon the map itself draws: the OpenFreeMap z14 polygon that holds
+     the host's point (smallest), else the nearest within LAND_EDGE_M (10 m), else the polygon that overlaps the
+     registry's own reviewed OpenStreetMap footprint most (IoU ≥ 0.3). Pieces clipped at tile edges are merged with
+     their same-id, same-height neighbours. No CityMETER V4 footprint is used (owner 2026-10-28 18:27), so a Land
+     building never collides with the city massing: it IS the massing polygon, which the app hides under it.
+  2. LOD > 1 (owner 15:24): when the registry's reviewed geometry for the host has building parts (base/top per part)
+     and its footprint is the same building (IoU ≥ 0.5 with the tile polygon), the parts are drawn inside the tile
+     outline instead of one block. Heights stay source values.
+  3. Each restaurant display point (≈ 9.55 m grid) and chain-register outlet point is tested against the buildings:
+     in = inside the outline OR within EDGE_M (10 m, the coordinate's own uncertainty) — such a point is given a
+     display position inside the outline (the nearest point 1.5 m inside) so the pin sits in the building it is
+     counted in; near = 10–100 m (report statistic only).
+  4. The name-based host links already in the registry are compared with the spatial result.
+  5. Industrial estates: candidate polygons only (no selected geometry, rights not reviewed) — counted in the report,
      never published as geometry.
-Outputs: data/land.json, data/land-buildings.geojson (only buildings that hold or touch at least one point) and the
-check report (JSON) given by --report.
+Outputs: data/land.json (hosts, relations, display positions), data/land-buildings.geojson (only buildings that hold at
+least one point) and the check report (JSON) given by --report.
 """
-import argparse, collections, glob, json, math, os, re
-import mapbox_vector_tile as mvt
+import argparse, collections, glob, gzip, json, math, os, re
 from shapely.geometry import shape, Point, Polygon, MultiPolygon, mapping
-from shapely.ops import unary_union
+from shapely.ops import unary_union, nearest_points
 from shapely.strtree import STRtree
 
-SKIPPED = []
 Z, EXTENT = 14, 4096
 N = 2 ** Z
-EDGE_M, NEAR_M, LAND_EDGE_M = 10.0, 100.0, 3.0
+EDGE_M, NEAR_M, LAND_EDGE_M = 10.0, 100.0, 10.0
 KX = 111320 * math.cos(math.radians(13.75))
 KY = 110574.0
+GRID = 2 ** 10 * 4096
 
 def to_m(geom):
     """Local metric frame (equirectangular at 13.75° N) for distances; error < 0.5 % across the seven provinces."""
     from shapely.affinity import scale
     return scale(geom, xfact=KX, yfact=KY, origin=(0, 0))
 
-def tile_ll(px, py, tx, ty):
-    gx, gy = (tx + px / EXTENT) / N, (ty + py / EXTENT) / N
-    return gx * 360 - 180, math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * gy))))
+def from_m(geom):
+    from shapely.affinity import scale
+    return scale(geom, xfact=1 / KX, yfact=1 / KY, origin=(0, 0))
 
 def num(v):
     try:
@@ -64,69 +67,57 @@ def text(v):
 def load(d, tab):
     return json.load(open(os.path.join(d, tab + '.json'), encoding='utf-8'))
 
-# ---------- production V4 footprints ----------
-def load_footprints(tile_dir):
-    import hashlib
-    parts, seen = [], set()
-    for path in sorted(glob.glob(os.path.join(tile_dir, '*.pbf'))):
-        meta = path + '.json'
-        b = open(path, 'rb').read()
-        # Only complete responses: HTTP 200 recorded with the same sha256 as the bytes on disk.
-        if not os.path.exists(meta):
-            continue
-        m = json.load(open(meta))
-        if m.get('status') != 200 or m.get('sha256') != hashlib.sha256(b).hexdigest() or not b:
-            continue
-        tx, ty, _ = os.path.basename(path)[:-4].split('_', 2)
-        tx, ty = int(tx), int(ty)
-        try:
-            layer = mvt.decode(b, default_options={'y_coord_down': True}).get('building-detail', {})
-        except Exception:
-            SKIPPED.append(os.path.basename(path))  # truncated response: refetch before a release build
-            continue
-        for f in layer.get('features', []):
-            g = f['geometry']
-            polys = [g['coordinates']] if g['type'] == 'Polygon' else g['coordinates'] if g['type'] == 'MultiPolygon' else []
-            for poly in polys:
-                key = (tx, ty, json.dumps(poly))
-                if key in seen:
-                    continue
-                seen.add(key)
-                clipped = any(px < 0 or px > EXTENT or py < 0 or py > EXTENT for ring in poly for px, py in ring)
-                try:
-                    shp = Polygon([tile_ll(px, py, tx, ty) for px, py in poly[0]], [[tile_ll(px, py, tx, ty) for px, py in r] for r in poly[1:]])
-                except Exception:
-                    continue
-                if not shp.is_valid:
-                    shp = shp.buffer(0)
-                if shp.is_empty or shp.area == 0:
-                    continue
-                parts.append({'geom': shp, 'height': text(f['properties'].get('height_m')), 'floors': f['properties'].get('estimated_floor'),
-                              'tile': (tx, ty), 'clipped': clipped})
-    # Merge clipped parts of one building across tiles: different tile, same height, overlapping area.
-    parent = list(range(len(parts)))
+def valid(g):
+    return g if g.is_valid else g.buffer(0)
+
+def grid_ll(gx, gy):
+    return gx / GRID * 360 - 180, math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * gy / GRID))))
+
+# ---------- OpenStreetMap buildings from the OpenFreeMap tiles ----------
+def load_osm(path):
+    """Polygons of the fetched tiles, merged across tile edges (same OSM id, same height, overlapping clipped pieces).
+    Returns buildings [{geom, height, base, osm, pieces}] and the count of raw pieces."""
+    opener = gzip.open if path.endswith('.gz') else open
+    with opener(path, 'rt', encoding='utf-8') as fh:
+        data = json.load(fh)
+    pieces = []
+    for key, tile in data['tiles'].items():
+        tx, ty = (int(v) for v in key.split('_'))
+        for f in tile.get('f', []):
+            if f.get('hide'):
+                continue
+            try:
+                shp = valid(Polygon(f['rings'][0], f['rings'][1:]))
+            except Exception:
+                continue
+            if shp.is_empty or shp.area == 0:
+                continue
+            h = num(f.get('h'))
+            pieces.append({'geom': shp, 'height': h, 'base': num(f.get('b')) or 0.0, 'osm': f.get('id'), 'tile': (tx, ty)})
+    parent = list(range(len(pieces)))
     def find(i):
         while parent[i] != i:
             parent[i] = parent[parent[i]]; i = parent[i]
         return i
-    clipped_idx = [i for i, p in enumerate(parts) if p['clipped']]
-    tree = STRtree([parts[i]['geom'] for i in clipped_idx])
-    for k, i in enumerate(clipped_idx):
-        for j in tree.query(parts[i]['geom']):
-            j = clipped_idx[j]
-            if j <= i or parts[j]['tile'] == parts[i]['tile'] or parts[j]['height'] != parts[i]['height']:
+    tree = STRtree([p['geom'] for p in pieces])
+    for i, p in enumerate(pieces):
+        for j in tree.query(p['geom']):
+            j = int(j)
+            if j <= i or pieces[j]['tile'] == p['tile'] or pieces[j]['osm'] != p['osm'] or pieces[j]['height'] != p['height']:
                 continue
-            if parts[i]['geom'].intersection(parts[j]['geom']).area * KX * KY > 1.0:
+            if p['geom'].intersection(pieces[j]['geom']).area * KX * KY > 0.5:
                 parent[find(j)] = find(i)
     groups = collections.defaultdict(list)
-    for i in range(len(parts)):
+    for i in range(len(pieces)):
         groups[find(i)].append(i)
     buildings = []
     for members in groups.values():
-        geom = parts[members[0]]['geom'] if len(members) == 1 else unary_union([parts[i]['geom'] for i in members])
-        buildings.append({'geom': geom, 'height': parts[members[0]]['height'], 'floors': parts[members[0]]['floors'],
-                          'parts': len(members), 'source': 'citymeter_v4'})
-    return buildings, len(parts)
+        geom = pieces[members[0]]['geom'] if len(members) == 1 else valid(unary_union([pieces[i]['geom'] for i in members]))
+        if geom.geom_type == 'MultiPolygon':  # pieces that only touch at a tile corner: keep the largest polygon
+            geom = max(geom.geoms, key=lambda g: g.area)
+        buildings.append({'geom': geom, 'height': pieces[members[0]]['height'], 'base': pieces[members[0]]['base'],
+                          'osm': pieces[members[0]]['osm'], 'pieces': len(members), 'tiles': sorted({pieces[i]['tile'] for i in members})})
+    return buildings, len(pieces), data.get('meta', {})
 
 def round_geom(geom, nd=7):
     m = mapping(geom)
@@ -136,8 +127,8 @@ def round_geom(geom, nd=7):
 
 def main():
     ap = argparse.ArgumentParser()
-    for k in ['tiles', 'shop', 'hotel', 'office', 'estates', 'ie-tiles', 'lod-buildings', 'sheet1', 'chain-dump', 'restaurants', 'chains', 'areas', 'out', 'report']:
-        ap.add_argument('--' + k, required=k not in ('ie-tiles', 'lod-buildings'))
+    for k in ['osm', 'shop', 'hotel', 'office', 'estates', 'ie-tiles', 'lod-buildings', 'sheet1', 'chain-dump', 'restaurants', 'chains', 'areas', 'out', 'report']:
+        ap.add_argument('--' + k, required=k not in ('ie-tiles', 'lod-buildings', 'estates'))
     a = ap.parse_args()
 
     areas = json.load(open(a.areas, encoding='utf-8'))
@@ -180,14 +171,14 @@ def main():
     counts = collections.Counter(x['ds'] for x in land)
     print('land points in the covered provinces', dict(counts))
 
-    # ---------- buildings ----------
-    v4, n_parts = load_footprints(a.tiles)
-    v4_tree = STRtree([b['geom'] for b in v4])
-    print('V4 footprint parts', n_parts, 'buildings', len(v4))
-    def valid(g):
-        return g if g.is_valid else g.buffer(0)
+    # ---------- OpenStreetMap buildings ----------
+    osm, n_pieces, osm_meta = load_osm(a.osm)
+    osm_geoms = [b['geom'] for b in osm]
+    osm_tree = STRtree(osm_geoms)
+    osm_m = [to_m(g) for g in osm_geoms]
+    print('OpenStreetMap pieces', n_pieces, 'buildings', len(osm))
 
-    # Registry building parts (LOD > 1): base/top per part under a host footprint drawn as an outline.
+    # ---------- registry geometry: used only to pick a polygon when the point misses, and to supply parts ----------
     mass_rows = load(a.hotel, '15_BUILDING_MASS')
     parts_by_parent = collections.defaultdict(list)
     for m in mass_rows:
@@ -209,16 +200,14 @@ def main():
             continue
         mid = text(m.get('mass_id'))
         masses.append({'geom': g, 'hotelIds': json.loads(m.get('hotel_ids') or '[]'), 'officeIds': json.loads(m.get('office_ids') or '[]'),
-                       'height': text(m.get('top_m')), 'source': 'registry_osm', 'massId': mid, 'parts': parts_by_parent.get(mid, []),
-                       'qualified': json.loads(m.get('qualified_hotel_ids') or '[]'), 'branchKeys': json.loads(m.get('registry_branch_keys') or '[]')})
+                       'height': num(m.get('top_m')), 'massId': mid, 'parts': parts_by_parent.get(mid, []),
+                       'branchKeys': json.loads(m.get('registry_branch_keys') or '[]')})
     mass_by_hotel, mass_by_office = collections.defaultdict(list), collections.defaultdict(list)
     for i, m in enumerate(masses):
         for h in m['hotelIds']:
             mass_by_hotel[h].append(i)
         for o in m['officeIds']:
             mass_by_office[o].append(i)
-
-    # Shopping: the Shopping Center release's selected host geometry for the same venue_id (footprints and parts).
     sc_geo, sc_meta = collections.defaultdict(lambda: {'foot': [], 'parts': []}), {}
     if a.lod_buildings:
         lod = json.load(open(a.lod_buildings, encoding='utf-8'))
@@ -231,97 +220,106 @@ def main():
                 continue
             part = p.get('geometry_role') == 'host_building_part_not_shop_unit'
             rec = {'geom': g, 'base': num(p.get('base_m')) or 0.0, 'top': num(p.get('height_m')), 'ref': text(p.get('host_id')),
-                   'status': text(p.get('height_status')), 'outline': p.get('render_as') == 'outline', 'osm': text(p.get('osm_id'))}
+                   'status': text(p.get('height_status')), 'osm': text(p.get('osm_id'))}
             for vid in p.get('venue_ids') or []:
                 sc_geo[vid]['parts' if part else 'foot'].append(rec)
 
-    buildings, building_key = [], {}
-    def building_index(src, ref, geom, height, floors=None, extra=None):
-        key = (src, ref)
-        if key not in building_key:
-            building_key[key] = len(buildings)
-            buildings.append({'src': src, 'ref': ref, 'geom': geom, 'height': height, 'floors': floors, 'hosts': [], 'pieces': [], 'lod': 1, **(extra or {})})
-        return building_key[key]
-    def registry_building(src, ref, foot, parts, height, extra=None):
-        """Join geometry = union of the footprint(s) and parts; pieces = the parts (LOD > 1), or the footprints when a
-        venue has several (each keeps its own height); a single footprint is one LOD1 block. One OpenStreetMap
-        footprint is one building whichever registry names it (CentralWorld is both a Shopping venue and a Hotel /
-        Office mass): its hosts are merged and the more detailed representation (more parts) is kept."""
-        geom = valid(unary_union([x['geom'] for x in foot + parts])) if len(foot) + len(parts) > 1 else (foot or parts)[0]['geom']
-        pieces = parts if parts else (foot if len(foot) > 1 else [])
-        tops = [x['top'] for x in pieces if x['top']]
-        osm = foot[0].get('osm') if len(foot) == 1 and foot[0].get('osm', '').startswith('osm:') else ''
-        key_src, key_ref = ('osm', osm) if osm else (src, ref)
-        rep = {'geom': geom, 'pieces': pieces, 'lod': 2 if parts else 1, 'height': max(tops) if tops else height}
-        if (key_src, key_ref) in building_key:
-            b = buildings[building_key[(key_src, key_ref)]]
-            if len(pieces) > len(b['pieces']):
-                b.update(rep, src=src)
-            for k, v in (extra or {}).items():
-                b[k] = list(dict.fromkeys((b.get(k) or []) + v)) if isinstance(v, list) else v
-            return building_key[(key_src, key_ref)]
-        i = building_index(key_src, key_ref, geom, rep['height'], extra={'pieces': pieces, 'lod': rep['lod'], **(extra or {})})
-        buildings[i]['src'] = src
-        return i
+    def registry_geometry(e):
+        """The registry's reviewed footprint(s) and parts for a host, or (None, [])."""
+        if e['ds'] == 'shopping':
+            sc = sc_geo.get(e['id'])
+            if sc and sc['foot']:
+                return valid(unary_union([x['geom'] for x in sc['foot']])), sc['parts']
+            return None, []
+        mids = mass_by_hotel.get(e.get('hotelId')) if e['ds'] == 'hotel' else mass_by_office.get(e['id'])
+        if not mids:
+            return None, []
+        p = Point(e['lon'], e['lat'])
+        cands = [i for i in mids if masses[i]['geom'].contains(p)] or mids
+        m = masses[min(cands, key=lambda i: masses[i]['geom'].area)]
+        e['branchKeys'] = m['branchKeys']
+        return m['geom'], m['parts']
+
+    # ---------- host → building ----------
+    buildings, building_of = [], {}
+    def building_index(i):
+        if i not in building_of:
+            building_of[i] = len(buildings)
+            b = osm[i]
+            buildings.append({'osmIndex': i, 'geom': b['geom'], 'height': b['height'], 'base': b['base'], 'osm': b['osm'], 'hosts': [], 'pieces': [], 'lod': 1,
+                              'registryRef': '', 'branchKeys': []})
+        return building_of[i]
     stats = collections.Counter()
-    for e in land:
+    iou_stats = collections.Counter()
+    for li, e in enumerate(land):
         p = Point(e['lon'], e['lat'])
-        sc = sc_geo.get(e['id']) if e['ds'] == 'shopping' else None
-        mids = mass_by_hotel.get(e.get('hotelId')) if e['ds'] == 'hotel' else mass_by_office.get(e['id']) if e['ds'] == 'office' else None
-        if sc and (sc['foot'] or sc['parts']):
-            foot = [x for x in sc['foot']]
-            e['fp'] = registry_building('registry_shopping', e['id'], foot, sc['parts'], foot[0]['top'] if foot else None)
-            e['fpBy'] = 'registry_geometry'
-        elif mids:
-            cands = [i for i in mids if masses[i]['geom'].contains(p)] or mids
-            m = masses[min(cands, key=lambda i: masses[i]['geom'].area)]
-            e['fp'] = registry_building('registry_osm', m['massId'], [{'geom': m['geom'], 'top': num(m['height']), 'base': 0.0, 'osm': m['massId']}], m['parts'], m['height'],
-                                        extra={'branchKeys': m['branchKeys']})
-            e['fpBy'] = 'registry_mass'
-        else:
-            inside = [i for i in v4_tree.query(p) if v4[i]['geom'].contains(p)]
-            i = None
-            if inside:
-                i = min(inside, key=lambda i: v4[i]['geom'].area)
-                e['fpBy'] = 'point_in_v4'
+        reg_geom, reg_parts = registry_geometry(e)
+        inside = [int(i) for i in osm_tree.query(p) if osm_geoms[i].contains(p)]
+        i, by = None, 'none'
+        if inside:
+            # Nested polygons under one point (a tower drawn inside a mall outline): the registry's reviewed footprint
+            # decides when it is the same building (best IoU ≥ 0.3); else a shopping host is the complex (largest),
+            # a hotel or office is its own building (smallest).
+            def iou_of(j):
+                inter = reg_geom.intersection(osm_geoms[j]).area
+                return inter / (reg_geom.union(osm_geoms[j]).area or 1) if inter > 0 else 0.0
+            ranked = sorted(inside, key=iou_of, reverse=True) if reg_geom is not None else []
+            if ranked and iou_of(ranked[0]) >= 0.3:
+                i, by = ranked[0], 'point_in_osm'
+            elif e['ds'] == 'shopping':
+                i, by = max(inside, key=lambda i: osm_geoms[i].area), 'point_in_osm'
             else:
-                pm = to_m(p)
-                near = [(to_m(v4[i]['geom']).distance(pm), i) for i in v4_tree.query(p.buffer(LAND_EDGE_M / KY * 1.5))]
-                near = [x for x in near if x[0] <= LAND_EDGE_M]
-                i = min(near)[1] if near else None
-                e['fpBy'] = 'edge_v4' if near else 'none'
-            if i is not None:
-                b = v4[i]
-                e['fp'] = building_index('citymeter_v4', i, b['geom'], b['height'], b['floors'])
-        stats[f"{e['ds']}:{e['fpBy']}"] += 1
-        if 'fp' in e and buildings[e['fp']]['lod'] == 2:
-            stats[f"{e['ds']}:lod2"] += 1
-    # How the registry geometry compares with the V4 footprint the point alone would pick (shopping and offices).
-    v4_agree = collections.Counter()
-    for e in land:
-        if e.get('fpBy') not in ('registry_geometry', 'registry_mass'):
+                i, by = min(inside, key=lambda i: osm_geoms[i].area), 'point_in_osm'
+        else:
+            pm = to_m(p)
+            near = [(osm_m[j].distance(pm), int(j)) for j in osm_tree.query(p.buffer(LAND_EDGE_M / KY * 1.5))]
+            near = [x for x in near if x[0] <= LAND_EDGE_M]
+            if near:
+                i, by = min(near)[1], 'edge_osm'
+            elif reg_geom is not None:
+                best = None
+                for j in osm_tree.query(reg_geom):
+                    j = int(j)
+                    inter = reg_geom.intersection(osm_geoms[j]).area
+                    if inter <= 0:
+                        continue
+                    iou = inter / (reg_geom.union(osm_geoms[j]).area or 1)
+                    if iou >= 0.3 and (best is None or iou > best[0]):
+                        best = (iou, j)
+                if best:
+                    i, by = best[1], 'registry_overlap_osm'
+        e['fpBy'] = by
+        stats[f"{e['ds']}:{by}"] += 1
+        if i is None:
             continue
-        p = Point(e['lon'], e['lat'])
-        inside = [i for i in v4_tree.query(p) if v4[i]['geom'].contains(p)]
-        if not inside:
-            v4_agree[e['ds'] + ':no_v4_at_point'] += 1
-            continue
-        g4 = v4[min(inside, key=lambda i: v4[i]['geom'].area)]['geom']
-        gr = buildings[e['fp']]['geom']
-        inter = gr.intersection(g4).area
-        iou = inter / (gr.union(g4).area or 1)
-        v4_agree[e['ds'] + (':iou>=0.5' if iou >= 0.5 else ':iou<0.5')] += 1
-    # host lists (by index in `land`)
-    for i, e in enumerate(land):
-        if 'fp' in e:
-            buildings[e['fp']]['hosts'].append(i)
+        b = buildings[building_index(i)]
+        e['fp'] = building_of[i]
+        b['hosts'].append(li)
+        # Registry parts (LOD > 1) ride along when the registry footprint is this very building.
+        if reg_geom is not None:
+            inter = reg_geom.intersection(b['geom']).area
+            iou = inter / (reg_geom.union(b['geom']).area or 1)
+            iou_stats[e['ds'] + (':iou>=0.5' if iou >= 0.5 else ':iou<0.5')] += 1
+            if reg_parts and iou >= 0.5 and len(reg_parts) > len(b['pieces']):
+                # Parts belong to this outline only when they sit in it (≥ 90 % of their area); parts of a wider
+                # complex than the OpenStreetMap polygon stay out (LOD1), never drawn beyond the outline.
+                parts_area = sum(x['geom'].area for x in reg_parts)
+                inside_share = sum(x['geom'].intersection(b['geom']).area for x in reg_parts) / parts_area if parts_area else 0
+                if inside_share >= 0.9:
+                    b['pieces'], b['lod'] = reg_parts, 2
+                    b['registryRef'] = 'registry_shopping:' + e['id'] if e['ds'] == 'shopping' else 'registry_osm'
+                else:
+                    stats['lod2_skipped_parts_outside_outline'] += 1
+        if e.get('branchKeys'):
+            b['branchKeys'] = list(dict.fromkeys(b['branchKeys'] + e['branchKeys']))
+    for b in buildings:
+        b['hosts'] = list(dict.fromkeys(b['hosts']))
+        if b['lod'] == 2:
+            stats['lod2_buildings'] += 1
     print('land building assignment', dict(stats))
 
     # ---------- points: restaurant display points and chain outlets ----------
     rj = json.load(open(a.restaurants, encoding='utf-8'))
-    G = 2 ** 10 * 4096
-    def grid_ll(gx, gy):
-        return gx / G * 360 - 180, math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * gy / G))))
     snap = [(k, *grid_ll(gx, gy)) for k, gx, gy in zip(rj['cols']['key'], rj['cols']['gx'], rj['cols']['gy'])]
     cj = json.load(open(a.chains, encoding='utf-8'))
     outlets = [(oid, lon, lat) for oid, lon, lat, area in zip(cj['cols']['id'], cj['cols']['lon'], cj['cols']['lat'], cj['cols']['area'])
@@ -329,11 +327,11 @@ def main():
     fp_geoms = [b['geom'] for b in buildings]
     fp_tree = STRtree(fp_geoms)
     fp_m = [to_m(g) for g in fp_geoms]
+    fp_inner = [valid(to_m(g).buffer(-1.5)) for g in fp_geoms]
 
     def join(points):
-        """Primary relation per point (smallest containing building; else the nearest edge / near building) and, for a
-        point inside nested buildings (an office tower or supermarket inside a mall outline), every other building that
-        contains it — the point falls in each of them, none is preferred by type."""
+        """Primary relation per point (smallest containing building; else the nearest within 10 m — counted as in;
+        else near ≤ 100 m) and, for a point inside nested buildings, every other building that contains it."""
         out, also = {}, {}
         for key, lon, lat in points:
             p = Point(lon, lat)
@@ -349,7 +347,7 @@ def main():
             pm = to_m(p)
             d, i = min((fp_m[i].distance(pm), int(i)) for i in cand)
             if d <= EDGE_M:
-                out[key] = (i, 'edge', round(d, 1))
+                out[key] = (i, 'in', round(d, 1))
             elif d <= NEAR_M:
                 out[key] = (i, 'near', round(d, 1))
         return out, also
@@ -360,9 +358,48 @@ def main():
         return hit if hit and hit[0] == b else (b, 'in', 0.0) if b in also.get(key, []) else None
     print('snapshot joined', collections.Counter(v[1] for v in snap_join.values()), 'chain joined', collections.Counter(v[1] for v in chain_join.values()))
 
+    # ---------- display positions for points counted in but lying outside (≤ 10 m) ----------
+    def inside_point(b, lon, lat):
+        """Nearest point ≥ 1.5 m inside the outline (else a representative point ≥ 0.3 m inside, else the polygon's
+        representative point); always inside the published (7-decimal) outline."""
+        inner = fp_inner[b]
+        if not inner.is_empty:
+            q = from_m(nearest_points(inner, to_m(Point(lon, lat)))[0])
+        else:
+            thin = valid(fp_m[b].buffer(-0.3))
+            q = from_m(thin.representative_point()) if not thin.is_empty else fp_geoms[b].representative_point()
+        return round(q.x, 7), round(q.y, 7)
+    snap_pos, chain_pos = {}, {}
+    moved = collections.Counter()
+    snap_lookup = {k: (lon, lat) for k, lon, lat in snap}
+    for key, (b, rel, d) in snap_join.items():
+        if rel != 'in' or d == 0:
+            continue
+        snap_pos[key] = inside_point(b, *snap_lookup[key])
+        moved['snapshot'] += 1
+    outlet_lookup = {k: (lon, lat) for k, lon, lat in outlets}
+    for key, (b, rel, d) in chain_join.items():
+        if rel != 'in' or d == 0:
+            continue
+        chain_pos[key] = inside_point(b, *outlet_lookup[key])
+        moved['chain'] += 1
+    # Every display position lies inside its building as published (the browser recomputes this in tests).
+    published = {}
+    def published_geom(b):
+        if b not in published:
+            published[b] = valid(shape(round_geom(fp_geoms[b])))
+        return published[b]
+    for key, (lon, lat) in list(snap_pos.items()):
+        if not published_geom(snap_join[key][0]).contains(Point(lon, lat)):
+            moved['snapshot_outside_after_rounding'] += 1; snap_pos.pop(key)
+    for key, (lon, lat) in list(chain_pos.items()):
+        if not published_geom(chain_join[key][0]).contains(Point(lon, lat)):
+            moved['chain_outside_after_rounding'] += 1; chain_pos.pop(key)
+    print('display positions', dict(moved))
+
     # ---------- registry name-based links vs spatial ----------
     s1 = load(a.sheet1, '02_STORES')
-    moved = load(a.chain_dump, '16_MASTER_OBSERVATIONS')
+    moved_rows = load(a.chain_dump, '16_MASTER_OBSERVATIONS')
     key_of = lambda sid: (lambda m: m.group(1)[:12] + ('' if m.group(2) == '01' else '-' + m.group(2)))(re.match(r'^R-([0-9a-f]{24})-(\d{2})$', sid))
     shop_by_uuid = {e['uuid']: i for i, e in enumerate(land) if e['ds'] == 'shopping' and e.get('uuid')}
     shop_by_mall = {e['mallId']: i for i, e in enumerate(land) if e['ds'] == 'shopping' and e.get('mallId')}
@@ -382,9 +419,8 @@ def main():
             name_links.append((key_of(sid), li, basis, 'accepted' if accepted else 'candidate'))
     for r in s1:
         collect(r)
-    for r in moved:
-        r = dict(r); r['snapshot_observation_id'] = r['snapshot_observation_id']
-        collect(r, 'master_')
+    for r in moved_rows:
+        collect(dict(r), 'master_')
     review = []
     def compare(links, joined, also):
         res = collections.Counter()
@@ -398,7 +434,7 @@ def main():
                 res['agree_' + own[1]] += 1
             elif hit:
                 res['other_building_' + hit[1]] += 1
-                if hit[1] in ('in', 'edge'):
+                if hit[1] == 'in':
                     review.append({'row': key, 'basis': basis, 'status': status, 'linkedHost': e['id'], 'linkedName': e['name'], 'relation': hit[1], 'distanceM': hit[2],
                                    'spatialHosts': [land[i]['id'] for i in buildings[hit[0]]['hosts']], 'spatialNames': [land[i]['name'] for i in buildings[hit[0]]['hosts']]})
             else:
@@ -433,7 +469,8 @@ def main():
 
     # ---------- industrial estates (candidate polygons, report only) ----------
     ie_report, ie_summary = [], {}
-    if a.ie_tiles and os.path.isdir(a.ie_tiles):
+    if a.estates and a.ie_tiles and os.path.isdir(a.ie_tiles):
+        import mapbox_vector_tile as mvt
         estates = {text(r['estate_id']): r for r in load(a.estates, '01_ESTATES')}
         versions = load(a.estates, '03_GEOMETRY_VERSIONS')
         feats = collections.defaultdict(list)
@@ -459,10 +496,6 @@ def main():
                         except Exception:
                             pass
         merged = {fid: unary_union(gs) for fid, gs in feats.items() if gs}
-        # Restaurant coverage: the subdistricts that hold at least one snapshot row. Registry link DL-2669875b0346b95e63be
-        # (industrial estates → restaurants): a candidate polygon never confirms “inside”; compare inside vs around only
-        # after the boundary, its date and rights are accepted. No estate boundary is accepted yet, so this check reports
-        # only where the estates sit relative to the restaurant coverage — no inside / around counts.
         covered_codes = {rj['areas'][i] for i in set(rj['cols']['area'])}
         covered_geoms = [g if g.is_valid else g.buffer(0) for g, c in zip(area_geom, area_ids) if c in covered_codes]
         covered_tree = STRtree(covered_geoms)
@@ -488,10 +521,10 @@ def main():
                       'rule': 'registry link DL-2669875b0346b95e63be: candidate polygons never confirm inside; inside vs around after boundary, date and rights acceptance'}
 
     # ---------- write ----------
-    # Published per-point relations: in / edge only (the building the point falls in or touches). “near” is a
-    # report statistic; the app measures the ring around one opened building itself (any Land building, not the nearest).
-    snap_pub = {k: v for k, v in snap_join.items() if v[1] != 'near'}
-    chain_pub = {k: v for k, v in chain_join.items() if v[1] != 'near'}
+    # Published per-point relations: in only (the building the point is counted in). “near” is a report statistic;
+    # the app measures the 10–100 m ring around one opened building itself.
+    snap_pub = {k: v for k, v in snap_join.items() if v[1] == 'in'}
+    chain_pub = {k: v for k, v in chain_join.items() if v[1] == 'in'}
     used = sorted({v[0] for v in snap_pub.values()} | {v[0] for v in chain_pub.values()} |
                   {b for v in snap_also.values() for b in v} | {b for v in chain_also.values() for b in v})
     remap = {b: i for i, b in enumerate(used)}
@@ -501,25 +534,25 @@ def main():
     for b in used:
         bd = buildings[b]
         g = bd['geom']
-        h = num(bd['height'])
+        h = bd['height']
         host_ids = [land[i]['id'] for i in bd['hosts']]
         pieces = bd.get('pieces') or []
-        common = {'building': remap[b], 'source': bd['src'], 'lod': bd.get('lod', 1), 'venue_ids': host_ids}
+        common = {'building': remap[b], 'source': 'openfreemap_osm', 'osm_id': bd['osm'], 'lod': bd.get('lod', 1), 'venue_ids': host_ids}
         if pieces:
-            # LOD > 1 (or several footprints): the building is an outline; each piece is extruded from its own base to top.
+            # LOD > 1: the OpenStreetMap outline is drawn as an outline; each registry part is extruded from its own base to top.
             feats.append({'type': 'Feature', 'id': remap[b], 'geometry': round_geom(g),
                           'properties': {'id': remap[b], **common, 'pieces': len(pieces), 'height_m': h, 'base_m': 0, 'display_height_m': 0, 'display_base_m': 0,
-                                         'render_as': 'outline', 'height_status': 'pieces', 'geometry_role': 'land_host_building'}})
+                                         'render_as': 'outline', 'height_status': 'pieces', 'geometry_role': 'land_host_building', 'parts_source': bd['registryRef']}})
             for k, x in enumerate(pieces):
                 top, base = num(x.get('top')), num(x.get('base')) or 0.0
                 feats.append({'type': 'Feature', 'id': f'{remap[b]}.{k}', 'geometry': round_geom(x['geom']),
                               'properties': {'id': f'{remap[b]}.{k}', **common, 'height_m': top, 'base_m': base, 'display_height_m': display_top(top, base), 'display_base_m': base,
                                              'render_as': 'extrusion', 'height_status': x.get('status') or ('source_height' if top else 'unknown_display_fallback'),
-                                             'geometry_role': 'land_host_building_part'}})
+                                             'geometry_role': 'land_host_building_part', 'parts_source': bd['registryRef']}})
         else:
             feats.append({'type': 'Feature', 'id': remap[b], 'geometry': round_geom(g),
-                          'properties': {'id': remap[b], **common, 'pieces': 0, 'height_m': h, 'base_m': 0,
-                                         'display_height_m': h if h and h > 0 else 3, 'display_base_m': 0, 'render_as': 'extrusion',
+                          'properties': {'id': remap[b], **common, 'pieces': 0, 'height_m': h, 'base_m': bd['base'] or 0,
+                                         'display_height_m': h if h and h > 0 else 3, 'display_base_m': bd['base'] or 0, 'render_as': 'extrusion',
                                          'height_status': 'source_height' if h and h > 0 else 'unknown_display_fallback',
                                          'geometry_role': 'land_host_building'}})
     host_keep = sorted({i for b in used for i in buildings[b]['hosts']})
@@ -529,35 +562,38 @@ def main():
         host_records.append({'id': e['id'], 'ds': e['ds'], 'name': e['name'], 'nameEn': e.get('nameEn', ''), 'type': e['type'], 'area': e['area'],
                              'lon': round(e['lon'], 7), 'lat': round(e['lat'], 7), 'fp': remap.get(e.get('fp'), -1), 'fpBy': e.get('fpBy', ''),
                              **({'uuid': e['uuid']} if e.get('uuid') else {}), **({'role': e['role']} if e.get('role') else {})})
-    host_index = {r['id']: k for k, r in enumerate(host_records)}
-    REL = {'in': 0, 'edge': 1, 'near': 2}
+    REL = {'in': 0, 'near': 2}
+    shapes_as_of = ''
+    m = re.search(r'(\d{4})(\d{2})(\d{2})', str(osm_meta.get('source', '')))
+    if m:
+        shapes_as_of = f'{m.group(1)}-{m.group(2)}-{m.group(3)}'
     land_json = {
-        'meta': {'schema': 'citymeter-land-join-1', 'checkedOn': '2026-10-28',
+        'meta': {'schema': 'citymeter-land-join-2', 'checkedOn': '2026-10-28', 'shapesAsOf': shapes_as_of,
                  'datasets': {'shopping': 'research.TH.shopping', 'hotel': 'research.TH.hotel', 'office': 'research.TH.office'},
-                 'rule': 'display-time candidate: restaurant display point (≈ 9.55 m grid) or register outlet point vs the Land building outline; in = inside, edge = within 10 m, near = within 100 m; never a located-in, tenancy or floor claim',
-                 'buildingRule': 'Land building = the registry reviewed host geometry when present (Shopping: Shopping Center release host geometry for the same venue_id; Hotel/Office: 15_BUILDING_MASS host_footprint, OpenStreetMap), else the CityMETER production V4 footprint that contains the Land point (or lies within 3 m). Building parts (LOD > 1) are drawn instead of one block when the registry has them (owner 2026-10-28); the join uses the union of footprint and parts',
-                 'geometrySources': {'registry_shopping': 'Shopping Center release (research geometry bundle, ODbL OpenStreetMap / CityMETER parts) as of ' + str(sc_meta.get('as_of', '')),
-                                     'registry_osm': 'Hotel registry 15_BUILDING_MASS (original OpenStreetMap vertices; parts base/top unverified)',
-                                     'citymeter_v4': 'CityMETER production building footprints (V4, detailMvt) — LOD1 footprint + height'},
-                 'relations': ['in', 'edge', 'near'],
+                 'rule': 'display-time candidate: restaurant display point (≈ 9.55 m grid) or register outlet point vs the Land building outline; in = inside or within 10 m (the coordinate\'s own uncertainty; such points get a display position inside the outline), near = 10–100 m (report only); never a located-in, tenancy or floor claim',
+                 'buildingRule': 'Land building = the OpenStreetMap building polygon of the OpenFreeMap z14 tiles the map draws: the polygon holding the host point, else the nearest within 10 m, else the polygon overlapping the registry\'s reviewed OpenStreetMap footprint most (IoU ≥ 0.3). Registry building parts (LOD > 1) are drawn inside the outline when the registry footprint is the same building (IoU ≥ 0.5). No CityMETER V4 footprint (owner 2026-10-28 18:27)',
+                 'geometrySources': {'openfreemap_osm': f"OpenStreetMap building polygons via OpenFreeMap ({osm_meta.get('source', 'z14 building layer')}), ODbL",
+                                     'registry_parts': 'Shopping Center release geometry bundle and Hotel registry 15_BUILDING_MASS building parts (OpenStreetMap-derived; base/top as recorded, unverified)'},
+                 'relations': ['in', 'in', 'near'],
+                 'display': 'snaps.rows / snaps.chains: display positions inside the outline for points counted in from within 10 m; the source positions stay in restaurants.json / chains.json',
                  'nested': 'a point inside several nested Land buildings has one row per building, the smallest first'},
         'hosts': host_records,
         # One row per (point, building): the primary relation first, then every other building that also contains the point.
         'snapshot': [r for k, v in sorted(snap_pub.items()) for r in [[k, remap[v[0]], REL[v[1]], v[2]]] + [[k, remap[b], 0, 0.0] for b in snap_also.get(k, [])]],
         'chains': [r for k, v in sorted(chain_pub.items()) for r in [[k, remap[v[0]], REL[v[1]], v[2]]] + [[k, remap[b], 0, 0.0] for b in chain_also.get(k, [])]],
+        'snaps': {'rows': [[k, v[0], v[1]] for k, v in sorted(snap_pos.items())], 'chains': [[k, v[0], v[1]] for k, v in sorted(chain_pos.items())]},
     }
     os.makedirs(os.path.join(a.out, 'data'), exist_ok=True)
     with open(os.path.join(a.out, 'data', 'land.json'), 'w', encoding='utf-8') as fh:
         json.dump(land_json, fh, ensure_ascii=False, separators=(',', ':'))
     with open(os.path.join(a.out, 'data', 'land-buildings.geojson'), 'w', encoding='utf-8') as fh:
-        json.dump({'type': 'FeatureCollection', 'metadata': {'attribution': '© OpenStreetMap contributors (registry host geometry, ODbL) · CityMETER production building footprints (V4) and building parts',
-                   'source': 'Land building outlines used by the 2026-10-28 restaurant join check'}, 'features': feats}, fh, ensure_ascii=False, separators=(',', ':'))
+        json.dump({'type': 'FeatureCollection', 'metadata': {'attribution': '© OpenStreetMap contributors (ODbL) via OpenFreeMap / OpenMapTiles · building parts: registry (OpenStreetMap-derived)',
+                   'source': f"Land building outlines of the 2026-10-28 restaurant join check — {osm_meta.get('source', 'OpenFreeMap z14 building layer')}"}, 'features': feats}, fh, ensure_ascii=False, separators=(',', ':'))
     per_ds = collections.defaultdict(collections.Counter)
     for e in land:
         per_ds[e['ds']]['points'] += 1
         per_ds[e['ds']]['fp_' + e.get('fpBy', 'none')] += 1
-    # Per dataset: a point counts once per dataset whose building it falls in / touches / lies near (best relation).
-    rank = {'in': 0, 'edge': 1, 'near': 2}
+    rank = {'in': 0, 'near': 2}
     for name, joined, also in (('snapshot', snap_join, snap_also), ('chain', chain_join, chain_also)):
         for k, v in joined.items():
             best = {}
@@ -568,14 +604,24 @@ def main():
                         best[ds] = rel
             for ds, rel in best.items():
                 per_ds[ds][f'{name}_{rel}'] += 1
-    lod_pub = collections.Counter((buildings[b]['src'], buildings[b].get('lod', 1)) for b in used)
-    report = {'checkedOn': '2026-10-28', 'landPoints': dict(counts), 'buildingAssignment': dict(stats), 'v4': {'parts': n_parts, 'buildings': len(v4), 'skippedTiles': len(SKIPPED)},
-              'registryVsV4AtPoint': dict(v4_agree),
-              'publishedBuildingsBySourceAndLod': {f'{k[0]}:lod{k[1]}': v for k, v in sorted(lod_pub.items())},
+    lod_pub = collections.Counter(buildings[b].get('lod', 1) for b in used)
+    with_points = {i for b in used for i in buildings[b]['hosts']}
+    by_type = collections.defaultdict(lambda: [0, 0])
+    for i, e in enumerate(land):
+        t = f"{e['ds']}:{e['type'] or 'unclassified'}"
+        by_type[t][1] += 1
+        if i in with_points:
+            by_type[t][0] += 1
+    in_from_edge = {'snapshot': sum(1 for v in snap_join.values() if v[1] == 'in' and v[2] > 0), 'chain': sum(1 for v in chain_join.values() if v[1] == 'in' and v[2] > 0)}
+    report = {'checkedOn': '2026-10-28', 'landPoints': dict(counts), 'buildingAssignment': dict(stats),
+              'osm': {'source': osm_meta.get('source', ''), 'tiles': osm_meta.get('tiles'), 'pieces': n_pieces, 'buildings': len(osm), 'fetchErrors': osm_meta.get('errors', [])},
+              'registryFootprintVsOsmAtHost': dict(iou_stats),
+              'publishedBuildingsByLod': {f'lod{k}': v for k, v in sorted(lod_pub.items())},
               'publishedParts': sum(1 for f in feats if f['properties']['geometry_role'] == 'land_host_building_part'),
               'shoppingCenterRelease': {k: sc_meta.get(k) for k in ('as_of', 'features', 'venues')},
               'hotelMasses': len(masses), 'perDataset': {k: dict(v) for k, v in per_ds.items()},
               'snapshotJoined': dict(collections.Counter(v[1] for v in snap_join.values())), 'chainJoined': dict(collections.Counter(v[1] for v in chain_join.values())),
+              'inFromWithin10m': in_from_edge, 'displayPositions': dict(moved),
               'snapshotPoints': len(snap), 'chainPointsInCoveredProvinces': len(outlets),
               'pointsInNestedBuildings': {'snapshot': len(snap_also), 'chain': len(chain_also)},
               'nameLinkReview': review,
@@ -583,10 +629,11 @@ def main():
               'nameLinksHotel': {'links': len(hotel_name), 'result': dict(hotel_cmp)},
               'hotelMassBranchKeys': dict(mass_cmp),
               'industrialEstates': {'summary': ie_summary, 'candidates': ie_report},
+              'hostsWithPointsByType': {k: {'withPoints': v[0], 'total': v[1]} for k, v in sorted(by_type.items())},
               'buildingsPublished': len(used), 'featuresPublished': len(feats), 'hostsPublished': len(host_records)}
     with open(a.report, 'w', encoding='utf-8') as fh:
         json.dump(report, fh, ensure_ascii=False, indent=1)
-    print(json.dumps(report, ensure_ascii=False, indent=1)[:6000])
+    print(json.dumps({k: v for k, v in report.items() if k != 'nameLinkReview'}, ensure_ascii=False, indent=1)[:6000])
 
 if __name__ == '__main__':
     main()
