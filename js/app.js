@@ -1589,6 +1589,15 @@ function trackAttribution(map) {
   const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(set) : null;
   observer?.observe(el);
   set();
+  // The phone Aha strip sits above the map key, whose height varies (province classes wrap; the outlet-pin row
+  // comes and goes): the key's live height is --legend-height, never a fixed offset (0.6.1).
+  const legend = $('map-legend');
+  if (legend) {
+    const setLegend = () => panel.style.setProperty('--legend-height', `${Math.ceil(legend.getBoundingClientRect().height)}px`);
+    const lo = typeof ResizeObserver === 'function' ? new ResizeObserver(setLegend) : null;
+    lo?.observe(legend);
+    setLegend();
+  }
   return observer;
 }
 

@@ -504,7 +504,7 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
   .map-legend { bottom: calc(var(--bottom-panel-height) + var(--attrib-height, 32px) + 4px); max-width: calc(100% - 16px); padding: 8px 10px; gap: 4px; }
   .legend-marks { display: none; }
   .map-status { display: none; }
-  .map-aha { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; position: absolute; left: 8px; right: 8px; bottom: calc(var(--bottom-panel-height) + var(--attrib-height, 32px) + 70px); z-index: 5; padding: 10px 12px; background: var(--surface-card); border: 1px solid var(--border-default); border-radius: var(--radius-sm); }
+  .map-aha { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; position: absolute; left: 8px; right: 8px; bottom: calc(var(--bottom-panel-height) + var(--attrib-height, 32px) + var(--legend-height, 62px) + 12px); z-index: 5; padding: 10px 12px; background: var(--surface-card); border: 1px solid var(--border-default); border-radius: var(--radius-sm); }
   .map-aha h2 { font-size: 14px; line-height: 1.4; font-family: var(--font-body); font-weight: 600; }
   .map-aha p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
   .map-aha .map-aha-crumb { font-size: 11px; color: var(--text-metadata); margin: 0 0 2px; }
