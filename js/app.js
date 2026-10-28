@@ -69,7 +69,7 @@ import {configureVenueLogos} from './venue-logos.js';
 import {installAreaLayers, installAreaLabels, buildAreaModel, featureBounds, FILL_MAX_ZOOM, AREA_MIN_ZOOM} from './map-layers.js';
 import {installProvinceLayers, buildProvinceModel, PROVINCE_FILL_MAX_ZOOM, PROVINCE_LABEL_MAX_ZOOM} from './provinces.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile, buildBuildingProfile} from './profile-model.js';
-import {renderOverview, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens} from './panel.js';
+import {renderOverview, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate} from './panel.js';
 import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint} from './building-join.js';
 import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE} from './map-style.js';
 import {installMassing, outerRings} from './massing.js';
@@ -1077,7 +1077,8 @@ function drawChart() {
   for (const b of document.querySelectorAll('[data-view]')) b.setAttribute('aria-selected', String(b.dataset.view === state.view));
   $('chart').setAttribute('aria-labelledby', 'tab-' + state.view);
   const narrowed = state.selectedArea || state.selectedDistrict || state.focusIds.length;
-  $('chart-scope').textContent = `${num(state.scopeRows.length)} ร้านในตัวกรอง${narrowed ? ' · ทุกพื้นที่' : ''}`;
+  // The tray cites its own source: a screenshot of the charts alone still names dataset · source · date · boundary.
+  $('chart-scope').textContent = `${num(state.scopeRows.length)} ร้านในตัวกรอง${narrowed ? ' · ทุกพื้นที่' : ''} · CityMETER Restaurants API ดึง ${thaiDate(state.data.meta?.retrievedOn || state.data.meta?.asOf || '')} · 7 จังหวัด (ขอบเขต CityMETER)`;
   if ($('insight-content').hidden) return;
   chartDispose = renderInsightChart({elementId: 'chart', view: state.view, rows: state.scopeRows, index: state.index, groups: state.data.groups, theme: theme(), selectedAreaId: state.selectedArea},
     selection => { if (selection.type === 'area') selectArea(selection.id, {fromMap: true}); });

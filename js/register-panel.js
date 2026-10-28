@@ -135,14 +135,14 @@ const hostLinks = hosts => hosts.map(h => `<button type="button" class="link-but
 export function renderStoreLand(rel) {
   if (!rel?.hosts?.length) return '';
   const also = (rel.also || []).flatMap(x => x.hosts);
-  return `<dt>อาคาร Land</dt><dd>${rel.rel === 'in' ? 'จุดตกในอาคารของ' : 'จุดติดขอบอาคารของ'} ${hostLinks(rel.hosts)}${also.length ? `<br>และอยู่ในขอบอาคารของ ${hostLinks(also)} ด้วย` : ''}<br><span class="hint">${rel.rel === 'edge' ? `ห่างขอบ ${dec(rel.d)} ม. · ` : ''}ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร</span></dd>`;
+  return `<dt>อาคาร Land</dt><dd>${rel.rel === 'in' ? 'จุดตกในอาคารของ' : 'จุดติดขอบอาคารของ'} ${hostLinks(rel.hosts)}${also.length ? `<br>และอยู่ในขอบอาคารของ ${hostLinks(also)} ด้วย` : ''}<br><span class="hint">${rel.rel === 'edge' ? `ห่างขอบ ${dec(rel.d)} ม. · ` : ''}ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร · ทะเบียน Land จับคู่ ${esc(thaiDate(SOURCES.land))}</span></dd>`;
 }
 
 /** Store panel: the register brand(s) the sheet links this name candidate to, and the moved-row status. */
 export function renderStoreRegister({row, national = [], register = 0, targets = []}) {
   const parts = [];
   if (national.length) {
-    parts.push(`<dt>ทะเบียนเครือ</dt><dd>${national.map(b => `<button type="button" class="link-button" data-action="select-chain" data-id="${esc(b.id)}">${esc(b.name)}</button> <span class="data-number">${num(b.outlets)}</span> สาขาในทะเบียน${b.companyRecord ? ` · ${esc(b.companyRecord.name)}` : ''}`).join('<br>')}<br><span class="hint">ชีตเชื่อมชื่อเครือนี้กับทะเบียน · ร้านนี้ยังเป็นรายการจากชื่อร้าน ไม่ใช่สาขาที่ยืนยันแล้ว</span></dd>`);
+    parts.push(`<dt>ทะเบียนเครือ</dt><dd>${national.map(b => `<button type="button" class="link-button" data-action="select-chain" data-id="${esc(b.id)}">${esc(b.name)}</button> <span class="data-number">${num(b.outlets)}</span> สาขาในทะเบียน${b.companyRecord ? ` · ${esc(b.companyRecord.name)}` : ''}`).join('<br>')}<br><span class="hint">ชีตเชื่อมชื่อเครือนี้กับทะเบียน · ร้านนี้ยังเป็นรายการจากชื่อร้าน ไม่ใช่สาขาที่ยืนยันแล้ว · ทะเบียนร้านเครือ ตรวจ ${esc(checkedRange())}</span></dd>`);
   }
   if (register) {
     const t = targets.length ? ` · <button type="button" class="link-button" data-action="select-outlet" data-id="${esc(targets[0].id)}">${register === 2 ? 'สาขาที่ตรงกันในทะเบียน' : 'สาขาที่อาจตรงกันในทะเบียน'}</button>` : '';

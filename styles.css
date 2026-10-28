@@ -476,7 +476,9 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
   .theme-visible-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .theme-control select { width: 66px; }
   .map-column { right: 0; }
-  .map-toolbar { gap: 5px; right: 52px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+  .map-toolbar { gap: 5px; right: 52px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; -webkit-overflow-scrolling: touch;
+    /* More chips scroll in from the right: the fade says so (the row never runs under the zoom control). */
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); padding-right: 24px; }
   .map-toolbar::-webkit-scrollbar { display: none; }
   .map-toolbar button { font-size: 12px; min-height: 38px; padding: 6px 10px; flex: 0 0 auto; }
   .map-toolbar button#mobile-panel { display: inline-flex; }
@@ -552,8 +554,8 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 .compare-table th[scope="row"] .cue-shape { margin-right: 6px; }
 .compare-table td small { color: var(--text-metadata); font-size: 11px; margin-left: 2px; }
 /* Map: one register dot = one listed outlet with a coordinate; logos from zoom 15 as buttons (identity only). */
-/* Register outlet key: the map's diamond (an outlet is never round like a restaurant symbol). */
-.legend-step .legend-register, .legend-register { display: inline-block; width: 8px; height: 8px; flex: 0 0 8px; margin: 0 2px; transform: rotate(45deg); border-radius: 1px; background: var(--map-active-layer); border: 1px solid var(--map-marker-halo); box-shadow: 0 0 0 1px var(--map-active-layer); }
+/* Register outlet key: the map's location pin (a shape outside the ten restaurant cue shapes). */
+.legend-step .legend-register, .legend-register { display: inline-block; width: 9px; height: 9px; flex: 0 0 9px; margin: 0 2px 2px; transform: rotate(-45deg); border-radius: 50% 50% 50% 0; background: var(--map-active-layer); border: 1px solid var(--map-marker-halo); box-shadow: 0 0 0 1px var(--map-active-layer); }
 .map-panel:not(.has-register-dots) .legend-register-item { display: none; }
 .register-logo-pin { display: inline-flex; align-items: center; justify-content: center; padding: 2px; min-width: 0; min-height: 0; border: 1px solid var(--border-default); border-radius: 4px; background: var(--surface-card); box-shadow: 0 1px 2px rgba(0, 0, 0, .18); cursor: pointer; }
 .register-logo-pin .brand-logo { width: 40px; height: 20px; }
