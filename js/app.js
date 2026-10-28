@@ -629,7 +629,7 @@ function renderPanel(summary = summarize(state.rows)) {
     const insight = focusMode() === 'explicit' ? summarizeAreaInsight(state.rows, state.index, {coverage: state.coverage, minRows: 1}) : state.insight;
     html = renderOverview({insight, summary, overview, focusMode: focusMode(), classOf: densityClassOf, provinces, meta, coverage: state.coverage, province, extra: overviewExtras(),
       population: {moved: state.data.moved?.length || 0}, unknownProvince: province ? 0 : (pmodel.unknown ?? state.scopeRows.filter(r => r.kind === 'outlet' && !r.province).length)});
-    renderMapAha(insight);
+    renderMapAha(insight, summary);
   } else {
     $('map-aha').hidden = true;
   }
@@ -641,12 +641,20 @@ function renderPanel(summary = summarize(state.rows)) {
   renderPanel.lastKey = key;
 }
 
-function renderMapAha(insight) {
+function renderMapAha(insight, summary = null) {
   const el = $('map-aha');
-  if (!insight.areas.length) { el.hidden = true; return; }
+  const crumb = `<p class="map-aha-crumb">${esc(breadcrumbText(buildBreadcrumb({province: $('province').value})))}</p>`;
+  if (!insight.areas.length) {
+    // A scope of outlets only (a จังหวัด outside the coverage): the strip states the count, as the panel's Aha does.
+    if (summary?.count && summary.outlets === summary.count && $('province').value) {
+      el.hidden = $('panel').classList.contains('is-open');
+      el.innerHTML = `<div>${crumb}<h2>${num(summary.count)} สาขาในทะเบียนร้านเครือ</h2><p>ไม่มีแขวง/ตำบลและความหนาแน่น — ชุดข้อมูลร้านครอบคลุม 7 จังหวัด</p></div><button type="button" class="btn" data-action="open-chains">ทะเบียน</button>`;
+      return;
+    }
+    el.hidden = true; return;
+  }
   const mode = focusMode();
   el.hidden = $('panel').classList.contains('is-open');
-  const crumb = `<p class="map-aha-crumb">${esc(breadcrumbText(buildBreadcrumb({province: $('province').value})))}</p>`;
   const names = insight.areas.map(a => esc(a.name)).join(' · ');
   el.innerHTML = mode === 'explicit'
     ? `<div>${crumb}<h2>กำลังสำรวจ ${num(insight.areas.length)} พื้นที่</h2><p>${num(insight.count)} ร้าน</p></div><button type="button" class="btn" data-action="clear-focus">ดูทุกพื้นที่</button>`

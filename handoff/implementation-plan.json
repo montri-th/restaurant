@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.6.0",
+  "productVersion": "0.6.1",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -903,7 +903,7 @@
     {
       "id": "AC44",
       "scenario": "A จังหวัด outside the covered seven",
-      "expected": "?province=CBI reads ‘1,279 สาขาในทะเบียนร้านเครือในชลบุรี’ with the coverage sentence, tiles 1,279 ร้าน · — ร้าน/ตร.กม. · — รีวิว · 114 เครือร้าน, the scoped chain list, no area list, no Land hosts, the camera on the province frame, the 980 outlets with a point drawn at every zoom and counted as ร้านในจอ; the legend says ‘ชลบุรี · สาขาในทะเบียน’; the filter chip names the province",
+      "expected": "?province=CBI reads ‘1,279 สาขาในทะเบียนร้านเครือในชลบุรี’ with the coverage sentence, tiles 1,279 ร้าน · — ร้าน/ตร.กม. · — รีวิว · 114 เครือร้าน, the scoped chain list, no area list, no Land hosts, the camera on the province frame, the 980 outlets with a point drawn at every zoom and counted as ร้านในจอ; the legend says ‘ชลบุรี · สาขาในทะเบียน’; the filter chip names the province; on a phone the map strip (#map-aha) states ‘N สาขาในทะเบียนร้านเครือ’ with a ทะเบียน button (0.6.1) instead of staying empty",
       "verificationType": "harness (probe-pop) + live",
       "result": "see VERIFICATION.md R10"
     }

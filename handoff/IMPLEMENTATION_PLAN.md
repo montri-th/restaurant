@@ -1,6 +1,6 @@
 # Implementation Plan — CityMETER · Restaurants 0.6
 
-รุ่น 0.6.0 · 28 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
+รุ่น 0.6.1 · 28 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
 
 > **รุ่น 0.4.0 (P14, AC36–AC39):** อาคาร Land = รูปอาคาร OpenStreetMap จาก tile OpenFreeMap หลังเดียวกับที่แผนที่วาด (`scripts/build-land.py --osm`; ไม่มี footprint V4; ทะเบียนใช้เลือกหลังและใส่ส่วนอาคาร LOD2) · massing ซ่อนรูปคู่แฝดของตึก Land ด้วยจุดภายใน (`js/massing.js#ringsOverlap`) และคงตึกที่ซ้อนในขอบ LOD1 (`keepNested`) · จุดห่างขอบ ≤ 10 ม. นับเป็นในอาคารและวาดในอาคาร (`land.json → snaps`, `js/land.js#applyRowDisplay/applyOutletDisplay`) · บรรทัดแหล่งข้อมูลบรรทัดเดียวต่อหน้า (`REGISTER_RULE`, `LAND_RULE`) · layout กระชับ: มือถือ header 40 px ชิปมี pictogram แผงครึ่งจอขยายได้ (`#expand-mobile-panel`) ส่วนหัวผลิตภัณฑ์และช่องค้นหาเฉพาะภาพรวม attribution พับหลังปุ่ม (i) หมุดสาขาเงียบเล็กลงที่ซูมเมือง (`js/register-layer.js` SIZE/OPACITY)
 
