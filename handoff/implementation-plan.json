@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.4.1",
+  "productVersion": "0.5.0",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -548,6 +548,26 @@
         "tests/register.test.js"
       ],
       "status": "done"
+    },
+    {
+      "id": "P15",
+      "title": "0.5.0: building focus — two-point camera, x-ray and see-through occluders for every building being looked at; one in-building list; phone key measured from the sheet (owner 2026-10-28 22:03 “อย่าให้ 3d building mass ตึกอื่นบังอาคารที่กำลังดูอยู่ … 2-point perspective เสมอ … ร้านเครือ กับ ร้านในอาคาร ให้แสดงรวมกัน” and 21:37 built-in browser walk)",
+      "dependsOn": [
+        "P14"
+      ],
+      "acceptanceCriteria": [
+        "AC39",
+        "AC40",
+        "AC41"
+      ],
+      "files": [
+        "js/app.js",
+        "js/register-panel.js",
+        "styles.css",
+        "tests/register.test.js",
+        "handoff/VERIFICATION.md"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -820,8 +840,22 @@
     {
       "id": "AC39",
       "scenario": "Compact, map-first layout on every viewport",
-      "expected": "phone portrait: header 40 px, map chips 34 px with LDS pictograms (กรุงเทพฯ = province, พื้นที่ = area, ร้านเครือ = brand; มุมสถาปนิก hidden while disabled), the sheet opens at half height (≤ 50 dvh) for a detail with ขยาย (92 dvh) and แผนที่ (close), a detail sheet starts with its breadcrumb and content (product heading and search/filters only on the overview), the attribution is folded behind its (i) button after load, the charts tray is 42 px when collapsed; desktop: product heading only on the overview, search and ตัวกรอง on one row; quiet register pins are small and translucent at city zoom and grow into pins from zoom 14.5; a selection stays opaque",
-      "verificationType": "harness + live (desktop and 390 px, light and dark)",
+      "expected": "phone portrait: header 40 px, map chips 34 px with LDS pictograms (กรุงเทพฯ = province, พื้นที่ = area, ร้านเครือ = brand; มุมสถาปนิก hidden while disabled), the sheet opens at half height (≤ 50 dvh) for a detail with ขยาย (92 dvh) and แผนที่ (close), a detail sheet starts with its breadcrumb and content (product heading and search/filters only on the overview), the attribution is folded behind its (i) button after load, the charts tray is 42 px when collapsed; desktop: product heading only on the overview, search and ตัวกรอง on one row; quiet register pins are small and translucent at city zoom and grow into pins from zoom 14.5; a selection stays opaque; with a half sheet open the outlet-pin key sits above the sheet's resting edge (--sheet-height measured from the sheet itself, after its slide and whenever its height changes, also on a slow deep link) and is hidden under an expanded sheet; the key never sits under the sheet or peeks above an expanded one",
+      "verificationType": "harness (CPU-throttled deep link) + live (desktop and 390 px, light and dark)",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC40",
+      "scenario": "Building focus: the building being looked at is never hidden and always under the two-point camera",
+      "expected": "opening a Land host, a hosted venue, a store or outlet whose point falls in a Land building, or a clicked building sets the eye preset (pitch 75, fov 24; มุมสถาปนิก pressed and enabled; ?cam=model opts out) on desktop and on phones (centred above the half sheet); the building is fed to the venue x-ray (drawn on top) and to the massing occlusion scene (focus-tier blocks in front of it become see-through); its OSM twin is not drawn; clicking the x-rayed building of an open store/outlet opens its Land host; a name-only venue frames its joined OpenStreetMap blocks once per venue",
+      "verificationType": "harness + live (desktop and 390 px)",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC41",
+      "scenario": "One list for what is in a Land building",
+      "expected": "the Land panel shows one section ‘ร้านและสาขาในอาคาร’ with snapshot rows and register outlets together A→Z, each entry marked ร้าน or สาขาในทะเบียน (brand, floor, evidence), a moved row with a recorded correspondence once; the header reads ‘N ร้าน · M สาขา · K เครือ’ and no summed total appears anywhere; brand chips stay above the list",
+      "verificationType": "unit + live",
       "result": "see VERIFICATION.md"
     }
   ],

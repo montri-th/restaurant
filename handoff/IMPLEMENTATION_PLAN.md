@@ -1,9 +1,11 @@
 # Implementation Plan — CityMETER · Restaurants 0.3
 
-รุ่น 0.4.0 · 28 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
+รุ่น 0.5.0 · 28 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
 
 > **รุ่น 0.4.0 (P14, AC36–AC39):** อาคาร Land = รูปอาคาร OpenStreetMap จาก tile OpenFreeMap หลังเดียวกับที่แผนที่วาด (`scripts/build-land.py --osm`; ไม่มี footprint V4; ทะเบียนใช้เลือกหลังและใส่ส่วนอาคาร LOD2) · massing ซ่อนรูปคู่แฝดของตึก Land ด้วยจุดภายใน (`js/massing.js#ringsOverlap`) และคงตึกที่ซ้อนในขอบ LOD1 (`keepNested`) · จุดห่างขอบ ≤ 10 ม. นับเป็นในอาคารและวาดในอาคาร (`land.json → snaps`, `js/land.js#applyRowDisplay/applyOutletDisplay`) · บรรทัดแหล่งข้อมูลบรรทัดเดียวต่อหน้า (`REGISTER_RULE`, `LAND_RULE`) · layout กระชับ: มือถือ header 40 px ชิปมี pictogram แผงครึ่งจอขยายได้ (`#expand-mobile-panel`) ส่วนหัวผลิตภัณฑ์และช่องค้นหาเฉพาะภาพรวม attribution พับหลังปุ่ม (i) หมุดสาขาเงียบเล็กลงที่ซูมเมือง (`js/register-layer.js` SIZE/OPACITY)
 
+> **รุ่น 0.5.0 (P15, AC40–AC41; AC39 ขยายความ):** อาคารที่เลือก/โฟกัสทุกแบบใช้กล้อง 2-point perspective เสมอ ส่งเข้า x-ray และฉากบังของ massing (`js/app.js#buildingFocus`, `#focusBuildingFeatures`, `#focusTargets`, `#frameVenue` — มือถือจัดกลางเหนือแผงครึ่งจอ) กดตึก x-ray ของร้าน/สาขาเปิด host ใน Land · แผงอาคาร Land รายการเดียว “ร้านและสาขาในอาคาร” (`js/register-panel.js#inBuildingRows`) · คำอธิบายหมุดบนมือถือวัดขอบแผงจากตัวแผงเอง (`js/app.js#measureSheet`: transitionend + ResizeObserver ไม่ใช่ตัวจับเวลา) หลังพบบนเว็บจริงใน built-in browser ว่าลิงก์ลึกที่โหลดช้าทำให้คำอธิบายอยู่ใต้แผง และกฎซ่อนคำอธิบายเมื่อขยายแผงต้องชนะกฎ detail zoom (`styles.css`) · 0.4.1 แก้ตามผู้ตรวจอิสระ — จุดที่รวบเข้าอาคารบอกระยะจากขอบ ความครอบคลุมของอาคาร Land บอกบนหน้าจอ ตารางพิมพ์พิกัดต้นทาง caveat ครั้งเดียวต่อหน้า
+>
 > **รุ่น 0.3.4:** มือถือแสดงคำอธิบายหมุดสาขาร้านเครือทุกครั้งที่หมุดอยู่บนแผนที่
 >
 > **รุ่น 0.3.3 (P13, AC35):** สาขาเป็นรูปหมุด (ไม่ซ้ำรูปทรงของประเภทร้าน) · ข้อมูลทะเบียน/Land ในหน้าร้านมีวันที่ · ถาดกราฟบอกแหล่งและวันที่ · แถบปุ่มบนมือถือมีขอบจางบอกว่าเลื่อนได้

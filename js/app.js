@@ -137,13 +137,28 @@ function currentVenue() {
 const currentBuilding = () => (state.panel.mode === 'building' ? state.buildingSel : null);
 /** The Land host being looked at (land mode), or null. */
 const currentLand = () => (state.panel.mode === 'land' ? state.land?.hostById.get(state.panel.id) || null : null);
-/** Venue level (eye camera, x-ray): a venue with a host building in this data set, or a Land host with its building. */
-const venueLevel = () => {
+/** The Land host whose building an open store's point falls in (drawn in the data colour, like an outlet's), or null. */
+function storeLand() {
+  if (state.panel.mode !== 'store' || !state.land) return null;
+  const rel = landOfRow(state.land, state.panel.id);
+  return rel && rel.rel === 'in' ? rel.hosts[0] || null : null;
+}
+/**
+ * Building focus (owner 2026-10-28 22:03): the building being looked at always gets the two-point camera, the x-ray
+ * and the see-through treatment of whatever stands in front of it — a Land host's building (Land view), a hosted
+ * venue's (venue view, or a store of that venue), the Land building an open outlet's or store's point falls in, a
+ * clicked building (building view: official host or OpenStreetMap block), or the OpenStreetMap blocks a name-only
+ * venue's points fall in once the join has found them.
+ */
+const buildingFocus = () => {
   const h = currentLand();
   if (h) return h.fp >= 0 && state.land.buildings.has(h.fp);
-  const v = currentVenue(); return Boolean(v && state.hosted.has(v.id));
+  if (outletLand() || storeLand() || currentBuilding()) return true;
+  const v = currentVenue();
+  if (v && state.hosted.has(v.id)) return true;
+  return Boolean(v && state.panel.mode === 'venue' && highlightIds().length);
 };
-const cameraPreset = () => presetFor({view3d: state.view3d, mode: ['overview', 'district'].includes(state.panel.mode) ? 'overview' : 'detail', twoPoint: state.twoPoint && venueLevel() && !sheetOpen()});
+const cameraPreset = () => presetFor({view3d: state.view3d, mode: ['overview', 'district'].includes(state.panel.mode) ? 'overview' : 'detail', twoPoint: state.twoPoint && buildingFocus()});
 
 function saveURL() {
   const f = values(), p = new URLSearchParams();
@@ -257,7 +272,7 @@ function detailRows() {
   const b = currentBuilding();
   if (b) return b.rows;
   const v = currentVenue();
-  if (v && (state.panel.mode === 'venue' || venueLevel())) {
+  if (v && (state.panel.mode === 'venue' || state.hosted.has(v.id))) {
     if (detailRows.key !== v.id || detailRows.scope !== state.scopeRows) {
       detailRows.key = v.id; detailRows.scope = state.scopeRows; detailRows.rows = state.scopeRows.filter(r => r.venue?.id === v.id);
     }
@@ -635,7 +650,7 @@ function goBack() {
   if (wasExtra && state.loaded && (state.panel.mode === 'venue' || state.panel.mode === 'store')) {
     update();
     const r = state.panel.mode === 'store' ? rowById(state.panel.id) : null;
-    if (state.panel.mode === 'venue' || venueLevel()) frameVenue();
+    if (state.panel.mode === 'venue' || buildingFocus()) frameVenue();
     else if (r && hasPoint(r)) framePoint(state.map, [r.longitude, r.latitude], {preset: cameraPreset(), zoom: 16.5, offset: sheetOffset(), animate: animate()});
     state.lastPreset = cameraPreset();
     return;
@@ -678,7 +693,7 @@ function selectStore(id, {fly = true, showPopup = false, fromPin = false} = {}) 
   saveURL();
   if (state.loaded) { updatePins(); updateSpatialLayers(); state.pins?.select(id); }
   if (hasPoint(r) && state.loaded) {
-    if (venueLevel() && (fly || cameraPreset() !== state.lastPreset)) frameVenue();
+    if (buildingFocus() && (fly || cameraPreset() !== state.lastPreset)) frameVenue();
     else if (fly || cameraPreset() !== state.lastPreset) framePoint(state.map, [r.longitude, r.latitude], {preset: cameraPreset(), zoom: 16.5, offset: sheetOffset(), animate: animate()});
     state.lastPreset = cameraPreset();
     state.popup?.remove(); state.popup = null;
@@ -726,7 +741,7 @@ function selectBuilding(key) {
   renderPanel();
   syncList();
   saveURL();
-  if (state.loaded) { updatePins(); updateSpatialLayers(); }
+  if (state.loaded) { updatePins(); updateSpatialLayers(); if (buildingFocus()) frameVenue(); state.lastPreset = cameraPreset(); }
   openMobilePanel();
   announce(`อาคารที่จุดของร้านตก ${num(rows.length)} ร้าน`);
 }
@@ -831,6 +846,7 @@ function frameExtras({instant = false} = {}) {
   if (mode === 'land') { frameVenue({instant}); return; }
   if (!reg) return;
   if (mode === 'outlet') {
+    if (buildingFocus()) { frameVenue({instant}); return; }
     const o = reg.byId.get(id);
     if (o?.hasPoint) framePoint(map, [o.longitude, o.latitude], {preset: state.view3d && !sheetOpen() ? 'model' : 'plan', zoom: 16.2, offset: sheetOffset(), animate: anim});
     return;
@@ -922,6 +938,11 @@ function applyJoin() {
   const label = $('legend-building-label');
   if (label) label.textContent = currentLand() || outletLand() ? 'อาคารในทะเบียน Land' : currentBuilding() ? 'อาคารที่เปิดอยู่' : 'อาคารของสถานที่';
   if (['venue', 'store'].includes(state.panel.mode) && panelSpatialSig() !== state.renderedSig) renderPanel();
+  // A name-only venue's blocks are known only after the join: frame them under the two-point camera once per venue.
+  const vk = state.panel.mode === 'venue' ? `${state.panel.id}|${state.scopeKey}` : '';
+  if (vk && vk !== applyJoin.framed && buildingFocus() && cameraPreset() !== state.lastPreset && !state.map.isMoving()) {
+    applyJoin.framed = vk; frameVenue(); state.lastPreset = cameraPreset();
+  }
 }
 
 /** Massing focus region of a venue: its rows' cluster (+ official host rings) with a buffer. */
@@ -941,14 +962,29 @@ function venueRegionFor(v, hostFeatures) {
  */
 function frameVenue({instant = false} = {}) {
   const map = state.map, preset = cameraPreset(), v = currentVenue(), h = currentLand();
-  if (!v && !h) return;
-  const targets = venueTargets();
-  if (targets.length && preset !== 'plan' && !mobilePortrait()) {
+  if (!v && !h && !buildingFocus()) return;
+  const targets = focusTargets();
+  if (targets.length && preset !== 'plan') {
+    // The focus building, footprint and roof inside the padded viewport, under the two-point camera (owner 22:03:
+    // always, phones included — the sheet's height pads the bottom so the building sits above it).
     const ground = targets.flatMap(t => t.ring.map(([lng, lat]) => [lng, lat, 0]));
     const roof = targets.flatMap(t => t.ring.map(([lng, lat]) => [lng, lat, t.height]));
     const bounds = ground.reduce((b, p) => b.extend([p[0], p[1]]), new maplibregl.LngLatBounds([ground[0][0], ground[0][1]], [ground[0][0], ground[0][1]]));
-    const h = map.getContainer().clientHeight;
-    const padding = {top: Math.round(h * (preset === 'eye' ? 0.12 : 0.1)), bottom: 48, left: 48, right: 48};
+    const ch = map.getContainer().clientHeight, phone = mobilePortrait();
+    const sheet = sheetOpen() ? Math.max(0, Math.round(window.innerHeight - $('panel').getBoundingClientRect().top)) || Math.round(ch * 0.5) : 0;
+    if (phone) {
+      // A phone has little map above its half sheet, so the building is centred above the sheet at a zoom set by
+      // its size (a 90 m block fills the width at 17.6; a 300 m mall sits near 15.9) — the roof may rise behind the
+      // chip row; fitting the whole roof at pitch 75 would shrink the building to a sliver.
+      const latRad = bounds.getNorth() * Math.PI / 180;
+      const size = Math.max(40, Math.hypot((bounds.getEast() - bounds.getWest()) * 111320 * Math.cos(latRad), (bounds.getNorth() - bounds.getSouth()) * 110540));
+      const zoom = Math.max(15.2, Math.min(17.6, 17.6 - Math.log2(size / 90)));
+      const p = applyPreset(map, preset, {animate: false});
+      // easeTo keeps the offset (jumpTo has none), so a reduced-motion or instant frame still lands above the sheet.
+      map.easeTo({center: bounds.getCenter().toArray(), zoom, pitch: p.pitch, bearing: p.bearing, offset: sheet ? [0, -Math.round(sheet * 0.5)] : [0, -Math.round(ch * 0.1)], duration: animate() && !instant ? 650 : 0});
+      return;
+    }
+    const padding = {top: Math.round(ch * (preset === 'eye' ? 0.12 : 0.1)), bottom: 48, left: 48, right: 48};
     const foot = fitPitched(map, bounds, {preset, points: ground, padding, maxZoom: 17.6, minZoom: 14.5, apply: false});
     const minZoom = Math.max(14.5, (foot?.zoom ?? 17.6) - 1);
     fitPitched(map, bounds, {preset, points: [...ground, ...roof], padding, maxZoom: 17.6, minZoom, animate: animate() && !instant});
@@ -1258,7 +1294,7 @@ function landRegionFor(features) {
 
 function updateSpatialLayers() {
   if (!state.loaded) return;
-  const code = $('province').value, reg = registerMode(), landHost = currentLand(), outletHost = outletLand();
+  const code = $('province').value, reg = registerMode(), landHost = currentLand(), outletHost = outletLand(), storeHost = storeLand();
   // One map for both data sets: the snapshot's frames, labels and context dots stay in every view (the register
   // counts another unit and never feeds them).
   const pm = state.provinceLayers?.update({rows: provinceScopeRows(), selectedCode: code, visible: true}) || null;
@@ -1275,16 +1311,17 @@ function updateSpatialLayers() {
   // Official host buildings: the venue being looked at (venue level); in the area view every hosted venue
   // named by the focused rows (clickable, like Luxury Brands); none while another venue/building, a Land host
   // or a register view is open.
-  const hostIds = reg || landHost ? [] : venueLevel() ? [v.id] : b ? (b.kind === 'host' ? b.footprint.venueIds || [] : []) : (state.panel.mode === 'venue' || (state.panel.mode === 'store' && v)) ? []
+  const hostIds = reg || landHost ? [] : v && state.hosted.has(v.id) ? [v.id] : b ? (b.kind === 'host' ? b.footprint.venueIds || [] : []) : (state.panel.mode === 'venue' || (state.panel.mode === 'store' && v)) ? []
     : [...new Set(detailRows().map(r => r.venue?.id).filter(id => id && state.hosted.has(id)))];
   state.buildings?.update({venueIds: hostIds, enabled: true, theme: theme()});
   // Land host building: the host being looked at (its own venue level), or the one an open outlet's point falls in.
-  state.landBuildings?.update({venueIds: landHost ? [landHost.id] : outletHost ? [outletHost.id] : [], enabled: true, theme: theme()});
+  const pointHost = outletHost || storeHost;
+  state.landBuildings?.update({venueIds: landHost ? [landHost.id] : pointHost ? [pointHost.id] : [], enabled: true, theme: theme()});
   const focusFeatures = reg ? registerFocusFeatures() : state.selectedArea ? [areaById(state.selectedArea)?.feature].filter(Boolean) : state.selectedDistrict ? [] : state.focusIds.map(id => areaById(id)?.feature).filter(Boolean);
   const hostFeatures = state.buildings?.displayedFeatures() || [];
   const landFeatures = state.landBuildings?.displayedFeatures() || [];
   // Venue / Land mode: the focus tier (and the join) follow the place's surroundings, wherever the area focus is.
-  const region = state.panel.mode === 'venue' && v ? venueRegionFor(v, hostFeatures) : landHost ? landRegionFor(landFeatures) : outletRegion(landFeatures);
+  const region = state.panel.mode === 'venue' && v ? venueRegionFor(v, hostFeatures) : landHost ? landRegionFor(landFeatures) : storeHost && landFeatures.length ? landRegionFor(landFeatures) : outletRegion(landFeatures);
   const anchorFeatures = focusFeatures.length ? focusFeatures : (state.selectedDistrict && !reg ? [districtById(state.selectedDistrict)?.feature].filter(Boolean) : []);
   const anchors = region ? [[(region[0][0] + region[2][0]) / 2, (region[0][1] + region[2][1]) / 2]]
     : anchorFeatures.length ? anchorFeatures.map(f => featureBounds(f, maplibregl.LngLatBounds).getCenter().toArray()) : [state.map.getCenter().toArray()];
@@ -1293,10 +1330,10 @@ function updateSpatialLayers() {
   const massingHosts = [...hostFeatures.flatMap(outerRings),
     ...landFeatures.flatMap(f => outerRings(f).map(ring => (f.properties?.geometry_role === 'land_host_building' && !f.properties?.pieces ? {ring, keepNested: true} : ring)))];
   state.massing?.update({regions: region ? [region] : focusFeatures.flatMap(outerRings), hosts: massingHosts, anchors, enabled: true, city: state.view3d, zoom: state.map.getZoom(), latitude: state.map.getCenter().lat})?.catch(e => console.warn('Massing', e));
-  state.massing?.setScene(cameraPreset() === 'eye' ? 'eye' : 'default', venueTargets());
+  state.massing?.setScene(cameraPreset() === 'eye' ? 'eye' : 'default', focusTargets());
   applyJoin();
   const hostColors = () => { const s = getComputedStyle(document.documentElement); return {fill: s.getPropertyValue('--map-active-layer').trim(), stroke: s.getPropertyValue('--map-selected-stroke').trim()}; };
-  state.xray?.update(venueLevel() ? levelFeatures().filter(f => f.properties?.render_as === 'extrusion') : [], {colors: hostColors()});
+  state.xray?.update(focusBuildingFeatures(), {colors: hostColors()});
   state.xray?.setEnabled(state.view3d);
   // Register dots on the same map: a register view's or a Land host's selection at every zoom (with logos), else
   // every outlet from city zoom as plain dots under the snapshot's symbols.
@@ -1309,12 +1346,28 @@ function updateSpatialLayers() {
 }
 
 /** Buildings drawn at venue level: the open Land host's, else the venue's official host buildings. */
-const levelFeatures = () => (currentLand() ? state.landBuildings?.displayedFeatures() || [] : state.buildings?.displayedFeatures() || []);
+/** OpenStreetMap focus buildings as x-ray features (the massing's original outlines and tile heights). */
+function massingFeatures(ids) {
+  const set = new Set(ids);
+  return (state.massing?.buildings() || []).filter(b => set.has(b.id)).map(b => ({type: 'Feature', id: b.id,
+    geometry: {type: 'Polygon', coordinates: [b.outer, ...(b.holes || [])]}, properties: {display_base_m: 0, display_height_m: b.height || 3, render_as: 'extrusion'}}));
+}
+/** The focus building(s) as extrusion features for the x-ray, the occlusion targets and the camera frame (see buildingFocus). */
+function focusBuildingFeatures() {
+  const extrusion = f => f.properties?.render_as === 'extrusion';
+  if (currentLand() || outletLand() || storeLand()) return (state.landBuildings?.displayedFeatures() || []).filter(extrusion);
+  const b = currentBuilding();
+  if (b) return b.kind === 'host' ? (state.buildings?.displayedFeatures() || []).filter(extrusion) : massingFeatures(b.kind === 'osm' ? [b.footprint.ref] : []);
+  const v = currentVenue();
+  if (v && state.hosted.has(v.id)) return (state.buildings?.displayedFeatures() || []).filter(extrusion);
+  if (v && state.panel.mode === 'venue') return massingFeatures(highlightIds());
+  return [];
+}
 
 /** Host building rings (+ display height) of the venue being looked at — occlusion and framing targets. */
-function venueTargets() {
-  if (!venueLevel()) return [];
-  return levelFeatures().flatMap(f => outerRings(f).map(ring => ({ring, height: Number(f.properties?.display_height_m) || 3})));
+function focusTargets() {
+  if (!buildingFocus()) return [];
+  return focusBuildingFeatures().flatMap(f => outerRings(f).map(ring => ({ring, height: Number(f.properties?.display_height_m) || 3})));
 }
 
 /** A venue named by a row in the current scope (a host building can carry several venue ids). */
@@ -1337,14 +1390,15 @@ function buildingTarget(point) {
 function onMapClick(e) {
   const point = e.point;
   if (state.xray?.hitTest([point.x, point.y])) {
-    // The open Land host's solid: its own points (snapshot pins, register dots) stay clickable; else nothing changes.
-    if (currentLand()) {
-      const r = state.pins?.hitTest(point);
-      if (r) { selectStore(r.id, {fly: false, showPopup: true, fromPin: true}); return; }
-      const o = state.registerLayer?.hitTest(point);
-      if (o) selectOutlet(o.id, {fromMap: true});
-      return;
-    }
+    // The focus building's solid: the points drawn on it (snapshot pins, register dots) stay clickable; the Land
+    // building of an open store/outlet opens its host; an open Land host, building or venue changes nothing.
+    const r = state.pins?.hitTest(point);
+    if (r) { selectStore(r.id, {fly: false, showPopup: true, fromPin: true}); return; }
+    const o = state.registerLayer?.hitTest(point);
+    if (o) { if (state.panel.mode !== 'outlet' || state.panel.id !== o.id) selectOutlet(o.id, {fromMap: true}); return; }
+    if (currentLand() || currentBuilding()) return;
+    const lh = outletLand() || storeLand();
+    if (lh) { selectLand(lh.id, {fromMap: true}); return; }
     const v = currentVenue(); if (v && state.panel.mode !== 'venue') selectVenue(v.id); return;
   }
   const hosted = scopedVenue(state.buildings?.hitTest(point) || []);
@@ -1424,7 +1478,7 @@ function installSpatialLayers() {
   updateSpatialLayers();
   if (!state.initialCameraDone) {
     state.initialCameraDone = true;
-    if (state.panel.mode === 'store') { const r = rowById(state.panel.id); if (r && hasPoint(r)) { if (venueLevel()) frameVenue({instant: true}); else framePoint(map, [r.longitude, r.latitude], {preset: cameraPreset(), zoom: 16.5, animate: false}); } }
+    if (state.panel.mode === 'store') { const r = rowById(state.panel.id); if (r && hasPoint(r)) { if (buildingFocus()) frameVenue({instant: true}); else framePoint(map, [r.longitude, r.latitude], {preset: cameraPreset(), zoom: 16.5, animate: false}); } }
     else if (state.panel.mode === 'venue') frameVenue({instant: true});
     else if (registerMode() || state.panel.mode === 'land') frameExtras({instant: true});
     else fitMap({instant: true});
@@ -1549,7 +1603,7 @@ function toggleTwoPoint() {
 function syncEyeToggle() {
   const b = $('toggle-eye');
   b.setAttribute('aria-pressed', String(state.twoPoint));
-  b.disabled = !state.view3d || !venueLevel();
+  b.disabled = !state.view3d || !buildingFocus();
 }
 
 /* ---------- mobile sheet ---------- */
@@ -1574,10 +1628,19 @@ function syncSheetState() {
   const open = mobilePortrait() && panel.classList.contains('is-open');
   mp.classList.toggle('has-sheet', open);
   mp.classList.toggle('has-sheet-expanded', open && panel.classList.contains('is-expanded'));
-  // Measured after the sheet's 0.2 s slide, so the key lands above the resting edge (and again at once for a resize).
-  const measure = () => { if (mp.classList.contains('has-sheet')) mp.style.setProperty('--sheet-height', `${Math.round(window.innerHeight - panel.getBoundingClientRect().top)}px`); };
   clearTimeout(syncSheetState.measureTimer);
-  if (open) { measure(); syncSheetState.measureTimer = setTimeout(measure, 260); }
+  if (open) { measureSheet(); syncSheetState.measureTimer = setTimeout(measureSheet, 260); }
+  else mp.style.removeProperty('--sheet-height');
+}
+/** The sheet's resting edge, written to --sheet-height so the key sits just above it. Measured on open/expand, after
+ * the slide (transitionend), whenever the sheet's size changes (ResizeObserver) and on resize; a sheet still
+ * off-screen measures 0 and is skipped, so the key falls back to the 50dvh edge instead of under the sheet. A timer
+ * alone raced the first paint of a deep link on a slow phone (found live on 0.4.1 in the built-in browser). */
+function measureSheet() {
+  const mp = document.querySelector('.map-panel'), panel = $('panel');
+  if (!mp || !mp.classList.contains('has-sheet')) return;
+  const h = Math.round(window.innerHeight - panel.getBoundingClientRect().top);
+  if (h > 0) mp.style.setProperty('--sheet-height', `${h}px`);
 }
 function closeMobilePanel() {
   const wasOpen = $('panel').classList.contains('is-open');
@@ -1590,7 +1653,7 @@ function closeMobilePanel() {
     else if (wasOpen && state.loaded && state.panel.mode === 'area') { const a = areaById(state.panel.id); if (a) fitFeature(a.feature); }
     else if (wasOpen && state.loaded && state.panel.mode === 'district') { const d = districtById(state.panel.id); if (d) fitFeature(d.feature, {maxZoom: 16}); }
     else if (wasOpen && state.loaded && (registerMode() || state.panel.mode === 'land')) frameExtras();
-    else if (wasOpen && state.loaded && (state.panel.mode === 'venue' || venueLevel())) frameVenue();
+    else if (wasOpen && state.loaded && (state.panel.mode === 'venue' || buildingFocus())) frameVenue();
     else if (wasOpen && state.loaded && state.panel.mode === 'store') { const r = rowById(state.panel.id); if (r && hasPoint(r)) framePoint(state.map, [r.longitude, r.latitude], {preset: cameraPreset(), zoom: 16.5, animate: animate()}); }
     updateSpatialLayers();
   }
@@ -1725,6 +1788,9 @@ function wireEvents() {
   if (colorMedia.addEventListener) colorMedia.addEventListener('change', onColorChange); else colorMedia.addListener(onColorChange);
   matchMedia('(max-width: 760px) and (orientation: portrait)').addEventListener?.('change', () => { if (!mobilePortrait()) $('panel').classList.remove('is-open'); syncSheetState(); renderPanel(); });
   window.addEventListener('resize', () => { clearTimeout(syncSheetState.timer); syncSheetState.timer = setTimeout(syncSheetState, 120); });
+  // The key follows the sheet's real edge: after its slide, and whenever its height changes (expand, collapse, a re-render).
+  $('panel').addEventListener('transitionend', e => { if (e.target === $('panel')) measureSheet(); });
+  if (typeof ResizeObserver === 'function') new ResizeObserver(measureSheet).observe($('panel'));
 }
 
 async function init() {

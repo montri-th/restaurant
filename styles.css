@@ -515,7 +515,8 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
   .map-aha .btn { min-height: 40px; font-size: 12px; padding: 6px 12px; }
   /* With a half sheet open the map key (outlet pins) rides above it; an expanded sheet covers the map, so it hides. */
   .map-panel.has-sheet .map-legend { bottom: calc(var(--sheet-height, 50dvh) + 8px); }
-  .map-panel.has-sheet-expanded .map-legend { display: none; }
+  /* Wins over the detail-zoom phone-key rule below (three classes), or the key peeks above an expanded sheet. */
+  .map-panel.has-sheet-expanded .map-legend, .map-panel.is-detail-zoom.has-register-dots.has-sheet-expanded .map-legend { display: none; }
   .panel { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-height: 50dvh; border-left: 0; border-top: 1px solid var(--border-default); border-radius: var(--radius-md) var(--radius-md) 0 0; transform: translateY(100%); visibility: hidden; transition: transform .2s ease, max-height .2s ease, visibility 0s linear .2s; z-index: 12; padding-bottom: env(safe-area-inset-bottom); }
   .panel.is-open { transform: none; visibility: visible; transition: transform .2s ease, max-height .2s ease; }
   .panel.is-expanded { max-height: 92dvh; }

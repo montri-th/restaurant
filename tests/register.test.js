@@ -334,7 +334,20 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   const landHtml = text(renderLand({land, profile, around, groups: data.groups, index}));
   assert.ok(!/\d+%/.test(landHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1].split('เครือในทะเบียน')[0]), 'no share on a handful of rows');
   assert.ok(landHtml.includes('ร้อยละเมื่อคอลัมน์มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่ทุกร้านในอาคาร'));
-  assert.ok(landHtml.includes('สาขาร้านเครือในอาคาร') && !landHtml.includes('ติดขอบ'));
+  // One list for the building (owner 2026-10-28 22:03): rows and register outlets together, A→Z, each saying its unit;
+  // the header keeps the two counts apart (never summed).
+  assert.ok(landHtml.includes('ร้านและสาขาในอาคาร') && !landHtml.includes('สาขาร้านเครือในอาคาร') && !landHtml.includes('ติดขอบ'));
+  const inside = profile.rows.in, outletsIn = profile.outlets.in;
+  assert.ok(landHtml.includes(`${inside.length.toLocaleString('th-TH')} ร้าน · ${outletsIn.length.toLocaleString('th-TH')} สาขา`), 'two units in the header');
+  assert.ok(!landHtml.includes(`${(inside.length + outletsIn.length).toLocaleString('th-TH')} รายการ`) || inside.length + outletsIn.length > 40, 'no summed total');
+  const listHtml = renderLand({land, profile, around, groups: data.groups, index});
+  const storeButtons = (listHtml.match(/data-action="select-store"/g) || []).length, outletButtons = (listHtml.match(/data-action="select-outlet"/g) || []).length;
+  const matched = new Set(inside.filter(r => r.register === 2).flatMap(r => r.registerTargets || []).filter(t => outletsIn.some(o => o.id === t)));
+  assert.ok(inside.length + outletsIn.length <= 40, 'Siam Paragon fits one page of the list');
+  assert.equal(storeButtons, inside.length, 'every row in the one list');
+  assert.equal(outletButtons, outletsIn.length - matched.size, 'every outlet in the same list, a matched one carried by its row');
+  assert.ok(listHtml.indexOf('data-action="select-outlet"') > 0 && listHtml.indexOf('data-action="select-store"') > 0);
+  assert.ok(landHtml.includes('สาขาในทะเบียน · ') && /ร้าน · /.test(landHtml.split('ร้านและสาขาในอาคาร')[1]), 'each entry names its unit');
 });
 
 test('snapshot chain and venue headers carry totals, never the length of a cut list (review 2, 0.3.2)', async () => {

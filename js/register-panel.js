@@ -298,12 +298,27 @@ export function renderLand({land, profile, around, groups, venue = null, index =
     <section class="panel-section land-compare"><div class="section-heading">${heading('segment', 'ประเภทร้าน: ในอาคารเทียบรอบอาคาร')}<span class="hint">${num(inside.length)} · ${num(around.length)} ร้าน</span></div>
       ${groupCompare(inside, around, groups)}
       <p class="hint">รอบอาคาร = ห่างขอบ 10–100 ม. · ${esc(shares)}</p></section>
-    <section class="panel-section"><div class="section-heading">${heading('brand', 'สาขาร้านเครือในอาคาร')}<span class="hint">${num(outletsIn.length)} สาขา · ${num(brands.filter(x => !x.brand.registry).length)} เครือ</span></div>
-      ${brandChips(brands, {empty: 'ไม่มีสาขาในทะเบียนในอาคารนี้'})}
-      ${outletsIn.length ? `${outletRows(outletsIn.slice(0, 20))}${shownOf(Math.min(20, outletsIn.length), outletsIn.length, 'สาขา')}` : ''}</section>
-    <section class="panel-section"><div class="section-heading">${heading('store', 'ร้านในอาคาร')}<span class="hint">${num(inside.length)} ร้าน</span></div>
-      ${inside.length ? `<ul class="outlet-list">${[...inside].sort(byReviews).slice(0, 30).map(r => `<li><button type="button" class="brand-row" data-action="select-store" data-id="${esc(r.id)}">${brandLogoMarkup(r.brand, {size: 'sm'})}<span><strong>${esc(r.name)}</strong><br><span class="small muted">${esc([r.type || 'ไม่ระบุประเภท', Number.isFinite(r.rating) ? `★ ${dec(r.rating)}` : ''].filter(Boolean).join(' · '))}</span></span></button></li>`).join('')}</ul>${inside.length > 30 ? `<p class="hint">แสดง 30 จาก ${num(inside.length)} ร้าน (รีวิวมากก่อน)</p>` : ''}` : '<p class="hint">ไม่มีร้านตามตัวกรองในอาคารนี้</p>'}</section>
-    ${landProvenance(land.meta, `อาคาร 1 หลังของ ${h.name} และวงรอบ 100 ม.${area ? ` · ${areaWord(area.province)}${area.name}` : ''}`, {note: `${LAND_RULE} · ร้านตามตัวกรอง ไม่ใช่ทุกร้านในอาคาร · สาขา = ทะเบียนร้านเครือ คนละหน่วย`})}`;
+    <section class="panel-section land-in"><div class="section-heading">${heading('store', 'ร้านและสาขาในอาคาร')}<span class="hint">${num(inside.length)} ร้าน · ${num(outletsIn.length)} สาขา · ${num(brands.filter(x => !x.brand.registry).length)} เครือ</span></div>
+      ${brands.length ? brandChips(brands) : ''}
+      ${inBuildingRows(inside, outletsIn)}</section>
+    ${landProvenance(land.meta, `อาคาร 1 หลังของ ${h.name} และวงรอบ 100 ม.${area ? ` · ${areaWord(area.province)}${area.name}` : ''}`, {note: `${LAND_RULE} · ร้านตามตัวกรอง ไม่ใช่ทุกร้านในอาคาร · สาขา = ทะเบียนร้านเครือ คนละหน่วย ไม่บวกกับร้าน`})}`;
+}
+
+/**
+ * One list for what is in the building (owner 2026-10-28 22:03 “ร้านเครือ กับ ร้านในอาคาร ให้แสดงรวมกันไม่ต้องแยก”):
+ * snapshot rows (sheet 1) and register outlets (sheet 2) side by side, A→Z, each entry saying which unit it is; a row the
+ * owner moved to the register with a recorded correspondence appears once, carrying its outlet. Counts stay per unit.
+ */
+export function inBuildingRows(rows = [], outlets = [], {limit = 40} = {}) {
+  const matched = new Map();
+  for (const r of rows) if (r.register === 2) for (const t of r.registerTargets || []) matched.set(t, r);
+  const entries = [
+    ...rows.map(r => ({kind: 'row', id: r.id, name: r.name, brand: r.brand, meta: [r.type || 'ไม่ระบุประเภท', Number.isFinite(r.rating) ? `★ ${dec(r.rating)}` : '', (r.registerTargets || []).some(t => matched.has(t) && outlets.some(o => o.id === t)) ? 'ร้าน · มีสาขาที่ตรงกันในทะเบียน' : 'ร้าน'].filter(Boolean).join(' · ')})),
+    ...outlets.filter(o => !matched.has(o.id)).map(o => ({kind: 'outlet', id: o.id, name: o.name || o.brand.name, brand: o.brand, meta: ['สาขาในทะเบียน', o.brand.name, o.floor ? `ชั้น ${o.floor}` : '', o.evidence !== 'primary' ? EVIDENCE_TH[o.evidence] : '', !o.hasPoint ? 'ไม่มีจุดบนแผนที่' : ''].filter(Boolean).join(' · ')})),
+  ].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+  if (!entries.length) return '<p class="hint">ไม่มีร้านตามตัวกรองและไม่มีสาขาในทะเบียนในอาคารนี้</p>';
+  const shown = entries.slice(0, limit);
+  return `<ul class="outlet-list">${shown.map(e => `<li><button type="button" class="brand-row" data-action="${e.kind === 'row' ? 'select-store' : 'select-outlet'}" data-id="${esc(e.id)}">${brandLogoMarkup(e.brand, {size: 'sm'})}<span><strong>${esc(e.name)}</strong><br><span class="small muted">${esc(e.meta)}</span></span></button></li>`).join('')}</ul>${entries.length > limit ? `<p class="hint">แสดง ${num(limit)} จาก ${num(entries.length)} รายการ (${num(rows.length)} ร้าน · ${num(outlets.length)} สาขา · ก–ฮ, A–Z)</p>` : ''}`;
 }
 
 export {RELATION_TH};

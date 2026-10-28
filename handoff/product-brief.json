@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.4.1",
+  "productVersion": "0.5.0",
   "updatedOn": "2026-10-28",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
@@ -511,7 +511,8 @@
       "farMetres": 2200,
       "mechanism": "feature-state `fade` written once per building id after tiles load (querySourceFeatures on sourcedata/moveend); anchors change → states rebuilt",
       "why": "MapLibre has no camera-distance expression and fill-extrusion-opacity is not data-driven"
-    }
+    },
+    "occlusion": "js/massing.js#setScene('eye', targets) with the focus buildings as targets (js/app.js#focusTargets): focus-tier buildings whose screen box overlaps a target and whose ground is nearer the camera move to the occluder layer (opacity 0.14 in the eye scene) and are recomputed after each camera stop; the target's own OSM twin is dropped from the massing (ringsOverlap)"
   },
   "cameraContract": {
     "module": "js/camera.js (CAMERA, presetFor, applyPreset, fitPitched, framePoint, shiftPadding)",
@@ -541,7 +542,7 @@
         "bearing": 28,
         "fov": 24,
         "fitShift": 0.1,
-        "when": "venue level only (venue mode, or a store inside a venue): on by default, ?cam=model opts out; disabled elsewhere and in 2D; on mobile portrait it waits until the sheet closes",
+        "when": "every building focus (owner 2026-10-28 22:03 “อาคารที่เลือก หรือ on focus ให้แสดงด้วยมุมมอง 2-point perspective เสมอ”): a Land host's building, a hosted venue's (venue view or a store of that venue), the Land building an open outlet's or store's point falls in, a clicked building, and a name-only venue's OpenStreetMap blocks once the join has found them — on by default, ?cam=model opts out; disabled elsewhere and in 2D; on a phone the building is centred above the half sheet at a zoom set by its size (js/app.js#frameVenue)",
         "constraint": "MapLibre 5.6.2 draws fill-extrusion displaced or not at all once the horizon enters the viewport (pitch > 90 − fov/2) — verified live 2026-10-22 (pitch 73 ok, 76 displaced, 82 missing); the eye preset keeps the horizon just outside the frame (90 − 12 − 3 = 75)"
       }
     },
@@ -558,7 +559,8 @@
       "requires": "setVerticalFieldOfView (≥ 4.7), maxPitch 85; keep pitch ≤ 90 − fov/2 − 3 for any fill-extrusion view",
       "orthographic": "not available in MapLibre; narrow FOV is the standard substitute"
     },
-    "alternatives": "deck.gl custom projectionMatrix or three.js camera.setViewOffset give a true two-point camera; not adopted to keep a single MapLibre scene"
+    "alternatives": "deck.gl custom projectionMatrix or three.js camera.setViewOffset give a true two-point camera; not adopted to keep a single MapLibre scene",
+    "buildingFocus": "js/app.js#buildingFocus / #focusBuildingFeatures / #focusTargets: one definition feeds the camera preset, the venue x-ray and the massing occlusion scene"
   },
   "breadcrumbContract": {
     "module": "js/breadcrumb.js (buildBreadcrumb, renderBreadcrumb, breadcrumbText, productionHref) + js/model.js PROVINCES, productionLink",
@@ -882,6 +884,10 @@
     {
       "id": "INV32",
       "rule": "Industrial-estate candidate polygons are neither published nor used for inside counts until accepted"
+    },
+    {
+      "id": "INV33",
+      "rule": "The building being looked at is always shown under the two-point camera (eye preset), drawn on top (x-ray) with the blocks in front of it see-through, on every viewport; a phone centres it above the half sheet. What is in a Land building is one list (snapshot rows and register outlets together, each entry naming its unit, counts kept apart and never summed)."
     }
   ],
   "chartContracts": [
@@ -925,7 +931,7 @@
   "venueXrayContract": {
     "module": "js/venue-xray.js#installVenueXray(map, {beforeId, toMercator, colors}) → {update(features, {colors}), setEnabled, hitTest(point), dispose, count, enabled, failed}",
     "layer": "venue-xray (type custom, renderingMode 3d), inserted before water-name after every fill-extrusion layer",
-    "input": "host features of the venue being looked at (mall_ids / venue_names match) with render_as = extrusion; display_base_m / display_height_m",
+    "input": "the focus building(s) (js/app.js#focusBuildingFeatures): Land host buildings and their LOD2 parts, official venue host features (mall_ids / venue_names), the Land building of an open outlet or store, a clicked building (official host, or an OpenStreetMap block as the massing's original outline with the tile height) and a name-only venue's joined blocks; render_as = extrusion; display_base_m / display_height_m",
     "geometry": "walls (two triangles per edge), roof via earcut (holes supported; js/vendor/earcut.js 3.2.4 ISC), edge lines; mercator coordinates relative to the centroid origin; z = MercatorCoordinate.z of the altitude",
     "matrix": "options.defaultProjectionData.mainMatrix (64-bit) × translate(origin) multiplied on the CPU, Float32 to the shader",
     "depth": "scissored depth clear inside the venue screen box (device pixels, padded 4 px), then LEQUAL read-write depth test against itself only; polygon offset keeps edges on top",
@@ -939,7 +945,8 @@
       "three.js material.depthTest = false selection highlight",
       "Cesium Entity.disableDepthTestDistance"
     ],
-    "knownTradeOff": "inside the cleared box a translucent 2D layer that sits below an opaque fill in style order may draw over it; none of the generated paper style layers are ordered that way"
+    "knownTradeOff": "inside the cleared box a translucent 2D layer that sits below an opaque fill in style order may draw over it; none of the generated paper style layers are ordered that way",
+    "rule": "the building being looked at is never hidden by another 3D mass (owner 2026-10-28 22:03, as in CityMETER · Luxury Brands 0.5 and Shopping Center): drawn on top by the x-ray, with the focus-tier blocks in front of it see-through (massing occluder tier) under the eye camera"
   },
   "provinceContract": {
     "data": "data/provinces.geojson — 7 provinces holding rows; id = production code (BKK …), code = DOPA two-digit; dissolved from the production subdistrict frames and simplified at 120 m (scripts/build-boundaries.py)",
@@ -990,7 +997,7 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261028-r8 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
+    "cacheTag": "?v=20261028-r9 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
     "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
   },
   "registerContract": {
@@ -1017,7 +1024,7 @@
       "near": "10–100 m (report only; the app measures the ring itself)",
       "nested": "a point inside several nested buildings relates to each (smallest first)"
     },
-    "panel": "in-vs-around food types (in vs 10–100 m ring of the filtered rows), register outlets in the building, co-hosts of the same building; one provenance line: dataset · source · date · boundary + LAND_RULE",
+    "panel": "renderLand (js/register-panel.js): tiles ร้านในอาคาร · สาขาร้านเครือ · ร้านรอบ 100 ม.; in-vs-around table; ONE list ‘ร้านและสาขาในอาคาร’ (owner 2026-10-28 22:03) — snapshot rows and register outlets side by side A→Z, each entry saying ร้าน or สาขาในทะเบียน, a moved row with a recorded correspondence shown once carrying its outlet (inBuildingRows); the header keeps the two counts apart and never sums them",
     "wording": "ในอาคาร (= the point lies in the outline) / รอบอาคาร — never ตั้งอยู่ใน, tenancy or floor; no count changes; no ติดขอบ bucket",
     "registryLinks": [
       "DL-fdc869a77aca940153dd",
