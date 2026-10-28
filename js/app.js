@@ -936,7 +936,7 @@ function applyJoin() {
   state.blueBuildings = n > 0 || (state.buildings?.displayedFeatures() || []).length > 0 || (state.landBuildings?.displayedFeatures() || []).length > 0;
   document.querySelector('.map-panel')?.classList.toggle('has-venue-building', state.blueBuildings);
   const label = $('legend-building-label');
-  if (label) label.textContent = currentLand() || outletLand() ? 'อาคารในทะเบียน Land' : currentBuilding() ? 'อาคารที่เปิดอยู่' : 'อาคารของสถานที่';
+  if (label) label.textContent = currentLand() || outletLand() || storeLand() ? 'อาคารในทะเบียน Land' : currentBuilding() ? 'อาคารที่เปิดอยู่' : 'อาคารของสถานที่';
   if (['venue', 'store'].includes(state.panel.mode) && panelSpatialSig() !== state.renderedSig) renderPanel();
   // A name-only venue's blocks are known only after the join: frame them under the two-point camera once per venue.
   const vk = state.panel.mode === 'venue' ? `${state.panel.id}|${state.scopeKey}` : '';
@@ -973,15 +973,14 @@ function frameVenue({instant = false} = {}) {
     const ch = map.getContainer().clientHeight, phone = mobilePortrait();
     const sheet = sheetOpen() ? Math.max(0, Math.round(window.innerHeight - $('panel').getBoundingClientRect().top)) || Math.round(ch * 0.5) : 0;
     if (phone) {
-      // A phone has little map above its half sheet, so the building is centred above the sheet at a zoom set by
-      // its size (a 90 m block fills the width at 17.6; a 300 m mall sits near 15.9) — the roof may rise behind the
-      // chip row; fitting the whole roof at pitch 75 would shrink the building to a sliver.
-      const latRad = bounds.getNorth() * Math.PI / 180;
-      const size = Math.max(40, Math.hypot((bounds.getEast() - bounds.getWest()) * 111320 * Math.cos(latRad), (bounds.getNorth() - bounds.getSouth()) * 110540));
-      const zoom = Math.max(15.2, Math.min(17.6, 17.6 - Math.log2(size / 90)));
-      const p = applyPreset(map, preset, {animate: false});
-      // easeTo keeps the offset (jumpTo has none), so a reduced-motion or instant frame still lands above the sheet.
-      map.easeTo({center: bounds.getCenter().toArray(), zoom, pitch: p.pitch, bearing: p.bearing, offset: sheet ? [0, -Math.round(sheet * 0.5)] : [0, -Math.round(ch * 0.1)], duration: animate() && !instant ? 650 : 0});
+      // A phone fits the building (footprint and roof) to the strip of map between its chip row and its half
+      // sheet (owner 22:33 “zoom to fit to viewport เสมอ”): the strip is the camera's padding, so the centre sits
+      // in it, and the fit is tested against the same strip plus a small margin.
+      const strip = {top: 104, bottom: sheet + 16, left: 0, right: 0};
+      const padding = {top: 6, bottom: 6, left: 20, right: 20};
+      const foot = fitPitched(map, bounds, {preset, points: ground, padding, shift: strip, maxZoom: 17.6, minZoom: 14.5, apply: false});
+      const minZoom = Math.max(14.5, (foot?.zoom ?? 17.6) - 1);
+      fitPitched(map, bounds, {preset, points: [...ground, ...roof], padding, shift: strip, maxZoom: 17.6, minZoom, animate: animate() && !instant});
       return;
     }
     const padding = {top: Math.round(ch * (preset === 'eye' ? 0.12 : 0.1)), bottom: 48, left: 48, right: 48};

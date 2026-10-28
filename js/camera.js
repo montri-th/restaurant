@@ -97,6 +97,9 @@ function cornersInside(map, corners, padding) {
  * animates to the result. Returns the camera used. `points` may carry a third
  * value (altitude in metres) so a building's roof is framed, not only its
  * footprint. `apply: false` only computes the target and restores the start.
+ * `shift` is the preset's fraction (principal point pushed down), or a padding
+ * object naming the strip of the viewport the box must fit — a phone's map
+ * between its chip row and its half sheet — so the centre sits in that strip.
  */
 export function fitPitched(map, bounds, {preset = 'city', padding = {top: 24, bottom: 24, left: 24, right: 24}, maxZoom = 16, animate = true, duration = 650, minZoom = 10, points = null, shift = null, apply = true} = {}) {
   const p = CAMERA[preset] || CAMERA.plan;
@@ -104,7 +107,10 @@ export function fitPitched(map, bounds, {preset = 'city', padding = {top: 24, bo
   setFov(map, p.fov);
   // A pitched camera sees much more ground above the centre than below it, so the
   // box is centred lower on the screen (view padding at the top) before fitting.
-  const view = shiftPadding(map, shift ?? (p.shift || p.fitShift || 0));
+  const strip = shift && typeof shift === 'object';
+  const view = strip ? {top: 0, bottom: 0, left: 0, right: 0, ...shift} : shiftPadding(map, shift ?? (p.shift || p.fitShift || 0));
+  // A strip is the camera's own padding (cameraForBounds adds it to `padding`), and the box the vertices must stay in.
+  const box = strip ? {top: view.top + padding.top, bottom: view.bottom + padding.bottom, left: view.left + padding.left, right: view.right + padding.right} : padding;
   map.jumpTo({pitch: p.pitch, bearing: p.bearing, padding: view});
   const flat = map.cameraForBounds(bounds, {padding, bearing: p.bearing, maxZoom});
   if (!flat) { map.jumpTo(start); return null; }
@@ -116,11 +122,11 @@ export function fitPitched(map, bounds, {preset = 'city', padding = {top: 24, bo
   let guard = 0;
   if (p.pitch > 0) {
     // Zoom out until every vertex is inside the padded viewport…
-    while (!cornersInside(map, corners, padding) && zoom > minZoom && guard++ < 60) { zoom -= 0.1; map.jumpTo({zoom}); }
+    while (!cornersInside(map, corners, box) && zoom > minZoom && guard++ < 60) { zoom -= 0.1; map.jumpTo({zoom}); }
     // …then zoom in while they all still fit (foreshortening leaves room the flat fit did not use).
     while (zoom + 0.1 <= maxZoom && guard++ < 120) {
       map.jumpTo({zoom: zoom + 0.1});
-      if (!cornersInside(map, corners, padding)) { map.jumpTo({zoom}); break; }
+      if (!cornersInside(map, corners, box)) { map.jumpTo({zoom}); break; }
       zoom += 0.1;
     }
     zoom = Math.round(zoom * 100) / 100;

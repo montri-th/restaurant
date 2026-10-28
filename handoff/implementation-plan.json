@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.5.0",
+  "productVersion": "0.5.1",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -847,7 +847,7 @@
     {
       "id": "AC40",
       "scenario": "Building focus: the building being looked at is never hidden and always under the two-point camera",
-      "expected": "opening a Land host, a hosted venue, a store or outlet whose point falls in a Land building, or a clicked building sets the eye preset (pitch 75, fov 24; มุมสถาปนิก pressed and enabled; ?cam=model opts out) on desktop and on phones (centred above the half sheet); the building is fed to the venue x-ray (drawn on top) and to the massing occlusion scene (focus-tier blocks in front of it become see-through); its OSM twin is not drawn; clicking the x-rayed building of an open store/outlet opens its Land host; a name-only venue frames its joined OpenStreetMap blocks once per venue",
+      "expected": "opening a Land host, a hosted venue, a store or outlet whose point falls in a Land building, or a clicked building sets the eye preset (pitch 75, fov 24; มุมสถาปนิก pressed and enabled; ?cam=model opts out) on desktop and on phones (fitted to the strip of map between the chip row and the half sheet, footprint and roof — owner 22:33 zoom to fit); the building is fed to the venue x-ray (drawn on top) and to the massing occlusion scene (focus-tier blocks in front of it become see-through); its OSM twin is not drawn; clicking the x-rayed building of an open store/outlet opens its Land host; a name-only venue frames its joined OpenStreetMap blocks once per venue",
       "verificationType": "harness + live (desktop and 390 px)",
       "result": "see VERIFICATION.md"
     },

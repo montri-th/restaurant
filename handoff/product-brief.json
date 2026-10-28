@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.5.0",
+  "productVersion": "0.5.1",
   "updatedOn": "2026-10-28",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
@@ -542,7 +542,7 @@
         "bearing": 28,
         "fov": 24,
         "fitShift": 0.1,
-        "when": "every building focus (owner 2026-10-28 22:03 “อาคารที่เลือก หรือ on focus ให้แสดงด้วยมุมมอง 2-point perspective เสมอ”): a Land host's building, a hosted venue's (venue view or a store of that venue), the Land building an open outlet's or store's point falls in, a clicked building, and a name-only venue's OpenStreetMap blocks once the join has found them — on by default, ?cam=model opts out; disabled elsewhere and in 2D; on a phone the building is centred above the half sheet at a zoom set by its size (js/app.js#frameVenue)",
+        "when": "every building focus (owner 2026-10-28 22:03 “อาคารที่เลือก หรือ on focus ให้แสดงด้วยมุมมอง 2-point perspective เสมอ”): a Land host's building, a hosted venue's (venue view or a store of that venue), the Land building an open outlet's or store's point falls in, a clicked building, and a name-only venue's OpenStreetMap blocks once the join has found them — on by default, ?cam=model opts out; disabled elsewhere and in 2D; on a phone the building (footprint and roof) is fitted to the strip of map between the chip row and the half sheet — the strip is the camera's padding (js/camera.js#fitPitched shift object; owner 22:33 “zoom to fit to viewport เสมอ”)",
         "constraint": "MapLibre 5.6.2 draws fill-extrusion displaced or not at all once the horizon enters the viewport (pitch > 90 − fov/2) — verified live 2026-10-22 (pitch 73 ok, 76 displaced, 82 missing); the eye preset keeps the horizon just outside the frame (90 − 12 − 3 = 75)"
       }
     },
@@ -997,7 +997,7 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261028-r9 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
+    "cacheTag": "?v=20261028-r10 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
     "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
   },
   "registerContract": {

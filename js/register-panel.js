@@ -306,15 +306,17 @@ export function renderLand({land, profile, around, groups, venue = null, index =
 
 /**
  * One list for what is in the building (owner 2026-10-28 22:03 “ร้านเครือ กับ ร้านในอาคาร ให้แสดงรวมกันไม่ต้องแยก”):
- * snapshot rows (sheet 1) and register outlets (sheet 2) side by side, A→Z, each entry saying which unit it is; a row the
- * owner moved to the register with a recorded correspondence appears once, carrying its outlet. Counts stay per unit.
+ * snapshot rows (sheet 1) and register outlets (sheet 2) side by side, A→Z, each entry saying which unit it is (an outlet
+ * under its chain's name, the branch name beside it); a row the owner moved to the register with a recorded
+ * correspondence appears once, carrying its outlet. Counts stay per unit.
  */
 export function inBuildingRows(rows = [], outlets = [], {limit = 40} = {}) {
   const matched = new Map();
   for (const r of rows) if (r.register === 2) for (const t of r.registerTargets || []) matched.set(t, r);
   const entries = [
     ...rows.map(r => ({kind: 'row', id: r.id, name: r.name, brand: r.brand, meta: [r.type || 'ไม่ระบุประเภท', Number.isFinite(r.rating) ? `★ ${dec(r.rating)}` : '', (r.registerTargets || []).some(t => matched.has(t) && outlets.some(o => o.id === t)) ? 'ร้าน · มีสาขาที่ตรงกันในทะเบียน' : 'ร้าน'].filter(Boolean).join(' · ')})),
-    ...outlets.filter(o => !matched.has(o.id)).map(o => ({kind: 'outlet', id: o.id, name: o.name || o.brand.name, brand: o.brand, meta: ['สาขาในทะเบียน', o.brand.name, o.floor ? `ชั้น ${o.floor}` : '', o.evidence !== 'primary' ? EVIDENCE_TH[o.evidence] : '', !o.hasPoint ? 'ไม่มีจุดบนแผนที่' : ''].filter(Boolean).join(' · ')})),
+    // An outlet is listed under its chain (the branch name usually repeats the building's), the branch name beside it.
+    ...outlets.filter(o => !matched.has(o.id)).map(o => ({kind: 'outlet', id: o.id, name: brandLabel(o.brand), brand: o.brand, meta: ['สาขาในทะเบียน', o.name && o.name !== o.brand.name ? o.name : '', o.floor ? `ชั้น ${o.floor}` : '', o.evidence !== 'primary' ? EVIDENCE_TH[o.evidence] : '', !o.hasPoint ? 'ไม่มีจุดบนแผนที่' : ''].filter(Boolean).join(' · ')})),
   ].sort((a, b) => a.name.localeCompare(b.name, 'th'));
   if (!entries.length) return '<p class="hint">ไม่มีร้านตามตัวกรองและไม่มีสาขาในทะเบียนในอาคารนี้</p>';
   const shown = entries.slice(0, limit);
