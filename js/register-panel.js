@@ -123,7 +123,7 @@ export function renderLandHostsIn(list, {title = 'อาคารในทะเ
   return `<section class="panel-section land-hosts"><div class="section-heading">${heading('venue', title)}<span class="hint">${num(total)} อาคาร</span></div>
     <ul class="venue-list">${list.map(x => `<li><button type="button" class="venue-row" data-action="select-land" data-id="${esc(x.host.id)}" aria-label="${esc(x.host.name)} ${num(x.rows)} ร้านในอาคาร"><span class="venue-name">${esc(x.host.name)}<small>${esc([kind(x.host), ...note(x)].join(' · '))}</small></span><span class="venue-count data-number">${num(x.rows)}<small>ร้าน${x.outlets ? ` · ${num(x.outlets)} สาขา` : ''}</small></span></button></li>`).join('')}</ul>
     ${shownOf(list.length, total, 'อาคาร', 'ร้านมากก่อน')}
-    ${landProvenance(meta, boundary || 'อาคารในรายการ', {compact: true, note: `${LAND_RULE} · ร้านตามตัวกรอง · สาขา = ทะเบียนร้านเครือ คนละหน่วย`})}</section>`;
+    ${landProvenance(meta, boundary || 'อาคารในรายการ', {compact: true, note: `${LAND_RULE} · ร้านตามตัวกรอง · เฉพาะ host ที่มีรูปอาคาร OpenStreetMap ที่จุด`})}</section>`;
 }
 
 /** Store / outlet panel: the Land building the point falls in. */
@@ -132,7 +132,9 @@ const hostLinks = hosts => hosts.map(h => `<button type="button" class="link-but
 export function renderStoreLand(rel) {
   if (!rel?.hosts?.length) return '';
   const also = (rel.also || []).flatMap(x => x.hosts);
-  return `<dt>อาคาร</dt><dd>${hostLinks(rel.hosts)}${also.length ? `<br>อยู่ในขอบอาคารของ ${hostLinks(also)} ด้วย` : ''}<br><span class="hint">จุดอยู่ในขอบอาคาร · ทะเบียน Land จับคู่ ${esc(thaiDate(SOURCES.land))}</span></dd>`;
+  // d = the source point's distance to the outline: 0 inside; up to 10 m outside counts as in and the pin is drawn inside.
+  const how = rel.d > 0 ? `จุดต้นทางห่างขอบอาคาร ${dec(rel.d)} ม. (ไม่เกิน 10 ม. นับเป็นในอาคาร หมุดแสดงในอาคาร)` : 'จุดอยู่ในขอบอาคาร';
+  return `<dt>อาคาร</dt><dd>${hostLinks(rel.hosts)}${also.length ? `<br>อยู่ในขอบอาคารของ ${hostLinks(also)} ด้วย` : ''}<br><span class="hint">${how} · ทะเบียน Land จับคู่ ${esc(thaiDate(SOURCES.land))}</span></dd>`;
 }
 
 /** Store panel: the register brand(s) the sheet links this name candidate to, and the moved-row status. */
@@ -220,7 +222,7 @@ export function renderOutlet({reg, outlet: o, area = null, land = null, sameBran
   const logo = getBrandLogo(o.brand);
   // The register's own coordinate; a pin drawn inside its Land building keeps the source values here.
   const lat = o.sourceLatitude ?? o.latitude, lon = o.sourceLongitude ?? o.longitude;
-  const coords = o.hasPoint ? `<span class="data-number">${lat.toFixed(6)}, ${lon.toFixed(6)}</span><br><span class="hint">${esc(GEO_TH[o.geo] || 'จุดจากแหล่งข้อมูล')}${o.snapped ? ' · หมุดแสดงในอาคารที่จุดอยู่ติดขอบ' : ''}</span>` : '<span class="hint">ทะเบียนยังไม่มีจุดที่เลือกใช้สำหรับสาขานี้</span>';
+  const coords = o.hasPoint ? `<span class="data-number">${lat.toFixed(6)}, ${lon.toFixed(6)}</span><br><span class="hint">${esc(GEO_TH[o.geo] || 'จุดจากแหล่งข้อมูล')}${o.snapped ? ' · หมุดแสดงในอาคาร Land' : ''}</span>` : '<span class="hint">ทะเบียนยังไม่มีจุดที่เลือกใช้สำหรับสาขานี้</span>';
   const province = o.province ? `${esc(o.provinceTh)}<br><span class="hint">${o.provinceBy === 'point' ? 'จากจุดของสาขา' : 'จากที่อยู่ในทะเบียน'}</span>` : '<span class="hint">ไม่ระบุจังหวัด</span>';
   const areaHtml = area ? `<dt>พื้นที่</dt><dd><button type="button" class="link-button" data-action="select-area" data-id="${esc(area.id)}">${esc(areaWord(area.province))}${esc(area.name)}</button> · ${esc(districtWord(area.province))}${esc(area.districtName)}</dd>` : '';
   const landHtml = renderStoreLand(land);

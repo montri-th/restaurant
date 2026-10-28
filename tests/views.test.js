@@ -185,7 +185,9 @@ test('venue and store copy say how the name link was made; spatial results say �
   // Spatial join results (venue section, store fact, building panel).
   const sp = {buildings: 2, own: 9, others: data.rows.filter(r => !r.venue).slice(0, 3)};
   const ts = text(renderVenue(buildVenueProfile(data.rows, charn, index, data.groups, {spatial: sp}), index, meta));
-  assert.ok(ts.includes('ร้านอื่นที่จุดตกในอาคารเดียวกัน') && ts.includes('ตกในอาคาร 2 หลัง') && ts.includes('ไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร'));
+  assert.ok(ts.includes('ร้านอื่นที่จุดตกในอาคารเดียวกัน') && ts.includes('ตกในอาคาร 2 หลัง'));
+  // One located-in caveat per view (owner 2026-10-28 18:27): the name-link note carries it, the spatial section does not repeat it.
+  assert.equal((ts.match(/ไม่ได้ยืนยัน/g) || []).length, 1, 'the venue view says it once');
   assert.ok(ts.includes('อาคารสีน้ำเงินคืออาคารที่จุดของร้านเหล่านี้ตกอยู่'));
   const r0 = data.rows.find(r => r.area === '100204');
   const tb = text(renderStore(buildStoreDetail(r0, {scopeRows: data.rows, index, groups: data.groups, building: {key: 'osm:7', others: 4}}), {...meta, index}));

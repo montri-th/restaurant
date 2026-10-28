@@ -274,7 +274,11 @@ test('register and Land views: one provenance line each (dataset · source · da
   assert.equal((inArea.match(/source-line/g) || []).length, 1); assert.ok(text(inArea).includes('คนละหน่วยกับร้านด้านบน'));
   const row = rowById.get(landOfRow(land, [...land.rowRel.keys()][0]) ? [...land.rowRel.keys()][0] : '');
   const storeLand = text(renderStoreLand(landOfRow(land, row.id)));
-  assert.ok(storeLand.includes('จุดอยู่ในขอบอาคาร') && !/ตั้งอยู่ใน|ติดขอบ/.test(storeLand));
+  assert.ok(/จุดอยู่ในขอบอาคาร|จุดต้นทางห่างขอบอาคาร [\d.]+ ม\. \(ไม่เกิน 10 ม\. นับเป็นในอาคาร/.test(storeLand) && !/ตั้งอยู่ใน|ติดขอบ/.test(storeLand));
+  // A point counted in from outside says so, with its distance (review 2026-10-28: never “in the outline” for a moved point).
+  const movedKey = [...land.rowLinks].find(([, l]) => l[0].d > 0)?.[0];
+  const movedText = text(renderStoreLand(landOfRow(land, movedKey)));
+  assert.ok(/จุดต้นทางห่างขอบอาคาร [\d.]+ ม\. \(ไม่เกิน 10 ม\. นับเป็นในอาคาร หมุดแสดงในอาคาร\)/.test(movedText) && !movedText.includes('จุดอยู่ในขอบอาคาร'), movedText);
   const moved = data.rows.find(r => r.register === 1);
   assert.ok(text(renderStoreRegister({row: moved, register: moved.register})).includes('ยังนับเป็น 1 ร้านในชุดข้อมูลนี้ตามเดิม'));
   const hostsIn = renderLandHostsIn([{host, rows: 3, outlets: 1}]);

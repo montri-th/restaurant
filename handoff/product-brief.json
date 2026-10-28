@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.4.0",
+  "productVersion": "0.4.1",
   "updatedOn": "2026-10-28",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
@@ -990,7 +990,7 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261028-r7 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
+    "cacheTag": "?v=20261028-r8 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
     "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
   },
   "registerContract": {

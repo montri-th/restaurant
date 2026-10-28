@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.4.0",
+  "productVersion": "0.4.1",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",

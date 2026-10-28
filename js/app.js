@@ -1122,7 +1122,7 @@ function renderTable() {
       <td>${Number.isFinite(r.rating) ? `★ <span class="data-number">${dec(r.rating)}</span>` : '<span class="hint">ไม่มีคะแนน</span>'}<small>${Number.isFinite(r.reviews) ? `${num(r.reviews)} รีวิว` : ''}</small></td>
       <td>${a ? `${esc(areaWord(a.province))}${esc(a.name)}<small>${esc(districtWord(a.province))}${esc(a.districtName)} · ${esc(provinceByCode(a.province)?.th || '')}</small>` : '—'}</td>
       <td>${r.brand ? esc(r.brand.name) : '<span class="hint">—</span>'}${r.venue ? `<small>${esc(r.venue.name)}</small>` : ''}</td>
-      <td><small class="data-number">${r.latitude.toFixed(5)}, ${r.longitude.toFixed(5)}</small></td></tr>`;
+      <td><small class="data-number">${(r.sourceLatitude ?? r.latitude).toFixed(5)}, ${(r.sourceLongitude ?? r.longitude).toFixed(5)}</small></td></tr>`;
   }).join('') || '<tr><td colspan="6">ไม่พบร้านตามตัวกรอง</td></tr>';
   $('page-label').textContent = list.length ? `${num(start + 1)}–${num(Math.min(start + pageSize, list.length))} / ${num(list.length)}` : '0 ร้าน';
   $('prev-page').disabled = state.page === 0;
@@ -1560,11 +1560,24 @@ function openMobilePanel({expanded = false} = {}) {
   $('map-aha').hidden = true;
   setSheetExpanded(expanded);
 }
-/** The phone sheet has two heights: half (the map stays in view) and expanded (reading a long panel). */
+/** The phone sheet has two heights: half (the map stays in view) and expanded (reading a long panel). The map
+ * panel learns the state so the legend (the outlet-pin key) sits above a half sheet and hides under an expanded one. */
 function setSheetExpanded(expanded) {
-  const b = $('expand-mobile-panel');
-  $('panel').classList.toggle('is-expanded', Boolean(expanded));
+  const b = $('expand-mobile-panel'), panel = $('panel');
+  panel.classList.toggle('is-expanded', Boolean(expanded));
   if (b) { b.setAttribute('aria-expanded', String(Boolean(expanded))); b.textContent = expanded ? 'ย่อ' : 'ขยาย'; }
+  syncSheetState();
+}
+function syncSheetState() {
+  const mp = document.querySelector('.map-panel'), panel = $('panel');
+  if (!mp) return;
+  const open = mobilePortrait() && panel.classList.contains('is-open');
+  mp.classList.toggle('has-sheet', open);
+  mp.classList.toggle('has-sheet-expanded', open && panel.classList.contains('is-expanded'));
+  // Measured after the sheet's 0.2 s slide, so the key lands above the resting edge (and again at once for a resize).
+  const measure = () => { if (mp.classList.contains('has-sheet')) mp.style.setProperty('--sheet-height', `${Math.round(window.innerHeight - panel.getBoundingClientRect().top)}px`); };
+  clearTimeout(syncSheetState.measureTimer);
+  if (open) { measure(); syncSheetState.measureTimer = setTimeout(measure, 260); }
 }
 function closeMobilePanel() {
   const wasOpen = $('panel').classList.contains('is-open');
@@ -1710,7 +1723,8 @@ function wireEvents() {
   const colorMedia = matchMedia('(prefers-color-scheme: dark)');
   const onColorChange = () => { if ($('theme').value === 'auto') applyTheme(); };
   if (colorMedia.addEventListener) colorMedia.addEventListener('change', onColorChange); else colorMedia.addListener(onColorChange);
-  matchMedia('(max-width: 760px) and (orientation: portrait)').addEventListener?.('change', () => { if (!mobilePortrait()) $('panel').classList.remove('is-open'); renderPanel(); });
+  matchMedia('(max-width: 760px) and (orientation: portrait)').addEventListener?.('change', () => { if (!mobilePortrait()) $('panel').classList.remove('is-open'); syncSheetState(); renderPanel(); });
+  window.addEventListener('resize', () => { clearTimeout(syncSheetState.timer); syncSheetState.timer = setTimeout(syncSheetState, 120); });
 }
 
 async function init() {
