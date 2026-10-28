@@ -528,6 +528,13 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 /* At detail zoom the choropleth is off, so its legend steps step aside; pins and buildings remain explained. */
 .map-panel.is-detail-zoom #legend-areas { display: none; }
 @media (max-width: 760px) and (orientation: portrait) { .map-panel.is-detail-zoom .map-legend { display: none; } }
+/* Phones keep one key whenever chain outlets are drawn: the pin is never left unexplained (the other marks stay hidden for space). */
+@media (max-width: 760px) and (orientation: portrait) {
+  .map-panel.has-register-dots .legend-marks { display: flex; }
+  .map-panel.has-register-dots .legend-marks > :not(.legend-register-item) { display: none; }
+  .map-panel.is-detail-zoom.has-register-dots .map-legend { display: grid; }
+  .map-panel.is-detail-zoom.has-register-dots #legend-areas { display: none; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0s !important; transition-duration: 0s !important; }
 }

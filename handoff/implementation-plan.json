@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.3.3",
+  "productVersion": "0.3.4",
   "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -493,7 +493,7 @@
     },
     {
       "id": "P13",
-      "title": "0.3.1–0.3.3: one map for both data sets (owner 2026-10-28 16:56 “ผมอยากให้แสดงร่วมกัน”, “ลองร้านเครือแล้วไม่เห็นตึก”) and the fixes of two independent Who reviews",
+      "title": "0.3.1–0.3.4: one map for both data sets (owner 2026-10-28 16:56 “ผมอยากให้แสดงร่วมกัน”, “ลองร้านเครือแล้วไม่เห็นตึก”) and the fixes of two independent Who reviews",
       "dependsOn": [
         "P12"
       ],
@@ -761,7 +761,7 @@
     {
       "id": "AC35",
       "scenario": "Two units on one map stay legible",
-      "expected": "register outlets are location pins (key and map), a shape outside the ten restaurant cue shapes; the map chip ‘ร้านเครือ’ (aria-pressed, ?rdots=0) hides every-outlet dots while a register or Land view keeps its selection; a register view shows the snapshot as quiet context only (no snapshot focus symbols, no province count labels over the selection) and its status line reads ‘สาขาในทะเบียนที่เลือก N ทั้งประเทศ (คนละหน่วย) · ร้านในชุดข้อมูลเป็นจุดบริบท …’; a disabled map chip stays opaque; snapshot chain and venue headers carry totals with ‘แสดง n จาก N’ ; store facts from the register and Land carry their check / join dates; the chart tray names dataset · source · date · boundary; on a phone the chip row fades at its right edge to show that more chips scroll in",
+      "expected": "register outlets are location pins (key and map), a shape outside the ten restaurant cue shapes; the map chip ‘ร้านเครือ’ (aria-pressed, ?rdots=0) hides every-outlet dots while a register or Land view keeps its selection; a register view shows the snapshot as quiet context only (no snapshot focus symbols, no province count labels over the selection) and its status line reads ‘สาขาในทะเบียนที่เลือก N ทั้งประเทศ (คนละหน่วย) · ร้านในชุดข้อมูลเป็นจุดบริบท …’; a disabled map chip stays opaque; snapshot chain and venue headers carry totals with ‘แสดง n จาก N’ ; store facts from the register and Land carry their check / join dates; the chart tray names dataset · source · date · boundary; on a phone the chip row fades at its right edge to show that more chips scroll in ; a phone keeps the chain-outlet key in view whenever outlets are drawn",
       "verificationType": "unit + harness + live",
       "result": "see VERIFICATION.md"
     }
