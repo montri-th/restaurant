@@ -80,6 +80,10 @@ export function decodeDataset(json, areas) {
   // 1 = a 07_VENUES name/alias ends the restaurant name; 2 = a name-derived place (repeated ending).
   const MATCH = {1: 'suffix', 2: 'auto'};
   const venueMatch = new Map((json.venueMatch || []).map(([i, m]) => [i, MATCH[m] || 'sheet']));
+  // Rows the owner moved to the chain register on 2026-10-25 (meta.registerRule): 1 = held for review, 2 = with a
+  // recorded correspondence; registerOutlets = register outlet_ids listed as possible targets. Still one row each here.
+  const register = new Map(json.register || []);
+  const registerOutlets = new Map(json.registerOutlets || []);
   const rows = [];
   let dropped = 0;
   for (let i = 0; i < n; i++) {
@@ -99,6 +103,7 @@ export function decodeDataset(json, areas) {
       area: code, district: a.district, province: a.province,
       brand, venue, venueEntity: venueEntity.has(i),
       venueMatch: venue ? (venueMatch.get(i) || 'sheet') : null,
+      register: register.get(i) || 0, registerTargets: registerOutlets.get(i) || [],
     };
     row.haystack = lower([row.name, brand?.name, venue?.name, a.name, a.nameEn, a.districtName].filter(Boolean).join(' '));
     rows.push(row);

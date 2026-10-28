@@ -1,0 +1,1036 @@
+{
+ "checkedOn": "2026-10-28",
+ "landPoints": {
+  "shopping": 3262,
+  "hotel": 2266,
+  "office": 378
+ },
+ "buildingAssignment": {
+  "shopping:none": 1112,
+  "shopping:registry_geometry": 43,
+  "shopping:lod2": 9,
+  "shopping:point_in_v4": 1768,
+  "shopping:edge_v4": 339,
+  "hotel:point_in_v4": 634,
+  "hotel:edge_v4": 366,
+  "hotel:none": 706,
+  "hotel:registry_mass": 560,
+  "hotel:lod2": 13,
+  "office:point_in_v4": 280,
+  "office:none": 58,
+  "office:edge_v4": 34,
+  "office:registry_mass": 6,
+  "office:lod2": 2
+ },
+ "v4": {
+  "parts": 2544191,
+  "buildings": 2520398,
+  "skippedTiles": 0
+ },
+ "registryVsV4AtPoint": {
+  "shopping:iou>=0.5": 32,
+  "shopping:iou<0.5": 8,
+  "shopping:no_v4_at_point": 3,
+  "hotel:iou>=0.5": 557,
+  "hotel:no_v4_at_point": 2,
+  "hotel:iou<0.5": 1,
+  "office:iou>=0.5": 5,
+  "office:iou<0.5": 1
+ },
+ "publishedBuildingsBySourceAndLod": {
+  "citymeter_v4:lod1": 1211,
+  "registry_osm:lod1": 136,
+  "registry_osm:lod2": 9,
+  "registry_shopping:lod1": 34,
+  "registry_shopping:lod2": 9
+ },
+ "publishedParts": 93,
+ "shoppingCenterRelease": {
+  "as_of": "2026-10-23",
+  "features": 130,
+  "venues": 77
+ },
+ "hotelMasses": 545,
+ "perDataset": {
+  "shopping": {
+   "points": 3262,
+   "fp_none": 1112,
+   "fp_registry_geometry": 43,
+   "fp_point_in_v4": 1768,
+   "fp_edge_v4": 339,
+   "snapshot_near": 7279,
+   "snapshot_edge": 679,
+   "snapshot_in": 1613,
+   "chain_in": 1638,
+   "chain_near": 1463,
+   "chain_edge": 324
+  },
+  "hotel": {
+   "points": 2266,
+   "fp_point_in_v4": 634,
+   "fp_edge_v4": 366,
+   "fp_none": 706,
+   "fp_registry_mass": 560,
+   "snapshot_near": 2188,
+   "snapshot_edge": 210,
+   "snapshot_in": 209,
+   "chain_near": 252,
+   "chain_in": 69,
+   "chain_edge": 20
+  },
+  "office": {
+   "points": 378,
+   "fp_point_in_v4": 280,
+   "fp_none": 58,
+   "fp_edge_v4": 34,
+   "fp_registry_mass": 6,
+   "snapshot_near": 582,
+   "snapshot_in": 203,
+   "snapshot_edge": 57,
+   "chain_in": 348,
+   "chain_edge": 52,
+   "chain_near": 164
+  }
+ },
+ "snapshotJoined": {
+  "near": 9990,
+  "edge": 932,
+  "in": 1882
+ },
+ "chainJoined": {
+  "near": 1840,
+  "in": 1741,
+  "edge": 389
+ },
+ "snapshotPoints": 70214,
+ "chainPointsInCoveredProvinces": 7630,
+ "pointsInNestedBuildings": {
+  "snapshot": 100,
+  "chain": 182
+ },
+ "nameLinkReview": [
+  {
+   "row": "957d8e0b8e07",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-000369",
+   "linkedName": "เจเจมอลล์",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-000383"
+   ],
+   "spatialNames": [
+    "ตลาดปลาลานเร่"
+   ]
+  },
+  {
+   "row": "3901cdb63c8f",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-001765",
+   "linkedName": "เอ็มควอเทียร์",
+   "relation": "edge",
+   "distanceM": 6.1,
+   "spatialHosts": [
+    "OFF-89F06E73EC92"
+   ],
+   "spatialNames": [
+    "Bhiraj Tower at EmQuartier"
+   ]
+  },
+  {
+   "row": "3df7a5370aea",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-001897",
+   "linkedName": "ตลาดวงศกร",
+   "relation": "edge",
+   "distanceM": 0.3,
+   "spatialHosts": [
+    "SC-SM-04833"
+   ],
+   "spatialNames": [
+    "โลตัส โก เฟรช ตลาดวงศกร"
+   ]
+  },
+  {
+   "row": "3df7a5370aea",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-001897",
+   "linkedName": "ตลาดวงศกร",
+   "relation": "edge",
+   "distanceM": 0.3,
+   "spatialHosts": [
+    "SC-SM-04833"
+   ],
+   "spatialNames": [
+    "โลตัส โก เฟรช ตลาดวงศกร"
+   ]
+  },
+  {
+   "row": "0211fbdbf830",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-000977",
+   "linkedName": "ปาร์ค บางนา",
+   "relation": "edge",
+   "distanceM": 5.5,
+   "spatialHosts": [
+    "VN-27262946f48cc9"
+   ],
+   "spatialNames": [
+    "บิ๊กซี ฟู้ดเพลส ปาร์ค บางนา"
+   ]
+  },
+  {
+   "row": "96c86c3eaed1",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "edge",
+   "distanceM": 6.5,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
+   "row": "96c86c3eaed1",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "edge",
+   "distanceM": 6.5,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
+   "row": "5517a86015fe",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
+   "row": "5517a86015fe",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
+   "row": "ce7e3f5caaf3",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-006590",
+   "linkedName": "เดอะมอลล์ไลฟ์สโตร์ งามวงศ์วาน",
+   "relation": "edge",
+   "distanceM": 5.4,
+   "spatialHosts": [
+    "OFF-D6970DEEAC3F"
+   ],
+   "spatialNames": [
+    "The Mall Ngamwongwan — office component (10F verified)"
+   ]
+  },
+  {
+   "row": "ce7e3f5caaf3",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-006590",
+   "linkedName": "เดอะมอลล์ไลฟ์สโตร์ งามวงศ์วาน",
+   "relation": "edge",
+   "distanceM": 5.4,
+   "spatialHosts": [
+    "OFF-D6970DEEAC3F"
+   ],
+   "spatialNames": [
+    "The Mall Ngamwongwan — office component (10F verified)"
+   ]
+  },
+  {
+   "row": "aa7f34d5de78",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-006568",
+   "linkedName": "ตลาดชาวสยาม",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-006354"
+   ],
+   "spatialNames": [
+    "ตลาดนัดบางกรวย"
+   ]
+  },
+  {
+   "row": "92d2887d93c9",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-006568",
+   "linkedName": "ตลาดชาวสยาม",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-006354"
+   ],
+   "spatialNames": [
+    "ตลาดนัดบางกรวย"
+   ]
+  },
+  {
+   "row": "d1204ee26705",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-006568",
+   "linkedName": "ตลาดชาวสยาม",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-006354"
+   ],
+   "spatialNames": [
+    "ตลาดนัดบางกรวย"
+   ]
+  },
+  {
+   "row": "c56043fc6c33",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-006489",
+   "linkedName": "คอสโม บาซาร์",
+   "relation": "edge",
+   "distanceM": 0.1,
+   "spatialHosts": [
+    "OFF-E3386CBA78C7"
+   ],
+   "spatialNames": [
+    "Cosmo Office Park"
+   ]
+  },
+  {
+   "row": "c56043fc6c33",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-006489",
+   "linkedName": "คอสโม บาซาร์",
+   "relation": "edge",
+   "distanceM": 0.1,
+   "spatialHosts": [
+    "OFF-E3386CBA78C7"
+   ],
+   "spatialNames": [
+    "Cosmo Office Park"
+   ]
+  },
+  {
+   "row": "8ec41a431cee",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
+   "row": "8ec41a431cee",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  }
+ ],
+ "nameLinksShopping": {
+  "links": 1568,
+  "result": {
+   "agree_near": 161,
+   "not_near_host_building": 110,
+   "agree_in": 780,
+   "host_without_building": 369,
+   "agree_edge": 87,
+   "other_building_near": 43,
+   "other_building_in": 8,
+   "other_building_edge": 10
+  }
+ },
+ "nameLinksHotel": {
+  "links": 73,
+  "result": {
+   "agree_in": 4,
+   "host_not_in_hotel_registry_points": 67,
+   "agree_edge": 1,
+   "host_without_building": 1
+  }
+ },
+ "hotelMassBranchKeys": {
+  "agree_in": 109
+ },
+ "industrialEstates": {
+  "summary": {
+   "estatesInRegistry": 106,
+   "estatesInCoveredProvinces": 22,
+   "boundaryStatus": {
+    "พบ polygon—มีประเด็นต้องตรวจ": 40,
+    "พบ polygon—รอยืนยันขอบเขตปัจจุบัน": 57,
+    "ยังไม่พบ polygon ที่จับคู่ได้": 9
+   },
+   "candidatePolygonsChecked": 10,
+   "rule": "registry link DL-2669875b0346b95e63be: candidate polygons never confirm inside; inside vs around after boundary, date and rights acceptance"
+  },
+  "candidates": [
+   {
+    "estateId": "EST-IEAT-2677",
+    "name": "นิคมอุตสาหกรรมบางชัน",
+    "province": "กรุงเทพมหานคร",
+    "boundaryStatus": "พบ polygon—มีประเด็นต้องตรวจ",
+    "mapStatus": "พักใช้—ข้อมูลขัดกัน",
+    "candidateAreaKm2": 2.46,
+    "restaurantCoverageShare": 1.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2675",
+    "name": "นิคมอุตสาหกรรมลาดกระบัง",
+    "province": "กรุงเทพมหานคร",
+    "boundaryStatus": "พบ polygon—รอยืนยันขอบเขตปัจจุบัน",
+    "mapStatus": "รอขอบเขตที่ผ่านการตรวจ",
+    "candidateAreaKm2": 7.65,
+    "restaurantCoverageShare": 1.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2730",
+    "name": "นิคมอุตสาหกรรมแหลมฉบัง",
+    "province": "ชลบุรี",
+    "boundaryStatus": "พบ polygon—รอยืนยันขอบเขตปัจจุบัน",
+    "mapStatus": "รอขอบเขตที่ผ่านการตรวจ",
+    "candidateAreaKm2": 5.9,
+    "restaurantCoverageShare": 0.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2679",
+    "name": "นิคมอุตสาหกรรมนครหลวง",
+    "province": "พระนครศรีอยุธยา",
+    "boundaryStatus": "พบ polygon—มีประเด็นต้องตรวจ",
+    "mapStatus": "พักใช้—ข้อมูลขัดกัน",
+    "candidateAreaKm2": 2.12,
+    "restaurantCoverageShare": 0.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2759",
+    "name": "นิคมอุตสาหกรรมพิจิตร",
+    "province": "พิจิตร",
+    "boundaryStatus": "พบ polygon—มีประเด็นต้องตรวจ",
+    "mapStatus": "พักใช้—ข้อมูลขัดกัน",
+    "candidateAreaKm2": 2.02,
+    "restaurantCoverageShare": 0.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2745",
+    "name": "นิคมอุตสาหกรรมมาบตาพุด",
+    "province": "ระยอง",
+    "boundaryStatus": "พบ polygon—มีประเด็นต้องตรวจ",
+    "mapStatus": "พักใช้—ข้อมูลขัดกัน",
+    "candidateAreaKm2": 12.31,
+    "restaurantCoverageShare": 0.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2761",
+    "name": "นิคมอุตสาหกรรมบางปู",
+    "province": "สมุทรปราการ",
+    "boundaryStatus": "พบ polygon—มีประเด็นต้องตรวจ",
+    "mapStatus": "พักใช้—ข้อมูลขัดกัน",
+    "candidateAreaKm2": 13.38,
+    "restaurantCoverageShare": 1.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2693",
+    "name": "นิคมอุตสาหกรรมบางพลี",
+    "province": "สมุทรปราการ",
+    "boundaryStatus": "พบ polygon—มีประเด็นต้องตรวจ",
+    "mapStatus": "พักใช้—ข้อมูลขัดกัน",
+    "candidateAreaKm2": 2.77,
+    "restaurantCoverageShare": 1.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2683",
+    "name": "นิคมอุตสาหกรรมสมุทรสาคร",
+    "province": "สมุทรสาคร",
+    "boundaryStatus": "พบ polygon—มีประเด็นต้องตรวจ",
+    "mapStatus": "พักใช้—ข้อมูลขัดกัน",
+    "candidateAreaKm2": 4.93,
+    "restaurantCoverageShare": 0.0,
+    "comparison": "not_run_boundary_not_accepted"
+   },
+   {
+    "estateId": "EST-IEAT-2672",
+    "name": "นิคมอุตสาหกรรมแก่งคอย",
+    "province": "สระบุรี",
+    "boundaryStatus": "พบ polygon—รอยืนยันขอบเขตปัจจุบัน",
+    "mapStatus": "รอขอบเขตที่ผ่านการตรวจ",
+    "candidateAreaKm2": 0.92,
+    "restaurantCoverageShare": 0.0,
+    "comparison": "not_run_boundary_not_accepted"
+   }
+  ]
+ },
+ "buildingsPublished": 1399,
+ "featuresPublished": 1492,
+ "hostsPublished": 1478,
+ "hostsWithPointsByType": {
+  "shopping": {
+   "unclassified": {
+    "hosts": 627,
+    "withPoints": 166
+   },
+   "supermarket_store_or_host_component": {
+    "hosts": 613,
+    "withPoints": 156
+   },
+   "covered_market_source_reported": {
+    "hosts": 567,
+    "withPoints": 146
+   },
+   "fuel_station_retail_scope_unconfirmed": {
+    "hosts": 364,
+    "withPoints": 75
+   },
+   "fuel_station_with_source_listed_retail_component": {
+    "hosts": 278,
+    "withPoints": 82
+   },
+   "night_market": {
+    "hosts": 151,
+    "withPoints": 17
+   },
+   "shopping_center": {
+    "hosts": 124,
+    "withPoints": 108
+   },
+   "retail_market": {
+    "hosts": 69,
+    "withPoints": 16
+   },
+   "community_shopping_center": {
+    "hosts": 60,
+    "withPoints": 37
+   },
+   "fuel_station_with_retail_component": {
+    "hosts": 53,
+    "withPoints": 14
+   },
+   "multi_tenant_travel_retail_stop": {
+    "hosts": 44,
+    "withPoints": 25
+   },
+   "community_mall": {
+    "hosts": 35,
+    "withPoints": 24
+   },
+   "fresh_market": {
+    "hosts": 34,
+    "withPoints": 15
+   },
+   "agricultural_wholesale_market": {
+    "hosts": 29,
+    "withPoints": 8
+   },
+   "managed_retail_component": {
+    "hosts": 14,
+    "withPoints": 7
+   },
+   "supermarket_with_owner_confirmed_restaurant_component": {
+    "hosts": 14,
+    "withPoints": 6
+   },
+   "supermarket_with_source_listed_consumer_unit_component": {
+    "hosts": 12,
+    "withPoints": 7
+   },
+   "supermarket_with_staffed_pharmacy_component": {
+    "hosts": 11,
+    "withPoints": 2
+   },
+   "retail_zone": {
+    "hosts": 10,
+    "withPoints": 6
+   },
+   "specialty_retail_store_or_host_component": {
+    "hosts": 7,
+    "withPoints": 0
+   },
+   "retail_complex": {
+    "hosts": 7,
+    "withPoints": 5
+   },
+   "specialty_retail_center": {
+    "hosts": 6,
+    "withPoints": 5
+   },
+   "foodplace_supermarket_store_context": {
+    "hosts": 6,
+    "withPoints": 4
+   },
+   "wholesale_produce_market": {
+    "hosts": 5,
+    "withPoints": 0
+   },
+   "managed_retail_component_candidate": {
+    "hosts": 5,
+    "withPoints": 5
+   },
+   "specialty_shopping_center": {
+    "hosts": 4,
+    "withPoints": 3
+   },
+   "entertainment_anchored_mall": {
+    "hosts": 4,
+    "withPoints": 3
+   },
+   "mixed_use_retail_venue": {
+    "hosts": 3,
+    "withPoints": 3
+   },
+   "mixed_use_retail_component": {
+    "hosts": 3,
+    "withPoints": 1
+   },
+   "community_retail_center": {
+    "hosts": 3,
+    "withPoints": 1
+   },
+   "market": {
+    "hosts": 3,
+    "withPoints": 1
+   },
+   "floating_market": {
+    "hosts": 3,
+    "withPoints": 2
+   },
+   "hypermarket_with_retail_component": {
+    "hosts": 3,
+    "withPoints": 2
+   },
+   "community_food_and_retail_mall": {
+    "hosts": 2,
+    "withPoints": 2
+   },
+   "outlet_center": {
+    "hosts": 2,
+    "withPoints": 0
+   },
+   "department_store_or_retail_complex": {
+    "hosts": 2,
+    "withPoints": 2
+   },
+   "community_retail_and_sports_complex": {
+    "hosts": 2,
+    "withPoints": 1
+   },
+   "fashion_retail_and_wholesale_center": {
+    "hosts": 2,
+    "withPoints": 0
+   },
+   "convenience_retail_center": {
+    "hosts": 2,
+    "withPoints": 1
+   },
+   "retail_and_dining_project_scope_pending": {
+    "hosts": 2,
+    "withPoints": 1
+   },
+   "shopping_center_retail_component": {
+    "hosts": 2,
+    "withPoints": 2
+   },
+   "retail_and_service_component": {
+    "hosts": 2,
+    "withPoints": 2
+   },
+   "office_retail_podium": {
+    "hosts": 2,
+    "withPoints": 2
+   },
+   "grocery_store_with_source_listed_restaurant_component": {
+    "hosts": 2,
+    "withPoints": 0
+   },
+   "hypermarket_with_managed_retail_component": {
+    "hosts": 2,
+    "withPoints": 2
+   },
+   "grocery_anchor_with_restaurant_component": {
+    "hosts": 2,
+    "withPoints": 1
+   },
+   "marketplace": {
+    "hosts": 2,
+    "withPoints": 0
+   },
+   "mixed_wholesale_retail_market": {
+    "hosts": 2,
+    "withPoints": 1
+   },
+   "walking_street_market": {
+    "hosts": 2,
+    "withPoints": 1
+   },
+   "shopping_center_under_construction": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "hospital_retail_component": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "mixed_use_parent_with_retail_component": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "specialty_retail_and_consumer_services_center": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "fresh_market_and_community_retail_center": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "community_shopping_center_opening_unconfirmed": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "mall_subarea_or_provider_duplicate_candidate": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "office_retail_component": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "retail_entertainment_building": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "managed_retail_entertainment_precinct": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "transport_terminal_retail_component": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "multi_business_consumer_service_building_candidate": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "office_retail_service_building_candidate": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "heritage_retail_and_restaurant_compound_candidate": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "former_fashion_retail_and_wholesale_center": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "shopping_center_building": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "residential_retail_podium": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "specialty_retail_and_cultural_center": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "retail_food_and_wholesale_mixed_destination": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "hotel_precinct_retail_component": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "heritage_retail_destination_under_redevelopment": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "airport_terminal_retail_and_service_component_candidate": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "retail_commercial_building": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "factory_outlet_retail_store": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "shopping_plaza_and_market_component_boundary_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "community_market_and_food_court_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "managed_food_court_and_event_space_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "secondhand_retail_and_service_site_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "commercial_and_service_project_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "mixed_commercial_retail_and_service_project_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "secondhand_import_goods_retailer_multibusiness_scope_unconfirmed": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "community_mall_redevelopment_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "retail_and_service_complex": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "power_center": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "community_retail_property_historical_source": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "community_shopping_center_candidate": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "wholesale_store": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "supermarket_store_format": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "supermarket_with_managed_retail_component_owner_reported": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "supermarket_with_managed_foodcourt_component": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "supermarket": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "historic_riverside_market": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "riverside_market": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "floating_market_multizone": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "wholesale_store_or_host_component": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "street_market_multiple_plot_management_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "historic_food_market": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "reported_market_source_vintage_disclosed": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "retail_food_district": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "periodic_market": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "community_food_and_service_market_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "community_retail_hub": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "food_market_common_management_unconfirmed": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "food_and_goods_market_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "foundation_resale_retail_component_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "retail_market_project_scope_pending": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "market_precinct": {
+    "hosts": 1,
+    "withPoints": 1
+   },
+   "weekend_food_market": {
+    "hosts": 1,
+    "withPoints": 0
+   },
+   "fuel_station_with_historical_retail_component": {
+    "hosts": 1,
+    "withPoints": 0
+   }
+  },
+  "hotel": {
+   "hotel": {
+    "hosts": 1663,
+    "withPoints": 270
+   },
+   "resort": {
+    "hosts": 141,
+    "withPoints": 6
+   },
+   "guesthouse": {
+    "hosts": 125,
+    "withPoints": 23
+   },
+   "motel": {
+    "hosts": 80,
+    "withPoints": 2
+   },
+   "serviced_apartment": {
+    "hosts": 71,
+    "withPoints": 14
+   },
+   "accommodation_other": {
+    "hosts": 48,
+    "withPoints": 4
+   },
+   "apartment_accommodation": {
+    "hosts": 46,
+    "withPoints": 2
+   },
+   "accommodation_unclassified": {
+    "hosts": 44,
+    "withPoints": 18
+   },
+   "homestay": {
+    "hosts": 32,
+    "withPoints": 1
+   },
+   "bungalow": {
+    "hosts": 8,
+    "withPoints": 0
+   },
+   "youth_lodging": {
+    "hosts": 5,
+    "withPoints": 0
+   },
+   "floating_accommodation": {
+    "hosts": 2,
+    "withPoints": 0
+   },
+   "park_or_government_lodging": {
+    "hosts": 1,
+    "withPoints": 0
+   }
+  },
+  "office": {
+   "office": {
+    "hosts": 378,
+    "withPoints": 147
+   }
+  }
+ },
+ "registryLinks": {
+  "shopping": "DL-fdc869a77aca940153dd",
+  "office": "DL-8e308daca1bf455d9375",
+  "hotel": "DL-845a42d1d4c939aa2590",
+  "industrialEstates": "DL-2669875b0346b95e63be",
+  "status": "review_status idea / pending_research in the registry export of 2026-10-28 (R12_DATASET_LINKS)"
+ },
+ "inputs": {
+  "restaurants": "data/restaurants.json (70,214 rows; display points on the z10 × 4096 grid ≈ 9.55 m)",
+  "chains": "data/chains.json (26,819 outlets; 7,630 with a point in the covered subdistricts)",
+  "registries": "research masters Shopping Centers & Retail Venues, Hotel, Office, Industrial Estates (internal; read 2026-10-28)",
+  "v4": "CityMETER production building footprints (detailMvt z14, per subdistrict; 2,260 tiles, read-only, 2026-10-28)",
+  "lod": "Shopping Center release data/venue-buildings.geojson (as_of 2026-10-23; https://montri-th.github.io/shoppingcenter/)"
+ }
+}

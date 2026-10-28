@@ -1,10 +1,10 @@
 {
   "$schema": "./handoff.schema.json",
-  "schemaVersion": "1.4.0",
+  "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.2.1",
-  "updatedOn": "2026-10-23",
+  "productVersion": "0.3.0",
+  "updatedOn": "2026-10-28",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
   "humanPlan": "IMPLEMENTATION_PLAN.md",
@@ -136,6 +136,34 @@
       {
         "path": "scripts/build-handoff.mjs · scripts/verify-live.mjs",
         "role": "manifest/bundle from git ls-files; live byte attestation"
+      },
+      {
+        "path": "js/register.js",
+        "role": "decode data/chains.json (outlets, brands, companies, provinces), brandsIn / companiesIn / provincesIn / outletMix, searchRegister (brand names first, then outlet names)"
+      },
+      {
+        "path": "js/register-layer.js",
+        "role": "register outlet dots (one circle per outlet with a point, LDS map data role), selection filters, logo buttons from zoom 15, hit test"
+      },
+      {
+        "path": "js/register-panel.js",
+        "role": "register and Land panel views (chains, chain, company, outlet, land) and the register / Land sections inside snapshot views; registerProvenance / landProvenance"
+      },
+      {
+        "path": "js/land.js",
+        "role": "decode data/land.json + land-buildings.geojson (hosts, building outlines, LOD2 parts, row / outlet links incl. nested buildings), landProfile, aroundGeometry, planar geometry helpers"
+      },
+      {
+        "path": "scripts/build-chains.py",
+        "role": "build data/chains.json from the chain register dump (+ 77 production province polygons, register logo links by sha256)"
+      },
+      {
+        "path": "scripts/build-land.py",
+        "role": "Land join check: hosts, registry geometry (incl. LOD2 parts) or V4 footprints, point relations, report docs/land-join-check.json"
+      },
+      {
+        "path": "scripts/xlsx-dump.py",
+        "role": "dump every tab of a research xlsx to JSON (inputs of the build scripts)"
       }
     ]
   },
@@ -160,7 +188,13 @@
       "store",
       "place",
       "view3d",
-      "cam"
+      "cam",
+      "chains",
+      "rq",
+      "chain",
+      "company",
+      "outlet",
+      "land"
     ],
     "rowScopes": {
       "scopeRows": "filters only",
@@ -189,7 +223,12 @@
       "crumb-area",
       "crumb-venue",
       "crumb-expand",
-      "toggle-3d"
+      "toggle-3d",
+      "open-chains",
+      "select-chain",
+      "select-company",
+      "select-outlet",
+      "select-land"
     ]
   },
   "tasks": [
@@ -414,6 +453,43 @@
         "tests/building-join.test.js"
       ],
       "status": "done"
+    },
+    {
+      "id": "P12",
+      "title": "0.3: two sheets into one snapshot, national chain register views, Land join check and host view, LOD > 1 building parts (owner 2026-10-28)",
+      "dependsOn": [
+        "P11"
+      ],
+      "acceptanceCriteria": [
+        "AC28",
+        "AC29",
+        "AC30",
+        "AC31"
+      ],
+      "files": [
+        "scripts/build-data.py",
+        "scripts/build-chains.py",
+        "scripts/build-land.py",
+        "scripts/xlsx-dump.py",
+        "data/restaurants.json",
+        "data/chains.json",
+        "data/land.json",
+        "data/land-buildings.geojson",
+        "data/venue-buildings.geojson",
+        "js/app.js",
+        "js/register.js",
+        "js/register-layer.js",
+        "js/register-panel.js",
+        "js/land.js",
+        "js/buildings.js",
+        "js/panel.js",
+        "js/model.js",
+        "index.html",
+        "styles.css",
+        "tests/register.test.js",
+        "docs/LAND_JOIN_CHECK.md"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -605,6 +681,34 @@
       "expected": "with an area open (3D or plan, any zoom) a click on the next แขวง/ตำบล — or its label, shown for every frame on screen — moves there in one animation; a click on a quiet context dot moves to its area (no store opens); a click inside the selected area changes nothing",
       "verificationType": "harness + live",
       "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC28",
+      "scenario": "Snapshot from two sheets",
+      "expected": "70,214 rows = Sheet 1 68,980 + 1,234 moved to the chain register, each once; moved rows flagged (register 1/2) and shown on the store panel; every 0.2.1 count unchanged except the documented sheet-link changes",
+      "verificationType": "unit (tests/data.test.js, tests/register.test.js)",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC29",
+      "scenario": "Chain register views",
+      "expected": "ร้านเครือ · ทั่วประเทศ switch opens chains → chain → company → outlet with dots for outlets with a point; snapshot frames, labels, context dots, charts and table hidden; every view says the unit is not added to the restaurant counts; search finds brand names first, then outlet names; deep links ?chains=1&rq=…, ?chain, ?company, ?outlet restore the view",
+      "verificationType": "harness + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC30",
+      "scenario": "Land host view",
+      "expected": "a Land host opens at venue level (its building in the data colour, x-ray, eye camera), with in-vs-around food types, register outlets in the building, co-hosts and provenance; wording จุดตกในอาคาร / ติดขอบอาคาร; ?land=… restores it",
+      "verificationType": "harness + live",
+      "result": "see VERIFICATION.md"
+    },
+    {
+      "id": "AC31",
+      "scenario": "LOD > 1",
+      "expected": "registry building parts (Shopping Center release / Hotel 15_BUILDING_MASS) drawn instead of a single block (Siam Paragon 7 parts, centralwOrld 15, MBK Center 2 also in venue mode); footprint as outline; heights labelled as source values",
+      "verificationType": "unit + harness + live",
+      "result": "see VERIFICATION.md"
     }
   ],
   "developerWorkflow": [
@@ -701,6 +805,24 @@
       "title": "Verify name-derived places (RX-…) and spelling variants of venue names (e.g. เกตเวย์ / เกทเวย์), then promote confirmed places and aliases into the venue sheet with evidence",
       "ownerRole": "research",
       "status": "backlog"
+    },
+    {
+      "id": "N15",
+      "title": "Land fallback building like the Shopping Center site: OpenFreeMap building at the host pin (incl. OSM building:parts) instead of the V4 footprint, with the same counts",
+      "ownerRole": "frontend + data",
+      "priority": "P2"
+    },
+    {
+      "id": "N16",
+      "title": "Industrial estates: run the inside vs around comparison once a boundary, its date and rights are accepted (registry link DL-2669875b0346b95e63be)",
+      "ownerRole": "data research",
+      "priority": "P2"
+    },
+    {
+      "id": "N17",
+      "title": "Review the 18 name links whose points fall in another Land building (docs/land-join-check.json → nameLinkReview)",
+      "ownerRole": "data research",
+      "priority": "P3"
     }
   ]
 }

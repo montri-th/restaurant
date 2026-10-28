@@ -12,9 +12,10 @@
     "schemaVersion": {
       "enum": [
         "1.3.0",
-        "1.4.0"
+        "1.4.0",
+        "1.5.0"
       ],
-      "description": "1.4.0 adds coverageContract, metricContract and categoricalCueContract to the product brief"
+      "description": "1.4.0 adds coverageContract, metricContract and categoricalCueContract to the product brief; 1.5.0 adds registerContract, landJoinContract and lodContract (release 0.3)"
     },
     "documentType": {
       "enum": [

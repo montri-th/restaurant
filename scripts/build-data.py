@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Build the demo data files from the research sheet of record and verified logo files.
+"""Build the demo data files from the research sheets of record and verified logo files.
 
 Inputs (internal, never committed):
-  --sheet          xlsx export of “CityMETER Restaurants Thailand — Source Audit & Refresh Master 2026-10-22”
-                   (tabs 02_STORES, 01_BRANDS, 07_VENUES, 00_README, 12_SOURCE_CATALOG)
+  --sheet          JSON dump (scripts/xlsx-dump.py) of “CityMETER Restaurants Thailand — Master” (Sheet 1;
+                   tabs 02_STORES, 01_BRANDS, 07_VENUES, 00_README, 12_SOURCE_CATALOG). An .xlsx path still works.
+  --chain-sheet    JSON dump of “CityMETER Chain Restaurants Thailand — Research Master” (Sheet 2): tab
+                   16_MASTER_OBSERVATIONS holds the 1,234 snapshot observations moved there on 2026-10-25 with every
+                   Sheet 1 column prefixed master_. Snapshot = 70,214 = Sheet 1 68,980 + 1,234 moved (README rule:
+                   the two tables are never counted as different restaurants).
   --logo-manifest  directory of the portable logo manifest (brand-logos.json, venue-logos.json)
   --brand-files    directory with the approved brand logo files (Restaurants_Brand_Logos_Web)
   --venue-files    directory with the approved venue logo files (Restaurants_Venue_Logos_Web)
@@ -274,6 +278,14 @@ def norm(value):
     return ' '.join(str(value or '').replace('​', '').lower().split())
 
 def read_tab(wb, name, columns=None):
+    """A tab as a list of dicts. `wb` is an openpyxl workbook or a directory of JSON dumps (scripts/xlsx-dump.py)."""
+    if isinstance(wb, str):
+        rows = json.load(open(os.path.join(wb, name + '.json'), encoding='utf-8'))
+        header = list(rows[0].keys()) if rows else []
+        missing = [c for c in (columns or []) if c not in header]
+        if missing:
+            sys.exit(f'{name}: missing columns {missing}')
+        return [{c: r.get(c) for c in (columns or header)} for r in rows]
     ws = wb[name]
     it = ws.iter_rows(values_only=True)
     header = [str(h) if h is not None else '' for h in next(it)]
@@ -288,6 +300,12 @@ def read_tab(wb, name, columns=None):
             continue
         out.append({c: r[idx[c]] for c in want})
     return out
+
+def open_book(path):
+    return path if os.path.isdir(path) else openpyxl.load_workbook(path, read_only=True, data_only=True)
+
+def blank(v):
+    return None if v is None or str(v).strip() in ('', 'None', 'nan') else v
 
 def num(v):
     if v is None or v == '':
@@ -359,10 +377,15 @@ def image_info(path, theme_support):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--sheet', required=True)
+    ap.add_argument('--chain-sheet', required=True)
     ap.add_argument('--logo-manifest', required=True)
     ap.add_argument('--brand-files', required=True)
     ap.add_argument('--venue-files', required=True)
     ap.add_argument('--host-buildings', required=True)
+    # Owner rule 2026-10-28 15:24: building parts (LOD > 1) win. The Shopping Center release's host geometry for the
+    # venue the sheet links by CityMETER uuid (via the shopping registry's 01_VENUES citymeter_venue_id → venue_id).
+    ap.add_argument('--lod-buildings', required=False)
+    ap.add_argument('--shop-registry', required=False)
     ap.add_argument('--areas', required=True)
     ap.add_argument('--out', required=True)
     a = ap.parse_args()
@@ -372,13 +395,34 @@ def main():
     area_index = {c: i for i, c in enumerate(area_codes)}
     area_uuid = {f['properties']['uuid']: f['properties']['id'] for f in areas['features']}
 
-    wb = openpyxl.load_workbook(a.sheet, read_only=True, data_only=True)
+    wb = open_book(a.sheet)
     readme = {r['หัวข้อ']: r['รายละเอียด'] for r in read_tab(wb, '00_README')}
-    stores = read_tab(wb, '02_STORES', ['snapshot_observation_id', 'store_name', 'latitude', 'longitude', 'primary_type',
+    store_cols = ['snapshot_observation_id', 'store_name', 'latitude', 'longitude', 'primary_type',
         'start_price_thb', 'end_price_thb', 'price_bucket', 'rating', 'rating_count', 'subdistrict_code', 'subdistrict_id',
         'province_code', 'brand_candidate_id', 'brand_link_status', 'brand_identity_review_required', 'venue_candidate_id',
         'venue_link_status', 'venue_candidate_row_role', 'source_url', 'operating_status', 'geometry_role',
-        'coordinate_grid_m_webmercator', 'retrieved_at_utc', 'checked_on', 'snapshot_sha256'])
+        'coordinate_grid_m_webmercator', 'retrieved_at_utc', 'checked_on', 'snapshot_sha256']
+    stores = read_tab(wb, '02_STORES', store_cols)
+    for r in stores:
+        for k in store_cols:
+            r[k] = blank(r[k])
+    sheet1_rows = len(stores)
+    # The chain-portfolio observations moved to Sheet 2 on 2026-10-25 (same snapshot ids, columns prefixed master_).
+    moved_tab = read_tab(open_book(a.chain_sheet), '16_MASTER_OBSERVATIONS')
+    register_status = {}
+    for m in moved_tab:
+        r = {k: blank(m.get('master_' + k)) for k in store_cols}
+        r['snapshot_observation_id'] = m['snapshot_observation_id']
+        r['_moved'] = True
+        try:
+            r['_register_outlets'] = [x for x in json.loads(m.get('national_target_ids') or '[]') if isinstance(x, str)]
+        except (TypeError, ValueError):
+            r['_register_outlets'] = []
+        register_status[m['snapshot_observation_id']] = m.get('identity_evidence_class') or ''
+        stores.append(r)
+    for r in stores:
+        if str(r.get('brand_identity_review_required')).upper() not in ('TRUE', 'FALSE'):
+            r['brand_identity_review_required'] = 'FALSE'
     brands_tab = read_tab(wb, '01_BRANDS')
     venues_tab = read_tab(wb, '07_VENUES')
     catalog = read_tab(wb, '12_SOURCE_CATALOG')
@@ -419,6 +463,7 @@ def main():
     if len({m.group(1)[:KEY_HEX] + m.group(2) for m in fingerprints}) != len(stores):
         sys.exit('row key prefix is not unique')
     ordinals, brand_col, venue_col, venue_entity, venue_match = {}, {}, {}, [], {}
+    register_col, register_outlets = {}, {}
     status_values = collections.Counter(); geometry_roles = collections.Counter(); grids = set(); retrieved = set(); checked = set()
     tile_mismatch = 0
     rows_sorted = sorted(stores, key=lambda r: (str(r['subdistrict_code']), r['snapshot_observation_id']))
@@ -456,6 +501,13 @@ def main():
         cols['area'].append(area_index[code])
         if r['brand_candidate_id']:
             brand_col[i] = b_index[r['brand_candidate_id']]
+        if r.get('_moved'):
+            # 1 = moved to the chain register, held for brand/branch review (held_chain_review);
+            # 2 = moved with a recorded correspondence (new_high_confidence_candidate / prior_supported_crosswalk — 55 rows).
+            cls = register_status.get(r['snapshot_observation_id'], '')
+            register_col[i] = 1 if cls == 'held_chain_review' or not cls else 2
+            if r.get('_register_outlets'):
+                register_outlets[i] = r['_register_outlets']
         if r['venue_candidate_id']:
             venue_col[i] = v_index[r['venue_candidate_id']]
             if r.get('_venue_match'):
@@ -513,12 +565,20 @@ def main():
         b_assets[asset['key']] = asset
         b_links[bid] = asset['key']
     brand_records = []
+    def national_ids(b):
+        try:
+            v = json.loads(b.get('national_brand_ids') or '[]')
+            return [x for x in v if isinstance(x, str)]
+        except (TypeError, ValueError):
+            return []
     for bid in brand_ids:
         b = brands_by_id.get(bid, {})
         brand_records.append({'id': bid, 'name': b.get('brand_name') or bid, 'rows': brand_rows[bid],
                               'logo': b_links.get(bid, ''), 'source': public_url(b.get('source_url')),
                               'link': b.get('brand_link_status') or '', 'hold': bid in holds,
-                              'holdReason': (b.get('identity_review_reason') or '') if bid in holds else ''})
+                              'holdReason': (b.get('identity_review_reason') or '') if bid in holds else '',
+                              # Register brand ids the sheet itself links this name candidate to (01_BRANDS.national_brand_ids).
+                              'national': national_ids(b)})
 
     venues_by_id = {v['venue_candidate_id']: v for v in venues_tab}
     v_assets, v_links, v_issues = {}, {}, []
@@ -541,7 +601,9 @@ def main():
                               'typeTh': VENUE_TYPE_TH.get(v.get('venue_type'), 'สถานที่'), 'rows': venue_rows[vid],
                               'logo': key, 'role': role or (v.get('logo_role') or ''), 'roleTh': VENUE_ROLE_TH.get(role or v.get('logo_role'), ''),
                               'link': v.get('host_link_status') or '',
-                              'match': 'auto' if str(v.get('venue_type') or '').startswith('name_suffix_') else 'sheet'})
+                              'match': 'auto' if str(v.get('venue_type') or '').startswith('name_suffix_') else 'sheet',
+                              # CityMETER shopping-centre uuid the sheet records for this venue (joins the Land registry's citymeter_venue_id).
+                              **({'uuid': str(v.get('citymeter_shopping_center_id'))} if re.match(r'^[0-9a-f]{8}-[0-9a-f]{4}-', str(v.get('citymeter_shopping_center_id') or '')) else {})})
 
     # ---------- host buildings (exact name match with the Luxury Brands host set) ----------
     hb = json.load(open(a.host_buildings, encoding='utf-8'))
@@ -567,6 +629,36 @@ def main():
         keep['venue_ids'] = matched
         keep['venue_join'] = 'exact normalized name/alias match between this sheet (07_VENUES) and the Luxury Brands host set'
         host_features.append({'type': 'Feature', 'id': f.get('id', p.get('host_id')), 'geometry': f['geometry'], 'properties': keep})
+    # ---------- more detailed host geometry by id (LOD > 1 wins over a name-matched footprint) ----------
+    lod_venues = []
+    if a.lod_buildings and a.shop_registry:
+        shop = json.load(open(os.path.join(a.shop_registry, '01_VENUES.json'), encoding='utf-8'))
+        sc_by_uuid = {str(r.get('citymeter_venue_id')): str(r.get('venue_id')) for r in shop if r.get('citymeter_venue_id') and r.get('venue_id')}
+        lod = json.load(open(a.lod_buildings, encoding='utf-8'))
+        by_sc = collections.defaultdict(list)
+        for f in lod['features']:
+            for sid in f['properties'].get('venue_ids') or []:
+                by_sc[sid].append(f)
+        is_part = lambda f: f['properties'].get('geometry_role') == 'host_building_part_not_shop_unit'
+        for rec in venue_records:
+            sid = sc_by_uuid.get(rec.get('uuid', ''))
+            feats = by_sc.get(sid, []) if sid else []
+            if not any(is_part(f) for f in feats):
+                continue  # only building parts (LOD > 1) replace what the venue has
+            mine = [f for f in host_features if rec['id'] in f['properties']['venue_ids']]
+            if sum(map(is_part, mine)) >= sum(map(is_part, feats)):
+                continue  # already as detailed (same research geometry)
+            for f in mine:
+                f['properties']['venue_ids'] = [v for v in f['properties']['venue_ids'] if v != rec['id']]
+            host_features = [f for f in host_features if f['properties']['venue_ids']]
+            for f in feats:
+                keep = {k: v for k, v in f['properties'].items() if k not in ('venue_ids', 'venue_names')}
+                keep['venue_ids'] = [rec['id']]
+                keep['venue_names'] = [rec['name']]
+                keep['venue_join'] = 'CityMETER venue uuid (this sheet 07_VENUES.citymeter_shopping_center_id) = Shopping Center registry citymeter_venue_id → venue_id; geometry from the Shopping Center release (LOD > 1 parts)'
+                host_features.append({'type': 'Feature', 'id': f.get('id', keep.get('host_id')), 'geometry': f['geometry'], 'properties': keep})
+            lod_venues.append({'venue': rec['id'], 'name': rec['name'], 'scVenue': sid, 'parts': sum(map(is_part, feats))})
+        print('LOD > 1 host geometry by uuid', lod_venues)
     hosted = sorted({vid for f in host_features for vid in f['properties']['venue_ids']})
     for rec in venue_records:
         rec['host'] = rec['id'] in hosted
@@ -578,12 +670,15 @@ def main():
     asof = readme.get('วันที่ดึงและตรวจ source…', readme.get('วันที่ดึงและตรวจ source'))
     source_row = next((c for c in catalog if c.get('source_key') == 'restaurant_public_snapshot'), {})
     meta = {
-        'schema': 'citymeter-restaurants-rows-1',
+        'schema': 'citymeter-restaurants-rows-2',
         'dataset': 'CityMETER Restaurants — public overlay snapshot with research enrichment',
         'asOf': '2026-10-22',
         'retrievedOn': sorted(retrieved)[0] if retrieved else '',
         'checkedOn': sorted(checked)[-1] if checked else '',
-        'sourceOfRecord': 'Research sheet “CityMETER Restaurants Thailand — Source Audit & Refresh Master 2026-10-22” (internal; tabs 02_STORES, 01_BRANDS, 07_VENUES)',
+        'sourceOfRecord': 'Research sheets “CityMETER Restaurants Thailand — Master” (internal; 02_STORES, 01_BRANDS, 07_VENUES) and “CityMETER Chain Restaurants Thailand — Research Master” (internal; 16_MASTER_OBSERVATIONS: the 1,234 snapshot rows moved there on 2026-10-25)',
+        'rowSources': {'sheet1': sheet1_rows, 'movedToChainRegister': len(rows_sorted) - sheet1_rows,
+                       'rule': 'snapshot = Sheet 1 rows + the rows moved to the chain register; one snapshot_observation_id = one row, never counted twice'},
+        'registerRule': 'register: 1 = row moved to the chain register and held for brand/branch review; 2 = moved with a recorded correspondence; registerOutlets = outlet_ids the register lists as possible targets (candidates unless register = 2)',
         'sourceApi': 'https://landometer.com/api/v2/citymeter-v3/restaurant',
         'sourcePage': 'https://landometer.com/v3/citymeter?d=restaurant',
         'sourceTable': 'master.restaurant_place (public CityMETER Restaurants API)',
@@ -606,7 +701,8 @@ def main():
             'groups': [{'id': g[0], 'th': g[1], 'en': g[2]} for g in GROUPS],
             'types': types, 'typeGroup': type_group, 'areas': area_codes,
             'brands': brand_records, 'venues': venue_records,
-            'cols': cols, 'brand': pairs(brand_col), 'venue': pairs(venue_col), 'venueEntity': venue_entity, 'venueMatch': pairs(venue_match)}
+            'cols': cols, 'brand': pairs(brand_col), 'venue': pairs(venue_col), 'venueEntity': venue_entity, 'venueMatch': pairs(venue_match),
+            'register': pairs(register_col), 'registerOutlets': pairs(register_outlets)}
     os.makedirs(os.path.join(a.out, 'data'), exist_ok=True)
     def write(name, obj):
         path = os.path.join(a.out, 'data', name)
@@ -625,7 +721,8 @@ def main():
                                'assets': sorted(v_assets.values(), key=lambda x: x['key']),
                                'venues': [{'id': v, 'key': k, 'role': r} for v, (k, r) in sorted(v_links.items())]})
     write('venue-buildings.geojson', {'type': 'FeatureCollection', 'metadata': {**{k: hb.get('metadata', {}).get(k) for k in ('geometry_license', 'attribution', 'attribution_url', 'fallback_height_m')},
-        'source': 'Luxury Brands release 0.5 host buildings (OpenStreetMap footprints, CityMETER building parts)', 'join': 'exact normalized venue name/alias', 'venues': len(hosted), 'features': len(host_features)},
+        'source': 'Luxury Brands release 0.5 host buildings (OpenStreetMap footprints, CityMETER building parts)' + (' + Shopping Center release host geometry with building parts (LOD > 1) for ' + str(len(lod_venues)) + ' venue(s) linked by CityMETER uuid' if lod_venues else ''),
+        'join': 'exact normalized venue name/alias; building parts (LOD > 1) by CityMETER venue uuid win (owner 2026-10-28)', 'lodVenues': lod_venues, 'venues': len(hosted), 'features': len(host_features)},
         'features': host_features})
     print('brands', len(brand_records), 'logos', len(b_links), 'issues', len(b_issues), '| venues', len(venue_records), 'logos', len(v_links), 'issues', len(v_issues), '| hosted venues', len(hosted))
 

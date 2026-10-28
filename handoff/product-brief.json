@@ -1,10 +1,10 @@
 {
   "$schema": "./handoff.schema.json",
-  "schemaVersion": "1.4.0",
+  "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.2.1",
-  "updatedOn": "2026-10-23",
+  "productVersion": "0.3.0",
+  "updatedOn": "2026-10-28",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
   "productName": "CityMETER · Restaurants",
@@ -39,10 +39,12 @@
     "เขต/อำเภอ profile",
     "store detail (rating, price, chain/venue candidates, display coordinate, source)",
     "venue with host building (x-ray, มุมสถาปนิก)",
+    "open a Land host (shopping centre, hotel, office) from a list, a store or an outlet: in-vs-around food types, register outlets in the building, the building at venue level (LOD2 parts when the registry has them)",
     "click a building in the focus (venue · store · ร้านที่จุดตกในอาคารนี้)",
     "click the next แขวง/ตำบล on the map (or its label) to move there",
     "compare areas (density · type · price) and table",
-    "open the same area in CityMETER production"
+    "open the same area in CityMETER production",
+    "switch to ร้านเครือ · ทั่วประเทศ: search a chain or company → brand (outlets by province, evidence, status) → outlet (source, checked date, coordinate source, Land building) — a separate unit, never added to the restaurant counts"
   ],
   "changesSince": {
     "base": "CityMETER Luxury Brands 0.5 (same camera, basemap, massing, venue x-ray, pictogram and handoff contracts)",
@@ -61,6 +63,13 @@
       "venue buildings drawn and clickable in the area view; every focus building is a click target",
       "area-hit at every zoom, neighbour labels at visible anchors, context dots no longer click targets",
       "no context re-send, massing shaped after the camera stops, pins follow during moves (smooth area-to-area moves)"
+    ],
+    "release030": [
+      "two sheets, one snapshot: Sheet 1 (68,980) + the 1,234 rows the owner moved to the chain register on 2026-10-25, each snapshot_observation_id once; moved rows carry register (1 held / 2 with correspondence) and registerOutlets",
+      "national chain register (data/chains.json): 26,819 outlet_ids, 756 brands with outlets, 311 company records; its own views and map dots; province by point-in-polygon or register text; แขวง/ตำบล only in the covered provinces",
+      "Land join (data/land.json, data/land-buildings.geojson): restaurant display points and register outlets in / at the edge of the buildings of Land hosts; in-vs-around compare; industrial estates not compared until boundaries are accepted",
+      "LOD > 1 wins (owner 2026-10-28): registry building parts drawn instead of one LOD1 block, for Land buildings (18) and for sheet venues linked by CityMETER uuid (MBK Center)",
+      "extras load after the first paint (or before it for a deep link into their views); failure leaves the snapshot unchanged"
     ]
   },
   "rowScopes": {
@@ -576,9 +585,14 @@
       "area",
       "venue",
       "building",
-      "store"
+      "store",
+      "land",
+      "chains",
+      "chain",
+      "company",
+      "outlet"
     ],
-    "navigation": "back stack (max 20); mode and id restored from URL (?district, ?area, ?place, ?store)",
+    "navigation": "back stack (max 20); mode and id restored from URL (?district, ?area, ?place, ?store, ?land, ?chains (+ ?rq), ?chain, ?company, ?outlet)",
     "actions": [
       "select-area",
       "select-district",
@@ -599,7 +613,12 @@
       "crumb-area",
       "crumb-venue",
       "crumb-expand",
-      "toggle-3d"
+      "toggle-3d",
+      "open-chains",
+      "select-chain",
+      "select-company",
+      "select-outlet",
+      "select-land"
     ],
     "models": {
       "overview": "js/profile-model.js#buildOverview + js/area-insight.js#summarizeAreaInsight",
@@ -607,15 +626,20 @@
       "area": "js/profile-model.js#buildAreaProfile",
       "venue": "js/profile-model.js#buildVenueProfile (+ spatial from js/building-join.js#venueNeighbours)",
       "building": "js/profile-model.js#buildBuildingProfile",
-      "store": "js/profile-model.js#buildStoreDetail (+ describeGeometry, describePrice)"
+      "store": "js/profile-model.js#buildStoreDetail (+ describeGeometry, describePrice)",
+      "land": "js/land.js#landProfile + aroundGeometry (10–100 m ring of the filtered rows)",
+      "chains": "js/register.js#searchRegister + outletMix",
+      "chain": "js/register.js#provincesIn + outletMix",
+      "company": "js/register.js#brandsIn + outletMix",
+      "outlet": "js/register.js (decoded outlet) + js/land.js#landOfOutlet"
     },
-    "renderer": "js/panel.js (pure HTML strings, delegated data-action clicks); provenance() ends every view: ชุดข้อมูล · แหล่ง · ดึงข้อมูล · ขอบเขต + popularity caveat"
+    "renderer": "js/panel.js (pure HTML strings, delegated data-action clicks); provenance() ends every view: ชุดข้อมูล · แหล่ง · ดึงข้อมูล · ขอบเขต + popularity caveat; register and Land views: js/register-panel.js (registerProvenance / landProvenance end every view: ชุดข้อมูล · แหล่ง · ตรวจ · ขอบเขต + the unit note)"
   },
   "data": {
     "observationGrain": "one observation of the public CityMETER Restaurants overlay (owning-tile view); never merged by name or coordinate",
     "core": "data/restaurants.json (columnar; meta, priceBuckets, groups, types, typeGroup, areas, brands, venues, cols, brand, venue, venueEntity, venueMatch)",
     "areas": "data/areas.geojson (581), data/districts.geojson (90), data/provinces.geojson (7), data/boundary-receipts.json (581 receipts)",
-    "hostBuildings": "data/venue-buildings.geojson (25 venues, 58 features)",
+    "hostBuildings": "data/venue-buildings.geojson (26 venues, 61 features; MBK Center parts by CityMETER uuid)",
     "logos": "data/brand-logos.json (155), data/venue-logos.json (157)",
     "snapshot": {
       "rows": 70214,
@@ -625,18 +649,69 @@
       "reviewsTotal": 6185635,
       "rowsWithRating": 53703,
       "rowsWithPrice": 19999,
-      "brands": 167,
+      "brands": 169,
       "brandHolds": 3,
       "venues": 1100,
       "sheetVenues": 1016,
       "nameDerivedVenues": 84,
-      "suffixRows": 11,
+      "suffixRows": 3,
       "autoRows": 252,
-      "hostedVenues": 25
+      "hostedVenues": 26,
+      "sheet1Rows": 68980,
+      "movedToChainRegister": 1234
     },
     "verification": "fresh reproduction of the public API matched all 70,214 rows on every compared field (handoff/VERIFICATION.md)",
     "coordinatePolicy": "MVT display positions (z10, extent 4096, 9.55 m) stored as grid integers; decoded with the research formula; screen-space displacement only; precision described, never upgraded",
-    "membershipPolicy": "source subdistrict code; no point-in-polygon on display positions; no name matching"
+    "membershipPolicy": "source subdistrict code; no point-in-polygon on display positions; no name matching",
+    "register": "data/chains.json (columnar; meta, provinces (77), areas, companies, brands, urls, cols id/name/brand/company/lat/lon/prov/provBy/area/ev/st/geo/floor/unit/addr/src/checked)",
+    "land": "data/land.json (meta, hosts, snapshot [[key, building, rel, d]], chains [[outlet_id, building, rel, d]]) + data/land-buildings.geojson (land_host_building outline/LOD1 block + land_host_building_part LOD2 parts)",
+    "registerSnapshot": {
+      "outlets": 26819,
+      "brandsWithOutlets": 756,
+      "brandProfiles": 1049,
+      "companyRecords": 311,
+      "withPoint": 16728,
+      "inCoveredSubdistricts": 7630,
+      "provinceByPoint": 16720,
+      "provinceByText": 6858,
+      "noProvince": 3241,
+      "evidence": {
+        "primary": 20165,
+        "secondary": 4236,
+        "cart": 2418
+      },
+      "status": {
+        "listed": 21519,
+        "pending": 5154,
+        "temporary": 102,
+        "closed": 44
+      },
+      "checked": "2026-10-25/2026-10-28"
+    },
+    "landSnapshot": {
+      "hostsInCoveredProvinces": {
+        "shopping": 3262,
+        "hotel": 2266,
+        "office": 378
+      },
+      "hostsPublished": 1478,
+      "buildings": 1399,
+      "features": 1492,
+      "lod2Buildings": 18,
+      "lod2Parts": 93,
+      "snapshotPoints": {
+        "in": 1882,
+        "edge": 932,
+        "nested": 100
+      },
+      "registerPoints": {
+        "in": 1741,
+        "edge": 389,
+        "nested": 182
+      },
+      "checkedOn": "2026-10-28",
+      "report": "docs/LAND_JOIN_CHECK.md + docs/land-join-check.json"
+    }
   },
   "visualSystem": {
     "release": "LDS 0.9.7",
@@ -775,6 +850,30 @@
     {
       "id": "INV26",
       "rule": "A selection never re-sends the context points or shapes massing during a camera move; pins only follow the map while it moves"
+    },
+    {
+      "id": "INV27",
+      "rule": "The snapshot is Sheet 1 + the rows moved to the chain register, each snapshot_observation_id once (70,214); a moved row keeps its place in every count"
+    },
+    {
+      "id": "INV28",
+      "rule": "Register outlets are another unit: never added to, subtracted from or ranked with snapshot rows; every register view says so"
+    },
+    {
+      "id": "INV29",
+      "rule": "Register province and แขวง/ตำบล say how they were derived (point / text / unknown); an outlet without a selected coordinate has no point"
+    },
+    {
+      "id": "INV30",
+      "rule": "Land relations are display-time candidates (in / edge ≤ 10 m); wording จุดตกในอาคาร / ติดขอบอาคาร, never ตั้งอยู่ใน; they change no count"
+    },
+    {
+      "id": "INV31",
+      "rule": "Registry building parts (LOD > 1) win over a single LOD1 block; one OSM footprint is one building across registries"
+    },
+    {
+      "id": "INV32",
+      "rule": "Industrial-estate candidate polygons are neither published nor used for inside counts until accepted"
     }
   ],
   "chartContracts": [
@@ -883,6 +982,47 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261023-r3 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)"
+    "cacheTag": "?v=20261028-r1 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
+    "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
+  },
+  "registerContract": {
+    "unit": "one outlet_id per listed branch / point of sale with qualifying evidence (incl. delivery kitchens and carts with their own status) — not a field count of open shops; never added to, subtracted from or ranked with the snapshot",
+    "views": "chains (directory + search) · chain (brand) · company · outlet; the snapshot frames, labels, context dots, charts tray and table step aside; the register search replaces the snapshot filters (data-set switch)",
+    "map": "js/register-layer.js: one circle per outlet with a selected coordinate (LDS map data role), selected outlet stroke; logos as buttons from zoom 15 (≤ 60); never clustered",
+    "derivations": {
+      "province": "point-in-polygon on the 77 production provinces (provBy point) → register province text (provBy text) → unknown, listed apart",
+      "area": "point-in-polygon on the covered subdistricts (display only)"
+    },
+    "links": "snapshot brand → register brands by 01_BRANDS.national_brand_ids; moved row → registerOutlets ids; names are search keys only",
+    "wording": [
+      "สาขาในทะเบียน",
+      "แหล่งข้อมูลระบุปิด… (ยังไม่ยืนยัน)",
+      "ความครบของทะเบียน",
+      "บทบาทในทะเบียนไม่ได้แปลว่าเป็นผู้ประกอบการของทุกสาขา"
+    ]
+  },
+  "landJoinContract": {
+    "hosts": "Land registries R11: Shopping Centers & Retail Venues, Hotel, Office (points in the covered subdistricts); Industrial Estates not compared until boundaries are accepted (DL-2669875b0346b95e63be)",
+    "building": "registry reviewed geometry (Shopping Center release by venue_id; Hotel/Office 15_BUILDING_MASS) else CityMETER production V4 footprint containing the host point (smallest) or within 3 m; one OSM footprint = one building whichever registry names it",
+    "relations": {
+      "in": "inside the outline",
+      "edge": "≤ 10 m from it",
+      "near": "≤ 100 m (report only)",
+      "nested": "a point inside several nested buildings relates to each (smallest first)"
+    },
+    "panel": "in-vs-around food types (in/edge vs 10–100 m ring of the filtered rows), register outlets in the building, co-hosts of the same building; dataset · source · date · boundary",
+    "wording": "จุดตกในอาคาร / ติดขอบอาคาร / รอบอาคาร — never ตั้งอยู่ใน, tenancy or floor; no count changes",
+    "registryLinks": [
+      "DL-fdc869a77aca940153dd",
+      "DL-8e308daca1bf455d9375",
+      "DL-845a42d1d4c939aa2590",
+      "DL-2669875b0346b95e63be"
+    ]
+  },
+  "lodContract": {
+    "decision": "owner 2026-10-28 15:24: “รูปทรงอาคารถ้ามี LOD > 1 เช่นใน shoppingcenter ให้ใช้ที่ละเอียดกว่าแทน”",
+    "land": "registry building parts (base/top) drawn as extrusions, the footprint as an outline; the join uses the union of footprint and parts",
+    "venues": "sheet venue uuid = shopping registry citymeter_venue_id → Shopping Center release parts replace a name-matched footprint when they have more parts (scripts/build-data.py --lod-buildings --shop-registry)",
+    "heights": "source values (CityMETER parts / OSM), never survey claims"
   }
 }

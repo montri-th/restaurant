@@ -1,6 +1,8 @@
-# Implementation Plan — CityMETER · Restaurants 0.2
+# Implementation Plan — CityMETER · Restaurants 0.3
 
-รุ่น 0.2.1 · 23 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.4.0) · อ่าน [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) ก่อน
+รุ่น 0.3.0 · 28 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
+
+> **รุ่น 0.3 (P12, AC28–AC31):** โมดูลใหม่ `js/register.js` · `js/register-layer.js` · `js/register-panel.js` · `js/land.js` และสคริปต์ `scripts/build-chains.py` · `scripts/build-land.py` · `scripts/xlsx-dump.py`; ข้อมูลใหม่ `data/chains.json` · `data/land.json` · `data/land-buildings.geojson` โหลดหลังภาพแรก (`loadExtras` ใน `js/app.js`); panel modes เพิ่ม land · chains · chain · company · outlet; URL `?chains=1&rq=…` `?chain` `?company` `?outlet` `?land`; ลำดับสร้างข้อมูล build-data → build-chains → build-land (DATA_METHOD §11); backlog ใหม่ N15–N17 · อ่าน [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) ก่อน
 
 ## 1. สถาปัตยกรรม
 

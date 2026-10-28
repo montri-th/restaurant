@@ -6,7 +6,7 @@ import {hostedVenueIds} from '../js/buildings.js';
 
 test('restaurants.json decodes to the 70,214 observations of the snapshot, nothing dropped, ids unique', () => {
   const {raw, data} = load();
-  assert.equal(raw.meta.schema, 'citymeter-restaurants-rows-1');
+  assert.equal(raw.meta.schema, 'citymeter-restaurants-rows-2');
   assert.equal(raw.meta.rows, 70214);
   assert.equal(raw.cols.key.length, 70214);
   assert.equal(data.rows.length, 70214);
@@ -81,7 +81,17 @@ test('brand and venue links stay name-based candidates; holds carry no logo; hos
   for (const h of holds) assert.ok(!linked.has(h.id));
   const hosted = hostedVenueIds(readJSON('data/venue-buildings.geojson'));
   assert.deepEqual([...hosted].sort(), data.venues.filter(v => v.host).map(v => v.id).sort());
-  assert.equal(hosted.size, 25);
+  assert.equal(hosted.size, 26);
+  // Building parts (LOD > 1) by CityMETER venue uuid win over a name match or no geometry (owner 2026-10-28): MBK Center.
+  const geo = readJSON('data/venue-buildings.geojson');
+  assert.deepEqual(geo.metadata.lodVenues.map(v => v.name), ['MBK Center']);
+  const mbk = data.venues.find(v => v.name === 'MBK Center');
+  const mbkFeatures = geo.features.filter(f => f.properties.venue_ids.includes(mbk.id));
+  assert.ok(mbk.host && mbkFeatures.some(f => f.properties.geometry_role === 'host_building_part_not_shop_unit'));
+  assert.ok(mbkFeatures.every(f => /uuid/.test(f.properties.venue_join)), 'joined by id, never by name');
+  for (const f of geo.features.filter(f => f.properties.geometry_role === 'host_building_part_not_shop_unit')) {
+    assert.ok(f.properties.display_height_m > f.properties.display_base_m, `${f.properties.host_id}: a part has its own base and top`);
+  }
   const counts = new Map();
   for (const r of data.rows) if (r.venue) counts.set(r.venue.id, (counts.get(r.venue.id) || 0) + 1);
   for (const v of data.venues) assert.equal(counts.get(v.id) || 0, v.rows, `${v.name} row count`);
@@ -124,16 +134,23 @@ test('name-ending venues (owner decision 2026-10-23): sheet links first, then a 
   const {raw, data} = load();
   const s = raw.meta.venueSuffix;
   // Snapshot values (regression fixtures, never UI constants).
-  assert.deepEqual({suffixRows: s.suffixRows, autoRows: s.autoRows, autoVenues: s.autoVenues, radiusM: s.radiusM}, {suffixRows: 11, autoRows: 252, autoVenues: 84, radiusM: 200});
+  // 2026-10-28: the owner's sheet now links 8 of the 0.2.1 name-ending rows itself (sheet beats suffix), so 3 remain.
+  assert.deepEqual({suffixRows: s.suffixRows, autoRows: s.autoRows, autoVenues: s.autoVenues, radiusM: s.radiusM}, {suffixRows: 3, autoRows: 252, autoVenues: 84, radiusM: 200});
   const by = m => data.rows.filter(r => r.venueMatch === m);
   assert.equal(by('suffix').length, s.suffixRows);
   assert.equal(by('auto').length, s.autoRows);
   assert.ok(data.rows.every(r => (r.venue ? ['sheet', 'suffix', 'auto'].includes(r.venueMatch) : r.venueMatch === null)));
   // A sheet venue name at the end of the restaurant name (a branch/floor word may follow).
+  const siam = data.rows.find(r => r.name === 'รสดีเด็ด เจ้าเก่าสยามสแควร์');
+  assert.equal(siam.venue?.name, 'Siam Square');
+  assert.equal(siam.venueMatch, 'suffix');
+  const panya = data.rows.find(r => r.name === 'Shabu Shabu Nangnai (Panya Market Branch)');
+  assert.equal(panya?.venue?.name, 'Panya Market');
+  assert.equal(panya.venueMatch, 'suffix');
+  // A sheet link always wins over the name ending (the owner linked KFC Gateway Bangsue in the sheet on 2026-10-28).
   const kfc = data.rows.find(r => r.name === 'KFC Gateway Bangsue');
   assert.equal(kfc.venue?.name, 'Gateway Bangsue');
-  assert.equal(kfc.venueMatch, 'suffix');
-  assert.equal(data.rows.find(r => r.name === 'Shabu Shabu Nangnai (Panya Market Branch)')?.venue?.name, 'Panya Market');
+  assert.equal(kfc.venueMatch, 'sheet');
   // A place word after หน้า / Behind … names a neighbour, never a host.
   for (const name of ['ข้าวต้มลุงเล็ก หน้าโลตัสศรีนครินทร์', 'Por Prathip Ayutthaya Noodle - Behind Central Bangna']) {
     const r = data.rows.find(x => x.name === name);

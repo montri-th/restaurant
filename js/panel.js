@@ -142,7 +142,7 @@ function areaRanking(list, classify, {title = 'พื้นที่ที่ร
 /* ---------- Overview ---------- */
 
 /** focusMode: 'auto' (default top three) · 'explicit' (user-chosen) · 'none' (every area). */
-export function renderOverview({insight, summary, overview, focusMode = 'auto', classOf, provinces = [], meta = {}, coverage = null, province = ''}) {
+export function renderOverview({insight, summary, overview, focusMode = 'auto', classOf, provinces = [], meta = {}, coverage = null, province = '', extra = ''}) {
   const count = insight.areas.length;
   const w = words(insight.areas);
   const names = insight.areas.map(a => `<button type="button" class="link-button" data-action="select-area" data-id="${esc(a.id)}">${esc(a.name)}</button>`).join(' · ');
@@ -191,7 +191,7 @@ export function renderOverview({insight, summary, overview, focusMode = 'auto', 
     {title: eligible ? 'พื้นที่ที่ร้านแน่นที่สุด' : 'พื้นที่ที่มีร้านมากที่สุด', minRows: overview.ranking.minRows, byCount: !eligible,
       note: eligible ? `${num(overview.ranking.eligible.length)} พื้นที่ ≥ ${num(overview.ranking.minRows)} ร้าน · ร้าน/ตร.กม.` : `ไม่มีพื้นที่ใดถึง ${num(overview.ranking.minRows)} ร้าน · เรียงตามจำนวน`});
   const chains = overview.chains.length ? `<section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้านที่พบมากที่สุด')}<span class="hint">ชื่อร้านตรงกับเครือ</span></div>${chainChips(overview.chains)}</section>` : '';
-  return `${aha}${metrics}${provinceList}${rank}${chains}${provenance(meta, `${scope} (ขอบเขตแขวง/ตำบลของ CityMETER)`)}`;
+  return `${aha}${metrics}${provinceList}${rank}${chains}${extra}${provenance(meta, `${scope} (ขอบเขตแขวง/ตำบลของ CityMETER)`)}`;
 }
 
 const areaWordFor = province => (province === 'BKK' ? 'แขวง' : 'ตำบล');
@@ -217,7 +217,7 @@ function selectionNote(p, place) {
   return '';
 }
 
-export function renderDistrict(p, classOf, meta = {}) {
+export function renderDistrict(p, classOf, meta = {}, extra = '') {
   if (!p) return '';
   const d = p.district;
   const w = p.words;
@@ -234,18 +234,18 @@ export function renderDistrict(p, classOf, meta = {}) {
       <div class="detail-actions">${p.count ? '<button type="button" class="btn" data-action="open-table">ดูร้าน</button><button type="button" class="btn quiet" data-action="open-charts">เปรียบเทียบพื้นที่</button>' : ''}${link(productionLink({province: d.province, district: d.id}), 'ดูใน CityMETER', 'btn quiet source-link')}</div>
     </section>
 `;
-  if (!p.count) return `${head}${provenance(meta, `${place} ${provinceName(d.province)} (ขอบเขต CityMETER)`)}`;
+  if (!p.count) return `${head}${extra}${provenance(meta, `${place} ${provinceName(d.province)} (ขอบเขต CityMETER)`)}`;
   return `${head}    ${areaRanking(ranked, classOf, {title: `${w.area}ใน${w.district}นี้`, note: `${num(ranked.length)} ${w.area} · ร้าน/ตร.กม.`, limit: 40, minRows: p.minRows})}
     <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}<span class="hint">ร้าน</span></div>${groupBars(p.byGroup, p.count)}</section>
     <section class="panel-section"><div class="section-heading">${heading('plain', 'ระดับราคา')}<span class="hint">ร้านที่ระบุราคา</span></div>${priceBars(p.byPrice)}</section>
     <section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้าน')}<span class="hint">${num(p.chains.length)}</span></div>${chainChips(p.chains)}</section>
     ${p.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(p.venues.length)} แห่ง</span></div>${venueRows(p.venues)}</section>` : ''}
-    ${provenance(meta, `${w.district}${d.name} ${provinceName(d.province)} (ขอบเขต CityMETER)`)}`;
+    ${extra}${provenance(meta, `${w.district}${d.name} ${provinceName(d.province)} (ขอบเขต CityMETER)`)}`;
 }
 
 /* ---------- Area (แขวง/ตำบล) ---------- */
 
-export function renderArea(p, meta = {}) {
+export function renderArea(p, meta = {}, extra = '') {
   if (!p) return '';
   const a = p.area, w = p.words;
   const rankText = p.coverageState === 'no_data' ? 'ไม่มีข้อมูลจากแหล่งข้อมูล' : p.rank ? `อันดับความหนาแน่น ${num(p.rank)} จาก ${num(p.rankOf)}` : `น้อยกว่า ${num(p.minRows)} ร้าน · ไม่จัดอันดับ`;
@@ -260,13 +260,13 @@ export function renderArea(p, meta = {}) {
       <div class="detail-actions">${p.count ? '<button type="button" class="btn" data-action="open-table">ดูร้าน</button><button type="button" class="btn quiet" data-action="open-charts">เปรียบเทียบพื้นที่</button>' : ''}${link(productionLink({province: a.province, area: a.id}), 'ดูใน CityMETER', 'btn quiet source-link')}</div>
     </section>
 `;
-  if (!p.count) return `${head}${provenance(meta, `${place} ${w.district}${a.districtName} ${provinceName(a.province)} (ขอบเขต CityMETER)`)}`;
+  if (!p.count) return `${head}${extra}${provenance(meta, `${place} ${w.district}${a.districtName} ${provinceName(a.province)} (ขอบเขต CityMETER)`)}`;
   return `${head}    <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}<span class="hint">ร้าน</span></div>${groupBars(p.byGroup, p.count)}</section>
     <section class="panel-section"><div class="section-heading">${heading('plain', 'ระดับราคา')}<span class="hint">ร้านที่ระบุราคา</span></div>${priceBars(p.byPrice)}</section>
     ${p.topReviewed.length ? `<section class="panel-section"><div class="section-heading">${heading('exclusive', 'รีวิวมากที่สุด')}<span class="hint">${num(p.topReviewed.length)} ร้าน</span></div>${restaurantList(p.topReviewed)}</section>` : ''}
     <section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้านในพื้นที่')}<span class="hint">${num(p.chains.length)}</span></div>${chainChips(p.chains)}</section>
     ${p.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(p.venues.length)} แห่ง</span></div>${venueRows(p.venues)}</section>` : ''}
-    ${provenance(meta, `${w.area}${a.name} ${w.district}${a.districtName} ${provinceName(a.province)} (ขอบเขต CityMETER)`)}`;
+    ${extra}${provenance(meta, `${w.area}${a.name} ${w.district}${a.districtName} ${provinceName(a.province)} (ขอบเขต CityMETER)`)}`;
 }
 
 /* ---------- Venue ---------- */
@@ -278,7 +278,7 @@ function venueMatchNote(v) {
   return `นับจากชื่อร้านที่อ้างถึงสถานที่นี้ ไม่ได้ยืนยันว่าร้านตั้งอยู่ภายใน${suffix}`;
 }
 
-export function renderVenue(v, index, meta = {}) {
+export function renderVenue(v, index, meta = {}, extra = '') {
   if (!v) return '';
   const logo = getVenueLogo(v.venue);
   const sp = v.spatial;
@@ -297,12 +297,12 @@ export function renderVenue(v, index, meta = {}) {
       ${sp.count ? restaurantList(sp.others, {showArea: true, index}) : '<p class="hint">ไม่มีร้านอื่นตามตัวกรองนี้</p>'}
       <p class="hint">จุดของร้านเหล่านี้ (ละเอียดราว 9.55 ม.) ตกในอาคาร ${num(sp.buildings)} หลังเดียวกับร้านของสถานที่นี้ ${num(sp.own)} ร้าน แต่ชื่อไม่ได้อ้างถึงสถานที่ จึงไม่นับรวมด้านบน และไม่ได้ยืนยันว่าตั้งอยู่ในอาคาร${sp.count > sp.others.length ? ` · แสดง ${num(sp.others.length)} ร้านที่มีรีวิวมากที่สุด` : ''}</p></section>` : ''}
     <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}</div>${groupBars(v.byGroup, v.count)}</section>
-    ${provenance(meta, `ร้านที่ชื่ออ้างถึง ${v.venue.name}${v.provinces.length === 1 ? ` · ${provinceName(v.provinces[0])}` : ''}`)}`;
+    ${extra}${provenance(meta, `ร้านที่ชื่ออ้างถึง ${v.venue.name}${v.provinces.length === 1 ? ` · ${provinceName(v.provinces[0])}` : ''}`)}`;
 }
 
 /* ---------- Building (spatial join) ---------- */
 
-export function renderBuilding(b, meta = {}) {
+export function renderBuilding(b, meta = {}, extra = '') {
   if (!b) return '';
   const w = b.words;
   const area = b.area ? `${w.area}${b.area.name}` : '';
@@ -318,12 +318,12 @@ export function renderBuilding(b, meta = {}) {
       ${b.count > 40 ? `<p class="hint">แสดง ${num(40)} จาก ${num(b.count)} ร้าน (รีวิวมากก่อน) · ดูทั้งหมดในตาราง</p>` : ''}</section>
     ${b.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(b.venues.length)} แห่ง</span></div>${venueRows(b.venues)}</section>` : ''}
     <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}</div>${groupBars(b.byGroup, b.count)}</section>
-    ${provenance(meta, `จุดของร้านที่ตกในขอบอาคาร OpenStreetMap หนึ่งหลัง${area ? ` · ${area} (ขอบเขต CityMETER)` : ''}`)}`;
+    ${extra}${provenance(meta, `จุดของร้านที่ตกในขอบอาคาร OpenStreetMap หนึ่งหลัง${area ? ` · ${area} (ขอบเขต CityMETER)` : ''}`)}`;
 }
 
 /* ---------- Store ---------- */
 
-export function renderStore(d, meta = {}) {
+export function renderStore(d, meta = {}, {extraFacts = '', extra = ''} = {}) {
   if (!d) return '';
   const r = d.row, w = d.words;
   const blogo = getBrandLogo(r.brand);
@@ -346,7 +346,7 @@ export function renderStore(d, meta = {}) {
       <dl class="facts">
         <dt>คะแนน</dt><dd>${rating}</dd>
         <dt>ราคา</dt><dd>${price}</dd>
-        ${brand}${venue}${building}
+        ${brand}${venue}${building}${extraFacts}
         <dt>พื้นที่</dt><dd>${area}</dd>
         <dt>พิกัด</dt><dd><span class="data-number">${esc(coords)}</span><br><span class="hint" title="${esc(d.geometry.note)}">${esc(d.geometry.label)}${d.coLocated ? ` · ตำแหน่งเดียวกับอีก ${num(d.coLocated)} ร้าน` : ''}</span></dd>
         <dt>แหล่งข้อมูล</dt><dd>CityMETER Restaurants API สาธารณะ · ดึงข้อมูล ${esc(thaiDate(meta.retrievedOn || meta.asOf || ''))}<br><span class="hint data-number" title="รหัสสังเกตการณ์ในชุดข้อมูลนี้ (ย่อ)">รหัส R-${esc(r.id.split('-')[0])}…</span></dd>
@@ -357,7 +357,7 @@ export function renderStore(d, meta = {}) {
       ${d.sameBrand.rows.length ? restaurantList(d.sameBrand.rows, {showArea: true, index: meta.index}) : '<p class="hint">ไม่มีในตัวกรองนี้</p>'}
       <div class="detail-actions"><button type="button" class="btn quiet" data-action="filter-brand" data-value="${esc(r.brand.id)}">ดูเฉพาะเครือนี้</button></div></section>` : ''}
     ${d.sameArea.length ? `<section class="panel-section"><div class="section-heading">${heading('segment', `${d.group?.th || 'ร้าน'}อื่นในพื้นที่`)}</div>${restaurantList(d.sameArea)}</section>` : ''}
-    ${provenance(meta, d.area ? `${w.area}${d.area.name} ${provinceName(r.province)} (ขอบเขต CityMETER)` : provinceName(r.province))}`;
+    ${extra}${provenance(meta, d.area ? `${w.area}${d.area.name} ${provinceName(r.province)} (ขอบเขต CityMETER)` : provinceName(r.province))}`;
 }
 
 /* ---------- Active filter chips ---------- */

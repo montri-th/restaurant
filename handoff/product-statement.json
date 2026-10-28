@@ -1,10 +1,10 @@
 {
   "$schema": "./handoff.schema.json",
-  "schemaVersion": "1.4.0",
+  "schemaVersion": "1.5.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.2.1",
-  "updatedOn": "2026-10-23",
+  "productVersion": "0.3.0",
+  "updatedOn": "2026-10-28",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
   "evidenceLabels": {
@@ -136,7 +136,9 @@
   "primary_questions": [
     "ร้านอาหารแน่นที่สุดอยู่ตรงไหน",
     "พื้นที่นี้เป็นร้านแบบไหน ราคาระดับไหน",
-    "เครือ X อยู่พื้นที่ไหนบ้าง"
+    "เครือ X อยู่พื้นที่ไหนบ้าง",
+    "เครือไหนมีสาขาอยู่แถวนี้ และทั่วประเทศอยู่ที่ไหน",
+    "ในศูนย์/โรงแรม/อาคารสำนักงานนี้มีร้านแบบไหน ต่างจากรอบอาคารอย่างไร"
   ],
   "channel_readiness": {
     "search": {
@@ -214,12 +216,26 @@
       "owner": "OpenStreetMap contributors",
       "url_or_reference": "https://openfreemap.org · data/venue-buildings.geojson",
       "data_type": "open (ODbL 1.0)"
+    },
+    {
+      "name": "CityMETER Chain Restaurants Thailand — Research Master (national chain register)",
+      "owner": "Landometer · CityMETER research",
+      "url_or_reference": "internal research sheet (not published); data/chains.json",
+      "update_frequency": "ad hoc",
+      "license_or_permission": "internal research; per-outlet public source links"
+    },
+    {
+      "name": "Land registries (Shopping Centers & Retail Venues, Hotel, Office, Industrial Estates) + Shopping Center release building geometry + CityMETER production V4 footprints",
+      "owner": "Landometer · CityMETER",
+      "url_or_reference": "docs/LAND_JOIN_CHECK.md; data/land.json; data/land-buildings.geojson",
+      "update_frequency": "ad hoc",
+      "license_or_permission": "OSM ODbL for OSM-derived geometry; production footprints read-only"
     }
   ],
   "spatial_granularity": "display point → แขวง/ตำบล (analytical unit) → เขต/อำเภอ → จังหวัด (production code) → ประเทศ",
-  "temporal_coverage": "snapshot retrieved 2026-10-22; upstream collection date not exposed",
+  "temporal_coverage": "restaurant snapshot retrieved 2026-10-22 (sheets read 2026-10-28); chain register checked 2026-10-25 to 2026-10-28; Land join 2026-10-28; upstream collection date not exposed",
   "update_frequency": "ad hoc",
-  "last_updated": "2026-10-22",
+  "last_updated": "2026-10-28",
   "key_metrics": [
     "restaurants per km² per แขวง/ตำบล",
     "combined density of the three densest areas",
@@ -228,7 +244,10 @@
     "rows by food-type group",
     "rows by price bucket (priced rows)",
     "reviews (popularity proxy)",
-    "rating mean (rated rows)"
+    "rating mean (rated rows)",
+    "outlets in the chain register (separate unit)",
+    "restaurants whose points fall in / at the edge of a Land building",
+    "in-vs-around food types of a Land host"
   ],
   "visual_layers": [
     "choropleth",
@@ -283,7 +302,10 @@
     "primary type เดียว รวมสถานที่ไม่ใช่อาหาร 130 แถว",
     "ราคาไม่ระบุ 71.5%",
     "เครือ/สถานที่เป็น candidate จากชื่อ",
-    "ตัวหารเป็นพื้นที่ทั้งตำบล"
+    "ตัวหารเป็นพื้นที่ทั้งตำบล",
+    "ทะเบียนร้านเครือยังไม่ครบทุกสาขาและนับคนละหน่วย ไม่บวกกับจำนวนร้าน",
+    "“จุดตกในอาคาร” ไม่ใช่การยืนยันว่าร้านตั้งอยู่ในอาคาร",
+    "นิคมอุตสาหกรรมยังไม่เทียบจนกว่าขอบเขตผ่านการตรวจรับ"
   ],
   "methodology_note": "DATA_METHOD.md, docs/AREA_METHOD.md, docs/CHART_SELECTION.md",
   "example_use_cases": [
@@ -324,5 +346,5 @@
     }
   ],
   "owner_team": "Landometer · CityMETER",
-  "last_reviewed": "2026-10-23"
+  "last_reviewed": "2026-10-28"
 }

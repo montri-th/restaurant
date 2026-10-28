@@ -525,3 +525,44 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 /* Areas below the eligibility threshold are listed without a rank (density on a handful of rows is not a finding). */
 .rank-row.is-unranked .rank-name { font-weight: 400; color: var(--text-secondary); }
 .rank-row.is-unranked .rank-value { color: var(--text-metadata); }
+
+/* 8. Chain register and Land hosts (release 0.3) --------------------------- */
+/* Data-set switch: the snapshot (filters apply) or the national chain register (its own search). Two units,
+   never summed: the switch replaces the snapshot's filters while the register is shown. */
+.view-switch { display: inline-flex; margin-top: 10px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); overflow: hidden; max-width: 100%; }
+.view-switch button { border: 0; border-radius: 0; min-height: 36px; padding: 6px 12px; font-size: 12px; font-weight: 600; background: transparent; color: var(--text-secondary); white-space: nowrap; }
+.view-switch button + button { border-left: 1px solid var(--border-default); }
+.view-switch button[aria-pressed="true"] { background: var(--surface-alt); color: var(--text-primary); box-shadow: inset 0 -2px 0 var(--text-primary); }
+.view-switch button:disabled { opacity: .55; cursor: progress; }
+.view-switch button:focus-visible { outline: 2px solid var(--interaction-focus-ring); outline-offset: -2px; }
+.panel[data-dataset="register"] #filters, .panel[data-dataset="register"] #filter-chips { display: none; }
+.workspace.is-register #insights, .workspace.is-register #results { display: none; }
+.register-lede { font-size: 14px; line-height: 1.5; }
+.register-lede strong { font-size: 18px; font-weight: 400; }
+.register-search input { width: 100%; }
+/* Register bars share the register dots' data role (LDS map.activeLayer, same HEX in both themes). */
+.mix-fill.register-fill { background: var(--map-active-layer); }
+.register .metrics.compact, .register-brand .metrics.compact, .register-company .metrics.compact, .register-outlet .metrics.compact, .land-host .metrics.compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* In-building vs around-building food types (Land host): counts with the column share, cue + label per row. */
+/* The results table's rules (min-width 820 px, sticky nowrap headers) must not reach this small panel table. */
+.compare-table { width: 100%; min-width: 0; border-collapse: collapse; font-size: 12px; table-layout: auto; }
+.compare-table th, .compare-table td { position: static; padding: 6px 4px; border-bottom: 1px solid var(--border-hairline); text-align: right; vertical-align: middle; background: none; white-space: normal; z-index: auto; }
+.compare-table td small { display: inline; margin-top: 0; }
+.compare-table thead th { font-weight: 600; color: var(--text-metadata); font-size: 11px; }
+.compare-table th[scope="row"], .compare-table thead th:first-child { text-align: left; font-weight: 400; }
+.compare-table th[scope="row"] .cue-shape { margin-right: 6px; }
+.compare-table td small { color: var(--text-metadata); font-size: 11px; margin-left: 2px; }
+/* Map: one register dot = one listed outlet with a coordinate; logos from zoom 15 as buttons (identity only). */
+.legend-step .legend-register, .legend-register { display: inline-block; width: 10px; height: 10px; flex: 0 0 10px; border-radius: 50%; background: var(--map-active-layer); border: 1px solid var(--map-marker-halo); box-shadow: 0 0 0 1px var(--map-active-layer); }
+.map-panel.is-register .legend-step { flex-direction: row; gap: 6px; min-width: 0; }
+.map-panel:not(.has-register-dots) .legend-register-item { display: none; }
+.map-panel.is-register .legend-marks { display: none; }
+.map-panel.is-register.is-detail-zoom #legend-areas { display: flex; }
+.register-logo-pin { display: inline-flex; align-items: center; justify-content: center; padding: 2px; min-width: 0; min-height: 0; border: 1px solid var(--border-default); border-radius: 4px; background: var(--surface-card); box-shadow: 0 1px 2px rgba(0, 0, 0, .18); cursor: pointer; }
+.register-logo-pin .brand-logo { width: 40px; height: 20px; }
+.register-logo-pin.is-selected { border: 2px solid var(--map-selected-stroke); }
+.register-logo-pin:focus-visible { outline: 2px solid var(--interaction-focus-ring); outline-offset: 2px; }
+@media (max-width: 760px) and (orientation: portrait) {
+  .view-switch { margin-top: 6px; }
+  .view-switch button { min-height: 34px; padding: 5px 10px; }
+}

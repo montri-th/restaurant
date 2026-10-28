@@ -172,12 +172,14 @@ test('venue and store copy say how the name link was made; spatial results say �
   const tc = text(renderVenue(pc, index, meta));
   assert.ok(tc.includes('สถานที่จากชื่อร้าน') && tc.includes('ทุกจุดอยู่ในรัศมี 200 ม. จากจุดกลาง'), tc.slice(0, 400));
   // Sheet venue with rows found by their name ending.
-  const gw = data.venues.find(v => v.name === 'Gateway Bangsue');
-  const tg = text(renderVenue(buildVenueProfile(data.rows, gw, index, data.groups), index, meta));
-  assert.ok(tg.includes('3 ร้านจับจากชื่อที่ลงท้ายด้วยชื่อสถานที่'), tg.slice(0, 400));
+  const pm = data.venues.find(v => v.name === 'Panya Market');
+  const suffix = data.rows.filter(r => r.venue?.id === pm.id && r.venueMatch === 'suffix').length;
+  assert.ok(suffix >= 1);
+  const tg = text(renderVenue(buildVenueProfile(data.rows, pm, index, data.groups), index, meta));
+  assert.ok(tg.includes(`${suffix} ร้านจับจากชื่อที่ลงท้ายด้วยชื่อสถานที่`), tg.slice(0, 400));
   // Store facts.
   const store = name => text(renderStore(buildStoreDetail(data.rows.find(r => r.name === name), {scopeRows: data.rows, index, groups: data.groups}), {...meta, index}));
-  assert.ok(store('KFC Gateway Bangsue').includes('ชื่อร้านลงท้ายด้วยชื่อสถานที่นี้'));
+  assert.ok(store('Shabu Shabu Nangnai (Panya Market Branch)').includes('ชื่อร้านลงท้ายด้วยชื่อสถานที่นี้'));
   const autoRow = data.rows.find(r => r.venue?.id === charn.id);
   assert.ok(store(autoRow.name).includes('ชื่อร้านลงท้ายด้วยชื่อนี้ · สถานที่จากชื่อร้าน'));
   // Spatial join results (venue section, store fact, building panel).

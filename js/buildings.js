@@ -10,11 +10,10 @@
  * naming one) is open — never as a claim that a given restaurant is inside it,
  * and never inferred by proximity.
  */
-const SOURCE = 'restaurant-venue-buildings';
-const EXTRUSION = 'restaurant-venue-buildings-3d';
-const OUTLINE = 'restaurant-venue-buildings-outline';
 /** Layer ids, exported so the massing tiers can be inserted BEFORE the host extrusion (draw order = depth order). */
-export const HOST_LAYERS = Object.freeze({extrusion: EXTRUSION, outline: OUTLINE, source: SOURCE});
+export const HOST_LAYERS = Object.freeze({extrusion: 'restaurant-venue-buildings-3d', outline: 'restaurant-venue-buildings-outline', source: 'restaurant-venue-buildings'});
+/** The Land host buildings (registry Land datasets, js/land.js) — a second instance with its own ids. */
+export const LAND_LAYERS = Object.freeze({extrusion: 'land-host-buildings-3d', outline: 'land-host-buildings-outline', source: 'land-host-buildings'});
 
 function list(value) {
   if (Array.isArray(value)) return value;
@@ -50,8 +49,14 @@ export function hostedVenueIds(geojson) {
   return ids;
 }
 
+/**
+ * options.ids = {source, extrusion, outline} installs a second, independent instance (the Land host
+ * buildings of js/land.js use it); options.outlineRole = the geometry_role drawn as an outline.
+ */
 export function installVenueBuildings(map, geojson, options = {}) {
   if (!map || typeof map.addSource !== 'function') throw new TypeError('A MapLibre map is required');
+  const SOURCE = options.ids?.source || HOST_LAYERS.source, EXTRUSION = options.ids?.extrusion || HOST_LAYERS.extrusion, OUTLINE = options.ids?.outline || HOST_LAYERS.outline;
+  const outlineRole = options.outlineRole || 'host_building_footprint_not_shop_unit';
   const originals = geojson?.type === 'FeatureCollection' && Array.isArray(geojson.features)
     ? geojson.features.filter(f => f?.geometry && ['Polygon', 'MultiPolygon'].includes(f.geometry.type)) : [];
   let venueIds = new Set(options.venueIds || []), enabled = options.enabled !== false, theme = options.theme || 'light', disposed = false, displayed = [];
@@ -64,7 +69,7 @@ export function installVenueBuildings(map, geojson, options = {}) {
     layout: {visibility: enabled ? 'visible' : 'none'},
     paint: {'fill-extrusion-color': palette.fill, 'fill-extrusion-height': ['get', 'display_height_m'], 'fill-extrusion-base': ['get', 'display_base_m'],
       'fill-extrusion-opacity': 0.92, 'fill-extrusion-vertical-gradient': true}}, before);
-  map.addLayer({id: OUTLINE, type: 'line', source: SOURCE, minzoom: 12, filter: ['==', ['get', 'geometry_role'], 'host_building_footprint_not_shop_unit'],
+  map.addLayer({id: OUTLINE, type: 'line', source: SOURCE, minzoom: 12, filter: ['==', ['get', 'geometry_role'], outlineRole],
     layout: {visibility: enabled ? 'visible' : 'none'},
     paint: {'line-color': palette.ink, 'line-width': ['interpolate', ['linear'], ['zoom'], 12, .6, 17, 1.5]}}, before);
 
