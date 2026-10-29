@@ -513,6 +513,7 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
   .crumbs.is-collapsible:not(.is-expanded) .crumb-ellipsis { display: inline-flex; }
   .crumbs.is-collapsible:not(.is-expanded) .crumb-ellipsis::before { content: none; padding: 0; }
   .map-aha .btn { min-height: 40px; font-size: 12px; padding: 6px 12px; }
+  .map-aha h2 .map-aha-logo { vertical-align: middle; margin-right: 6px; }
   /* With a half sheet open the map key (outlet pins) rides above it; an expanded sheet covers the map, so it hides. */
   .map-panel.has-sheet .map-legend { bottom: calc(var(--sheet-height, 50dvh) + 8px); }
   /* Wins over the detail-zoom phone-key rule below (three classes), or the key peeks above an expanded sheet. */
@@ -597,4 +598,26 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 .register-logo-pin.is-selected { border: 2px solid var(--map-selected-stroke); }
 .register-logo-pin:focus-visible { outline: 2px solid var(--interaction-focus-ring); outline-offset: 2px; }
 @media (max-width: 760px) and (orientation: portrait) {
+}
+
+/* 0.7.0 — one vocabulary: entries chain first, outbound searches, collapsed long lists (owner 2026-10-29). */
+.entry .entry-text { min-width: 0; }
+.entry-branch { font-weight: 400; color: var(--text-secondary); }
+.entry-branch-line { margin-top: -2px; }
+.entry-cue { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 56px; height: 28px; border: 1px solid var(--border-hairline); border-radius: 4px; background: var(--surface-alt); }
+.entry-cue .cue-shape { width: 16px; height: 16px; }
+.outbound { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+.outbound-label { font-size: 12px; font-weight: 600; color: var(--text-metadata); margin-right: 2px; }
+.outbound-link { display: inline-flex; align-items: center; min-height: 32px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: var(--text-primary); background: var(--surface-raised); border: 1px solid var(--border-default); border-radius: 999px; text-decoration: none; white-space: normal; }
+.outbound-link:hover { background: var(--surface-alt); }
+.outbound-link:focus-visible { outline: 2px solid var(--interaction-focus-ring); outline-offset: 2px; }
+.more-list summary { cursor: pointer; min-height: 36px; display: flex; align-items: center; font-size: 12px; font-weight: 600; color: var(--text-secondary); padding: 0 8px; }
+.more-list summary:hover { background: var(--surface-alt); border-radius: var(--radius-sm); }
+.more-list[open] summary { margin-bottom: 4px; }
+.brand-head .metrics.compact { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.mix-list .mix-label.link-button { font-weight: 400; text-decoration: none; justify-content: flex-start; }
+.mix-list .mix-label.link-button:hover { text-decoration: underline; }
+.map-panel .maplibregl-popup-content h3 .entry-branch { display: block; font-size: 13px; font-weight: 400; }
+@media (max-width: 760px) {
+  .brand-head .metrics.compact { grid-template-columns: 1fr 1fr; }
 }

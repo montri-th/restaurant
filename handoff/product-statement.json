@@ -3,8 +3,8 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.6.2",
-  "updatedOn": "2026-10-28",
+  "productVersion": "0.7.0",
+  "updatedOn": "2026-10-30",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
   "evidenceLabels": {
@@ -235,7 +235,7 @@
   "spatial_granularity": "display point → แขวง/ตำบล (analytical unit) → เขต/อำเภอ → จังหวัด (production code) → ประเทศ",
   "temporal_coverage": "restaurant snapshot retrieved 2026-10-22 (sheets read 2026-10-28); chain register checked 2026-10-25 to 2026-10-28; Land join 2026-10-28; upstream collection date not exposed",
   "update_frequency": "ad hoc",
-  "last_updated": "2026-10-28",
+  "last_updated": "2026-10-30",
   "key_metrics": [
     "restaurants and chain outlets per km² per แขวง/ตำบล (one population since 0.6.0)",
     "combined density of the three densest areas",
@@ -245,9 +245,10 @@
     "rows by price bucket (priced rows)",
     "reviews (popularity proxy)",
     "rating mean (rated rows)",
-    "chain outlets in the register — counted with the restaurants in every ร้าน figure since 0.6.0 (owner 2026-10-28 22:36), the split ‘ร้าน = N + M’ stated once per view; evidence per outlet",
+    "chain outlets of the register counted as ร้าน with the restaurants (0.6.0), under one vocabulary since 0.7.0 (owner 2026-10-29): chain first, the split stated in the provenance line only, each outlet typed by its chain (derived, labelled); evidence per outlet",
     "restaurants whose points lie in a Land building (inside or within 10 m, drawn inside)",
-    "in-vs-around food types of a Land host"
+    "in-vs-around food types of a Land host",
+    "chains across both sheets (792): restaurants + outlets as one count per chain, a chain page per filter"
   ],
   "visual_layers": [
     "choropleth",
@@ -266,34 +267,38 @@
     "Business Dynamics",
     "Locale Insight (context only)"
   ],
-  "data_transparency": {
-    "raw_fields": [
-      "name",
-      "primary_type",
-      "start_price",
-      "end_price",
-      "price_bucket",
-      "rating",
-      "rating_count",
-      "subdistrict code",
-      "display coordinate (z10 grid)"
-    ],
-    "calculated_metrics": [
-      "density (rows of the population ÷ km²: restaurants by subdistrict code, outlets by point in the frame)",
-      "combined density Σ/Σ",
-      "coverage baseline",
-      "group and price shares",
-      "review totals",
-      "rating mean"
-    ],
-    "inferred_fields": [
-      "food-type group",
-      "chain candidate (name-based)",
-      "venue candidate (name-based: sheet link, name ending, or a name-derived place from repeated endings within 200 m)",
-      "building join (display point falls inside a drawn building footprint; display-time only)"
-    ],
-    "limitation_text": "ไม่ใช่สำมะโนร้านอาหาร; ชุดข้อมูลร้าน 7 จังหวัด นอกสามจังหวัดหลักเพียงบางตำบล; สาขาในทะเบียนร้านเครือทั่วประเทศนับรวมเป็นประชากรเดียวตั้งแต่ 0.6.0 (ร้าน = ร้านในชุดข้อมูล + สาขาในทะเบียน บอกส่วนแยกทุกหน้า) แต่ไม่มีคะแนน รีวิว ราคา ประเภท; พิกัดแสดงผลกริด 9.55 ม. จึงบอกได้เพียงว่าจุดตกในอาคารใด ไม่ใช่ที่ตั้งร้าน; คะแนน/รีวิวเป็นความนิยมตามแหล่งข้อมูล"
-  },
+  "data_transparency": [
+    {
+      "raw_fields": [
+        "name",
+        "primary_type",
+        "start_price",
+        "end_price",
+        "price_bucket",
+        "rating",
+        "rating_count",
+        "subdistrict code",
+        "display coordinate (z10 grid)"
+      ],
+      "calculated_metrics": [
+        "density (rows of the population ÷ km²: restaurants by subdistrict code, outlets by point in the frame)",
+        "combined density Σ/Σ",
+        "coverage baseline",
+        "group and price shares",
+        "review totals",
+        "rating mean"
+      ],
+      "inferred_fields": [
+        "food-type group",
+        "chain candidate (name-based)",
+        "venue candidate (name-based: sheet link, name ending, or a name-derived place from repeated endings within 200 m)",
+        "building join (display point falls inside a drawn building footprint; display-time only)"
+      ],
+      "limitation_text": "ไม่ใช่สำมะโนร้านอาหาร; ชุดข้อมูลร้าน 7 จังหวัด นอกสามจังหวัดหลักเพียงบางตำบล; สาขาในทะเบียนร้านเครือทั่วประเทศนับรวมเป็นประชากรเดียวตั้งแต่ 0.6.0 (ร้าน = ร้านในชุดข้อมูล + สาขาในทะเบียน บอกส่วนแยกทุกหน้า) แต่ไม่มีคะแนน รีวิว ราคา ประเภท; พิกัดแสดงผลกริด 9.55 ม. จึงบอกได้เพียงว่าจุดตกในอาคารใด ไม่ใช่ที่ตั้งร้าน; คะแนน/รีวิวเป็นความนิยมตามแหล่งข้อมูล"
+    },
+    "0.7.0: an outlet's food type is derived from its chain (majority of the chain's typed sheet-1 rows, else the register format) and says so — Inference, never a source attribute; price, rating and reviews are never derived",
+    "0.7.0: outbound AI Mode / Street View / Maps links are ways to search outside, labelled “ค้นต่อ”, never evidence of the product"
+  ],
   "known_limitations": [
     "ไม่ใช่สำมะโน",
     "ชุดข้อมูลร้าน (ชีต 1) ครอบคลุม 7 จังหวัด นอก กทม./นนทบุรี/สมุทรปราการ เพียงบางตำบล; อีก 70 จังหวัดมีเฉพาะสาขาในทะเบียนร้านเครือ",
@@ -305,7 +310,8 @@
     "ตัวหารเป็นพื้นที่ทั้งตำบล",
     "ทะเบียนร้านเครือยังไม่ครบทุกสาขา; ตั้งแต่ 0.6.0 นับรวมกับร้านในชุดข้อมูลเป็นประชากรเดียวตามคำสั่งเจ้าของ (28 ต.ค. 2569 22:36) โดยบอกส่วนแยกทุกหน้า — 1,234 แถวที่ย้ายไปทะเบียนนับครั้งเดียวฝั่งทะเบียน; สาขาไม่มีคะแนน รีวิว ราคา ประเภท (แสดง — ไม่ใช่ 0); สาขา 10,091 รายการไม่มีพิกัด (3,241 ไม่ทราบจังหวัด) จึงอยู่ในยอดรวมแต่ไม่อยู่ในความหนาแน่น",
     "“จุดตกในอาคาร” ไม่ใช่การยืนยันว่าร้านตั้งอยู่ในอาคาร",
-    "นิคมอุตสาหกรรมยังไม่เทียบจนกว่าขอบเขตผ่านการตรวจรับ"
+    "นิคมอุตสาหกรรมยังไม่เทียบจนกว่าขอบเขตผ่านการตรวจรับ",
+    "Register of 28 Oct: 10,091 outlets have no coordinate (625 of 756 chains none at all — e.g. TP TEA 12/12); they are counted and listed, never drawn; the owner's 29 Oct refresh (coordinates + logos) is pending (N22)"
   ],
   "methodology_note": "DATA_METHOD.md, docs/AREA_METHOD.md, docs/CHART_SELECTION.md",
   "example_use_cases": [
@@ -346,5 +352,5 @@
     }
   ],
   "owner_team": "Landometer · CityMETER",
-  "last_reviewed": "2026-10-28"
+  "last_reviewed": "2026-10-30"
 }

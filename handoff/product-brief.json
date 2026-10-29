@@ -3,8 +3,8 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.6.2",
-  "updatedOn": "2026-10-28",
+  "productVersion": "0.7.0",
+  "updatedOn": "2026-10-30",
   "datasetCheckedOn": "2026-10-22",
   "language": "th",
   "productName": "CityMETER · Restaurants",
@@ -84,6 +84,17 @@
       "a จังหวัด outside the covered seven: outlet count Aha, dashes for density and reviews, pins at every zoom, province frame fit, no Land hosts (the Land register lies in the covered provinces)",
       "first Aha on the population: สุริยวงศ์ · สีลม · วังใหม่ 122.0 ร้าน/ตร.กม. (422 rows / 3.46 km²), baseline 9.37 over 475 covered frames",
       "scripts/build-provinces.py + 70 PROVINCE receipts"
+    ],
+    "release070": [
+      "one vocabulary (owner 2026-10-29 23:39 “ตอนนี้เวบยังแยกร้านทะเบียนร้านเครืออยู่เลย เลิกซะที … ปรับใหม่ให้ search / filter / คำนวณ / aggregate รวมกันทั้งสองตาราง · เอา logo + brand ขึ้นก่อนชื่อสาขา ทั้ง map ป้าย และ side bar · ข้อความใน side bar ให้กระชับ · google search AI mode, streetview, search ด้วย context”): no register framing in the main flow — ‘สาขาในทะเบียน’, ‘ทะเบียนร้านเครือ · ทั่วประเทศ’, ‘ดูทะเบียนร้านเครือ’ and the split line ‘ร้าน = N + M’ are gone from tiles, Ahas, hints, legends, chips and lists; an outlet's meta line says ‘สาขาเครือ’; the two sheets are told apart in the provenance line only",
+      "one chain index across both sheets (js/chains.js): the brand filter lists every chain (792) with restaurants + outlets as one count; a chain is the overview under its brand filter headed by renderBrandHead (logo · name · company · tiles ร้าน / จังหวัด / บนแผนที่ / ประเภท · outbound row · provinces); the register chain view and its own search box are retired; ?chain= links open as the brand filter; the directory (chains mode) follows the main search",
+      "a chain's food type is derived (deriveChainGroups): majority group of its typed sheet-1 rows (≥ 3, > half) else the register format on whole tokens, else ไม่ระบุประเภท — outlets join the ten groups (15,751 of 26,819 typed), so the type filter, mix bars, matrix and in-vs-around tables reach both sheets; the outlet panel prints the basis with “(อนุมาน)”; price, rating, reviews stay absent on outlets",
+      "brand first (entryParts / entryMarkup): lists, table, popup, store/outlet heads and map logo markers read logo · เครือ · สาขา; entries without a logo show their type cue; outlet pins carry logos from zoom 15 in every view",
+      "rows without a coordinate are said, not hidden: ‘ยังไม่มีพิกัด N ร้าน’ in the overview (when a filter is on), the brand head, the map strip, the status line and the legend; a scope whose rows all lack points lists them chain first (the “tp tea” case: 12 outlets with no coordinate and no province in the 28 Oct register)",
+      "the panel's province list is built from the rendered scope (never the map's previous model — found live on 0.6.2)",
+      "narrow scopes show every point: a brand filter, a search of ≤ 2,000 outlets or an outlet-only scope draws outlet pins at every zoom; fitMap frames every point of a chain or a small search; a chain's page has no automatic three-area focus",
+      "outbound searches (js/outbound.js): a “ค้นต่อ” row on overview, brand, area, district, venue, building, store, outlet, company and Land views — Google AI Mode (udm=50) pre-filled with the question the view's user is likely holding (Product Statement §2.1 triggers), Street View at the point (map_action=pano), Google Maps; public URL schemes, never evidence",
+      "condensed copy: province list 8 + details, ranking 8, type bars 6 + ‘อื่น ๆ’, eligibility rule in one line (reason in its title), km² and rating basis in tile titles, price labels as ranges (N18 closed: ‘100–300 บาท’)"
     ]
   },
   "rowScopes": {
@@ -685,7 +696,9 @@
       "population": 95799,
       "populationRule": "sheet1Rows 68,980 + register outlets 26,819 = 95,799 (the 1,234 moved rows counted on the register side); coveredAreas 475 and reviewsTotal 5,922,059 on this population (reviews = sheet-1 rows only)",
       "noDataAreasOnPopulation": 106,
-      "coveredAreasOnPopulation": 475
+      "coveredAreasOnPopulation": 475,
+      "chainsTotal": 792,
+      "outletsTyped": 15751
     },
     "verification": "fresh reproduction of the public API matched all 70,214 rows on every compared field (handoff/VERIFICATION.md)",
     "coordinatePolicy": "MVT display positions (z10, extent 4096, 9.55 m) stored as grid integers; decoded with the research formula; screen-space displacement only; precision described, never upgraded",
@@ -910,6 +923,10 @@
     {
       "id": "INV34",
       "rule": "One population (owner 2026-10-28 22:36): every ร้าน figure = sheet-1 rows + register outlets of the same scope, the split stated once per view; the 1,234 moved rows are counted once, on the register side; ratings, reviews, prices and types exist on the sheet-1 side only and are never imputed (a tile with no such row shows —); outlets without a point count in totals and the province list, never in a density or a frame; all 77 provinces are drawn and counted"
+    },
+    {
+      "id": "INV35",
+      "rule": "One vocabulary (owner 2026-10-29): no tile, Aha, hint, legend, chip or list names “สาขาในทะเบียน” or routes to a “ทะเบียน” view; an outlet is a ร้าน with the meta line “สาขาเครือ”; every entry reads chain first (logo · เครือ · สาขา); a chain is one key across both sheets with one count; an outlet's food type is its chain's derived type, labelled as derived; rows without a coordinate are counted and said, never drawn from a host or a centroid; the two sheets are told apart in the provenance line only"
     }
   ],
   "chartContracts": [
@@ -1023,7 +1040,7 @@
     "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
   },
   "registerContract": {
-    "unit": "one outlet_id per listed branch / point of sale with qualifying evidence (incl. delivery kitchens and carts with their own status) — not a field count of open shops. ONE POPULATION since 0.6.0 (owner 2026-10-28 22:36 “จำนวนร้านต้อง 7x,xxx + 26,xxx แสดงนับรวมกัน”): the outlets are rows of the snapshot population (group REGISTER_GROUP ‘สาขาร้านเครือ’, kind outlet), counted with the sheet-1 restaurants in every ร้าน figure (overview tiles, province frames and list, แขวง/ตำบล densities, area/district/venue/building/Land panels, charts, table); the split ‘ร้าน = N ร้านในชุดข้อมูล + M สาขาในทะเบียน’ is stated once per view; the 1,234 moved rows are counted once, on the register side. This supersedes the 0.3.0 rule ‘never added to the snapshot’ for counting and presentation; the register keeps its own views, evidence and provenance.",
+    "unit": "one outlet_id per listed branch / point of sale with qualifying evidence (incl. delivery kitchens and carts with their own status) — not a field count of open shops. ONE POPULATION since 0.6.0 (owner 2026-10-28 22:36 “จำนวนร้านต้อง 7x,xxx + 26,xxx แสดงนับรวมกัน”): the outlets are rows of the snapshot population (group REGISTER_GROUP ‘สาขาร้านเครือ’, kind outlet), counted with the sheet-1 restaurants in every ร้าน figure (overview tiles, province frames and list, แขวง/ตำบล densities, area/district/venue/building/Land panels, charts, table); the split ‘ร้าน = N ร้านในชุดข้อมูล + M สาขาในทะเบียน’ is stated once per view; the 1,234 moved rows are counted once, on the register side. This supersedes the 0.3.0 rule ‘never added to the snapshot’ for counting and presentation; the register keeps its own views, evidence and provenance. ONE VOCABULARY since 0.7.0 (owner 2026-10-29): the outlets read as ร้าน everywhere (meta line “สาขาเครือ”), the split is stated in the provenance line only, the outlets carry their chain's derived food type, and a chain is the brand filter — the register keeps its directory (chains), company and outlet views, its evidence and its provenance.",
     "views": "chains (directory + search) · chain (brand) · company · outlet; there the snapshot frames, labels, context dots, charts tray and table step aside and the register search replaces the snapshot filters (data-set switch). In every snapshot view the outlets are rows: filters reach them (group = สาขาร้านเครือ, province by the register's province, brand through brandKeys / 01_BRANDS.national_brand_ids, search over name · brand · company · province), cue series ‘register’ (pin path) in the legend; outlet rows carry no price, rating, reviews or type (UNSPECIFIED / null — never imputed)",
     "map": "js/register-layer.js: one pin per outlet with a selected coordinate (16,728 of 26,819) (LDS map data role), selected outlet stroke; logos as buttons from zoom 15 (≤ 60); never clustered; from city zoom (REGISTER_MIN_ZOOM) for a full scope; a scope of outlets only (a จังหวัด outside the covered seven, ?group=register, a chain-only brand) draws its outlets at every zoom (registerSelection().scoped) and the status line counts them as ร้านในจอ",
     "derivations": {
@@ -1062,5 +1079,61 @@
     "land": "registry building parts (base/top) drawn as extrusions, the footprint as an outline; the join uses the union of footprint and parts",
     "venues": "sheet venue uuid = shopping registry citymeter_venue_id → Shopping Center release parts replace a name-matched footprint when they have more parts (scripts/build-data.py --lod-buildings --shop-registry)",
     "heights": "source values (CityMETER parts / OSM), never survey claims"
+  },
+  "chainIndexContract": {
+    "module": "js/chains.js#buildChainIndex",
+    "key": "brandKey(row): the register brand id when the sheet-1 name candidate links to one (01_BRANDS.national_brand_ids[0]), else the candidate id; a register-only brand keys itself",
+    "count": "rows (sheet-1 restaurants of the candidate) + outlets (register outlets of the brand); a chain present in one sheet only is still one chain",
+    "name": "the sheet-1 candidate's name when it exists (as the sheet writes it), else the register brand name; shared register names show the operator in directory sublines",
+    "logo": "the register brand's verified file first, else the candidate's (lookup by id only)",
+    "readers": [
+      "#brand select (every chain, count desc)",
+      "chain chips (chainsOf: scope rows → chains with rows/outlets split)",
+      "chains directory (follows the main search; no search box of its own)",
+      "brand page (renderBrandHead)",
+      "filterBrand / chainKeyOf (any brand id → chain key; ?chain= of 0.3–0.6 opens as ?brand=)"
+    ]
+  },
+  "derivedTypeContract": {
+    "module": "js/model.js#deriveChainGroups (CHAIN_TYPE_MIN_ROWS = 3)",
+    "rule": "register brand → majority food-type group of the sheet-1 rows whose candidate links to it (≥ 3 typed rows, more than half; rows typed unspecified/other do not vote), else formatGroup(register format) on whole tokens of the format code (a format saying “restaurant” names nothing unless pizza/burger/sandwich; “steamed” never reads as “tea”), else ไม่ระบุประเภท",
+    "label": "Inference — every outlet shows how its type was derived (“ตามร้านชื่อเดียวกัน N ร้านในชุดข้อมูล (อนุมาน)” / “ตามรูปแบบที่ทะเบียนระบุ (อนุมาน)”); the table column says “(ตามเครือ)”",
+    "neverDerived": [
+      "price",
+      "rating",
+      "reviews",
+      "coordinates (an outlet without a selected coordinate has no point)"
+    ],
+    "counts": {
+      "chainsTyped": 188,
+      "byRows": 83,
+      "byFormat": 105,
+      "outletsTyped": 15751,
+      "outletsOf": 26819,
+      "note": "fixtures of the 28 Oct register; move with the sheet"
+    }
+  },
+  "outboundContract": {
+    "module": "js/outbound.js#outboundFor · js/panel.js#outboundRow",
+    "label": "“ค้นต่อ” — a way to search outside, never evidence of the product; numbers of the product never change",
+    "targets": {
+      "aiMode": "https://www.google.com/search?udm=50&q=…",
+      "streetView": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=lat,lng",
+      "maps": "https://www.google.com/maps/search/?api=1&query=…"
+    },
+    "contexts": {
+      "store": "brand · branch · area · province → รีวิว เมนู ราคา เวลาเปิด; Street View at the point; Maps at the point",
+      "chain": "สาขาและข่าวล่าสุด; แฟรนไชส์และคู่แข่ง; Maps search",
+      "area": "ร้านดังและราคาแถวนี้; ทำเลและค่าเช่า; Street View at the frame's label anchor",
+      "venue": "ร้านในสถานที่นี้; พื้นที่เช่า; Street View at the point",
+      "company": "แบรนด์ในเครือ",
+      "country": "เครือร้านอาหารในไทย"
+    },
+    "rules": [
+      "rel=\"noopener\" target=\"_blank\"",
+      "public URL schemes, no API key",
+      "text labels only (no borrowed icon)",
+      "the question is the link title"
+    ]
   }
 }

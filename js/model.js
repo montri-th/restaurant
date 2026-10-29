@@ -44,9 +44,10 @@ export const provinceCodeFrom = value => {
 
 /** Price buckets of the source (COALESCE(end_price, start_price); thresholds ≤100, ≤300, ≤500, ≤1,000, >1,000). */
 export const PRICE_BUCKETS = Object.freeze(['UNDER_100', 'R100_300', 'R300_500', 'R500_1000', 'OVER_1000', 'UNSPECIFIED']);
+/** Bucket labels read as ranges (N18, 0.7.0): the bucket (100, 300] is “100–300 บาท”, the open top “เกิน 1,000 บาท”. */
 export const PRICE_LABELS = Object.freeze({
-  UNDER_100: 'ไม่เกิน 100 บาท', R100_300: 'เกิน 100–300 บาท', R300_500: 'เกิน 300–500 บาท',
-  R500_1000: 'เกิน 500–1,000 บาท', OVER_1000: 'เกิน 1,000 บาท', UNSPECIFIED: 'ไม่ระบุราคา',
+  UNDER_100: 'ไม่เกิน 100 บาท', R100_300: '100–300 บาท', R300_500: '300–500 บาท',
+  R500_1000: '500–1,000 บาท', OVER_1000: 'เกิน 1,000 บาท', UNSPECIFIED: 'ไม่ระบุราคา',
 });
 export const PRICE_SHORT = Object.freeze({
   UNDER_100: '≤100', R100_300: '>100–300', R300_500: '>300–500', R500_1000: '>500–1,000', OVER_1000: '>1,000', UNSPECIFIED: 'ไม่ระบุ',
@@ -74,15 +75,14 @@ const lower = v => String(v || '').toLocaleLowerCase('th-TH');
  * `areas` is data/areas.geojson (subdistrict frames): every row's `area` code
  * must exist there (the build checks it; rows that fail are dropped and counted).
  */
-export const REGISTER_GROUP = Object.freeze({id: 'register', th: 'สาขาร้านเครือ', en: 'Chain outlets (register)'});
-
 export function decodeDataset(json, areas) {
   if (!json?.cols || !Array.isArray(json.cols.key)) throw new Error('Invalid restaurants dataset');
   const c = json.cols, n = c.key.length;
   const areaProps = new Map((areas?.features || []).map(f => [String(f.id ?? f.properties?.id), f.properties]));
-  // One population since 0.6.0 (owner 2026-10-28 22:36): the chain register's outlets join the rows as the group
-  // ‘สาขาร้านเครือ’ (pin cue), so every count, area and density reads restaurants and outlets together.
-  const groups = [...(json.groups || []), REGISTER_GROUP].map((g, i) => ({...g, index: i, series: seriesOf(g.id), short: GROUP_SHORT[g.id] || g.th}));
+  // One population since 0.6.0 (owner 2026-10-28 22:36) and one vocabulary since 0.7.0 (owner 2026-10-29 “ปรับใหม่ให้
+  // search / filter / คำนวณ / aggregate รวมกันทั้งสองตาราง”): the register's outlets join the rows under the same ten
+  // food-type groups (a chain's type, derived — see deriveChainGroups), never as a group of their own.
+  const groups = (json.groups || []).map((g, i) => ({...g, index: i, series: seriesOf(g.id), short: GROUP_SHORT[g.id] || g.th}));
   const brands = (json.brands || []).map((b, i) => ({...b, index: i}));
   const venues = (json.venues || []).map((v, i) => ({...v, index: i}));
   const brandOf = new Map((json.brand || []).map(([i, b]) => [i, brands[b]]));
@@ -128,19 +128,75 @@ export function decodeDataset(json, areas) {
 }
 
 /**
- * Turn the register's outlets into rows of the same population (in place, so register views keep their objects):
- * group ‘สาขาร้านเครือ’, no type / price / rating (never a 0), the province and subdistrict the register derived,
- * and brand keys that let the snapshot's brand filter reach the outlets of the same chain (`snapshotOf`: register
- * brand id → snapshot brand candidates). Outlets without a selected coordinate have no point (hasPoint false).
+ * Register `format` hints that name a food type outright (the fallback when a chain has no typed rows of its own),
+ * matched on whole tokens of the format code (“steamed” must never read as “tea”). A format that says “restaurant”
+ * is ambiguous (a Thai restaurant with desserts, a restaurant with a bar) and names nothing — unless it is a pizza,
+ * burger or sandwich format, which the sheet-1 types also file under fast food.
  */
-export function outletRows(register, groups, {snapshotOf = new Map(), index = null} = {}) {
-  const g = groups.find(x => x.id === REGISTER_GROUP.id);
+const FORMAT_TOKENS = [
+  [new Set(['japanese', 'ramen', 'sushi', 'yakiniku', 'izakaya', 'shabu']), 'japanese'],
+  [new Set(['pizza', 'burger', 'sandwich', 'sandwiches', 'fastfood']), 'fastfood'],
+  [new Set(['juice', 'matcha', 'bakery', 'dessert']), 'cafe'],
+  [new Set(['bar', 'cocktail', 'nightlife', 'lounge', 'pub', 'club', 'dining']), 'other'],
+  [new Set(['cafe', 'coffee', 'tea', 'beverage', 'bubble', 'roaster', 'pastry', 'brunch']), 'cafe'],
+];
+export function formatGroup(format) {
+  const tokens = new Set(String(format || '').toLowerCase().split(/[^a-z]+/).filter(Boolean));
+  if (!tokens.size) return '';
+  const fast = ['pizza', 'burger', 'sandwich', 'sandwiches'].some(t => tokens.has(t));
+  if (tokens.has('restaurant') && !fast) return '';
+  for (const [set, groupId] of FORMAT_TOKENS) if ([...set].some(t => tokens.has(t))) return groupId;
+  return '';
+}
+/** Majority needs this many typed rows of the chain before the chain's outlets inherit the type. */
+export const CHAIN_TYPE_MIN_ROWS = 3;
+
+/**
+ * A food type per chain (0.7.0, Inference — stated as such on every outlet): the majority food-type group of the
+ * sheet-1 rows whose name candidate links to the register brand (≥ CHAIN_TYPE_MIN_ROWS rows and more than half of
+ * them), else the group the register's own `format` names, else ‘ไม่ระบุประเภท’. The register records no cuisine;
+ * without this the outlets could not be filtered, mixed or charted with the restaurants (owner 2026-10-29).
+ * Returns register brand id → {groupId, how: 'rows' | 'format', rows, share}.
+ */
+export function deriveChainGroups(register, {snapshotOf = new Map(), rows = [], groups = []} = {}) {
+  const known = new Set(groups.map(g => g.id));
+  const byCandidate = new Map();
+  for (const r of rows) if (r.brand && r.kind !== 'outlet' && r.groupId !== 'unspecified' && r.groupId !== 'other') {
+    const m = byCandidate.get(r.brand.id) || new Map();
+    m.set(r.groupId, (m.get(r.groupId) || 0) + 1);
+    byCandidate.set(r.brand.id, m);
+  }
+  const out = new Map();
+  for (const b of register?.brands || []) {
+    const tally = new Map();
+    for (const c of snapshotOf.get(b.id) || []) for (const [g, n] of byCandidate.get(c.id) || []) tally.set(g, (tally.get(g) || 0) + n);
+    const total = [...tally.values()].reduce((s, n) => s + n, 0);
+    const [top, n] = [...tally].sort((x, y) => y[1] - x[1])[0] || ['', 0];
+    if (top && known.has(top) && n >= CHAIN_TYPE_MIN_ROWS && n * 2 > total) { out.set(b.id, {groupId: top, how: 'rows', rows: n, share: n / total}); continue; }
+    const hit = formatGroup(b.format);
+    if (hit && known.has(hit)) out.set(b.id, {groupId: hit, how: 'format', rows: 0, share: 0, format: b.format});
+  }
+  return out;
+}
+
+/**
+ * Turn the register's outlets into rows of the same population (in place, so register views keep their objects):
+ * the chain's derived food-type group (`chainGroups`, else ไม่ระบุประเภท), no price / rating (never a 0), the province
+ * and subdistrict the register derived, and brand keys that let the brand filter reach the outlets of the same chain
+ * (`snapshotOf`: register brand id → snapshot brand candidates). Outlets without a selected coordinate have no point.
+ */
+export function outletRows(register, groups, {snapshotOf = new Map(), index = null, chainGroups = new Map()} = {}) {
+  const byId = new Map(groups.map(g => [g.id, g]));
+  const fallback = byId.get('unspecified') || groups[groups.length - 1];
   const out = [];
   for (const o of register?.outlets || []) {
     const a = o.area && index ? index.byId.get(o.area) : null;
+    const derived = chainGroups.get(o.brand?.id) || null;
+    const g = (derived && byId.get(derived.groupId)) || fallback;
     o.kind = 'outlet';
     o.name = o.name || o.brand?.name || '';
-    o.type = null; o.group = g?.index ?? 0; o.groupId = REGISTER_GROUP.id; o.series = g?.series ?? seriesOf(REGISTER_GROUP.id);
+    o.type = null; o.group = g?.index ?? 0; o.groupId = g?.id || 'unspecified'; o.series = g?.series ?? seriesOf('unspecified');
+    o.groupBy = derived; // how the type was derived (null = none)
     o.price = 'UNSPECIFIED'; o.p0 = null; o.p1 = null; o.rating = null; o.reviews = null;
     o.venue = null; o.venueEntity = false; o.venueMatch = null; o.register = 0; o.registerTargets = [];
     o.brandKeys = new Set([o.brand?.id, ...(snapshotOf.get(o.brand?.id) || []).map(b => b.id)].filter(Boolean));
@@ -148,6 +204,23 @@ export function outletRows(register, groups, {snapshotOf = new Map(), index = nu
     out.push(o);
   }
   return out;
+}
+
+/**
+ * Brand-first naming (owner 2026-10-29 “เอา logo + brand ขึ้นก่อน ชื่อสาขา”): primary = the chain, secondary = the
+ * branch / the rest of the row name. A row without a chain candidate keeps its own name as the primary.
+ */
+export function entryParts(r) {
+  const brand = r?.brand?.name || '';
+  const name = r?.name || '';
+  if (!brand) return {primary: name, secondary: ''};
+  if (r.kind === 'outlet') return {primary: brand, secondary: name && lower(name) !== lower(brand) ? name : ''};
+  if (lower(name).startsWith(lower(brand))) {
+    let rest = name.slice(brand.length).trim().replace(/^[\-–—·,:|]+\s*/, '');
+    if (/^\(.*\)$/.test(rest)) rest = rest.slice(1, -1).trim(); // “After You (Siam Paragon)” → Siam Paragon
+    return {primary: brand, secondary: rest};
+  }
+  return {primary: brand, secondary: name};
 }
 
 /** One key per chain across both sheets: a snapshot candidate with a register link counts as that register brand. */

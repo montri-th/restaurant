@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {dirname, join} from 'node:path';
-import {decodeDataset, outletRows, registerProvinces} from '../js/model.js';
+import {decodeDataset, outletRows, deriveChainGroups, registerProvinces} from '../js/model.js';
 import {buildAreaIndex} from '../js/areas.js';
 import {decodeRegister} from '../js/register.js';
 
@@ -27,7 +27,10 @@ export function load() {
   const snapshotOf = new Map();
   for (const b of data.brands) for (const id of b.national || []) { const x = register.brandById.get(id); if (!x) continue; if (!snapshotOf.has(x.id)) snapshotOf.set(x.id, []); snapshotOf.get(x.id).push(b); }
   data.restaurants = data.rows;
-  data.outlets = outletRows(register, data.groups, {snapshotOf, index});
+  // 0.7.0: a chain's food type (its typed sheet-1 rows, else the register's format) reaches its outlets.
+  const chainGroups = deriveChainGroups(register, {snapshotOf, rows: data.rows, groups: data.groups});
+  data.outlets = outletRows(register, data.groups, {snapshotOf, index, chainGroups});
+  data.chainGroups = chainGroups;
   data.rows = [...data.restaurants, ...data.outlets];
   const covered = new Set(data.rows.map(r => r.area).filter(Boolean));
   let km2 = 0;

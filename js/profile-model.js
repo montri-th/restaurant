@@ -24,10 +24,20 @@ function stats(rows) {
   return {reviews, reviewed, rated, ratingMean: rated ? ratingSum / rated : null, priced, outlets};
 }
 
-/** Chains present in rows (snapshot candidates and register brands of the same chain under one key), most rows first. */
+/**
+ * Chains present in rows (snapshot candidates and register brands of the same chain under one key), most rows
+ * first. Each entry carries the key (the brand filter's value), every brand record seen under it (a candidate, a
+ * register brand — whichever has the logo) and the split of restaurants / outlets.
+ */
 export function chainsIn(rows, limit = 12) {
   const m = new Map();
-  for (const r of rows) if (r.brand) { const k = brandKey(r); const e = m.get(k) || {brand: r.brand, count: 0}; e.count++; m.set(k, e); }
+  for (const r of rows) if (r.brand) {
+    const k = brandKey(r);
+    const e = m.get(k) || {key: k, brand: r.brand, brands: [], count: 0, rows: 0, outlets: 0};
+    e.count++; if (r.kind === 'outlet') e.outlets++; else e.rows++;
+    if (!e.brands.includes(r.brand)) e.brands.push(r.brand);
+    m.set(k, e);
+  }
   return [...m.values()].sort((a, b) => b.count - a.count || a.brand.name.localeCompare(b.brand.name)).slice(0, limit);
 }
 

@@ -1,7 +1,8 @@
 /**
- * Chain register (data/chains.json) and the Land join (data/land.json + land-buildings.geojson), releases 0.3–0.4.
- * Contracts: the register keeps its own unit (one outlet_id per listed branch) and is never added to the
- * snapshot; derived fields say how they were derived; the Land join publishes only “in” relations (inside the
+ * Chain register (data/chains.json) and the Land join (data/land.json + land-buildings.geojson), releases 0.3–0.7.
+ * Contracts: the register keeps its own unit (one outlet_id per listed branch) and, since 0.6.0, joins the
+ * population as rows (0.7.0: under one vocabulary and one chain index); derived fields say how they were derived;
+ * the Land join publishes only “in” relations (inside the
  * OpenStreetMap outline or within 10 m — those points get a display position inside it) that the browser geometry
  * reproduces; every view ends with one provenance line and never claims “ตั้งอยู่ใน”.
  */
@@ -12,7 +13,8 @@ import {join} from 'node:path';
 import {load, readJSON, readBytes, sha256, ROOT} from './helpers.js';
 import {brandsIn, provincesIn, outletMix, searchRegister, EVIDENCE, STATUS} from '../js/register.js';
 import {decodeLand, geometryContains, distanceToGeometry, landProfile, landOfRow, landOfOutlet, hostsOf, aroundGeometry, landTypeTh, applyRowDisplay, applyOutletDisplay, LAND_RULE} from '../js/land.js';
-import {renderRegisterSummary, renderRegisterInArea, renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderChain, renderCompany, renderOutlet, renderLand} from '../js/register-panel.js';
+import {renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderCompany, renderOutlet, renderLand} from '../js/register-panel.js';
+import {buildChainIndex, chainsOf} from '../js/chains.js';
 import {configureBrandLogos} from '../js/brand-logos.js';
 import {brandKey} from '../js/model.js';
 
@@ -252,19 +254,17 @@ test('Land profile: rows in the building, the 100 m ring outside it, register ou
 
 test('register and Land views: one provenance line each (dataset · source · date · boundary + the unit once), never “ตั้งอยู่ใน”', () => {
   const {reg, land, rowById, data, index} = setup();
-  const brand = [...reg.brands].sort((a, b) => b.outlets - a.outlets)[0];
-  const outlets = reg.byBrand.get(brand.id);
+  const chains = buildChainIndex({rows: data.rows, brands: data.brands, register: reg});
   const company = reg.companies.find(c => (reg.byCompany.get(c.id) || []).length);
   const outlet = reg.outlets.find(o => o.hasPoint && o.area);
   const host = land.hosts.find(h => (land.rowsByBuilding.get(h.fp) || []).length > 3);
   const profile = landProfile(land, host, {rowsByKey: rowById, outletsById: reg.byId});
+  const companyOutlets = reg.byCompany.get(company.id);
   const views = {
-    summary: renderRegisterSummary({meta: reg.meta, brands: reg.brands.slice(0, 5)}),
-    chains: renderChains({reg, query: '', results: searchRegister(reg, ''), mix: outletMix(reg.outlets)}),
-    chain: renderChain({reg, brand, outlets, provinces: provincesIn(outlets, reg.provinces), mix: outletMix(outlets)}),
-    company: renderCompany({reg, company, brands: brandsIn(reg.byCompany.get(company.id), 50), outlets: reg.byCompany.get(company.id), mix: outletMix(reg.byCompany.get(company.id))}),
-    outlet: renderOutlet({reg, outlet, area: index.byId.get(outlet.area), land: landOfOutlet(land, outlet.id), sameBrand: []}),
-    land: renderLand({land, profile, around: [], groups: data.groups, index}),
+    chains: renderChains({reg, chains: chainsOf(data.rows, chains, Infinity), scopeCount: data.rows.length, withPoint: 1}),
+    company: renderCompany({reg, company, chains: chainsOf(companyOutlets, chains, Infinity), rows: companyOutlets, withPoint: companyOutlets.filter(o => o.hasPoint).length}),
+    outlet: renderOutlet({reg, outlet, area: index.byId.get(outlet.area), land: landOfOutlet(land, outlet.id), sameBrand: [], group: data.groups[outlet.group]}),
+    land: renderLand({land, profile, around: [], groups: data.groups, index, chains: chainsOf([...profile.rows.in, ...profile.outlets.in], chains, Infinity)}),
   };
   const caveats = /ไม่ได้ยืนยัน|ไม่นำมาบวกกัน|ละเอียดราว|คนละหน่วย/g;
   for (const [name, html] of Object.entries(views)) {
@@ -274,13 +274,13 @@ test('register and Land views: one provenance line each (dataset · source · da
     assert.equal((html.match(/class="hint panel-foot provenance"|class="hint source-line"/g) || []).length, 1, `${name}: one provenance line`);
     assert.ok(/ชุดข้อมูล \S/.test(t) && /แหล่ง \S/.test(t) && /ตรวจ \d/.test(t) && /ขอบเขต \S/.test(t), `${name}: dataset · source · date · boundary`);
     assert.ok((t.match(caveats) || []).length <= 1, `${name}: caveats said once at most — ${t.match(caveats)}`);
+    assert.ok(!/สาขาในทะเบียน/.test(t), `${name}: one vocabulary (0.7.0) — no register framing`);
+    assert.ok(t.includes('ค้นต่อ') && /AI Mode/.test(t), `${name}: outbound searches offered`);
   }
   assert.ok(text(views.chains).includes('ไม่ใช่จำนวนร้านที่เปิดอยู่จริง'), 'the register unit is explained once');
+  assert.ok(text(views.outlet).includes(outlet.brand.name) && views.outlet.indexOf(`<h2>${outlet.brand.name}`) > 0, 'an outlet is headed by its chain');
+  assert.ok(views.outlet.includes('maps/@?api=1&amp;map_action=pano') && views.outlet.includes('udm=50'), 'Street View at the point and an AI Mode question');
   assert.ok(text(views.land).includes(LAND_RULE) && text(views.land).includes('ร้านในอาคาร') && !text(views.land).includes('ติดขอบ'));
-  // Sections inside snapshot views carry their own single line.
-  const area = [...reg.byArea.keys()][0];
-  const inArea = renderRegisterInArea({outlets: reg.byArea.get(area), brands: brandsIn(reg.byArea.get(area)), place: 'แขวงทดสอบ'});
-  assert.equal((inArea.match(/source-line/g) || []).length, 1); assert.ok(text(inArea).includes('นับรวมอยู่ในตัวเลขร้านและสาขาด้านบนแล้ว'));
   const row = rowById.get(landOfRow(land, [...land.rowRel.keys()][0]) ? [...land.rowRel.keys()][0] : '');
   const storeLand = text(renderStoreLand(landOfRow(land, row.id)));
   assert.ok(/จุดอยู่ในขอบอาคาร|จุดต้นทางห่างขอบอาคาร [\d.]+ ม\. \(ไม่เกิน 10 ม\. นับเป็นในอาคาร/.test(storeLand) && !/ตั้งอยู่ใน|ติดขอบ/.test(storeLand));
@@ -289,7 +289,7 @@ test('register and Land views: one provenance line each (dataset · source · da
   const movedText = text(renderStoreLand(landOfRow(land, movedKey)));
   assert.ok(/จุดต้นทางห่างขอบอาคาร [\d.]+ ม\. \(ไม่เกิน 10 ม\. นับเป็นในอาคาร หมุดแสดงในอาคาร\)/.test(movedText) && !movedText.includes('จุดอยู่ในขอบอาคาร'), movedText);
   const moved = data.moved.find(r => r.register === 1);
-  assert.ok(text(renderStoreRegister({row: moved, register: moved.register})).includes('นับในทะเบียนร้านเครือ ไม่นับซ้ำ'));
+  assert.ok(text(renderStoreRegister({row: moved, register: moved.register})).includes('นับครั้งเดียวฝั่งทะเบียนร้านเครือ'));
   const hostsIn = renderLandHostsIn([{host, rows: 3, outlets: 1}]);
   assert.ok(text(hostsIn).includes(LAND_RULE) && (hostsIn.match(/source-line/g) || []).length === 1 && !text(hostsIn).includes('ไม่ได้ยืนยัน'));
   // One row per building: other registry names on the same footprint ride along; a nested outline says what it repeats.
@@ -302,15 +302,23 @@ test('register and Land views: one provenance line each (dataset · source · da
 
 test('counts are totals, never list lengths; registers and carts are named; small samples print no share (review 2026-10-28)', () => {
   const {reg, land, rowById, data, index} = setup();
+  const chains = buildChainIndex({rows: data.rows, brands: data.brands, register: reg});
   // A multi-banner point-of-sale registry is a record, not a chain: out of the chain count and the ranking.
   const registry = reg.brands.find(b => b.id === 'ROOT-BR-cpf-pos-network');
   assert.ok(registry?.registry, 'Five Star network is flagged as a registry');
   assert.equal(reg.chainCount, reg.brands.filter(b => b.outlets > 0).length - reg.registries.length);
   assert.ok(!searchRegister(reg, '').brands.some(b => b.registry), 'the ranking lists chains only');
   assert.ok(searchRegister(reg, 'five star').brands.some(b => b.registry), 'search still reaches it');
-  const summary = text(renderRegisterSummary({meta: reg.meta, brands: searchRegister(reg, '').brands.slice(0, 10), chainCount: reg.chainCount, registries: reg.registries}));
-  assert.ok(summary.includes(`${reg.chainCount.toLocaleString('th-TH')} เครือ`) && summary.includes('ไม่นับ Five Star network'), summary.slice(0, 300));
-  assert.ok(/ชุดข้อมูล \S/.test(summary) && /แหล่ง \S/.test(summary) && /ตรวจ \d/.test(summary) && /ขอบเขต \S/.test(summary), 'the overview section cites its own source and date');
+  // The directory (0.7.0): every chain of the scope, restaurants and outlets together, and the registries named apart.
+  const all = chainsOf(data.rows, chains, Infinity);
+  const directory = text(renderChains({reg, chains: all, scopeCount: data.rows.length, withPoint: 1}));
+  assert.ok(directory.includes(`${all.total.toLocaleString('th-TH')} เครือ`) && directory.includes('ไม่นับ Five Star network'), directory.slice(0, 300));
+  assert.ok(directory.includes(`แสดง 60 จาก ${all.total.toLocaleString('th-TH')} เครือ`), 'the list is cut and says so');
+  assert.ok(/ชุดข้อมูล \S/.test(directory) && /แหล่ง \S/.test(directory) && /ตรวจ \d/.test(directory) && /ขอบเขต \S/.test(directory), 'the directory cites its own source and date');
+  // Chain keys unify the sheets: a chain with rows of both kinds counts both, and keys the brand filter.
+  const both = all.find(c => c.rows > 0 && c.outlets > 0);
+  assert.ok(both && both.count === both.rows + both.outlets && chains.byKey.get(both.key)?.count === both.count, 'one key, one count across both sheets');
+  assert.equal(chains.list.filter(c => c.count > 0).length, chains.total);
   // Shared names show the operator; a cart or secondary-source majority is flagged in lists.
   const kfc = reg.brands.filter(b => b.name === 'KFC');
   assert.equal(kfc.length, 3);
@@ -318,18 +326,12 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   assert.equal(reg.brands.find(b => b.name === 'Chaysee Bamee Kiew').evidenceTag?.short, 'รถเข็น');
   assert.equal(reg.brands.find(b => b.name === 'MIXUE').evidenceTag?.short, 'แหล่งรอง');
   assert.equal(reg.brands.find(b => b.name === 'Café Amazon').evidenceTag, null);
-  // An area header counts every chain; the chips stop at 16 and say so.
-  const [areaId, outlets] = [...reg.byArea].sort((a, b) => brandsIn(b[1], Infinity).length - brandsIn(a[1], Infinity).length)[0];
-  const all = brandsIn(outlets, Infinity);
-  assert.ok(all.length > 16, `${areaId} has ${all.length} chains`);
-  const areaHtml = text(renderRegisterInArea({outlets, brands: all, place: 'แขวงทดสอบ', meta: reg.meta}));
-  assert.ok(areaHtml.includes(`${all.filter(x => !x.brand.registry).length.toLocaleString('th-TH')} เครือ`) && areaHtml.includes(`แสดง 16 จาก ${all.length.toLocaleString('th-TH')} เครือ`), areaHtml.slice(0, 400));
-  assert.ok(/ชุดข้อมูล \S/.test(areaHtml) && /ตรวจ \d/.test(areaHtml) && areaHtml.includes('ขอบเขต จุดของสาขาอยู่ในแขวงทดสอบ'));
   // Same-brand outlets: the heading carries the total, the list its own length.
   const outlet = reg.outlets.find(o => o.hasPoint && o.brand.name === 'KFC' && o.provinceTh === 'กรุงเทพมหานคร');
   const others = reg.byBrand.get(outlet.brand.id).filter(x => x !== outlet && x.province === outlet.province);
-  const outletHtml = text(renderOutlet({reg, outlet, area: outlet.area ? index.byId.get(outlet.area) : null, land: landOfOutlet(land, outlet.id), sameBrand: {list: others.slice(0, 8), total: others.length, nearest: true}}));
-  assert.ok(outletHtml.includes(`${others.length.toLocaleString('th-TH')} สาขา`) && outletHtml.includes(`แสดง 8 จาก ${others.length.toLocaleString('th-TH')} สาขา`), outletHtml.slice(-600));
+  const outletHtml = text(renderOutlet({reg, outlet, area: outlet.area ? index.byId.get(outlet.area) : null, land: landOfOutlet(land, outlet.id), sameBrand: {list: others.slice(0, 8), total: others.length, nearest: true}, group: data.groups[outlet.group]}));
+  assert.ok(outletHtml.includes(`${others.length.toLocaleString('th-TH')} ร้าน`) && outletHtml.includes(`แสดง 8 จาก ${others.length.toLocaleString('th-TH')} ร้าน`), outletHtml.slice(-600));
+  assert.ok(outletHtml.includes('ฟาสต์ฟู้ด') && outletHtml.includes('(อนุมาน)'), 'the derived type says it is derived');
   // Land lists: the header is the number of buildings, not the rows shown; the section cites all three inputs.
   const host = land.hosts.find(h => (land.rowsByBuilding.get(h.fp) || []).length > 3);
   const list = [{host, rows: 3, outlets: 1}]; list.total = 1399;
@@ -340,23 +342,21 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   const paragon = land.hosts.find(h => h.id === 'SC-001244');
   const profile = landProfile(land, paragon, {rowsByKey: rowById, outletsById: reg.byId});
   const around = data.rows.slice(0, 4).map(r => ({...r}));
-  const landHtml = text(renderLand({land, profile, around, groups: data.groups, index}));
-  assert.ok(!/\d+%/.test(landHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1].split('เครือในทะเบียน')[0]), 'no share on a handful of rows');
-  assert.ok(landHtml.includes('ร้อยละเมื่อคอลัมน์มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่ทุกร้านในอาคาร'));
-  // One list for the building (owner 2026-10-28 22:03): rows and register outlets together, A→Z, each saying its unit;
-  // the header keeps the two counts apart (never summed).
-  assert.ok(landHtml.includes('ร้านและสาขาในอาคาร') && !landHtml.includes('สาขาร้านเครือในอาคาร') && !landHtml.includes('ติดขอบ'));
   const inside = profile.rows.in, outletsIn = profile.outlets.in;
-  assert.ok(landHtml.includes(`${inside.length.toLocaleString('th-TH')} ร้าน · ${outletsIn.length.toLocaleString('th-TH')} สาขา`), 'two units in the header');
-  assert.ok(!landHtml.includes(`${(inside.length + outletsIn.length).toLocaleString('th-TH')} รายการ`) || inside.length + outletsIn.length > 40, 'no summed total');
-  const listHtml = renderLand({land, profile, around, groups: data.groups, index});
-  const storeButtons = (listHtml.match(/data-action="select-store"/g) || []).length, outletButtons = (listHtml.match(/data-action="select-outlet"/g) || []).length;
+  const landChains = chainsOf([...inside, ...outletsIn], chains, Infinity);
+  const listHtml = renderLand({land, profile, around, groups: data.groups, index, chains: landChains});
+  const landHtml = text(listHtml);
+  assert.ok(!/\d+%/.test(landHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1].split('ร้านในอาคาร ')[0]), 'no share on a handful of rows');
+  assert.ok(landHtml.includes('ร้อยละเมื่อคอลัมน์มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่ทุกร้านในอาคาร'));
+  // One list for the building (owner 2026-10-28 22:03; one vocabulary 2026-10-29): rows and outlets together, chain first.
+  assert.ok(!landHtml.includes('สาขาในทะเบียน') && !landHtml.includes('ติดขอบ'));
+  assert.ok(landHtml.includes(`${(inside.length + outletsIn.length).toLocaleString('th-TH')} ร้านในอาคาร`), 'one total');
+  const buttons = (listHtml.match(/data-action="select-store"/g) || []).length;
   const matched = new Set(inside.filter(r => r.register === 2).flatMap(r => r.registerTargets || []).filter(t => outletsIn.some(o => o.id === t)));
   assert.ok(inside.length + outletsIn.length <= 40, 'Siam Paragon fits one page of the list');
-  assert.equal(storeButtons, inside.length, 'every row in the one list');
-  assert.equal(outletButtons, outletsIn.length - matched.size, 'every outlet in the same list, a matched one carried by its row');
-  assert.ok(listHtml.indexOf('data-action="select-outlet"') > 0 && listHtml.indexOf('data-action="select-store"') > 0);
-  assert.ok(landHtml.includes('สาขาในทะเบียน · ') && /ร้าน · /.test(landHtml.split('ร้านและสาขาในอาคาร')[1]), 'each entry names its unit');
+  assert.equal(buttons, inside.length + outletsIn.length - matched.size, 'every row and outlet in the one list, a matched one carried by its row');
+  assert.ok(!listHtml.includes('data-action="select-outlet"'), 'one action for every entry');
+  assert.ok(landHtml.includes('สาขาเครือ'), 'an outlet entry names itself as a chain outlet in its meta line');
 });
 
 test('snapshot chain and venue headers carry totals, never the length of a cut list (review 2, 0.3.2)', async () => {

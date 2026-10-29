@@ -1,12 +1,12 @@
 # CityMETER Restaurants — Developer Handoff
 
-รุ่นเผยแพร่ 0.6.2 · 28 ต.ค. 2569 · ร้านดึงและตรวจ 22 ต.ค. 2569 · ทะเบียนร้านเครือตรวจ 25–28 ต.ค. · Land join 28 ต.ค. 2569
+รุ่นเผยแพร่ 0.7.0 · 30 ต.ค. 2569 · ร้านดึงและตรวจ 22 ต.ค. 2569 · ทะเบียนร้านเครือตรวจ 25–28 ต.ค. (ฉบับ 29 ต.ค. รอไฟล์ — N22) · Land join 28 ต.ค. 2569
 
 เริ่มอ่าน `source/handoff/README.md` จากนั้น Product Statement (`source/PRODUCT_STATEMENT.md` + `source/handoff/product-statement.json`), Product Brief และ Implementation Plan ในโฟลเดอร์ `source/handoff` ทั้ง `.md` และ `.json` ใช้คู่กัน
 
 เข้าโฟลเดอร์ `source` แล้วรัน `npm test` และ `npm start` เปิด http://127.0.0.1:4173/
 
-ชุดนี้มี source code (ES modules มีคอมเมนต์สัญญาทุกโมดูล), datasets, assets ที่ตรวจ hash แล้ว, unit tests บนข้อมูลจริง, JSON Schema 1.5.0, acceptance criteria AC01–AC44, สคริปต์สร้างข้อมูล/ขอบเขต/manifest/bundle และตรวจ live bytes อ่าน `source/AGENTS.md` ก่อนแก้ไข
+ชุดนี้มี source code (ES modules มีคอมเมนต์สัญญาทุกโมดูล), datasets, assets ที่ตรวจ hash แล้ว, unit tests บนข้อมูลจริง, JSON Schema 1.5.0, acceptance criteria AC01–AC50, สคริปต์สร้างข้อมูล/ขอบเขต/manifest/bundle และตรวจ live bytes อ่าน `source/AGENTS.md` ก่อนแก้ไข
 
 เว็บจริง: https://montri-th.github.io/restaurant/
 Repository: https://github.com/montri-th/restaurant

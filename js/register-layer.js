@@ -115,7 +115,7 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
       const el = document.createElement('button');
       el.type = 'button';
       el.className = 'register-logo-pin' + (o.index === selected ? ' is-selected' : '');
-      el.setAttribute('aria-label', `${o.name || o.brand.name} — สาขาในทะเบียนร้านเครือ`);
+      el.setAttribute('aria-label', `${o.brand.name}${o.name && o.name !== o.brand.name ? ` ${o.name}` : ''} — สาขาเครือ`);
       el.innerHTML = brandLogoMarkup(o.brand, {size: 'xs'});
       el.addEventListener('click', e => { e.stopPropagation(); onSelect?.(o); });
       markers.push(new maplibregl.Marker({element: el, anchor: 'bottom', offset: [0, -8]}).setLngLat([o.longitude, o.latitude]).addTo(map));
@@ -131,7 +131,8 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
   const onSourceData = e => { if (e.sourceId === SOURCE && e.isSourceLoaded && visible && !disposed) relayout(); };
   map.on('sourcedata', onSourceData);
 
-  function update({show = false, selection = {}, selectedIndex = null, minZoom = 0, logos = true} = {}) {
+  /** quiet: every outlet of a wide scope (small translucent marks at city zoom); logos: brand logos from LOGO_MIN_ZOOM. */
+  function update({show = false, selection = {}, selectedIndex = null, minZoom = 0, logos = true, quiet = false} = {}) {
     if (disposed) return;
     visible = Boolean(show);
     logosOn = Boolean(logos);
@@ -140,7 +141,7 @@ export function installRegisterLayer(map, register, {beforeId, onSelect} = {}) {
     const col = colors();
     for (const id of [DOTS, SELECTED, HIT]) if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
     for (const id of [DOTS, HIT]) if (map.getLayer(id)) { map.setLayerZoomRange(id, Math.max(0, minZoom), 24); map.setFilter(id, filter); }
-    if (map.getLayer(DOTS)) { map.setLayoutProperty(DOTS, 'icon-size', logosOn ? SIZE.selection : SIZE.quiet); map.setPaintProperty(DOTS, 'icon-opacity', logosOn ? OPACITY.selection : OPACITY.quiet); map.setPaintProperty(DOTS, 'icon-color', col.fill); map.setPaintProperty(DOTS, 'icon-halo-color', col.halo); }
+    if (map.getLayer(DOTS)) { map.setLayoutProperty(DOTS, 'icon-size', quiet ? SIZE.quiet : SIZE.selection); map.setPaintProperty(DOTS, 'icon-opacity', quiet ? OPACITY.quiet : OPACITY.selection); map.setPaintProperty(DOTS, 'icon-color', col.fill); map.setPaintProperty(DOTS, 'icon-halo-color', col.halo); }
     if (map.getLayer(SELECTED)) { map.setFilter(SELECTED, selected == null ? NONE : ['==', ['get', 'i'], selected]); map.setPaintProperty(SELECTED, 'circle-stroke-color', col.selected); }
     layoutLogos();
     if (visible) relayout();

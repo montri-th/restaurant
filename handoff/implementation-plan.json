@@ -3,8 +3,8 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.6.2",
-  "updatedOn": "2026-10-28",
+  "productVersion": "0.7.0",
+  "updatedOn": "2026-10-30",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
   "humanPlan": "IMPLEMENTATION_PLAN.md",
@@ -596,6 +596,38 @@
         "handoff/VERIFICATION.md"
       ],
       "status": "done"
+    },
+    {
+      "id": "P17",
+      "title": "0.7.0: one vocabulary across both sheets (owner 2026-10-29 23:39 “ตอนนี้เวบยังแยกร้านทะเบียนร้านเครืออยู่เลย เลิกซะที … ปรับใหม่ให้ search / filter / คำนวณ / aggregate รวมกันทั้งสองตาราง · เอา logo + brand ขึ้นก่อนชื่อสาขา ทั้ง map ป้าย และ side bar · ข้อความใน side bar ให้กระชับ · google search AI mode, streetview, search ด้วย context”) — one chain index (brand filter = chain, brand page replaces the register chain view), derived food type for outlets, brand-first entries with logos, rows without a coordinate said everywhere, fresh province list per render, outbound AI Mode / Street View / Maps row, condensed panel copy",
+      "dependsOn": [
+        "P16"
+      ],
+      "acceptanceCriteria": [
+        "AC45",
+        "AC46",
+        "AC47",
+        "AC48",
+        "AC49",
+        "AC50"
+      ],
+      "files": [
+        "js/chains.js",
+        "js/outbound.js",
+        "js/model.js",
+        "js/app.js",
+        "js/panel.js",
+        "js/register-panel.js",
+        "js/register-layer.js",
+        "js/profile-model.js",
+        "index.html",
+        "styles.css",
+        "tests/*.test.js",
+        "AGENTS.md",
+        "DATA_METHOD.md",
+        "handoff/VERIFICATION.md"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -906,6 +938,48 @@
       "expected": "?province=CBI reads ‘1,279 สาขาในทะเบียนร้านเครือในชลบุรี’ with the coverage sentence, tiles 1,279 ร้าน · — ร้าน/ตร.กม. · — รีวิว · 114 เครือร้าน, the scoped chain list, no area list, no Land hosts, the camera on the province frame, the 980 outlets with a point drawn at every zoom and counted as ร้านในจอ; the legend says ‘ชลบุรี · สาขาในทะเบียน’; the filter chip names the province; on a phone the map strip (#map-aha) states ‘N สาขาในทะเบียนร้านเครือ’ with a ทะเบียน button (0.6.1) instead of staying empty",
       "verificationType": "harness (probe-pop) + live",
       "result": "see VERIFICATION.md R10"
+    },
+    {
+      "id": "AC45",
+      "scenario": "Search “tp tea” (12 outlets, no coordinate, no province in the 28 Oct register)",
+      "expected": "the Aha reads “12 ร้าน · สาขาเครือ — ทุกร้านยังไม่มีพิกัดในทะเบียน จึงยังไม่อยู่บนแผนที่”, the 12 rows are listed chain first (TP TEA · Central World …), the chip “TP TEA 12” opens the chain page, the status line says “0 ร้านในจอ · บริบท 0 · ยังไม่มีพิกัด 12”, the province list is empty (never the previous query's provinces), the phone strip says the same",
+      "verificationType": "harness (probe-one tpTea, brandTpTea, phoneTpTea) + live",
+      "result": "see VERIFICATION.md R13"
+    },
+    {
+      "id": "AC46",
+      "scenario": "A chain is one page across both sheets",
+      "expected": "?brand=RBR-kfc (or ?chain=<register id>, or a chain chip) opens the overview under the brand filter: head with logo · KFC · Central Restaurants Group · tiles 1,274 ร้าน / 74 จังหวัด / 1,197 บนแผนที่ / ฟาสต์ฟู้ด, “ยังไม่มีพิกัด 77 ร้าน”, outbound row, provinces bars; the map frames every point of the chain nationwide with outlet pins at every zoom and no automatic three-area focus; the brand select lists every chain (792) with restaurants + outlets as one count",
+      "verificationType": "harness (brandKfc, chainLink, phoneBrand) + live",
+      "result": "see VERIFICATION.md R13"
+    },
+    {
+      "id": "AC47",
+      "scenario": "No register framing in the main flow",
+      "expected": "no tile, Aha, hint, legend, chip or list says “สาขาในทะเบียน”, “ทะเบียนร้านเครือ · ทั่วประเทศ” or “ดูทะเบียนร้านเครือ”; the split “ร้าน = N + M” appears in the provenance line only; the map chip reads “หมุดสาขา”, the legend item “สาขาเครือ”; the chains directory follows the main search and has no search box",
+      "verificationType": "tests (views, register) + harness",
+      "result": "see VERIFICATION.md R13"
+    },
+    {
+      "id": "AC48",
+      "scenario": "Outlets carry their chain's derived food type",
+      "expected": "?group=cafe holds 11,652 rows (2,597 restaurants + 9,055 outlets); KFC outlets read ฟาสต์ฟู้ด; the outlet panel prints the basis “ตามร้านชื่อเดียวกัน N ร้านในชุดข้อมูล (อนุมาน)” or “ตามรูปแบบที่ทะเบียนระบุ (อนุมาน)”; the Land in-vs-around table and the mix bars count outlets under their derived group; the group ‘สาขาร้านเครือ’ no longer exists; price, rating and reviews stay — on outlets",
+      "verificationType": "tests (data) + harness (groupCafe, outlet, land)",
+      "result": "see VERIFICATION.md R13"
+    },
+    {
+      "id": "AC49",
+      "scenario": "Brand first everywhere",
+      "expected": "every list entry, table row, popup and head reads logo (or the type cue) · เครือ · สาขา — “After You · Siam Paragon”, “TP TEA · Central World”; a row without a chain keeps its own name; outlet pins carry the chain logo from zoom 15 in every view (≤ 60 on screen)",
+      "verificationType": "tests (views, register) + harness screenshots + live",
+      "result": "see VERIFICATION.md R13"
+    },
+    {
+      "id": "AC50",
+      "scenario": "Outbound searches with the view's context",
+      "expected": "a “ค้นต่อ” row on the overview, brand, area, district, venue, building, store, outlet, company and Land views: AI Mode links with udm=50 and a pre-filled question (title), Street View (map_action=pano&viewpoint=lat,lng) where the view has a point, Google Maps; links open in a new tab with rel=\"noopener\"; no number of the product changes",
+      "verificationType": "tests (register) + harness (outbound hrefs) + live click-through",
+      "result": "see VERIFICATION.md R13"
     }
   ],
   "developerWorkflow": [
@@ -1044,6 +1118,12 @@
       "title": "Outlets without a coordinate (10,091; 3,241 with no province either) sit in the totals but on no map and in no density — a coordinate pass on the register would move them into the frames (research task)",
       "ownerRole": "research",
       "priority": "P3"
+    },
+    {
+      "id": "N22",
+      "title": "Register refresh of 2026-10-29 (sheet README: “ตรวจเติมโลโก้และพิกัด”: outlets 26,819 → 27,120, brands 1,049 → 1,149, companies 311 → 336, more logo files) is not in this build — the sheet exceeds the Drive export limit; rebuild chains.json, restaurants.json (moved rows), land.json and the logo registry from the owner's xlsx + logo zip when they arrive (0.7.1)",
+      "ownerRole": "data",
+      "priority": "P1"
     }
   ]
 }

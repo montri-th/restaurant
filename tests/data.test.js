@@ -59,8 +59,16 @@ test('membership is the source subdistrict: every row sits in an existing frame 
   for (const o of data.outlets) {
     assert.equal(o.kind, 'outlet');
     if (o.area) { const a = index.byId.get(o.area); assert.ok(a, `outlet area ${o.area}`); assert.equal(o.district, a.district); assert.equal(o.province, a.province); }
-    assert.ok(o.group >= 0 && o.groupId === 'register' && o.price === 'UNSPECIFIED' && o.rating == null && o.reviews == null);
+    // 0.7.0: an outlet sits in one of the ten food-type groups (its chain's derived type, else ไม่ระบุประเภท) and says how.
+    assert.ok(o.group >= 0 && data.groups[o.group]?.id === o.groupId && o.groupId !== 'register' && o.price === 'UNSPECIFIED' && o.rating == null && o.reviews == null);
+    if (o.groupBy) assert.ok(['rows', 'format'].includes(o.groupBy.how) && o.groupBy.groupId === o.groupId);
+    else assert.equal(o.groupId, 'unspecified');
   }
+  // The derivation is a majority of the chain's typed sheet-1 rows (≥ 3 rows, > half), so KFC's outlets read as fast food.
+  const kfc = data.outlets.find(o => /^kfc$/i.test(o.brand?.name || ''));
+  if (kfc) assert.equal(kfc.groupId, 'fastfood', 'KFC outlets inherit the chain type');
+  const typed = data.outlets.filter(o => o.groupBy?.how === 'rows').length;
+  assert.ok(typed > 1000, `outlets typed from the chain's rows: ${typed}`);
 });
 
 test('coordinates decode with the research formula on the z10 × 4096 grid and stay display positions', () => {

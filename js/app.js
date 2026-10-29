@@ -52,24 +52,25 @@
  *     Panel mode land opens one host at venue level (its building in the data colour, x-ray, eye camera).
  * URL: chains=1 (+ rq=query), chain, company, outlet, land.
  */
-import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, filterRows, summarize, hasPoint, productionLink} from './model.js';
+import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink} from './model.js';
 import {buildAreaIndex, areaWord, districtWord, areaLocator} from './areas.js';
 import {summarizeAreaInsight, filterAreaRows, MIN_AREA_ROWS} from './area-insight.js';
 import {renderInsightChart} from './charts.js';
 import {loadMapLibrary} from './vendors.js';
 import {installRestaurantPins, PIN_LAYERS} from './pins.js';
 import {installVenueBuildings, hostedVenueIds, HOST_LAYERS, LAND_LAYERS} from './buildings.js';
-import {decodeRegister, brandsIn, provincesIn, outletMix, searchRegister} from './register.js';
+import {decodeRegister} from './register.js';
 import {installRegisterLayer, REGISTER_MIN_ZOOM} from './register-layer.js';
 import {decodeLand, applyOutletDisplay, applyRowDisplay, landOfRow, landOfOutlet, landProfile, hostsOf, aroundGeometry, geometryBounds} from './land.js';
-import {renderRegisterSummary, renderRegisterInArea, renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderChain, renderCompany, renderOutlet, renderLand, setSourceDates} from './register-panel.js';
+import {renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderCompany, renderOutlet, renderLand, setSourceDates, registerChecked} from './register-panel.js';
+import {buildChainIndex, chainsOf, chainLabel} from './chains.js';
 import {installVenueXray} from './venue-xray.js';
 import {configureBrandLogos, brandLogoMarkup} from './brand-logos.js';
 import {configureVenueLogos} from './venue-logos.js';
 import {installAreaLayers, installAreaLabels, buildAreaModel, featureBounds, FILL_MAX_ZOOM, AREA_MIN_ZOOM} from './map-layers.js';
 import {installProvinceLayers, buildProvinceModel, provinceBounds, PROVINCE_FILL_MAX_ZOOM, PROVINCE_LABEL_MAX_ZOOM} from './provinces.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile, buildBuildingProfile} from './profile-model.js';
-import {renderOverview, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate} from './panel.js';
+import {renderOverview, renderBrandHead, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate, heading} from './panel.js';
 import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint} from './building-join.js';
 import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE} from './map-style.js';
 import {installMassing, outerRings} from './massing.js';
@@ -96,14 +97,15 @@ const state = {
   pins: null, buildings: null, massing: null, xray: null, areaLayers: null, labels: null, areaModel: null,
   provinceLayers: null, provinceLabels: null, provinceModel: null, rowById: new Map(), venueById: new Map(), brandById: new Map(),
   scopeKey: '', join: null, buildingSel: null, labelView: new Map(), renderedSig: '', locateArea: null,
-  // Chain register (data/chains.json) and the Land join (data/land.json + land-buildings.geojson): loaded after the first
-  // paint (or before it when the URL opens one of their views). Separate units: never added to the snapshot's counts.
-  register: null, land: null, landGeo: null, extras: null, extrasState: 'idle', registerLayer: null, landBuildings: null, registerQuery: '',
+  // Chain register (data/chains.json — loaded with the snapshot since 0.6.0: one population) and the Land join
+  // (data/land.json + land-buildings.geojson, after the first paint or before it when the URL opens a Land view).
+  register: null, land: null, landGeo: null, extras: null, extrasState: 'idle', registerLayer: null, landBuildings: null,
   landByUuid: new Map(), venueLand: new Map(), landVenue: new Map(), nationalOf: new Map(), snapshotOf: new Map(), registerShown: 0,
-  showRegister: true, // every register outlet as a dot from city zoom (map chip “ร้านเครือ”; ?rdots=0 hides them)
+  chains: null, chainGroups: new Map(), // one chain index across both sheets (js/chains.js); register brand id → derived food type
+  showRegister: true, // every chain outlet as a pin from city zoom (map chip “หมุดสาขา”; ?rdots=0 hides them)
 };
-/** Panel modes of the chain register (the snapshot keeps overview/district/area/venue/building/store; land is a snapshot view). */
-const REGISTER_MODES = new Set(['chains', 'chain', 'company', 'outlet']);
+/** Panel modes that come from the chain register (the directory, a company, an outlet); a chain itself is the brand filter. */
+const REGISTER_MODES = new Set(['chains', 'company', 'outlet']);
 const registerMode = () => REGISTER_MODES.has(state.panel.mode);
 /** Area frames, labels and context dots of the snapshot are shown in every view (the register shares the map). */
 const areasShown = () => state.showAreas;
@@ -171,8 +173,7 @@ function saveURL() {
   if (!state.showRegister) p.set('rdots', '0');
   if (state.panel.mode === 'store' && state.panel.id) p.set('store', state.panel.id);
   if (state.panel.mode === 'venue' && state.panel.id) p.set('place', state.panel.id);
-  if (state.panel.mode === 'chains') { p.set('chains', '1'); if (state.registerQuery.trim()) p.set('rq', state.registerQuery.trim()); }
-  if (state.panel.mode === 'chain' && state.panel.id) p.set('chain', state.panel.id);
+  if (state.panel.mode === 'chains') p.set('chains', '1');
   if (state.panel.mode === 'company' && state.panel.id) p.set('company', state.panel.id);
   if (state.panel.mode === 'outlet' && state.panel.id) p.set('outlet', state.panel.id);
   if (state.panel.mode === 'land' && state.panel.id) p.set('land', state.panel.id);
@@ -218,7 +219,8 @@ function update({fit = false} = {}) {
   state.baseRows = area ? state.scopeRows.filter(r => r.area === area.id) : district ? state.scopeRows.filter(r => r.district === district.id) : state.scopeRows;
   state.coverage = scopedCoverage({province: f.province, district: district?.id || ''});
   state.insight = summarizeAreaInsight(district ? state.baseRows : state.scopeRows, state.index, {coverage: state.coverage});
-  state.focusIds = state.focusAreaIds.length ? state.focusAreaIds : (state.autoFocus && !area && !district ? state.insight.areaIds : []);
+  // A chain's page (brand filter) shows every row of the chain with detail: no automatic three-area focus there.
+  state.focusIds = state.focusAreaIds.length ? state.focusAreaIds : (state.autoFocus && !area && !district && !f.brand ? state.insight.areaIds : []);
   state.rows = state.focusIds.length ? filterAreaRows(state.baseRows, new Set(state.focusIds)) : state.baseRows;
   state.page = 0;
   if (update.modelScope !== state.scopeRows || update.modelProvince !== f.province) {
@@ -247,7 +249,7 @@ function update({fit = false} = {}) {
   $('filter-count').textContent = activeFilterCount(f) ? String(activeFilterCount(f)) : '';
   $('filter-chips').innerHTML = renderFilterChips(f, {
     group: Object.fromEntries(state.data.groups.map(g => [g.id, g.th])), price: PRICE_LABELS,
-    province: Object.fromEntries(ALL_PROVINCES.map(p => [p.code, p.th])), brand: Object.fromEntries(state.data.brands.map(b => [b.id, b.name])), venue: {}});
+    province: Object.fromEntries(ALL_PROVINCES.map(p => [p.code, p.th])), brand: Object.fromEntries((state.chains?.list || []).map(c => [c.key, c.name])), venue: {}});
   renderPanel(s);
   renderLegend();
   if (state.loaded) {
@@ -396,18 +398,6 @@ function landHostsIn(areaIds, {limit = 12} = {}) {
 /** The main Land host of a building (shopping, then office, then hotel). */
 const mainLandHost = building => hostsOf(state.land, building)[0] || null;
 
-/** Register outlets of the selected area / district (polygon test on the outlet point, covered provinces only). */
-function registerPlace() {
-  const reg = state.register;
-  if (!reg) return null;
-  const area = state.selectedArea ? areaById(state.selectedArea) : null;
-  const district = !area && state.selectedDistrict ? districtById(state.selectedDistrict) : null;
-  if (area) return {label: `${areaWord(area.province)}${area.name}`, outlets: reg.byArea.get(area.id) || []};
-  if (district) return {label: `${districtWord(district.province)}${district.name}`, outlets: reg.byDistrict.get(district.id) || []};
-  const code = $('province').value, p = code ? provinceByCode(code) : null;
-  return p ? {label: p.th, outlets: reg.byProvince.get(p.code) || []} : null;
-}
-
 /** The table and its counter: the snapshot rows that carry detail (register views keep the filtered rows). */
 const tableRows = () => (registerMode() ? state.rows : detailRows());
 function syncList() {
@@ -475,8 +465,10 @@ function renderCrumbs() {
   $('crumbs').innerHTML = renderBreadcrumb(crumbs);
   const reg = state.register;
   const title = mode === 'store' ? `${rowById(id)?.name || ''} · ` : mode === 'building' ? 'อาคาร · ' : mode === 'land' ? `${currentLand()?.name || ''} · ` : '';
-  const regTitle = mode === 'chain' ? reg?.brandById.get(id)?.name : mode === 'company' ? reg?.companyById.get(id)?.name : mode === 'outlet' ? (reg?.byId.get(id)?.name || reg?.byId.get(id)?.brand.name) : '';
-  document.title = registerMode() ? `${regTitle ? `${regTitle} · ` : ''}ทะเบียนร้านเครือ · Restaurants · CityMETER` : `${title}${breadcrumbText(crumbs)} · Restaurants · CityMETER`;
+  const o = mode === 'outlet' ? reg?.byId.get(id) : null;
+  const regTitle = mode === 'company' ? reg?.companyById.get(id)?.name : o ? `${o.brand.name}${o.name && o.name !== o.brand.name ? ` ${o.name}` : ''}` : mode === 'chains' ? 'เครือร้าน' : '';
+  const chain = !registerMode() && $('brand').value ? chainLabel(state.chains?.byKey.get($('brand').value)) : '';
+  document.title = registerMode() ? `${regTitle ? `${regTitle} · ` : ''}Restaurants · CityMETER` : `${title}${chain ? `${chain} · ` : ''}${breadcrumbText(crumbs)} · Restaurants · CityMETER`;
   return crumbs;
 }
 
@@ -489,28 +481,24 @@ const densityClassOf = a => {
 
 const extrasPending = () => state.extrasState === 'idle' || state.extrasState === 'loading';
 
-const extrasNote = () => `<section class="panel-section"><p class="hint">${extrasPending() ? 'กำลังโหลดทะเบียนร้านเครือและข้อมูลอาคาร…' : 'โหลดทะเบียนร้านเครือหรือข้อมูลอาคารไม่สำเร็จ ข้อมูลร้านอาหารยังใช้งานได้'}</p></section>`;
+const extrasNote = () => `<section class="panel-section"><p class="hint">${extrasPending() ? 'กำลังโหลดข้อมูลอาคาร…' : 'โหลดข้อมูลอาคารไม่สำเร็จ ข้อมูลร้านยังใช้งานได้'}</p></section>`;
+const landLoading = () => `<section class="panel-section"><div class="section-heading">${heading('venue', 'อาคารในทะเบียน Land')}</div><p class="hint">กำลังโหลดข้อมูลอาคาร…</p></section>`;
 
-/** Overview: the register at a glance and the Land hosts holding the most restaurant points (scope = filters). */
+/** Overview: the Land hosts holding the most restaurant points (scope = filters). */
 function overviewExtras() {
-  if (extrasPending()) return renderRegisterSummary({loading: true});
-  const reg = state.register;
-  if (reg && !overviewExtras.top) overviewExtras.top = reg.brands.filter(b => !b.registry).sort((a, b) => b.outlets - a.outlets || a.name.localeCompare(b.name)).slice(0, 10);
+  if (extrasPending()) return landLoading();
   const province = $('province').value;
   const areaIds = province ? new Set([...state.coveredIds].filter(a => areaById(a)?.province === province)) : new Set();
   const p = province ? provinceByCode(province) : null;
   // The Land register's hosts all lie in the covered provinces: a จังหวัด outside them lists none (not every host).
-  const hosts = province && !areaIds.size ? [] : landHostsIn(areaIds, {limit: 8});
-  // With a จังหวัด filter the scoped chain list above already ranks the chains: the nationwide chips would repeat it.
-  return (reg ? renderRegisterSummary({meta: reg.meta, brands: province ? [] : overviewExtras.top, chainCount: reg.chainCount, registries: reg.registries}) : '') +
-    renderLandHostsIn(hosts, {boundary: p ? `host ใน${p.th}` : 'host ใน 7 จังหวัดที่ข้อมูลร้านครอบคลุม'});
+  const hosts = province && !areaIds.size ? [] : landHostsIn(areaIds, {limit: 6});
+  return renderLandHostsIn(hosts, {boundary: p ? `host ใน${p.th}` : 'host ใน 7 จังหวัดที่ข้อมูลร้านครอบคลุม'});
 }
 
-/** Area / district: register outlets whose points lie in the frame, and the Land hosts there. */
-function placeExtras(outlets, place, areaIds) {
-  if (extrasPending()) return renderRegisterInArea({loading: true});
-  return (state.register ? renderRegisterInArea({outlets, brands: brandsIn(outlets, Infinity), place, meta: state.register.meta}) : '') +
-    renderLandHostsIn(landHostsIn(areaIds, {limit: 10}), {boundary: `host ใน${place}`});
+/** Area / district: the Land hosts there (the chains of the frame, outlets included, are in the profile already). */
+function placeExtras(place, areaIds) {
+  if (extrasPending()) return landLoading();
+  return renderLandHostsIn(landHostsIn(areaIds, {limit: 8}), {boundary: `host ใน${place}`});
 }
 
 /** Venue: the Land host recording the same CityMETER venue uuid. */
@@ -529,14 +517,13 @@ function buildingExtras() {
   return best ? renderLandHostsIn([landEntry(best[0])], {title: 'อาคารในทะเบียน Land ที่จุดของร้านเหล่านี้ตก', boundary: 'อาคารที่จุดของร้านในแผงนี้ตกมากที่สุด'}) : '';
 }
 
-/** Store: the Land building its point falls in, and its links to the chain register. */
+/** Store: the Land building its point falls in, and — for a row the owner moved to the register — where it is counted. */
 function storeExtras(id) {
   const r = rowById(id);
   if (!r) return {};
   const reg = state.register;
   const land = state.land ? renderStoreLand(landOfRow(state.land, id)) : '';
-  const register = renderStoreRegister({row: r, national: (r.brand && state.nationalOf.get(r.brand.id)) || [], register: r.register,
-    targets: reg ? r.registerTargets.map(t => reg.byId.get(t)).filter(Boolean) : []});
+  const register = renderStoreRegister({row: r, register: r.register, targets: reg ? r.registerTargets.map(t => reg.byId.get(t)).filter(Boolean) : []});
   return {extraFacts: land + register};
 }
 
@@ -567,34 +554,25 @@ function renderExtraView(mode, id) {
     const profile = landProfile(state.land, h, {rowsByKey: state.rowById, outletsById: reg?.byId, scopeKeys: scopeKeySet()});
     const inside = new Set(profile.rows.in.map(r => r.id));
     const around = profile.feature ? aroundGeometry(profile.feature.geometry, state.scopeRows, 100, inside) : [];
-    return renderLand({land: state.land, profile, around, groups: state.data.groups, venue: state.landVenue.get(h.id) || null, index: state.index});
+    return renderLand({land: state.land, profile, around, groups: state.data.groups, venue: state.landVenue.get(h.id) || null, index: state.index,
+      chains: chainsOf([...profile.rows.in, ...profile.outlets.in], state.chains, Infinity)});
   }
   if (!reg) return extrasNote();
-  const place = registerPlace();
   if (mode === 'chains') {
-    if (!renderExtraView.mix) renderExtraView.mix = outletMix(reg.outlets);
-    return renderChains({reg, query: state.registerQuery, results: searchRegister(reg, state.registerQuery), mix: renderExtraView.mix,
-      area: place, areaOutlets: place?.outlets || null, areaBrands: place ? brandsIn(place.outlets, Infinity) : []});
-  }
-  if (mode === 'chain') {
-    const brand = reg.brandById.get(id);
-    if (!brand) return extrasNote();
-    const outlets = reg.byBrand.get(id) || [];
-    const snap = (state.snapshotOf.get(id) || []).slice().sort((a, b) => b.rows - a.rows)[0];
-    return renderChain({reg, brand, outlets, provinces: provincesIn(outlets, reg.provinces), mix: outletMix(outlets),
-      area: place, inArea: place ? place.outlets.filter(o => o.brand.id === id) : [], snapshot: snap ? {brand: snap, count: snap.rows} : null,
-      operators: brand.family ? reg.brands.filter(b => b.family === brand.family) : []});
+    // The directory follows the filters: every chain of the scope, restaurants and outlets together.
+    const chains = chainsOf(state.scopeRows, state.chains, Infinity);
+    return renderChains({reg, chains, scopeCount: state.scopeRows.length, withPoint: state.scopeRows.filter(hasPoint).length, query: values().search.trim()});
   }
   if (mode === 'company') {
     const company = reg.companyById.get(id);
     if (!company) return extrasNote();
     const outlets = reg.byCompany.get(id) || [];
-    return renderCompany({reg, company, brands: brandsIn(outlets, 200), outlets, mix: outletMix(outlets)});
+    return renderCompany({reg, company, chains: chainsOf(outlets, state.chains, Infinity), rows: outlets, withPoint: outlets.filter(o => o.hasPoint).length});
   }
   if (mode === 'outlet') {
     const o = reg.byId.get(id);
     if (!o) return extrasNote();
-    return renderOutlet({reg, outlet: o, area: o.area ? areaById(o.area) : null, land: state.land ? landOfOutlet(state.land, o.id) : null, sameBrand: sameBrandNear(o)});
+    return renderOutlet({reg, outlet: o, area: o.area ? areaById(o.area) : null, land: state.land ? landOfOutlet(state.land, o.id) : null, sameBrand: sameBrandNear(o), group: state.data.groups[o.group] || null});
   }
   return extrasNote();
 }
@@ -610,26 +588,35 @@ function renderPanel(summary = summarize(state.rows)) {
   if (registerMode() || mode === 'land') html = renderExtraView(mode, id);
   else if (mode === 'area') {
     const a = areaById(id);
-    html = renderArea(buildAreaProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds}), meta,
-      a ? placeExtras(state.register?.byArea.get(id) || [], `${areaWord(a.province)}${a.name}`, [id]) : '');
+    html = renderArea(buildAreaProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds}), meta, a ? placeExtras(`${areaWord(a.province)}${a.name}`, [id]) : '');
   } else if (mode === 'district') {
     const d = districtById(id);
-    html = renderDistrict(buildDistrictProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds}), densityClassOf, meta,
-      d ? placeExtras(state.register?.byDistrict.get(id) || [], `${districtWord(d.province)}${d.name}`, (d.areas || []).map(a => a.id)) : '');
+    html = renderDistrict(buildDistrictProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds}), densityClassOf, meta, d ? placeExtras(`${districtWord(d.province)}${d.name}`, (d.areas || []).map(a => a.id)) : '');
   }
   else if (mode === 'venue') html = renderVenue(buildVenueProfile(state.scopeRows, state.venueById.get(id), state.index, groups, {hosted: state.hosted.has(id), spatial: venueSpatial(id)}), state.index, meta, venueExtras(id));
   else if (mode === 'building') html = renderBuilding(buildBuildingProfile(currentBuilding(), state.index, groups), {...meta, index: state.index}, buildingExtras());
   else if (mode === 'store') html = renderStore(buildStoreDetail(rowById(id), {scopeRows: state.scopeRows, index: state.index, groups, building: storeBuilding(id)}), {...meta, index: state.index}, storeExtras(id));
   state.renderedSig = panelSpatialSig();
   if (!html) {
-    const province = $('province').value;
+    const f = values(), province = f.province;
     const overview = buildOverview(state.scopeRows, state.index, {province});
-    const pmodel = state.provinceModel || buildProvinceModelSafe();
-    const provinces = province ? [] : (pmodel.provinces || pmodel).filter(p => p.count > 0).sort((a, b) => b.count - a.count).map(p => ({...p, covered: isCoveredProvince(p.code)}));
+    // The province list is built from the scope being rendered — never from the model the map drew for the previous
+    // filters (seen live on 0.6.2: a search listed the provinces of the query before it).
+    const pmodel = buildProvinceModelSafe();
+    const provinces = province ? [] : pmodel.provinces.filter(p => p.count > 0).sort((a, b) => b.count - a.count).map(p => ({...p, covered: isCoveredProvince(p.code)}));
     const insight = focusMode() === 'explicit' ? summarizeAreaInsight(state.rows, state.index, {coverage: state.coverage, minRows: 1}) : state.insight;
+    const chains = chainsOf(state.scopeRows, state.chains, 10);
+    const q = f.search.trim().toLocaleLowerCase('th-TH');
+    // Chains whose name holds the query: one tap to the chain's page (the search already filtered their rows).
+    const searchChains = q ? chainsOf(state.scopeRows, state.chains, Infinity).filter(c => chainLabel(c).toLocaleLowerCase('th-TH').includes(q)).slice(0, 12) : [];
+    const noPoint = state.scopeRows.reduce((n, r) => n + (hasPoint(r) ? 0 : 1), 0);
+    // A small scope (a search, a chain, a province of a few outlets) is listed in the panel, chain first.
+    const listRows = !f.brand && state.scopeRows.length <= 40 && (q || noPoint) ? [...state.scopeRows].sort((a, b) => (b.reviews ?? -1) - (a.reviews ?? -1) || (a.brand?.name || a.name).localeCompare(b.brand?.name || b.name, 'th')) : null;
+    const brandHead = f.brand ? brandPageHead(f.brand, province) : '';
     html = renderOverview({insight, summary, overview, focusMode: focusMode(), classOf: densityClassOf, provinces, meta, coverage: state.coverage, province, extra: overviewExtras(),
-      population: {moved: state.data.moved?.length || 0}, unknownProvince: province ? 0 : (pmodel.unknown ?? state.scopeRows.filter(r => r.kind === 'outlet' && !r.province).length)});
-    renderMapAha(insight, summary);
+      unknownProvince: province ? 0 : (pmodel.unknown ?? state.scopeRows.filter(r => r.kind === 'outlet' && !r.province).length),
+      chains, chainTotal: chains.total, noPoint, filtered: activeFilterCount(f) > 0, listRows, brandHead, search: f.search.trim(), searchChains, index: state.index});
+    renderMapAha(insight, summary, {noPoint});
   } else {
     $('map-aha').hidden = true;
   }
@@ -641,14 +628,26 @@ function renderPanel(summary = summarize(state.rows)) {
   renderPanel.lastKey = key;
 }
 
-function renderMapAha(insight, summary = null) {
+function renderMapAha(insight, summary = null, {noPoint = 0} = {}) {
   const el = $('map-aha');
   const crumb = `<p class="map-aha-crumb">${esc(breadcrumbText(buildBreadcrumb({province: $('province').value})))}</p>`;
+  const brand = $('brand').value ? state.chains?.byKey.get($('brand').value) : null;
+  if (brand && summary?.count) {
+    // A chain's strip reads chain first: name · rows · provinces (the three-area finding is not the point here).
+    const provinces = new Set(state.scopeRows.map(r => r.province).filter(Boolean)).size;
+    const lb = brand.logoBrand;
+    el.hidden = $('panel').classList.contains('is-open');
+    el.innerHTML = `<div>${crumb}<h2>${lb ? brandLogoMarkup(lb, {size: 'xs', className: 'map-aha-logo'}) : ''}${esc(chainLabel(brand))} · ${num(summary.count)} ร้าน</h2><p>${provinces ? `${num(provinces)} จังหวัด` : 'ไม่ระบุจังหวัด'}${noPoint ? ` · ยังไม่มีพิกัด ${num(noPoint)}` : ''}</p></div><button type="button" class="btn" data-action="open-table">รายการ</button>`;
+    return;
+  }
   if (!insight.areas.length) {
-    // A scope of outlets only (a จังหวัด outside the coverage): the strip states the count, as the panel's Aha does.
-    if (summary?.count && summary.outlets === summary.count && $('province').value) {
+    // No frame holds a row of this scope (a จังหวัด outside the coverage, a chain without points): the strip states
+    // the count and why the map is quiet, as the panel's Aha does.
+    if (summary?.count) {
+      const f = values();
+      const why = noPoint === summary.count ? 'ยังไม่มีพิกัดในทะเบียน จึงยังไม่อยู่บนแผนที่' : f.province ? 'ไม่มีแขวง/ตำบลที่นี่ — ข้อมูลร้านครอบคลุม 7 จังหวัด · หมุด = ร้านที่มีพิกัด' : 'หมุด = ร้านที่มีพิกัด';
       el.hidden = $('panel').classList.contains('is-open');
-      el.innerHTML = `<div>${crumb}<h2>${num(summary.count)} สาขาในทะเบียนร้านเครือ</h2><p>ไม่มีแขวง/ตำบลและความหนาแน่น — ชุดข้อมูลร้านครอบคลุม 7 จังหวัด</p></div><button type="button" class="btn" data-action="open-chains">ทะเบียน</button>`;
+      el.innerHTML = `<div>${crumb}<h2>${num(summary.count)} ร้าน${f.brand ? ` · ${esc(chainLabel(state.chains?.byKey.get(f.brand)) || '')}` : f.search ? ` · “${esc(f.search.trim())}”` : ''}</h2><p>${esc(why)}</p></div><button type="button" class="btn" data-action="open-table">รายการ</button>`;
       return;
     }
     el.hidden = true; return;
@@ -727,10 +726,13 @@ function selectStore(id, {fly = true, showPopup = false, fromPin = false} = {}) 
     state.lastPreset = cameraPreset();
     state.popup?.remove(); state.popup = null;
     if (showPopup && !mobilePortrait()) {
+      // Brand first (owner 2026-10-29): logo · เครือ, then the branch / rest of the name, then type and rating.
       const wrap = document.createElement('div'), h = document.createElement('h3'), p = document.createElement('p');
+      const parts = entryParts(r);
       wrap.innerHTML = brandLogoMarkup(r.brand, {size: 'sm', className: 'popup-logo'});
-      h.textContent = r.name;
-      p.textContent = [r.type || 'ไม่ระบุประเภท', Number.isFinite(r.rating) ? `★ ${dec(r.rating)}` : ''].filter(Boolean).join(' · ');
+      h.textContent = parts.primary;
+      if (parts.secondary) { const s = document.createElement('span'); s.className = 'entry-branch'; s.textContent = ` ${parts.secondary}`; h.append(s); }
+      p.textContent = [r.type || state.data.groups[r.group]?.th || 'ไม่ระบุประเภท', Number.isFinite(r.rating) ? `★ ${dec(r.rating)}` : ''].filter(Boolean).join(' · ');
       wrap.append(h, p);
       state.popup = new maplibregl.Popup({maxWidth: '280px', offset: 14, closeButton: true}).setLngLat([r.longitude, r.latitude]).setDOMContent(wrap).addTo(state.map);
     }
@@ -797,20 +799,18 @@ function openExtra(panel, {frame = true, fromMap = false, text = ''} = {}) {
 }
 
 function openChains() {
-  if (!state.register) return;
-  openExtra({mode: 'chains', id: ''}, {text: `ทะเบียนร้านเครือ ${num(state.register.meta.outlets)} สาขา`});
+  if (!state.chains) return;
+  openExtra({mode: 'chains', id: ''}, {text: `เครือร้าน ${num(state.chains.total)} เครือ`});
 }
-function selectChain(id) {
-  const b = state.register?.brandById.get(id);
-  if (b) openExtra({mode: 'chain', id}, {text: `${b.name} ${num(b.outlets)} สาขาในทะเบียน`});
-}
+/** A chain is the brand filter (0.7.0): one page for its restaurants and outlets together. */
+function selectChain(id) { filterBrand(id); }
 function selectCompany(id) {
   const c = state.register?.companyById.get(id);
   if (c) openExtra({mode: 'company', id}, {text: c.name});
 }
 function selectOutlet(id, {fromMap = false} = {}) {
   const o = state.register?.byId.get(id);
-  if (o) openExtra({mode: 'outlet', id}, {fromMap, text: `เลือก ${o.name || o.brand.name}`});
+  if (o) openExtra({mode: 'outlet', id}, {fromMap, text: `เลือก ${o.brand.name}${o.name && o.name !== o.brand.name ? ` ${o.name}` : ''}`});
 }
 function selectLand(id, {fromMap = false} = {}) {
   const h = state.land?.hostById.get(id);
@@ -821,8 +821,7 @@ function selectLand(id, {fromMap = false} = {}) {
 function registerSelection() {
   const reg = state.register, {mode, id} = state.panel;
   if (!reg) return {show: false};
-  if (mode === 'chains') return {show: true, selection: {}, count: reg.meta.stats?.withPoint ?? reg.outlets.filter(o => o.hasPoint).length};
-  if (mode === 'chain') { const b = reg.brandById.get(id); return b ? {show: true, selection: {brand: b.index}, count: (reg.byBrand.get(id) || []).filter(o => o.hasPoint).length} : {show: false}; }
+  if (mode === 'chains') { const pts = (state.scopeOutlets || []).filter(o => o.hasPoint); return {show: pts.length > 0, selection: state.scopeAllOutlets ? {} : {ids: pts.map(o => o.index)}, count: pts.length}; }
   if (mode === 'company') { const c = reg.companyById.get(id); return c ? {show: true, selection: {company: c.index}, count: (reg.byCompany.get(id) || []).filter(o => o.hasPoint).length} : {show: false}; }
   if (mode === 'outlet') { const o = reg.byId.get(id); return o ? {show: true, selection: {brand: o.brand.index}, selectedIndex: o.hasPoint ? o.index : null, count: (reg.byBrand.get(o.brand.id) || []).filter(x => x.hasPoint).length} : {show: false}; }
   if (mode === 'land') {
@@ -830,9 +829,11 @@ function registerSelection() {
     const ids = h && h.fp >= 0 ? (state.land.outletsByBuilding.get(h.fp) || []).map(k => reg.byId.get(k)).filter(o => o?.hasPoint).map(o => o.index) : [];
     return {show: ids.length > 0, selection: {ids}, count: ids.length};
   }
-  // A scope with outlets but no restaurant rows (a province outside the covered seven, the group ‘สาขาร้านเครือ’, a
-  // chain-only brand) shows its outlets at every zoom, as a register view would — they are all there is to see.
-  if ((state.scopeOutlets || []).length && !(state.scopeRestaurants || []).length) {
+  // A scope the user narrowed to a chain or a search, or one with outlets but no restaurant rows (a province outside
+  // the covered seven, a chain-only brand): its outlets show at every zoom — they are what there is to see.
+  const f = values();
+  const narrowed = Boolean(f.brand) || (Boolean(f.search.trim()) && (state.scopeOutlets || []).length <= 2000) || ((state.scopeOutlets || []).length && !(state.scopeRestaurants || []).length);
+  if (narrowed && (state.scopeOutlets || []).length) {
     const pts = state.scopeOutlets.filter(o => o.hasPoint);
     return {show: pts.length > 0, selection: state.scopeAllOutlets ? {} : {ids: pts.map(o => o.index)}, count: pts.length, scoped: true};
   }
@@ -900,7 +901,7 @@ function frameExtras({instant = false} = {}) {
     if (o?.hasPoint) framePoint(map, [o.longitude, o.latitude], {preset: state.view3d && !sheetOpen() ? 'model' : 'plan', zoom: 16.2, offset: sheetOffset(), animate: anim});
     return;
   }
-  const outlets = mode === 'chain' ? reg.byBrand.get(id) || [] : mode === 'company' ? reg.byCompany.get(id) || [] : registerPlace()?.outlets.length ? registerPlace().outlets : reg.outlets;
+  const outlets = mode === 'company' ? reg.byCompany.get(id) || [] : (state.scopeOutlets || []).length ? state.scopeOutlets : reg.outlets;
   const pts = outlets.filter(o => o.hasPoint);
   if (!pts.length) return;
   let w = 180, e = -180, s = 90, n = -90;
@@ -1086,9 +1087,17 @@ function clearFilter(key) {
   update({fit: key !== 'search'});
 }
 
+/** The chain key of any brand id: a sheet-1 candidate maps to its register brand (national[0]) when linked. */
+function chainKeyOf(id) {
+  if (!id) return '';
+  if (state.chains?.byKey.has(id)) return id;
+  const c = state.brandById.get(id);
+  return c ? (c.national?.[0] || c.id) : '';
+}
 function filterBrand(id) {
-  if (![...$('brand').options].some(o => o.value === id)) return;
-  $('brand').value = id;
+  const key = chainKeyOf(id);
+  if (!key || ![...$('brand').options].some(o => o.value === key)) return;
+  $('brand').value = key;
   state.selectedArea = ''; state.selectedDistrict = '';
   state.focusAreaIds = [];
   state.panel = overviewPanel();
@@ -1143,14 +1152,16 @@ function renderLegend() {
   panelEl.classList.toggle('has-register-dots', registerDotsShown());
   if (atProvince) {
     const m = state.provinceModel;
-    $('legend-title').textContent = 'จังหวัด · ร้านและสาขา';
-    steps.innerHTML = m?.classes.classes.length ? m.classes.classes.map(c => `<span class="legend-step"><i style="background:${c.fill}" aria-hidden="true"></i>${esc(c.label)}</span>`).join('') + (m.zeroCount ? '<span class="legend-step" title="จังหวัดที่ไม่มีร้านหรือสาขาตามตัวกรองนี้"><i class="legend-zero" aria-hidden="true"></i>0</span>' : '') : '<span class="hint">ไม่มีร้านในตัวกรองนี้</span>';
-    $('legend-areas').title = `ร้านต่อจังหวัด (ผลรวม: ร้านในชุดข้อมูล + สาขาในทะเบียนร้านเครือ) · ${m?.classes.classCount || 0} ระดับเท่าช่วง · ทั้ง 77 จังหวัด · สีเดียวกันทั้งสองธีม`;
-  } else if (isCoveredProvince($('province').value) === false) {
+    const noPoint = state.scopeRows.length && state.scopeRows.every(r => !hasPoint(r) && !r.province);
+    $('legend-title').textContent = 'จังหวัด · ร้าน';
+    steps.innerHTML = m?.classes.classes.length ? m.classes.classes.map(c => `<span class="legend-step"><i style="background:${c.fill}" aria-hidden="true"></i>${esc(c.label)}</span>`).join('') + (m.zeroCount ? '<span class="legend-step" title="จังหวัดที่ไม่มีร้านตามตัวกรองนี้"><i class="legend-zero" aria-hidden="true"></i>0</span>' : '')
+      : `<span class="hint">${noPoint ? 'ร้านตามตัวกรองยังไม่มีพิกัดและจังหวัดในทะเบียน' : 'ไม่มีร้านในตัวกรองนี้'}</span>`;
+    $('legend-areas').title = `ร้านต่อจังหวัด (ร้านในชุดข้อมูล + สาขาเครือ นับรวมกัน) · ${m?.classes.classCount || 0} ระดับเท่าช่วง · ทั้ง 77 จังหวัด · สีเดียวกันทั้งสองธีม`;
+  } else if ($('province').value && !isCoveredProvince($('province').value)) {
     // A จังหวัด outside the covered seven has no แขวง/ตำบล frames: the key says so instead of an empty scale.
-    $('legend-title').textContent = `${provinceByCode($('province').value)?.th || 'จังหวัด'} · สาขาในทะเบียน`;
-    steps.innerHTML = '<span class="hint">ชุดข้อมูลร้าน (ชีต 1) ครอบคลุม 7 จังหวัด จึงไม่มีสีแขวง/ตำบลที่นี่ · 1 หมุด = 1 สาขา</span>';
-    $('legend-areas').title = 'จังหวัดนอกชุดข้อมูลร้าน: มีเฉพาะสาขาในทะเบียนร้านเครือ';
+    $('legend-title').textContent = `${provinceByCode($('province').value)?.th || 'จังหวัด'} · ร้าน`;
+    steps.innerHTML = '<span class="hint">ข้อมูลร้านครอบคลุม 7 จังหวัด จึงไม่มีสีแขวง/ตำบลที่นี่ · 1 หมุด = 1 ร้าน</span>';
+    $('legend-areas').title = 'จังหวัดนอก 7 จังหวัดที่มีกรอบแขวง/ตำบล: ร้านที่มีพิกัดแสดงเป็นหมุด';
   } else {
     const m = state.areaModel;
     $('legend-title').textContent = 'แขวง/ตำบล · ร้าน/ตร.กม.';
@@ -1173,8 +1184,7 @@ function drawChart() {
   $('chart').setAttribute('aria-labelledby', 'tab-' + state.view);
   const narrowed = state.selectedArea || state.selectedDistrict || state.focusIds.length;
   // The tray cites its own source: a screenshot of the charts alone still names dataset · source · date · boundary.
-  const outlets = (state.scopeOutlets || []).length;
-  $('chart-scope').textContent = `${num(state.scopeRows.length)} ร้านในตัวกรอง${outlets ? ` (${num(state.scopeRestaurants.length)} ร้าน + ${num(outlets)} สาขาในทะเบียน)` : ''}${narrowed ? ' · ทุกพื้นที่' : ''} · CityMETER Restaurants API ดึง ${thaiDate(state.data.meta?.retrievedOn || state.data.meta?.asOf || '')} + ทะเบียนร้านเครือ · แขวง/ตำบล 7 จังหวัด (ขอบเขต CityMETER)`;
+  $('chart-scope').textContent = `${num(state.scopeRows.length)} ร้านในตัวกรอง${narrowed ? ' · ทุกพื้นที่' : ''} · CityMETER Restaurants API ดึง ${thaiDate(state.data.meta?.retrievedOn || state.data.meta?.asOf || '')} + ทะเบียนร้านเครือ · แขวง/ตำบล 7 จังหวัด (ขอบเขต CityMETER)`;
   if ($('insight-content').hidden) return;
   chartDispose = renderInsightChart({elementId: 'chart', view: state.view, rows: state.scopeRows, index: state.index, groups: state.data.groups, theme: theme(), selectedAreaId: state.selectedArea},
     selection => { if (selection.type === 'area') selectArea(selection.id, {fromMap: true}); });
@@ -1208,12 +1218,15 @@ function renderTable() {
   $('result-rows').innerHTML = rs.map(r => {
     const a = areaById(r.area);
     const outlet = r.kind === 'outlet';
-    return `<tr><td><button type="button" class="row-name brand-row" data-id="${esc(r.id)}">${brandLogoMarkup(r.brand, {size: 'xs'})}<span>${esc(r.name)}</span></button><small>${esc(outlet ? `สาขาในทะเบียน${r.floor ? ` · ชั้น ${r.floor}` : ''}` : r.type || 'ไม่ระบุประเภท')}</small></td>
+    const parts = entryParts(r), g = state.data.groups[r.group];
+    // Brand first (owner 2026-10-29): logo · เครือ · สาขา; an outlet's type is its chain's derived type.
+    const type = outlet ? `${g?.id !== 'unspecified' ? `${g?.th || ''} (ตามเครือ) · ` : ''}สาขาเครือ${r.floor ? ` · ชั้น ${r.floor}` : ''}` : r.type || 'ไม่ระบุประเภท';
+    return `<tr><td><button type="button" class="row-name brand-row" data-id="${esc(r.id)}">${brandLogoMarkup(r.brand, {size: 'xs'})}<span><strong>${esc(parts.primary)}</strong>${parts.secondary ? ` <span class="entry-branch">${esc(parts.secondary)}</span>` : ''}</span></button><small>${esc(type)}</small></td>
       <td>${outlet ? '<span class="hint">—</span>' : esc(PRICE_LABELS[r.price])}</td>
       <td>${Number.isFinite(r.rating) ? `★ <span class="data-number">${dec(r.rating)}</span>` : `<span class="hint">${outlet ? '—' : 'ไม่มีคะแนน'}</span>`}<small>${Number.isFinite(r.reviews) ? `${num(r.reviews)} รีวิว` : ''}</small></td>
-      <td>${a ? `${esc(areaWord(a.province))}${esc(a.name)}<small>${esc(districtWord(a.province))}${esc(a.districtName)} · ${esc(provinceByCode(a.province)?.th || '')}</small>` : r.province ? `${esc(provinceByCode(r.province)?.th || r.province)}<small>${outlet ? 'จังหวัดจากทะเบียน · ไม่มีแขวง/ตำบลในชุดข้อมูล' : 'ไม่มีแขวง/ตำบล'}</small>` : '<span class="hint">ไม่ทราบจังหวัด</span>'}</td>
+      <td>${a ? `${esc(areaWord(a.province))}${esc(a.name)}<small>${esc(districtWord(a.province))}${esc(a.districtName)} · ${esc(provinceByCode(a.province)?.th || '')}</small>` : r.province ? `${esc(provinceByCode(r.province)?.th || r.province)}<small>${outlet ? 'จังหวัดจากทะเบียน · ไม่มีแขวง/ตำบล' : 'ไม่มีแขวง/ตำบล'}</small>` : '<span class="hint">ไม่ทราบจังหวัด</span>'}</td>
       <td>${r.brand ? esc(r.brand.name) : '<span class="hint">—</span>'}${r.venue ? `<small>${esc(r.venue.name)}</small>` : ''}</td>
-      <td>${hasPoint(r) ? `<small class="data-number">${(r.sourceLatitude ?? r.latitude).toFixed(5)}, ${(r.sourceLongitude ?? r.longitude).toFixed(5)}</small>` : '<span class="hint">ไม่มีจุด</span>'}</td></tr>`;
+      <td>${hasPoint(r) ? `<small class="data-number">${(r.sourceLatitude ?? r.latitude).toFixed(5)}, ${(r.sourceLongitude ?? r.longitude).toFixed(5)}</small>` : '<span class="hint">ยังไม่มีพิกัด</span>'}</td></tr>`;
   }).join('') || '<tr><td colspan="6">ไม่พบร้านตามตัวกรอง</td></tr>';
   $('page-label').textContent = list.length ? `${num(start + 1)}–${num(Math.min(start + pageSize, list.length))} / ${num(list.length)}` : '0 ร้าน';
   $('prev-page').disabled = state.page === 0;
@@ -1259,10 +1272,17 @@ function fitMap({instant = false} = {}) {
   if (area) { fitFeature(area.feature, {instant}); return; }
   const district = state.selectedDistrict ? districtById(state.selectedDistrict) : null;
   if (district) { fitFeature(district.feature, {maxZoom: 16, instant}); return; }
-  const focusFeatures = state.focusIds.map(id => areaById(id)?.feature).filter(Boolean);
+  const f = values();
+  // A chain or a small search (0.7.0): every point of the scope, wherever it is, rather than the three focus areas.
+  const narrowPoints = f.brand || (f.search.trim() && state.scopeRows.length < 5000) ? state.scopeRows.filter(hasPoint) : [];
+  const focusFeatures = narrowPoints.length ? [] : state.focusIds.map(id => areaById(id)?.feature).filter(Boolean);
   const b = new maplibregl.LngLatBounds();
-  const province = !focusFeatures.length && $('province').value ? provinceBounds(state.provincesGeo, $('province').value, maplibregl.LngLatBounds) : null;
-  if (focusFeatures.length) focusFeatures.forEach(f => featureBounds(f, maplibregl.LngLatBounds).toArray().forEach(p => b.extend(p)));
+  const province = !focusFeatures.length && !narrowPoints.length && f.province ? provinceBounds(state.provincesGeo, f.province, maplibregl.LngLatBounds) : null;
+  if (narrowPoints.length) {
+    let w = 180, e = -180, s = 90, n = -90;
+    for (const r of narrowPoints) { if (r.longitude < w) w = r.longitude; if (r.longitude > e) e = r.longitude; if (r.latitude < s) s = r.latitude; if (r.latitude > n) n = r.latitude; }
+    b.extend([w, s]); b.extend([e, n]);
+  } else if (focusFeatures.length) focusFeatures.forEach(f => featureBounds(f, maplibregl.LngLatBounds).toArray().forEach(p => b.extend(p)));
   else if (province) province.toArray().forEach(p => b.extend(p)); // a จังหวัด without focus areas (outside the covered seven): its own frame
   else {
     const rs = state.rows.filter(hasPoint);
@@ -1280,7 +1300,26 @@ function fitMap({instant = false} = {}) {
 /** Rows for the province frames: current filters WITHOUT the province filter, so every frame keeps its own count. */
 const provinceScopeRows = () => filterRows(state.data.rows, {...values(), province: ''});
 function buildProvinceModelSafe() {
-  try { return state.provincesGeo?.features?.length ? buildProvinceModel(provinceScopeRows(), state.provincesGeo).provinces : []; } catch { return []; }
+  const empty = {provinces: [], classes: null, zeroCount: 0, unknown: 0};
+  try { return state.provincesGeo?.features?.length ? buildProvinceModel(provinceScopeRows(), state.provincesGeo) : empty; } catch { return empty; }
+}
+
+/** The head of a chain's page (the overview under a brand filter): the chain, its rows in the scope, its derived type. */
+function brandPageHead(key, province) {
+  const chain = state.chains?.byKey.get(key);
+  if (!chain) return '';
+  const rows = state.scopeRows;
+  const derived = chain.register ? state.chainGroups.get(chain.register.id) || null : null;
+  // The type shown is the derived one for the register brand, else the majority group of the chain's rows here.
+  let group = derived ? state.data.groups.find(g => g.id === derived.groupId) || null : null;
+  if (!group && rows.length) {
+    const tally = new Map();
+    for (const r of rows) tally.set(r.group, (tally.get(r.group) || 0) + 1);
+    const top = [...tally].sort((a, b) => b[1] - a[1])[0];
+    group = top ? state.data.groups[top[0]] || null : null;
+  }
+  const evidence = chain.register ? chain.register.evidenceMix : null;
+  return renderBrandHead({chain, rows, group, groupBy: derived, province, evidence});
 }
 
 /**
@@ -1358,7 +1397,7 @@ function updateSpatialLayers() {
   state.provinceModel = pm;
   // Province labels print snapshot counts: under a register selection they would read as the chain's count.
   state.provinceLabels?.update(pm && !reg ? pm.provinces.filter(p => p.count > 0 || p.code === code).sort((a, b) => (b.code === code) - (a.code === code) || b.count - a.count)
-    .map(p => ({id: p.code, name: p.name, value: num(p.count), state: p.state, quiet: Boolean(code) && p.code !== code, selected: p.code === code, center: p.label, swatch: p.fill || '', title: `${p.name} · ${num(p.count)} ร้าน (ร้านและสาขา)`})) : [], {visible: !reg});
+    .map(p => ({id: p.code, name: p.name, value: num(p.count), state: p.state, quiet: Boolean(code) && p.code !== code, selected: p.code === code, center: p.label, swatch: p.fill || '', title: `${p.name} · ${num(p.count)} ร้าน`})) : [], {visible: !reg});
   const districtAreas = state.selectedDistrict ? (districtById(state.selectedDistrict)?.areas || []).map(a => a.id) : [];
   state.areaLayers?.update({model: state.areaModel, selectedId: state.selectedArea, focusIds: state.selectedDistrict ? districtAreas : state.focusIds, outlineFocus: !state.selectedDistrict, districtId: state.selectedDistrict, visible: areasShown()});
   state.labels?.update(areasShown() ? areaLabelItems() : [], {visible: areasShown()});
@@ -1392,12 +1431,13 @@ function updateSpatialLayers() {
   const hostColors = () => { const s = getComputedStyle(document.documentElement); return {fill: s.getPropertyValue('--map-active-layer').trim(), stroke: s.getPropertyValue('--map-selected-stroke').trim()}; };
   state.xray?.update(focusBuildingFeatures(), {colors: hostColors()});
   state.xray?.setEnabled(state.view3d);
-  // Register dots on the same map: a register view's or a Land host's selection at every zoom (with logos), else
-  // every outlet from city zoom as plain dots under the snapshot's symbols.
+  // Outlet pins on the same map: a selection (a chain, a search, a company, an outlet, a Land host, a province of
+  // outlets) at every zoom, else every outlet of the scope from city zoom under the restaurant symbols — with the
+  // chain's logo from LOGO_MIN_ZOOM either way (owner 2026-10-29: logo + brand first on the map too).
   const sel = registerSelection();
   state.registerShown = sel.show ? sel.count : 0;
   state.registerLayer?.update(sel.show ? {show: true, selection: sel.selection || {}, selectedIndex: sel.selectedIndex ?? null, minZoom: 0, logos: true}
-    : {show: state.showRegister && (state.scopeOutlets || []).length > 0, selection: state.scopeAllOutlets === false ? {ids: state.scopeOutlets.map(o => o.index)} : {}, minZoom: REGISTER_MIN_ZOOM, logos: false});
+    : {show: state.showRegister && (state.scopeOutlets || []).length > 0, selection: state.scopeAllOutlets === false ? {ids: state.scopeOutlets.map(o => o.index)} : {}, minZoom: REGISTER_MIN_ZOOM, logos: true, quiet: true});
   document.querySelector('.map-panel')?.classList.toggle('has-register-dots', registerDotsShown());
   state.pins?.layout();
 }
@@ -1527,9 +1567,12 @@ function installSpatialLayers() {
       // and the context dots; a register view names its selection (national) and the restaurants as context.
       const outletsInView = registerMode() ? 0 : outletsInViewCount();
       const pinsHidden = outletPinsHidden();
+      // Rows the filters keep but no map can draw (no coordinate in the register) are named whenever a filter is on.
+      const f = values();
+      const noPoint = activeFilterCount(f) ? state.scopeRows.reduce((n, r) => n + (hasPoint(r) ? 0 : 1), 0) : 0;
       $('map-status').textContent = registerMode()
-        ? `สาขาที่เลือก ${num(state.registerShown)} ทั้งประเทศ · ร้านในชุดข้อมูลเป็นจุดบริบท ${num(stats.contextRows)}`
-        : `${num(stats.focusInView + outletsInView)} ร้านในจอ${logos} · บริบท ${num(stats.contextRows)}${pinsHidden ? ' · หมุดสาขาแสดงจากซูมระดับเมือง' : ''}`;
+        ? `หมุดที่เลือก ${num(state.registerShown)} ทั้งประเทศ · ร้านอื่นเป็นจุดบริบท ${num(stats.contextRows)}`
+        : `${num(stats.focusInView + outletsInView)} ร้านในจอ${logos} · บริบท ${num(stats.contextRows)}${pinsHidden ? ' · หมุดสาขาเครือจากซูมเมือง' : ''}${noPoint ? ` · ยังไม่มีพิกัด ${num(noPoint)}` : ''}`;
     },
   });
   installExtraLayers();
@@ -1756,7 +1799,9 @@ function options(id, items) {
 
 function restoreFromURL() {
   const p = new URLSearchParams(location.search);
-  for (const f of FIELDS) if (p.has(f)) { const v = f === 'province' ? provinceCodeFrom(p.get(f)) : p.get(f); if (f === 'search' || [...($(f).options || [])].some(o => o.value === v)) $(f).value = v; }
+  for (const f of FIELDS) if (p.has(f)) { const v = f === 'province' ? provinceCodeFrom(p.get(f)) : f === 'brand' ? chainKeyOf(p.get(f)) : p.get(f); if (f === 'search' || [...($(f).options || [])].some(o => o.value === v)) $(f).value = v; }
+  // A chain link of 0.3–0.6 (?chain=<register brand id>) is the brand filter now.
+  if (p.get('chain') && !p.has('brand')) { const v = chainKeyOf(p.get('chain')); if ([...$('brand').options].some(o => o.value === v)) $('brand').value = v; }
   if (['density', 'mix', 'price'].includes(p.get('view'))) state.view = p.get('view');
   state.showRegister = p.get('rdots') !== '0';
   $('toggle-register')?.setAttribute('aria-pressed', String(state.showRegister));
@@ -1773,13 +1818,12 @@ function restoreFromURL() {
   else if (p.get('place') && state.venueById.has(p.get('place'))) state.panel = {mode: 'venue', id: p.get('place')};
   else if (p.get('land') && state.land?.hostById.has(p.get('land'))) state.panel = {mode: 'land', id: p.get('land')};
   else if (p.get('outlet') && state.register?.byId.has(p.get('outlet'))) state.panel = {mode: 'outlet', id: p.get('outlet')};
-  else if (p.get('chain') && state.register?.brandById.has(p.get('chain'))) state.panel = {mode: 'chain', id: p.get('chain')};
   else if (p.get('company') && state.register?.companyById.has(p.get('company'))) state.panel = {mode: 'company', id: p.get('company')};
-  else if (p.has('chains') && state.register) { state.panel = {mode: 'chains', id: ''}; state.registerQuery = (p.get('rq') || '').slice(0, 80); }
+  else if (p.has('chains') && state.register) { state.panel = {mode: 'chains', id: ''}; if (p.get('rq') && !$('search').value) $('search').value = p.get('rq').slice(0, 80); }
 }
 
-/** URL parameters that open a register or Land view (the extra data is awaited before the first render). */
-const EXTRA_PARAMS = ['chains', 'chain', 'company', 'outlet', 'land'];
+/** URL parameters that open a Land view (its data is awaited before the first render). */
+const EXTRA_PARAMS = ['land'];
 
 function wireEvents() {
   let timer;
@@ -1815,20 +1859,6 @@ function wireEvents() {
     if (registerMode() || state.panel.mode === 'land') { frameExtras(); return; }
     if (state.selectedArea || state.selectedDistrict || state.rows.length) fitMap();
   };
-  let searchTimer;
-  $('panel-view').addEventListener('input', event => {
-    if (event.target.id !== 'register-search') return;
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      // Raw value (the field is re-rendered from it); searchRegister trims for matching.
-      state.registerQuery = event.target.value.slice(0, 80);
-      renderPanel();
-      saveURL();
-      // The list re-renders under the field: keep typing where the caret was.
-      const el = $('register-search');
-      if (el) { el.focus({preventScroll: true}); const n = el.value.length; el.setSelectionRange(n, n); }
-    }, 250);
-  });
   $('bangkok-map').onclick = () => { if (state.map) applyPreset(state.map, state.view3d ? 'city' : 'plan', {center: BANGKOK.center, zoom: BANGKOK.zoom, animate: animate()}); };
   $('toggle-3d').onclick = toggle3d;
   $('toggle-eye').onclick = toggleTwoPoint;
@@ -1837,7 +1867,7 @@ function wireEvents() {
   $('toggle-register').onclick = () => {
     state.showRegister = !state.showRegister;
     $('toggle-register').setAttribute('aria-pressed', String(state.showRegister));
-    announce(state.showRegister ? 'แสดงจุดสาขาร้านเครือทุกสาขาจากซูมระดับเมือง' : 'ซ่อนจุดสาขาร้านเครือ (ยกเว้นเครือหรืออาคารที่เปิดอยู่)');
+    announce(state.showRegister ? 'แสดงหมุดสาขาเครือทุกสาขาจากซูมระดับเมือง' : 'ซ่อนหมุดสาขาเครือ (ยกเว้นเครือ อาคาร หรือคำค้นที่เปิดอยู่)');
     updateSpatialLayers(); saveURL();
   };
   $('mobile-panel').onclick = () => { $('panel').classList.contains('is-open') ? closeMobilePanel() : openMobilePanel(); };
@@ -1882,19 +1912,24 @@ async function init() {
     if (results[7].status === 'fulfilled') { try { state.register = decodeRegister(results[7].value, state.index); } catch (e) { console.warn('Chain register', e); } }
     else console.warn('Chain register', results[7].reason);
     linkExtras();
-    if (state.register) {
-      registerProvinces(state.register.provinces);
-      state.data.outlets = outletRows(state.register, state.data.groups, {snapshotOf: state.snapshotOf, index: state.index});
-      state.data.rows = [...state.data.rows, ...state.data.outlets];
-    } else state.data.outlets = [];
-    state.rowById = new Map([...state.data.rows, ...state.data.moved].map(r => [r.id, r]));
-    state.coveredIds = new Set(state.data.rows.map(r => r.area).filter(Boolean));
-    state.coverage = scopedCoverage();
     const brandLogos = configureBrandLogos(results[5].status === 'fulfilled' ? results[5].value : {assets: []});
     if (!brandLogos.complete) console.warn('Brand logo registry', brandLogos);
     const venueLogos = configureVenueLogos(results[6].status === 'fulfilled' ? results[6].value : {assets: []});
     if (!venueLogos.complete) console.warn('Venue logo registry', venueLogos);
-
+    if (state.register) {
+      registerProvinces(state.register.provinces);
+      // A chain's food type (derived from its typed rows, else the register's format) lets its outlets be filtered,
+      // mixed and charted with the restaurants (0.7.0); every outlet says how its type was derived.
+      state.chainGroups = deriveChainGroups(state.register, {snapshotOf: state.snapshotOf, rows: state.data.rows, groups: state.data.groups});
+      state.data.outlets = outletRows(state.register, state.data.groups, {snapshotOf: state.snapshotOf, index: state.index, chainGroups: state.chainGroups});
+      state.data.rows = [...state.data.rows, ...state.data.outlets];
+      state.data.meta = {...state.data.meta, registerChecked: registerChecked(state.register.meta)};
+    } else state.data.outlets = [];
+    state.rowById = new Map([...state.data.rows, ...state.data.moved].map(r => [r.id, r]));
+    state.coveredIds = new Set(state.data.rows.map(r => r.area).filter(Boolean));
+    state.coverage = scopedCoverage();
+    // One chain index across both sheets: the brand filter, the chips, the directory and the brand page read it.
+    state.chains = buildChainIndex({rows: state.data.rows, brands: state.data.brands, register: state.register});
 
     const priceCounts = Object.fromEntries(PRICE_BUCKETS.map(b => [b, 0]));
     for (const r of state.data.rows) priceCounts[r.price]++;
@@ -1908,7 +1943,8 @@ async function init() {
     for (const r of state.data.rows) if (r.province) provinceCounts.set(r.province, (provinceCounts.get(r.province) || 0) + 1);
     const provinceList = [...ALL_PROVINCES].sort((a, b) => Number(isCoveredProvince(b.code)) - Number(isCoveredProvince(a.code)) || (provinceCounts.get(b.code) || 0) - (provinceCounts.get(a.code) || 0));
     options('province', provinceList.filter(p => provinceCounts.get(p.code)).map(p => [p.code, `${p.th} (${num(provinceCounts.get(p.code))})`]));
-    options('brand', [...state.data.brands].sort((a, b) => b.rows - a.rows || a.name.localeCompare(b.name)).map(b => [b.id, `${b.name} (${num(b.rows)})`]));
+    // Every chain of both sheets (restaurants + outlets), most rows first.
+    options('brand', state.chains.list.map(c => [c.key, `${c.name} (${num(c.count)})`]));
     $('category-items').innerHTML = state.data.groups.map(g => `<span>${cueMarkup(g.series)}${esc(g.th)}</span>`).join('');
 
     // A link into a register or Land view waits for that data; otherwise the snapshot paints first.

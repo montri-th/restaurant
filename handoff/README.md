@@ -1,10 +1,12 @@
 # เริ่มงานต่อ — CityMETER Restaurants
 
-รุ่นส่งต่อ 0.6.2 · 28 ตุลาคม 2569 · ร้านดึงและตรวจ 22 ตุลาคม 2569 · ทะเบียนร้านเครือตรวจ 25–28 ตุลาคม · Land join 28 ตุลาคม 2569
+รุ่นส่งต่อ 0.7.0 · 30 ตุลาคม 2569 · ร้านดึงและตรวจ 22 ตุลาคม 2569 · ทะเบียนร้านเครือตรวจ 25–28 ตุลาคม (ฉบับ 29 ต.ค. รอไฟล์ — N22) · Land join 28 ตุลาคม 2569
 
 ชุดนี้ส่งต่อให้ developer หรือ coding agent พัฒนาต่อจาก repository ที่ใช้งานจริง หลักของรุ่นนี้คือ **เห็นเมือง 3 มิติที่โฟกัส 3 แขวง/ตำบลที่ร้านอาหารแน่นที่สุดก่อน (ร้าน/ตร.กม.) แสดงรายละเอียดเฉพาะส่วนที่โฟกัส ส่วนอื่นเงียบ และบอกความครอบคลุมของข้อมูลบนแผนที่** โดยคงสัญญากล้อง basemap มวลอาคาร และ venue x-ray ของ CityMETER · Luxury Brands 0.5 รุ่น 0.2 เพิ่มสถานที่จากท้ายชื่อร้าน การจับจุดของร้านกับอาคาร 3 มิติ (กดอาคารได้) และการย้ายไปแขวง/ตำบลข้าง ๆ ด้วยการกดบนแผนที่ รุ่น 0.3 เพิ่มทะเบียนร้านเครือทั่วประเทศ (มีมุมมองของตัวเอง; ตั้งแต่ 0.6.0 นับรวมกับร้านเป็นประชากรเดียว บอกส่วนแยก) อาคารในทะเบียน Land (ในอาคารเทียบรอบอาคาร) และส่วนอาคาร LOD2 จากชุดเดียวกับเว็บ shoppingcenter
 
 Live: [Restaurants](https://montri-th.github.io/restaurant/) · Source: [GitHub](https://github.com/montri-th/restaurant) · ระบบจริง: [CityMETER Restaurant](https://landometer.com/v3/citymeter?d=restaurant)
+
+> **รุ่น 0.7.0 (เจ้าของสั่ง 29 ต.ค. 2569 23:39 “เลิกแยกร้านทะเบียนร้านเครือ … search / filter / คำนวณ / aggregate รวมกันทั้งสองตาราง · logo + brand ขึ้นก่อนชื่อสาขา · side bar กระชับ · google AI mode, streetview, search ด้วย context”):** คำเดียว “ร้าน” — ไม่มีคำว่า “สาขาในทะเบียน” บรรทัด “ร้าน = N + M” หรือทางเข้า “ทะเบียน” ในหน้าหลัก (ความต่างของสองชีตอยู่ในบรรทัดแหล่งข้อมูล) · เครือหนึ่งคีย์ข้ามสองชีต (`js/chains.js`): ตัวกรองเครือครบ 792 เครือ นับร้าน + สาขาเป็นตัวเลขเดียว หน้าเครือ = ภาพรวมภายใต้ตัวกรองเครือ (มุมมอง “เครือในทะเบียน” และช่องค้นหาของทะเบียนยกเลิก; `?chain=` เปิดเป็น `?brand=`) · ประเภทของสาขาเครืออนุมานจากร้านชื่อเดียวกัน (≥ 3 ร้านและเกินครึ่ง) ไม่เช่นนั้นจาก format ของทะเบียน — 15,751 สาขาได้ประเภท หน้าสาขาบอก (อนุมาน) · ทุกรายการ ตาราง ป๊อปอัป และโลโก้บนแผนที่อ่าน โลโก้ · เครือ · สาขา · ร้านที่ยังไม่มีพิกัดบอกตรง ๆ และรายชื่อแทนแผนที่ว่าง (กรณี “tp tea”: ทะเบียน 28 ต.ค. ไม่มีพิกัดและจังหวัด 12/12) · รายชื่อจังหวัดสร้างจากขอบเขตที่กำลังแสดง (บั๊ก 0.6.2) · เครือหรือคำค้นแสดงหมุดทุกระดับซูมและจัดกรอบทุกจุด · แถว “ค้นต่อ”: Google AI Mode (คำถามตามบริบท) Street View Google Maps · ข้อความกระชับ ป้ายราคาเป็นช่วง (N18) — รายละเอียดใน `IMPLEMENTATION_PLAN.md` (P17, AC45–AC50, N22) และ `VERIFICATION.md` §R13
 
 > **รุ่น 0.6.0 (เจ้าของสั่ง 28 ต.ค. 2569 22:36 “ทำไมทั่วประเทศไม่เห็นทุกจังหวัด … จำนวนร้านต้อง 7x,xxx + 26,xxx แสดงนับรวมกันนะ”):** ประชากรเดียว — ร้านในชุดข้อมูล 68,980 + สาขาในทะเบียนร้านเครือ 26,819 = 95,799 นับรวมกันในทุกตัวเลขร้าน ความหนาแน่น กรอบจังหวัด รายการ กราฟ และตาราง ทุกหน้าบอกส่วนแยก “ร้าน = N ร้านในชุดข้อมูล + M สาขาในทะเบียน” (แถวที่ย้าย 1,234 แถวนับครั้งเดียวฝั่งทะเบียน; สาขาไม่มีคะแนน รีวิว ราคา ประเภท จึงแสดง — ไม่ใช่ 0) · มุมมองทั้งประเทศมีกรอบ จำนวน และป้ายทั้ง 77 จังหวัด · จังหวัดนอกชุดข้อมูลร้านแสดงสาขาทุกระดับซูมพร้อมข้อค้นพบ “N สาขาในทะเบียนร้านเครือใน{จังหวัด}” ไม่มีความหนาแน่น · ข้อค้นพบแรกใหม่: สุริยวงศ์ · สีลม · วังใหม่ 122.0 ร้าน/ตร.กม. ฐานเทียบ 9.4 (475 กรอบ) — กติกา “สองหน่วยไม่บวกกัน” ของ 0.3 ยกเลิกเฉพาะการนับและแสดงผล ทะเบียนยังมีมุมมองและหลักฐานของตัวเอง
 
@@ -17,8 +19,8 @@ Live: [Restaurants](https://montri-th.github.io/restaurant/) · Source: [GitHub]
 | คนอ่าน | เครื่องอ่าน | ใช้ทำอะไร |
 |---|---|---|
 | [../PRODUCT_STATEMENT.md](../PRODUCT_STATEMENT.md) | [product-statement.json](product-statement.json) | Winning strategy: Who / What / Which / How, quality bar, ป้ายหลักฐาน, hypotheses — อ่านก่อนเปลี่ยนสิ่งที่หน้าแรกบอก |
-| [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) | [product-brief.json](product-brief.json) | row scopes + focus modes, first Aha, สัญญาตัวชี้วัด ความครอบคลุม รูปทรงประเภท แผนที่ focus/quiet, breadcrumb, แผงหกโหมด, สัญญาจับคู่สถานที่ อาคาร และการกด, กราฟ, invariants INV01–INV32, registerContract, landJoinContract, lodContract |
-| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [implementation-plan.json](implementation-plan.json) | โมดูล งาน P01–P13 acceptance AC01–AC35 backlog N01–N19 วิธีทำงานต่อ |
+| [PRODUCT_BRIEF.md](PRODUCT_BRIEF.md) | [product-brief.json](product-brief.json) | row scopes + focus modes, first Aha, สัญญาตัวชี้วัด ความครอบคลุม รูปทรงประเภท แผนที่ focus/quiet, breadcrumb, แผงหกโหมด, สัญญาจับคู่สถานที่ อาคาร และการกด, กราฟ, invariants INV01–INV35, registerContract, landJoinContract, lodContract, chainIndexContract, derivedTypeContract, outboundContract |
+| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | [implementation-plan.json](implementation-plan.json) | โมดูล งาน P01–P17 acceptance AC01–AC50 backlog N01–N22 วิธีทำงานต่อ |
 | [VERIFICATION.md](VERIFICATION.md) | `handoff-manifest.json` (ใน bundle) | ผลตรวจแยกระดับ (unit / LDS parity / rendered / live) และ hash ของทุกไฟล์ |
 | README นี้ | [handoff.schema.json](handoff.schema.json) | สัญญาโครงสร้างของ JSON (schema 1.5.0) |
 
