@@ -3,7 +3,11 @@
  * from machine.analyticalScales of Landometer-Design-System-v0.9.7.md
  * (SHA-256 d3085cbc…96). DATAVIZ-02/03: the approved light 41-sample LUT is
  * consumed unchanged on both themes; class indices are round(i × 40 / (n − 1));
- * nothing is interpolated here.
+ * nothing is interpolated here. Since 0.7.1 (owner 2026-10-30 “color scale always
+ * go for 41 colors”) every sequential encoding — choropleth, province frames,
+ * ranking bars, matrix cells — uses all 41 LUT values (RAMP_CLASSES) as
+ * equal-interval classes; legends draw the ramp with head · middle · tail labels.
+ * The 3/5/7/9 class pickers remain for the price buckets and tests.
  *
  * Families used by this product (selected from metric + denominator):
  *  - density.area — restaurants per km² of a subdistrict (denominator = area): the
@@ -59,14 +63,18 @@ export function inkFor(fill) {
   return contrastRatio(fill, dark) >= contrastRatio(fill, light) ? dark : light;
 }
 
-/** Exact class colours for n ∈ {3,5,7,9}: index round(i × 40 / (n − 1)). */
-export function classColors(n = 5, scale = COUNT_SCALE) {
-  if (![3, 5, 7, 9].includes(n)) throw new RangeError('Class count must be 3, 5, 7 or 9');
+/** The whole LUT as classes: 41 (owner 2026-10-30 “color scale always go for 41 colors”). */
+export const RAMP_CLASSES = 41;
+
+/** Exact class colours for n ∈ {3,5,7,9} (index round(i × 40 / (n − 1))) or the full LUT (n = 41). */
+export function classColors(n = RAMP_CLASSES, scale = COUNT_SCALE) {
+  if (n === RAMP_CLASSES) return scale.lut.slice();
+  if (![3, 5, 7, 9].includes(n)) throw new RangeError('Class count must be 3, 5, 7, 9 or 41');
   return Array.from({length: n}, (_, i) => scale.lut[Math.round((i * 40) / (n - 1))]);
 }
 
 /** Equal-interval closed integer intervals over [1, max] (count family). */
-export function countThresholds(max, n = 5) {
+export function countThresholds(max, n = RAMP_CLASSES) {
   const top = Number.isFinite(max) ? Math.max(0, Math.floor(max)) : 0;
   if (top < 1) return [];
   const classes = Math.min(n, top);
@@ -83,7 +91,7 @@ export function countThresholds(max, n = 5) {
 const NUM = new Intl.NumberFormat('th-TH', {maximumFractionDigits: 0});
 
 /** Count classes for measured totals (zero is measured_zero, never a ramp class). */
-export function buildCountClasses(values, n = 5, {unit = 'ร้าน'} = {}) {
+export function buildCountClasses(values, n = RAMP_CLASSES, {unit = 'ร้าน'} = {}) {
   const measured = (Array.isArray(values) ? values : []).filter(v => Number.isFinite(v) && v > 0);
   const max = measured.length ? Math.max(...measured) : 0;
   const intervals = countThresholds(max, n);
@@ -104,7 +112,7 @@ export function buildCountClasses(values, n = 5, {unit = 'ร้าน'} = {}) {
  * [lower, upper) except the closed last one; values are compared at full precision;
  * labels show the breakpoints. Zero is measured_zero, never a ramp class.
  */
-export function buildDensityClasses(values, n = 5) {
+export function buildDensityClasses(values, n = RAMP_CLASSES) {
   const measured = (Array.isArray(values) ? values : []).filter(v => Number.isFinite(v) && v > 0);
   const max = measured.length ? Math.max(...measured) : 0;
   const colors = classColors(n, DENSITY_SCALE);
@@ -127,6 +135,23 @@ export function buildDensityClasses(values, n = 5) {
 }
 
 /**
+ * Head · middle · tail of a class model for a ramp legend (LDS anchors): the lowest class's lower bound, the class
+ * at the middle of the ramp, and the top. Labels reuse the model's own formatting (precision follows the data).
+ */
+export function rampAnchors(model) {
+  const classes = model?.classes || [];
+  if (!classes.length) return [];
+  const fmt = v => (model.scaleId === 'density.area'
+    ? new Intl.NumberFormat('th-TH', {minimumFractionDigits: model.precision ?? 0, maximumFractionDigits: model.precision ?? 0}).format(v)
+    : NUM.format(v));
+  const first = classes[0], last = classes.at(-1), mid = classes[Math.floor((classes.length - 1) / 2)];
+  const head = model.scaleId === 'density.area' ? `>0` : fmt(first.lower);
+  const middle = classes.length > 2 ? fmt(mid.lower) : '';
+  const tail = fmt(model.scaleId === 'density.area' ? (model.top ?? last.upper) : last.upper);
+  return [{label: head, fill: first.fill}, ...(middle ? [{label: middle, fill: mid.fill}] : []), {label: tail, fill: last.fill}];
+}
+
+/**
  * Resolve one value to its EVID-05 state and treatment.
  *  measured: finite nonzero → class fill · measured_zero: 0 → lowest fill + zero outline
  *  no_data: null fill (caller draws the hatch) · out_of_scope: nothing drawn
@@ -137,7 +162,7 @@ export function classify(value, model, state = 'measured') {
   if (state === 'no_data' || value == null || !Number.isFinite(value)) return {state: 'no_data', fill: null, ink: null, label: 'ไม่มีร้านในชุดข้อมูล'};
   if (value <= 0) return {state: 'measured_zero', fill: model.zero.fill, ink: inkFor(model.zero.fill), outline: model.zero.outline, label: '0'};
   const cls = model.classes.find(c => (c.closed ? value >= c.lower && value <= c.upper : value >= c.lower && value < c.upper)) || model.classes.at(-1);
-  if (!cls) return {state: 'measured', fill: scale.lut[40], ink: inkFor(scale.lut[40]), label: String(value), classIndex: 4};
+  if (!cls) return {state: 'measured', fill: scale.lut[40], ink: inkFor(scale.lut[40]), label: String(value), classIndex: model.classes.length ? model.classes.at(-1).index : 40};
   return {state: 'measured', fill: cls.fill, ink: cls.ink, label: String(value), classIndex: cls.index};
 }
 

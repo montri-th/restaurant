@@ -63,6 +63,7 @@ import {decodeRegister} from './register.js';
 import {installRegisterLayer, REGISTER_MIN_ZOOM} from './register-layer.js';
 import {decodeLand, applyOutletDisplay, applyRowDisplay, landOfRow, landOfOutlet, landProfile, hostsOf, aroundGeometry, geometryBounds} from './land.js';
 import {renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderCompany, renderOutlet, renderLand, setSourceDates, registerChecked} from './register-panel.js';
+import {rampMarkup} from './legend.js';
 import {buildChainIndex, chainsOf, chainLabel} from './chains.js';
 import {installVenueXray} from './venue-xray.js';
 import {configureBrandLogos, brandLogoMarkup} from './brand-logos.js';
@@ -314,7 +315,7 @@ function loadExtras() {
     state.rowsSnapped = state.land ? applyRowDisplay(state.land, state.rowById) : 0;
     linkExtras();
     state.extrasState = state.register || state.land ? 'ready' : 'failed';
-    setSourceDates({snapshot: state.data.meta?.retrievedOn || state.data.meta?.asOf || '', registerFrom: state.register?.meta.checkedFrom || '', registerTo: state.register?.meta.checkedTo || '', land: state.land?.meta?.checkedOn || ''});
+    setSourceDates({snapshot: state.data.meta?.retrievedOn || state.data.meta?.asOf || '', registerFrom: state.register?.meta.checkedFrom || '', registerTo: state.register?.meta.checkedTo || '', registerReadBack: state.register?.meta.readBackOn || '', land: state.land?.meta?.checkedOn || ''});
     return true;
   });
   return state.extras;
@@ -1154,9 +1155,9 @@ function renderLegend() {
     const m = state.provinceModel;
     const noPoint = state.scopeRows.length && state.scopeRows.every(r => !hasPoint(r) && !r.province);
     $('legend-title').textContent = 'จังหวัด · ร้าน';
-    steps.innerHTML = m?.classes.classes.length ? m.classes.classes.map(c => `<span class="legend-step"><i style="background:${c.fill}" aria-hidden="true"></i>${esc(c.label)}</span>`).join('') + (m.zeroCount ? '<span class="legend-step" title="จังหวัดที่ไม่มีร้านตามตัวกรองนี้"><i class="legend-zero" aria-hidden="true"></i>0</span>' : '')
+    steps.innerHTML = m?.classes.classes.length ? rampMarkup(m.classes, {unit: 'ร้าน'}) + (m.zeroCount ? '<span class="legend-step" title="จังหวัดที่ไม่มีร้านตามตัวกรองนี้"><i class="legend-zero" aria-hidden="true"></i>0</span>' : '')
       : `<span class="hint">${noPoint ? 'ร้านตามตัวกรองยังไม่มีพิกัดและจังหวัดในทะเบียน' : 'ไม่มีร้านในตัวกรองนี้'}</span>`;
-    $('legend-areas').title = `ร้านต่อจังหวัด (ร้านในชุดข้อมูล + สาขาเครือ นับรวมกัน) · ${m?.classes.classCount || 0} ระดับเท่าช่วง · ทั้ง 77 จังหวัด · สีเดียวกันทั้งสองธีม`;
+    $('legend-areas').title = `ร้านต่อจังหวัด (ร้านในชุดข้อมูล + สาขาเครือ นับรวมกัน) · ${m?.classes.classCount || 0} ระดับเท่าช่วงจาก LUT 41 ค่าของ LDS · ทั้ง 77 จังหวัด · สีเดียวกันทั้งสองธีม`;
   } else if ($('province').value && !isCoveredProvince($('province').value)) {
     // A จังหวัด outside the covered seven has no แขวง/ตำบล frames: the key says so instead of an empty scale.
     $('legend-title').textContent = `${provinceByCode($('province').value)?.th || 'จังหวัด'} · ร้าน`;
@@ -1165,10 +1166,10 @@ function renderLegend() {
   } else {
     const m = state.areaModel;
     $('legend-title').textContent = 'แขวง/ตำบล · ร้าน/ตร.กม.';
-    steps.innerHTML = (m?.classes.classes.length ? m.classes.classes.map(c => `<span class="legend-step"><i style="background:${c.fill}" aria-hidden="true"></i>${esc(c.label)}</span>`).join('') : '<span class="hint">ไม่มีร้านในตัวกรองนี้</span>') +
+    steps.innerHTML = (m?.classes.classes.length ? rampMarkup(m.classes, {unit: 'ร้าน/ตร.กม.'}) : '<span class="hint">ไม่มีร้านในตัวกรองนี้</span>') +
       (m?.zeroCount ? `<span class="legend-step" title="พื้นที่ที่มีร้านในชุดข้อมูล แต่ไม่พบตามตัวกรองนี้"><i class="legend-zero" style="background:${m.classes.zero.fill}" aria-hidden="true"></i>0</span>` : '') +
       (m?.noDataCount ? '<span class="legend-step" title="แหล่งข้อมูลไม่มีร้านในพื้นที่นี้ ไม่ได้แปลว่าไม่มีร้านอาหาร"><i class="legend-nodata" aria-hidden="true"></i>ไม่มีข้อมูล</span>' : '');
-    $('legend-areas').title = `ร้านต่อ ตร.กม. ของแขวง/ตำบล (ร้าน ÷ พื้นที่ตาม CityMETER) · ${m?.classes.classCount || 0} ระดับเท่าช่วง [ล่าง, บน) ช่วงสุดท้ายปิด · สีเดียวกันทั้งสองธีม`;
+    $('legend-areas').title = `ร้านต่อ ตร.กม. ของแขวง/ตำบล (ร้าน ÷ พื้นที่ตาม CityMETER) · ${m?.classes.classCount || 0} ระดับเท่าช่วงจาก LUT 41 ค่าของ LDS [ล่าง, บน) ช่วงสุดท้ายปิด · สีเดียวกันทั้งสองธีม`;
   }
   document.querySelector('.map-panel').classList.toggle('is-3d', state.view3d);
   document.querySelector('.map-panel').classList.toggle('has-venue-building', Boolean(state.blueBuildings));

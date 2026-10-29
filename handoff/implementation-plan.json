@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.7.0",
+  "productVersion": "0.7.1",
   "updatedOn": "2026-10-30",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -628,6 +628,37 @@
         "handoff/VERIFICATION.md"
       ],
       "status": "done"
+    },
+    {
+      "id": "P18",
+      "title": "0.7.1: register of 2026-10-30 (coordinates + logos) and the 41-colour ramp (owner 2026-10-30 00:43 “ไฟล์อยู่ใน download แล้ว”, 00:54 “color scale always go for 41 colors”) — xlsx dump → build-data (unchanged restaurants.json) → build-chains with --logo-files (408 verified files) → build-land --checked-on 2026-10-30; fixtures refreshed from a run; scales default to 41 classes, legends as ramps",
+      "dependsOn": [
+        "P17"
+      ],
+      "acceptanceCriteria": [
+        "AC51",
+        "AC52",
+        "AC53"
+      ],
+      "files": [
+        "scripts/build-chains.py",
+        "scripts/build-land.py",
+        "js/scales.js",
+        "js/legend.js",
+        "js/provinces.js",
+        "js/app.js",
+        "js/charts.js",
+        "js/register-panel.js",
+        "data/chains.json",
+        "data/brand-logos.json",
+        "data/land.json",
+        "data/land-buildings.geojson",
+        "assets/brand-logos/*",
+        "tests/*.test.js",
+        "DATA_METHOD.md",
+        "handoff/VERIFICATION.md"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -980,6 +1011,27 @@
       "expected": "a “ค้นต่อ” row on the overview, brand, area, district, venue, building, store, outlet, company and Land views: AI Mode links with udm=50 and a pre-filled question (title), Street View (map_action=pano&viewpoint=lat,lng) where the view has a point, Google Maps; links open in a new tab with rel=\"noopener\"; no number of the product changes",
       "verificationType": "tests (register) + harness (outbound hrefs) + live click-through",
       "result": "see VERIFICATION.md R13"
+    },
+    {
+      "id": "AC51",
+      "scenario": "Register of 2026-10-30 in the population",
+      "expected": "96,100 rows (68,980 + 27,120); 22,182 outlets with a point; search “tp tea” shows 11 pins in 3 provinces and says “ยังไม่มีพิกัด 1”; the brand page TP TEA shows its logo, 3 จังหวัด, 11 บนแผนที่; the first Aha reads 164.6 ร้าน/ตร.กม. — ตลาดยอด · สีลม · สุริยวงศ์ (380 ร้าน ใน 2.3 ตร.กม., baseline 9.8); the chains directory counts 857 chains; every number cites “ทะเบียนร้านเครือ ตรวจ 25–28 ต.ค. 2569 · เติมพิกัดและโลโก้ 29 ต.ค. 2569”",
+      "verificationType": "tests (data, insight, register, views) + harness + live",
+      "result": "see VERIFICATION.md R14"
+    },
+    {
+      "id": "AC52",
+      "scenario": "Register logo files",
+      "expected": "563 brand-logo assets load with 0 issues (configureBrandLogos); every asset file's sha256 and byte size equal its registry record; 541 register brands link a logo; outlet pins and list entries of newly covered chains (e.g. TP TEA, Bonjour) show the logo; no file outside the registry sits in assets/brand-logos; no SVG with script/event handlers",
+      "verificationType": "tests (logos) + build log + live",
+      "result": "see VERIFICATION.md R14"
+    },
+    {
+      "id": "AC53",
+      "scenario": "41-colour scales",
+      "expected": "the แขวง/ตำบล choropleth, the province frames, the ranking bars and the matrix cells take their fills from the 41 LUT values (class i = lut[i], max class = lut[40]); the map key and the matrix legend show a ramp bar with head · middle · tail labels (e.g. “>0 · 84 · 172 ร้าน/ตร.กม.”, “1 · 25,200 · 51,659 ร้าน”) plus the zero and no-data cues; identical HEX on both themes; the price bars keep their five bucket colours",
+      "verificationType": "tests (scales) + harness screenshots + live (light/dark, desktop + 390 px)",
+      "result": "see VERIFICATION.md R14"
     }
   ],
   "developerWorkflow": [
@@ -1115,15 +1167,29 @@
     },
     {
       "id": "N21",
-      "title": "Outlets without a coordinate (10,091; 3,241 with no province either) sit in the totals but on no map and in no density — a coordinate pass on the register would move them into the frames (research task)",
+      "title": "Outlets without a coordinate (10,091; 3,241 with no province either) sit in the totals but on no map and in no density — a coordinate pass on the register would move them into the frames (research task) — 0.7.1: the register of 2026-10-30 located 5,454 more outlets (22,182 with a point); 4,938 remain without one (CPF 1,166 by the owner's order; 936 have only an approximate venue point, not drawn)",
       "ownerRole": "research",
-      "priority": "P3"
+      "priority": "P3",
+      "status": "partly closed 0.7.1"
     },
     {
       "id": "N22",
-      "title": "Register refresh of 2026-10-29 (sheet README: “ตรวจเติมโลโก้และพิกัด”: outlets 26,819 → 27,120, brands 1,049 → 1,149, companies 311 → 336, more logo files) is not in this build — the sheet exceeds the Drive export limit; rebuild chains.json, restaurants.json (moved rows), land.json and the logo registry from the owner's xlsx + logo zip when they arrive (0.7.1)",
+      "title": "Register refresh of 2026-10-29 (sheet README: “ตรวจเติมโลโก้และพิกัด”: outlets 26,819 → 27,120, brands 1,049 → 1,149, companies 311 → 336, more logo files) is not in this build — the sheet exceeds the Drive export limit; rebuild chains.json, restaurants.json (moved rows), land.json and the logo registry from the owner's xlsx + logo zip when they arrive (0.7.1) — DONE 0.7.1 (xlsx + logo zip received 2026-10-30 00:43)",
       "ownerRole": "data",
-      "priority": "P1"
+      "priority": "P1",
+      "status": "closed 0.7.1"
+    },
+    {
+      "id": "N23",
+      "title": "Register venue logos (20_CHAIN_LOGOS rows of type venue, 37) are not shipped — the register's venues (07_VENUES, 99) are not drawn with logos; add when a venue registry for the register exists",
+      "ownerRole": "data",
+      "priority": "P3"
+    },
+    {
+      "id": "N24",
+      "title": "Brand-logo payload is 34.3 MB over 563 files (largest: an SVG of 3.7 MB, PNGs up to 1.5 MB); files load lazily, but a web-size derivative set with a recorded derivation (bytes of the originals kept in the registry) would cut first-logo latency on phones",
+      "ownerRole": "engineering",
+      "priority": "P3"
     }
   ]
 }

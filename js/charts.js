@@ -11,6 +11,7 @@
  */
 import {buildChartModel, areaMatrix, areaPrices} from './chart-model.js';
 import {buildCountClasses, buildDensityClasses, classify, priceColors} from './scales.js';
+import {rampMarkup} from './legend.js';
 import {PRICED, PRICE_SHORT, PRICE_LABELS} from './model.js';
 import {cueMarkup} from './cues.js';
 import {districtWord} from './areas.js';
@@ -71,7 +72,7 @@ function matrix(element, model, select, selectedId) {
     }).join('');
     return `<tr${pressed ? ' class="is-selected"' : ''}><th scope="row"><button type="button" class="matrix-row" data-area="${esc(a.id)}" aria-pressed="${pressed}">${esc(a.name)}<small class="data-number">${num(a.count)}</small></button></th>${cells}</tr>`;
   }).join('');
-  const legend = classes.classes.map(c => `<span class="legend-step"><i style="background:${c.fill}" aria-hidden="true"></i>${esc(c.label)}</span>`).join('');
+  const legend = rampMarkup(classes, {unit: 'ร้าน'});
   const columns = `<colgroup><col class="matrix-head-col">${m.groups.map(() => '<col class="matrix-cell-col">').join('')}</colgroup>`;
   element.innerHTML = `<p class="chart-caption">${num(m.areas.length)} พื้นที่ที่ร้านแน่นที่สุด × ${num(m.groups.length)} ประเภท · ตัวเลข = ร้าน · ทุกช่องขนาดเท่ากัน ขนาดไม่มีความหมาย</p>
     <div class="matrix-scroll"><table class="matrix" style="--matrix-columns:${m.groups.length}">${columns}<thead><tr><th scope="col" class="matrix-corner">พื้นที่ · ร้าน</th>${head}</tr></thead><tbody>${body}</tbody></table></div>

@@ -33,7 +33,11 @@ export function setSourceDates(dates = {}) { SOURCES = {...SOURCES, ...Object.fr
 
 const checkedRange = (meta = {}) => {
   const a = thaiDate(meta?.checkedFrom || SOURCES.registerFrom), b = thaiDate(meta?.checkedTo || SOURCES.registerTo);
-  return a && b && a !== b ? `${a}–${b}` : b || a || '';
+  const range = a && b && a !== b ? `${a}–${b}` : b || a || '';
+  // 0.7.1: the owner's later read-back that filled coordinates and logos (README “จุดตรวจ Logo / GPS — <date>”) is a
+  // second date on the same register, named for what it added — never a re-check of every row.
+  const readBack = thaiDate(meta?.readBackOn || SOURCES.registerReadBack || '');
+  return readBack && readBack !== b ? `${range} · เติมพิกัดและโลโก้ ${readBack}` : range;
 };
 export const registerChecked = (meta = {}) => checkedRange(meta);
 const foot = compact => (compact ? 'hint source-line' : 'hint panel-foot provenance');

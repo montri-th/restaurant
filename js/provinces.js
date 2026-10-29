@@ -38,7 +38,7 @@ export function buildProvinceModel(rows, geojson) {
     const meta = PROVINCES.find(p => p.code === code) || {code, th: f.properties?.name || code, en: f.properties?.nameEn || code};
     return {id: code, code, name: meta.th, nameEn: meta.en, count: counts.get(code) || 0, label: f.properties?.label || null, feature: f};
   });
-  const classes = buildCountClasses(provinces.map(p => p.count), 5, {unit: 'ร้าน'});
+  const classes = buildCountClasses(provinces.map(p => p.count), undefined, {unit: 'ร้าน'});
   for (const p of provinces) { const c = classify(p.count, classes); p.state = c.state; p.fill = c.fill; p.ink = c.ink; p.outline = c.outline || null; }
   // Register outlets without a province (no point, no province text) are counted apart, never dropped silently.
   return {provinces, classes, zeroCount: provinces.filter(p => p.state === 'measured_zero').length, unknown: counts.get('') || 0};

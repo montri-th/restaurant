@@ -293,6 +293,13 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .legend-steps { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; }
 .legend-step { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; line-height: 1.2; min-width: 40px; color: var(--text-metadata); white-space: nowrap; }
 .legend-step i { display: block; width: 100%; height: 10px; border: 1px solid var(--border-default); }
+/* 0.7.1 — ramp legend: every class fill (the 41 LDS LUT values) as one bar, LDS anchors head · middle · tail under it. */
+.legend-ramp { display: inline-flex; flex-direction: column; gap: 2px; flex: 1 1 150px; min-width: 150px; max-width: 260px; font-size: 11px; line-height: 1.2; color: var(--text-metadata); }
+.legend-ramp-bar { display: flex; height: 10px; border: 1px solid var(--border-default); }
+.legend-ramp-bar i { display: block; flex: 1 1 0; min-width: 0; }
+.legend-ramp-labels { display: flex; justify-content: space-between; gap: 6px; white-space: nowrap; }
+.legend-ramp-labels span:nth-child(2):not(:last-child) { text-align: center; }
+.chart-legend .legend-ramp { flex: 0 1 220px; min-width: 150px; }
 .legend-step .legend-zero { background: var(--scale-count-1); box-shadow: inset 0 0 0 2px var(--data-zero-outline); }
 /* EVID-05 no_data: 135° hatch on the no-data ground with an emphasis border — never a zero. */
 .legend-step .legend-nodata, .legend-nodata { background: repeating-linear-gradient(135deg, var(--border-emphasis) 0 1.5px, var(--data-no-data) 1.5px 5px); border-color: var(--border-emphasis); }

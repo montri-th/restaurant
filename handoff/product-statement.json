@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.7.0",
+  "productVersion": "0.7.1",
   "updatedOn": "2026-10-30",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
@@ -237,7 +237,7 @@
   "update_frequency": "ad hoc",
   "last_updated": "2026-10-30",
   "key_metrics": [
-    "restaurants and chain outlets per km² per แขวง/ตำบล (one population since 0.6.0)",
+    "restaurants and chain outlets per km² per แขวง/ตำบล (one population since 0.6.0; register of 2026-10-30 since 0.7.1: 96,100 rows)",
     "combined density of the three densest areas",
     "coverage baseline density",
     "restaurants + chain outlets per province (count, all 77 provinces)",
@@ -248,7 +248,8 @@
     "chain outlets of the register counted as ร้าน with the restaurants (0.6.0), under one vocabulary since 0.7.0 (owner 2026-10-29): chain first, the split stated in the provenance line only, each outlet typed by its chain (derived, labelled); evidence per outlet",
     "restaurants whose points lie in a Land building (inside or within 10 m, drawn inside)",
     "in-vs-around food types of a Land host",
-    "chains across both sheets (792): restaurants + outlets as one count per chain, a chain page per filter"
+    "chains across both sheets (857): restaurants + outlets as one count per chain, a chain page per filter",
+    "first Aha on the current population: ตลาดยอด · สีลม · สุริยวงศ์ 164.6 ร้าน/ตร.กม. (380 rows / 2.31 km²), baseline 9.8 — moved from สุริยวงศ์ · สีลม · วังใหม่ 122.0 when the register of 2026-10-30 located 5,454 more outlets"
   ],
   "visual_layers": [
     "choropleth",
@@ -297,7 +298,8 @@
       "limitation_text": "ไม่ใช่สำมะโนร้านอาหาร; ชุดข้อมูลร้าน 7 จังหวัด นอกสามจังหวัดหลักเพียงบางตำบล; สาขาในทะเบียนร้านเครือทั่วประเทศนับรวมเป็นประชากรเดียวตั้งแต่ 0.6.0 (ร้าน = ร้านในชุดข้อมูล + สาขาในทะเบียน บอกส่วนแยกทุกหน้า) แต่ไม่มีคะแนน รีวิว ราคา ประเภท; พิกัดแสดงผลกริด 9.55 ม. จึงบอกได้เพียงว่าจุดตกในอาคารใด ไม่ใช่ที่ตั้งร้าน; คะแนน/รีวิวเป็นความนิยมตามแหล่งข้อมูล"
     },
     "0.7.0: an outlet's food type is derived from its chain (majority of the chain's typed sheet-1 rows, else the register format) and says so — Inference, never a source attribute; price, rating and reviews are never derived",
-    "0.7.0: outbound AI Mode / Street View / Maps links are ways to search outside, labelled “ค้นต่อ”, never evidence of the product"
+    "0.7.0: outbound AI Mode / Street View / Maps links are ways to search outside, labelled “ค้นต่อ”, never evidence of the product",
+    "every sequential colour scale uses the full 41-value LDS LUT with a ramp legend (head · middle · tail); zero and no-data stay outside the ramp (0.7.1)"
   ],
   "known_limitations": [
     "ไม่ใช่สำมะโน",
@@ -311,7 +313,9 @@
     "ทะเบียนร้านเครือยังไม่ครบทุกสาขา; ตั้งแต่ 0.6.0 นับรวมกับร้านในชุดข้อมูลเป็นประชากรเดียวตามคำสั่งเจ้าของ (28 ต.ค. 2569 22:36) โดยบอกส่วนแยกทุกหน้า — 1,234 แถวที่ย้ายไปทะเบียนนับครั้งเดียวฝั่งทะเบียน; สาขาไม่มีคะแนน รีวิว ราคา ประเภท (แสดง — ไม่ใช่ 0); สาขา 10,091 รายการไม่มีพิกัด (3,241 ไม่ทราบจังหวัด) จึงอยู่ในยอดรวมแต่ไม่อยู่ในความหนาแน่น",
     "“จุดตกในอาคาร” ไม่ใช่การยืนยันว่าร้านตั้งอยู่ในอาคาร",
     "นิคมอุตสาหกรรมยังไม่เทียบจนกว่าขอบเขตผ่านการตรวจรับ",
-    "Register of 28 Oct: 10,091 outlets have no coordinate (625 of 756 chains none at all — e.g. TP TEA 12/12); they are counted and listed, never drawn; the owner's 29 Oct refresh (coordinates + logos) is pending (N22)"
+    "Register of 28 Oct: 10,091 outlets have no coordinate (625 of 756 chains none at all — e.g. TP TEA 12/12); they are counted and listed, never drawn; the owner's 29 Oct refresh (coordinates + logos) is pending (N22)",
+    "register of 2026-10-30: 4,938 of 27,120 outlets still have no coordinate (576 of 821 chains none at all; the CPF set of 1,166 rows by the owner's order) and 2,213 no province — in the totals, on no map; 936 rows carry only an approximate venue point that is never drawn",
+    "brand logos: 563 files (34.3 MB) loaded lazily; a logo identifies the chain, never a branch, a tenancy or an open status"
   ],
   "methodology_note": "DATA_METHOD.md, docs/AREA_METHOD.md, docs/CHART_SELECTION.md",
   "example_use_cases": [

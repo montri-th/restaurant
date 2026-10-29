@@ -40,12 +40,12 @@ function setup() {
 }
 const PRIVATE = /(docs|drive)\.google\.com|googleusercontent\.com|drive\.usercontent/;
 
-test('chains.json keeps the register unit: 26,819 outlet_ids, unique, every column complete', () => {
+test('chains.json keeps the register unit: 27,120 outlet_ids, unique, every column complete', () => {
   const {raw, reg} = setup();
   assert.equal(raw.meta.schema, 'citymeter-chain-register-1');
   const n = raw.cols.id.length;
   // Snapshot values of the register read on 2026-10-28 (regression fixtures, never UI constants).
-  assert.equal(n, 26819);
+  assert.equal(n, 27120);
   assert.equal(raw.meta.outlets, n);
   assert.equal(String(raw.meta.readmeCounts['จำนวนตัวตนสาขา/จุดขาย']), String(n), 'equals the register README count');
   for (const [k, col] of Object.entries(raw.cols)) assert.equal(col.length, n, `column ${k}`);
@@ -65,7 +65,7 @@ test('coordinates: only the register\'s selected points, inside Thailand; no poi
     assert.ok(o.latitude > 5 && o.latitude < 21 && o.longitude > 97 && o.longitude < 106, o.id);
   }
   assert.equal(withPoint, raw.meta.stats.withPoint);
-  assert.equal(withPoint, 16728);
+  assert.equal(withPoint, 22182);
 });
 
 test('province and แขวง/ตำบล are derived and say how: point-in-polygon first, register text second, unknown stays unknown', () => {
@@ -346,7 +346,12 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   const landChains = chainsOf([...inside, ...outletsIn], chains, Infinity);
   const listHtml = renderLand({land, profile, around, groups: data.groups, index, chains: landChains});
   const landHtml = text(listHtml);
-  assert.ok(!/\d+%/.test(landHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1].split('ร้านในอาคาร ')[0]), 'no share on a handful of rows');
+  // Since the 0.7.1 register (more located outlets) the building column holds ≥ 30 rows, so its share prints; a
+  // handful of rows (the same host cut to five of each kind) still prints none.
+  const few = {...profile, rows: {...profile.rows, in: profile.rows.in.slice(0, 3)}, outlets: {...profile.outlets, in: profile.outlets.in.slice(0, 2)}};
+  const fewHtml = text(renderLand({land, profile: few, around, groups: data.groups, index, chains: chainsOf([...few.rows.in, ...few.outlets.in], chains, Infinity)}));
+  assert.ok(!/\d+%/.test(fewHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1].split('ร้านในอาคาร ')[0]), 'no share on a handful of rows');
+  assert.ok(inside.length + outletsIn.length >= 30 && /\d+%/.test(landHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1]), 'a column of ≥ 30 rows prints its share');
   assert.ok(landHtml.includes('ร้อยละเมื่อคอลัมน์มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่ทุกร้านในอาคาร'));
   // One list for the building (owner 2026-10-28 22:03; one vocabulary 2026-10-29): rows and outlets together, chain first.
   assert.ok(!landHtml.includes('สาขาในทะเบียน') && !landHtml.includes('ติดขอบ'));

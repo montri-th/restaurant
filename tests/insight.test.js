@@ -12,18 +12,19 @@ test('first Aha (one-population fixture): the three densest แขวง with �
   const i = summarizeAreaInsight(data.rows, index, {coverage});
   assert.equal(i.mode, 'density');
   assert.equal(i.minRows, MIN_AREA_ROWS);
-  // 0.6.0 (owner 2026-10-28 22:36): restaurants and chain outlets counted together — สุริยวงศ์ · สีลม · วังใหม่
-  // (0.4: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ at 99.7 from the sheet-1 rows alone).
-  assert.deepEqual(i.areaIds, ['100403', '100402', '100702'], 'สุริยวงศ์ · สีลม · วังใหม่');
-  assert.deepEqual(i.areas.map(a => a.count), [80, 184, 158]);
-  assert.equal(i.count, 422);
+  // 0.7.1 (register of 2026-10-29/30, 22,182 outlets with a point): ตลาดยอด · สีลม · สุริยวงศ์ — ตลาดยอด (0.186 km²)
+  // reaches the 30-row floor with 9 located outlets (0.6.0–0.7.0: สุริยวงศ์ · สีลม · วังใหม่ at 122.0; 0.4: สี่แยกมหานาค ·
+  // ตลาดน้อย · สุริยวงศ์ at 99.7 from the sheet-1 rows alone). Numbers come from a run, never by hand.
+  assert.deepEqual(i.areaIds, ['100108', '100402', '100403'], 'ตลาดยอด · สีลม · สุริยวงศ์');
+  assert.deepEqual(i.areas.map(a => a.count), [32, 250, 98]);
+  assert.equal(i.count, 380);
   const km2 = i.areas.reduce((s, a) => s + a.km2, 0);
-  assert.ok(Math.abs(i.density - 422 / km2) < 1e-9, 'combined density is a ratio of totals, not a mean of ratios');
-  assert.ok(Math.abs(i.density - 122.0) < 0.05, `${i.density}`);
+  assert.ok(Math.abs(i.density - 380 / km2) < 1e-9, 'combined density is a ratio of totals, not a mean of ratios');
+  assert.ok(Math.abs(i.density - 164.6) < 0.05, `${i.density}`);
   // The baseline counts the rows that sit in a covered frame (outlets outside the covered provinces have no frame).
   assert.equal(i.framedRows, data.rows.filter(r => r.area).length);
   assert.ok(Math.abs(i.baselineDensity - i.framedRows / coverage.km2) < 1e-9);
-  assert.ok(Math.abs(i.baselineDensity - 9.37) < 0.01, `${i.baselineDensity}`);
+  assert.ok(Math.abs(i.baselineDensity - 9.83) < 0.01, `${i.baselineDensity}`);
   assert.ok(i.areas.every(a => a.count >= MIN_AREA_ROWS));
   // Every eligible area outside the three is less dense than the third.
   const all = summarizeAreas(data.rows, index).filter(a => a.count >= MIN_AREA_ROWS).sort(byDensity);
@@ -86,7 +87,7 @@ test('province frames count rows per province (a total, not a density)', () => {
   const outletsBy = {}; for (const o of register.outlets) if (o.province) outletsBy[o.province] = (outletsBy[o.province] || 0) + 1;
   for (const p of m.provinces) assert.equal(p.count, (raw.meta.rowsByProvince[p.code] || 0) - (movedBy[p.code] || 0) + (outletsBy[p.code] || 0), p.code);
   assert.equal(m.unknown, register.outlets.filter(o => !o.province).length, 'outlets without a province are counted apart');
-  assert.equal(m.unknown, 3241);
+  assert.equal(m.unknown, 2213);
   assert.ok(m.provinces.every(p => p.count > 0), 'every province holds at least one restaurant or outlet');
   assert.equal(m.classes.scaleId, 'count');
   const none = buildProvinceModel([], provincesGeo);

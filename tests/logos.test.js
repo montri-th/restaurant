@@ -27,7 +27,7 @@ test('brand registry: lookup by brand id only; identity holds get no logo; marku
   const {data} = load();
   const status = configureBrandLogos(readJSON('data/brand-logos.json'));
   assert.equal(status.complete, true);
-  assert.equal(status.assets, 155);
+  assert.equal(status.assets, 563, '155 from the portable manifest + 408 from the register folder (0.7.1)');
   const withLogo = data.brands.filter(b => getBrandLogo(b));
   assert.ok(withLogo.length >= 150);
   for (const b of data.brands.filter(x => x.hold)) assert.equal(getBrandLogo(b), null);

@@ -3,9 +3,9 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.7.0",
+  "productVersion": "0.7.1",
   "updatedOn": "2026-10-30",
-  "datasetCheckedOn": "2026-10-22",
+  "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/28, read back 2026-10-29 · Land join 2026-10-30",
   "language": "th",
   "productName": "CityMETER · Restaurants",
   "repository": "https://github.com/montri-th/restaurant",
@@ -95,6 +95,15 @@
       "narrow scopes show every point: a brand filter, a search of ≤ 2,000 outlets or an outlet-only scope draws outlet pins at every zoom; fitMap frames every point of a chain or a small search; a chain's page has no automatic three-area focus",
       "outbound searches (js/outbound.js): a “ค้นต่อ” row on overview, brand, area, district, venue, building, store, outlet, company and Land views — Google AI Mode (udm=50) pre-filled with the question the view's user is likely holding (Product Statement §2.1 triggers), Street View at the point (map_action=pano), Google Maps; public URL schemes, never evidence",
       "condensed copy: province list 8 + details, ranking 8, type bars 6 + ‘อื่น ๆ’, eligibility rule in one line (reason in its title), km² and rating basis in tile titles, price labels as ranges (N18 closed: ‘100–300 บาท’)"
+    ],
+    "release071": [
+      "register of 2026-10-30 (owner read-back 2026-10-29 “ตรวจเติมโลโก้และพิกัด”, N22 closed): 27,120 outlets (26,819), 1,149 brand profiles / 821 with outlets (1,049 / 756), 336 companies (311); 22,182 outlets with a point (16,728; 81.8 %), 2,213 without a province (3,241), 11,353 inside the covered แขวง/ตำบล frames (7,630); 936 rows carry only the register's separate approximate point (latitude_approx, a venue reference) — counted in meta.stats.approxOnly, never drawn; the CPF set (1,166 rows) stays without coordinates by the owner's order",
+      "population 96,100 = 68,980 + 27,120; the first Aha moves with the data (fixture from a run, never by hand): ตลาดยอด · สีลม · สุริยวงศ์ 380 rows / 2.308 km² = 164.6 ร้าน/ตร.กม. (ตลาดยอด, 0.186 km², reaches the 30-row floor with 9 located outlets), baseline 9.83 (80,333 framed rows ÷ 8,171.8 km², 475 frames); 0.6–0.7.0: สุริยวงศ์ · สีลม · วังใหม่ 122.0 / 9.37",
+      "register logo files (scripts/build-chains.py --logo-files): 408 files of the owner's Drive folder (577 files) shipped because their sha256 equals 01_BRANDS.logo_sha256 of a register brand with outlets — 563 brand-logo assets (155 + 408), 619 brand links, 541 register brands with a logo (78); 20_CHAIN_LOGOS supplies source page, asset URL, role and recommended surface (→ backplate); bytes unchanged, names sanitised, SVG with script/event/foreignObject rejected (0); the 27 folder files the register does not point at are not shipped; TP TEA now has 11/12 located outlets, 3 provinces and a logo",
+      "every sequential scale goes for the 41 LUT values (owner 2026-10-30 “color scale always go for 41 colors”): buildCountClasses / buildDensityClasses default to RAMP_CLASSES = 41 equal-interval classes taking LUT value i (no interpolation; a small range keeps only distinct breakpoints at the label precision, colour index still proportional to the value) — choropleth, province frames, ranking bars, matrix cells, area labels; legends draw the ramp (js/legend.js#rampMarkup) with the LDS anchors head · middle · tail (rampAnchors) and keep zero / no-data outside it; price buckets keep their five classes",
+      "chain index 857 chains (792); 15,800 of 27,120 outlets typed by 190 chains (83 by rows, 107 by format); Siam Paragon 38 rows in the building (9 + 29) → its in-vs-around column prints shares (≥ 30)",
+      "Land join rerun 2026-10-30 (scripts/build-land.py --checked-on): 1,089 hosts published (1,036), 989 buildings / 1,053 features (942 / 1,006), register points in 3,396 (2,038), near 1,842, 478 display positions from within 10 m (299); snapshot side unchanged (in 2,239, 595 from within 10 m)",
+      "provenance: the register's later read-back is a second date on the same register — “ทะเบียนร้านเครือ ตรวจ 25–28 ต.ค. 2569 · เติมพิกัดและโลโก้ 29 ต.ค. 2569” (meta.readBackOn from the README key “จุดตรวจ Logo / GPS — <date>”), never a re-check of every row; checked_on per row still spans 25–28 Oct"
     ]
   },
   "rowScopes": {
@@ -173,29 +182,29 @@
     "model": "js/area-insight.js#summarizeAreaInsight",
     "filter": "js/area-insight.js#filterAreaRows",
     "defaultSnapshot": {
-      "asOf": "2026-10-28",
-      "population": "sheet 1 + register (0.6.0)",
+      "asOf": "2026-10-30",
+      "population": "sheet 1 + register of 2026-10-30 (0.7.1)",
       "areaIds": [
-        "100403",
+        "100108",
         "100402",
-        "100702"
+        "100403"
       ],
       "names": [
-        "สุริยวงศ์",
+        "ตลาดยอด",
         "สีลม",
-        "วังใหม่"
+        "สุริยวงศ์"
       ],
       "rows": [
-        80,
-        184,
-        158
+        32,
+        250,
+        98
       ],
-      "count": 422,
-      "km2": 3.4592,
-      "density": 121.99,
-      "baselineDensity": 9.37,
-      "framedRows": 76610,
-      "totalRows": 95799,
+      "count": 380,
+      "km2": 2.3079,
+      "density": 164.65,
+      "baselineDensity": 9.83,
+      "framedRows": 80333,
+      "totalRows": 96100,
       "coverage": {
         "areas": 475,
         "km2": 8171.79
@@ -205,7 +214,7 @@
         "name": "คลองตันเหนือ",
         "reviews": 214826
       },
-      "previous": "0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66 ร้าน/ตร.กม., baseline 18.01, coverage 308 / 3,899.11 km²",
+      "previous": "0.6.0–0.7.0 (register of 2026-10-28): สุริยวงศ์ · สีลม · วังใหม่ 121.99 ร้าน/ตร.กม., baseline 9.37, 76,610 framed rows; 0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66, baseline 18.01, coverage 308 / 3,899.11 km²",
       "status": "regression fixture — never a UI constant"
     },
     "fallbacks": {
@@ -213,7 +222,39 @@
       "smallSelection": "fewer than 1,000 rows or fewer than 3 eligible areas → count mode: {share}% ของร้านตามตัวกรองอยู่ใน 3 พื้นที่นี้",
       "mapUnavailable": "Aha, panel, charts and table stay usable; map failure card with retry",
       "outletsOnly": "a scope with outlets and no restaurant row and no area (a จังหวัด outside the covered seven): ‘N สาขาในทะเบียนร้านเครือใน{จังหวัด}’ + the coverage sentence; never ‘0% … 0 พื้นที่’"
-    }
+    },
+    "previousSnapshots": [
+      {
+        "asOf": "2026-10-28",
+        "population": "sheet 1 + register (0.6.0–0.7.0)",
+        "areaIds": [
+          "100403",
+          "100402",
+          "100702"
+        ],
+        "names": [
+          "สุริยวงศ์",
+          "สีลม",
+          "วังใหม่"
+        ],
+        "rows": [
+          80,
+          184,
+          158
+        ],
+        "count": 422,
+        "km2": 3.4592,
+        "density": 121.99,
+        "baselineDensity": 9.37,
+        "framedRows": 76610,
+        "totalRows": 95799
+      },
+      {
+        "asOf": "2026-10-22",
+        "population": "restaurants only (0.5.x)",
+        "note": "0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66 ร้าน/ตร.กม., baseline 18.01, coverage 308 / 3,899.11 km²"
+      }
+    ]
   },
   "metricContract": {
     "areas": {
@@ -674,7 +715,7 @@
     "core": "data/restaurants.json (columnar; meta, priceBuckets, groups, types, typeGroup, areas, brands, venues, cols, brand, venue, venueEntity, venueMatch)",
     "areas": "data/areas.geojson (581), data/districts.geojson (90), data/provinces.geojson (77: 7 dissolved + 70 production outlines), data/boundary-receipts.json (581 subdistrict + 70 PROVINCE receipts)",
     "hostBuildings": "data/venue-buildings.geojson (26 venues, 61 features; MBK Center parts by CityMETER uuid)",
-    "logos": "data/brand-logos.json (155), data/venue-logos.json (157)",
+    "logos": "data/brand-logos.json (563: 155 from the portable manifest + 408 from the register folder, 0.7.1), data/venue-logos.json (157)",
     "snapshot": {
       "rows": 70214,
       "provinces": 7,
@@ -693,12 +734,13 @@
       "hostedVenues": 26,
       "sheet1Rows": 68980,
       "movedToChainRegister": 1234,
-      "population": 95799,
-      "populationRule": "sheet1Rows 68,980 + register outlets 26,819 = 95,799 (the 1,234 moved rows counted on the register side); coveredAreas 475 and reviewsTotal 5,922,059 on this population (reviews = sheet-1 rows only)",
+      "population": 96100,
+      "populationRule": "sheet1Rows 68,980 + register outlets 27,120 = 96,100 (the 1,234 moved rows counted on the register side); coveredAreas 475 and reviewsTotal 5,922,059 on this population (reviews = sheet-1 rows only); 0.6–0.7.0: 95,799 with the register of 2026-10-28",
       "noDataAreasOnPopulation": 106,
       "coveredAreasOnPopulation": 475,
-      "chainsTotal": 792,
-      "outletsTyped": 15751
+      "chainsTotal": 857,
+      "outletsTyped": 15800,
+      "framedRows": 80333
     },
     "verification": "fresh reproduction of the public API matched all 70,214 rows on every compared field (handoff/VERIFICATION.md)",
     "coordinatePolicy": "MVT display positions (z10, extent 4096, 9.55 m) stored as grid integers; decoded with the research formula; screen-space displacement only; precision described, never upgraded",
@@ -706,27 +748,55 @@
     "register": "data/chains.json (columnar; meta, provinces (77), areas, companies, brands, urls, cols id/name/brand/company/lat/lon/prov/provBy/area/ev/st/geo/floor/unit/addr/src/checked)",
     "land": "data/land.json (meta, hosts, snapshot [[key, building, rel, d]], chains [[outlet_id, building, rel, d]]) + data/land-buildings.geojson (land_host_building outline/LOD1 block + land_host_building_part LOD2 parts)",
     "registerSnapshot": {
-      "outlets": 26819,
-      "brandsWithOutlets": 756,
-      "brandProfiles": 1049,
-      "companyRecords": 311,
-      "withPoint": 16728,
-      "inCoveredSubdistricts": 7630,
-      "provinceByPoint": 16720,
-      "provinceByText": 6858,
-      "noProvince": 3241,
+      "asOf": "2026-10-30 (owner read-back 2026-10-29)",
+      "outlets": 27120,
+      "brandsWithOutlets": 821,
+      "brandProfiles": 1149,
+      "companyRecords": 336,
+      "withPoint": 22182,
+      "approxOnly": 936,
+      "inCoveredSubdistricts": 11353,
+      "provinceByPoint": 22174,
+      "provinceByText": 2733,
+      "noProvince": 2213,
+      "pointOutsideProvinces": 8,
       "evidence": {
-        "primary": 20165,
-        "secondary": 4236,
+        "primary": 20260,
+        "secondary": 4442,
         "cart": 2418
       },
       "status": {
-        "listed": 21519,
-        "pending": 5154,
-        "temporary": 102,
+        "listed": 21607,
+        "pending": 5365,
+        "temporary": 104,
         "closed": 44
       },
-      "checked": "2026-10-25/2026-10-28"
+      "geometry": {
+        "brand": 13104,
+        "other": 9078,
+        "host": 0
+      },
+      "logos": {
+        "brandsLinked": 541,
+        "profilesWithFile": 553,
+        "assetsShipped": 563,
+        "folderFiles": 577,
+        "filesAdded": 408
+      },
+      "checked": "2026-10-25/2026-10-28 · readBackOn 2026-10-29",
+      "previous": {
+        "asOf": "2026-10-28",
+        "outlets": 26819,
+        "brandsWithOutlets": 756,
+        "brandProfiles": 1049,
+        "companyRecords": 311,
+        "withPoint": 16728,
+        "inCoveredSubdistricts": 7630,
+        "provinceByPoint": 16720,
+        "provinceByText": 6858,
+        "noProvince": 3241,
+        "logosLinked": 78
+      }
     },
     "landSnapshot": {
       "hostsInCoveredProvinces": {
@@ -734,24 +804,37 @@
         "hotel": 2266,
         "office": 378
       },
-      "hostsPublished": 1036,
-      "buildings": 942,
-      "features": 1006,
+      "hostsPublished": 1089,
+      "buildings": 989,
+      "features": 1053,
       "lod2Buildings": 15,
       "lod2Parts": 64,
       "snapshotPoints": {
         "in": 2239,
+        "near": 5451,
         "inFromWithin10m": 595,
         "nested": 11
       },
       "registerPoints": {
-        "in": 2038,
-        "inFromWithin10m": 299,
-        "nested": 21
+        "in": 3396,
+        "near": 1842,
+        "inFromWithin10m": 478,
+        "nested": 33
       },
-      "checkedOn": "2026-10-28",
+      "checkedOn": "2026-10-30",
       "report": "docs/LAND_JOIN_CHECK.md + docs/land-join-check.json",
-      "source": "openfreemap_osm (OpenFreeMap planet 20261025_080012_pt z14 building layer)"
+      "source": "openfreemap_osm (OpenFreeMap planet 20261025_080012_pt z14 building layer)",
+      "previous": {
+        "checkedOn": "2026-10-28",
+        "hostsPublished": 1036,
+        "buildings": 942,
+        "features": 1006,
+        "registerPoints": {
+          "in": 2038,
+          "inFromWithin10m": 299,
+          "nested": 21
+        }
+      }
     }
   },
   "visualSystem": {
@@ -767,7 +850,9 @@
       "price": "a4fcda655f3e10c43e8deab212d7da20335392a87c823a390ab81a69d38cfccc",
       "lutSamples": 41,
       "themePolicy": "identical light HEX on both themes",
-      "source": "js/scales.js"
+      "source": "js/scales.js",
+      "classes": "41 equal-interval classes per sequential encoding since 0.7.1 (owner 2026-10-30 “color scale always go for 41 colors”): class i = LUT value i; legends = ramp with head · middle · tail anchors (js/legend.js); 3/5/7/9 pickers remain for the price buckets",
+      "legend": "js/legend.js#rampMarkup + js/scales.js#rampAnchors"
     },
     "categoricalSeries": {
       "registry": "landometer-series-10-v8",
@@ -927,6 +1012,14 @@
     {
       "id": "INV35",
       "rule": "One vocabulary (owner 2026-10-29): no tile, Aha, hint, legend, chip or list names “สาขาในทะเบียน” or routes to a “ทะเบียน” view; an outlet is a ร้าน with the meta line “สาขาเครือ”; every entry reads chain first (logo · เครือ · สาขา); a chain is one key across both sheets with one count; an outlet's food type is its chain's derived type, labelled as derived; rows without a coordinate are counted and said, never drawn from a host or a centroid; the two sheets are told apart in the provenance line only"
+    },
+    {
+      "id": "INV36",
+      "rule": "Every sequential colour encoding (choropleth, province frames, ranking bars, matrix cells, labels) uses the full 41-value LDS LUT as equal-interval classes — never a 5-class subset, never an interpolated or theme-transformed colour; the legend shows the ramp with its head · middle · tail anchors and keeps measured_zero and no_data outside it (owner 2026-10-30)"
+    },
+    {
+      "id": "INV37",
+      "rule": "A logo file ships only when its sha256 equals the logo_sha256 the register (01_BRANDS) or the portable manifest records for a brand with rows; bytes never change, the lookup stays by brand id; files the registers do not point at, and SVGs with script/event/foreignObject, are never shipped; the register's separate approximate coordinate (latitude_approx) is counted, never drawn"
     }
   ],
   "chartContracts": [
@@ -1054,7 +1147,8 @@
       "แหล่งข้อมูลระบุปิด… (ยังไม่ยืนยัน)",
       "ความครบของทะเบียน",
       "บทบาทในทะเบียนไม่ได้แปลว่าเป็นผู้ประกอบการของทุกสาขา"
-    ]
+    ],
+    "logos": "since 0.7.1 the register's own logo folder is an input (scripts/build-chains.py --logo-files): see chainIndexContract.logo and INV37"
   },
   "landJoinContract": {
     "hosts": "Land registries R11: Shopping Centers & Retail Venues, Hotel, Office (points in the covered subdistricts); Industrial Estates not compared until boundaries are accepted (DL-2669875b0346b95e63be)",

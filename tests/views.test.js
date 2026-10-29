@@ -40,7 +40,7 @@ test('every panel view ends with dataset · source · date · boundary and the p
     assert.ok(t.includes('ไม่ใช่ยอดขาย'), `${name}: rating/reviews are popularity proxies`);
   }
   // One population (0.6.0): the first Aha reads restaurants and chain outlets together (fixture in tests/insight.test.js).
-  assert.ok(text(views.overview).includes('122.0 ร้าน/ตร.กม.'), text(views.overview).slice(0, 300));
+  assert.ok(text(views.overview).includes('164.6 ร้าน/ตร.กม.'), text(views.overview).slice(0, 300));
   // One vocabulary (0.7.0): the two sheets are told apart in the provenance line only — never in a tile, an Aha or a hint.
   const ov = text(views.overview);
   assert.ok(ov.includes('ร้าน = ร้านในชุดข้อมูล CityMETER Restaurants (7 จังหวัด) + สาขาเครือจากทะเบียนร้านเครือ (ทั่วประเทศ) นับรวมกัน'), 'the split lives in the provenance line');

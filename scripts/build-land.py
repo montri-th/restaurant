@@ -33,7 +33,7 @@ Method (every result is a display-time candidate, never a located-in or tenancy 
 Outputs: data/land.json (hosts, relations, display positions), data/land-buildings.geojson (only buildings that hold at
 least one point) and the check report (JSON) given by --report.
 """
-import argparse, collections, glob, gzip, json, math, os, re
+import argparse, sys, collections, glob, gzip, json, math, os, re
 from shapely.geometry import shape, Point, Polygon, MultiPolygon, mapping
 from shapely.ops import unary_union, nearest_points
 from shapely.strtree import STRtree
@@ -129,7 +129,10 @@ def main():
     ap = argparse.ArgumentParser()
     for k in ['osm', 'shop', 'hotel', 'office', 'estates', 'ie-tiles', 'lod-buildings', 'sheet1', 'chain-dump', 'restaurants', 'chains', 'areas', 'out', 'report']:
         ap.add_argument('--' + k, required=k not in ('ie-tiles', 'lod-buildings', 'estates'))
+    ap.add_argument('--checked-on', default='2026-10-28', help='the date of this join run (YYYY-MM-DD), cited by every Land number; 0.3–0.7.0 joins ran on 2026-10-28, the 0.7.1 join on 2026-10-30')
     a = ap.parse_args()
+    if not re.match(r'^\d{4}-\d{2}-\d{2}$', a.checked_on):
+        sys.exit('--checked-on must be YYYY-MM-DD')
 
     areas = json.load(open(a.areas, encoding='utf-8'))
     area_geom = [shape(f['geometry']) for f in areas['features']]
@@ -568,7 +571,7 @@ def main():
     if m:
         shapes_as_of = f'{m.group(1)}-{m.group(2)}-{m.group(3)}'
     land_json = {
-        'meta': {'schema': 'citymeter-land-join-2', 'checkedOn': '2026-10-28', 'shapesAsOf': shapes_as_of,
+        'meta': {'schema': 'citymeter-land-join-2', 'checkedOn': a.checked_on, 'shapesAsOf': shapes_as_of,
                  'datasets': {'shopping': 'research.TH.shopping', 'hotel': 'research.TH.hotel', 'office': 'research.TH.office'},
                  'rule': 'display-time candidate: restaurant display point (≈ 9.55 m grid) or register outlet point vs the Land building outline; in = inside or within 10 m (the coordinate\'s own uncertainty; such points get a display position inside the outline), near = 10–100 m (report only); never a located-in, tenancy or floor claim',
                  'buildingRule': 'Land building = the OpenStreetMap building polygon of the OpenFreeMap z14 tiles the map draws: the polygon holding the host point, else the nearest within 10 m, else the polygon overlapping the registry\'s reviewed OpenStreetMap footprint most (IoU ≥ 0.3). Registry building parts (LOD > 1) are drawn inside the outline when the registry footprint is the same building (IoU ≥ 0.5). No CityMETER V4 footprint (owner 2026-10-28 18:27)',
@@ -613,7 +616,7 @@ def main():
         if i in with_points:
             by_type[t][0] += 1
     in_from_edge = {'snapshot': sum(1 for v in snap_join.values() if v[1] == 'in' and v[2] > 0), 'chain': sum(1 for v in chain_join.values() if v[1] == 'in' and v[2] > 0)}
-    report = {'checkedOn': '2026-10-28', 'landPoints': dict(counts), 'buildingAssignment': dict(stats),
+    report = {'checkedOn': a.checked_on, 'landPoints': dict(counts), 'buildingAssignment': dict(stats),
               'osm': {'source': osm_meta.get('source', ''), 'tiles': osm_meta.get('tiles'), 'pieces': n_pieces, 'buildings': len(osm), 'fetchErrors': osm_meta.get('errors', [])},
               'registryFootprintVsOsmAtHost': dict(iou_stats),
               'publishedBuildingsByLod': {f'lod{k}': v for k, v in sorted(lod_pub.items())},

@@ -1,5 +1,5 @@
 {
- "checkedOn": "2026-10-28",
+ "checkedOn": "2026-10-30",
  "landPoints": {
   "shopping": 3262,
   "hotel": 2266,
@@ -34,7 +34,7 @@
   "office:iou>=0.5": 6
  },
  "publishedBuildingsByLod": {
-  "lod1": 927,
+  "lod1": 974,
   "lod2": 15
  },
  "publishedParts": 64,
@@ -53,8 +53,8 @@
    "fp_edge_osm": 276,
    "snapshot_near": 3617,
    "snapshot_in": 1811,
-   "chain_in": 1911,
-   "chain_near": 932
+   "chain_in": 3171,
+   "chain_near": 1391
   },
   "hotel": {
    "points": 2266,
@@ -63,8 +63,8 @@
    "fp_edge_osm": 341,
    "snapshot_near": 1417,
    "snapshot_in": 344,
-   "chain_near": 185,
-   "chain_in": 91
+   "chain_near": 270,
+   "chain_in": 149
   },
   "office": {
    "points": 378,
@@ -73,8 +73,8 @@
    "fp_edge_osm": 50,
    "snapshot_near": 522,
    "snapshot_in": 273,
-   "chain_in": 401,
-   "chain_near": 163
+   "chain_in": 671,
+   "chain_near": 267
   }
  },
  "snapshotJoined": {
@@ -82,22 +82,22 @@
   "in": 2239
  },
  "chainJoined": {
-  "near": 1224,
-  "in": 2038
+  "near": 1842,
+  "in": 3396
  },
  "inFromWithin10m": {
   "snapshot": 595,
-  "chain": 299
+  "chain": 478
  },
  "displayPositions": {
   "snapshot": 595,
-  "chain": 299
+  "chain": 478
  },
  "snapshotPoints": 70214,
- "chainPointsInCoveredProvinces": 7630,
+ "chainPointsInCoveredProvinces": 11353,
  "pointsInNestedBuildings": {
   "snapshot": 11,
-  "chain": 21
+  "chain": 33
  },
  "nameLinkReview": [
   {
@@ -457,11 +457,11 @@
    "total": 48
   },
   "hotel:accommodation_unclassified": {
-   "withPoints": 19,
+   "withPoints": 21,
    "total": 44
   },
   "hotel:apartment_accommodation": {
-   "withPoints": 2,
+   "withPoints": 3,
    "total": 46
   },
   "hotel:bungalow": {
@@ -473,7 +473,7 @@
    "total": 2
   },
   "hotel:guesthouse": {
-   "withPoints": 20,
+   "withPoints": 22,
    "total": 125
   },
   "hotel:homestay": {
@@ -481,7 +481,7 @@
    "total": 32
   },
   "hotel:hotel": {
-   "withPoints": 219,
+   "withPoints": 223,
    "total": 1663
   },
   "hotel:motel": {
@@ -509,11 +509,11 @@
    "total": 8
   },
   "office:office_use_component": {
-   "withPoints": 19,
+   "withPoints": 20,
    "total": 38
   },
   "office:office_venue_source_record": {
-   "withPoints": 124,
+   "withPoints": 136,
    "total": 332
   },
   "shopping:agricultural_wholesale_market": {
@@ -565,7 +565,7 @@
    "total": 1
   },
   "shopping:community_shopping_center": {
-   "withPoints": 38,
+   "withPoints": 39,
    "total": 60
   },
   "shopping:community_shopping_center_candidate": {
@@ -581,7 +581,7 @@
    "total": 2
   },
   "shopping:covered_market_source_reported": {
-   "withPoints": 80,
+   "withPoints": 85,
    "total": 567
   },
   "shopping:department_store_or_retail_complex": {
@@ -597,7 +597,7 @@
    "total": 1
   },
   "shopping:fashion_retail_and_wholesale_center": {
-   "withPoints": 0,
+   "withPoints": 1,
    "total": 2
   },
   "shopping:floating_market": {
@@ -617,7 +617,7 @@
    "total": 1
   },
   "shopping:foodplace_supermarket_store_context": {
-   "withPoints": 3,
+   "withPoints": 4,
    "total": 6
   },
   "shopping:former_fashion_retail_and_wholesale_center": {
@@ -637,7 +637,7 @@
    "total": 1
   },
   "shopping:fuel_station_retail_scope_unconfirmed": {
-   "withPoints": 35,
+   "withPoints": 38,
    "total": 364
   },
   "shopping:fuel_station_with_historical_retail_component": {
@@ -645,11 +645,11 @@
    "total": 1
   },
   "shopping:fuel_station_with_retail_component": {
-   "withPoints": 8,
+   "withPoints": 9,
    "total": 53
   },
   "shopping:fuel_station_with_source_listed_retail_component": {
-   "withPoints": 33,
+   "withPoints": 36,
    "total": 278
   },
   "shopping:grocery_anchor_with_restaurant_component": {
@@ -701,7 +701,7 @@
    "total": 1
   },
   "shopping:managed_retail_component": {
-   "withPoints": 7,
+   "withPoints": 8,
    "total": 14
   },
   "shopping:managed_retail_component_candidate": {
@@ -753,7 +753,7 @@
    "total": 44
   },
   "shopping:night_market": {
-   "withPoints": 7,
+   "withPoints": 10,
    "total": 151
   },
   "shopping:office_retail_component": {
@@ -805,7 +805,7 @@
    "total": 1
   },
   "shopping:retail_complex": {
-   "withPoints": 5,
+   "withPoints": 6,
    "total": 7
   },
   "shopping:retail_entertainment_building": {
@@ -845,7 +845,7 @@
    "total": 1
   },
   "shopping:shopping_center": {
-   "withPoints": 109,
+   "withPoints": 110,
    "total": 124
   },
   "shopping:shopping_center_building": {
@@ -897,7 +897,7 @@
    "total": 1
   },
   "shopping:supermarket_store_or_host_component": {
-   "withPoints": 43,
+   "withPoints": 48,
    "total": 613
   },
   "shopping:supermarket_with_managed_foodcourt_component": {
@@ -925,7 +925,7 @@
    "total": 1
   },
   "shopping:unclassified": {
-   "withPoints": 100,
+   "withPoints": 105,
    "total": 627
   },
   "shopping:walking_street_market": {
@@ -949,7 +949,7 @@
    "total": 1
   }
  },
- "buildingsPublished": 942,
- "featuresPublished": 1006,
- "hostsPublished": 1036
+ "buildingsPublished": 989,
+ "featuresPublished": 1053,
+ "hostsPublished": 1089
 }
