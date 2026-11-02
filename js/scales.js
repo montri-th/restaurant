@@ -166,10 +166,21 @@ export function classify(value, model, state = 'measured') {
   return {state: 'measured', fill: cls.fill, ink: cls.ink, label: String(value), classIndex: cls.index};
 }
 
-/** Price bucket colours: the five priced buckets take the five `price` classes in order; unspecified is no_data. */
+/**
+ * k ordered classes on the 41-value LUT: index round(i × 40 / (k − 1)) — exact samples, head and tail always
+ * present, the same picks the ramps make when a range has few classes (owner 2026-10-30 “color scale always go for
+ * 41 colors”). Used for the source's fixed class sets whose size is not one of LDS's 3/5/7/9 (six price tiers).
+ */
+export function lutPicks(k, scale = COUNT_SCALE) {
+  if (!Number.isInteger(k) || k < 1 || k > RAMP_CLASSES) throw new RangeError('Class count must be 1–41');
+  if (k === 1) return [scale.lut[40]];
+  return Array.from({length: k}, (_, i) => scale.lut[Math.round((i * 40) / (k - 1))]);
+}
+
+/** Price tier colours (0.8.0): P1…P6 take six exact `price` LUT samples in order; unspecified is no_data (no colour). */
 export function priceColors() {
-  const c = classColors(5, PRICE_SCALE);
-  return {UNDER_100: c[0], R100_300: c[1], R300_500: c[2], R500_1000: c[3], OVER_1000: c[4], UNSPECIFIED: null};
+  const c = lutPicks(6, PRICE_SCALE);
+  return {P1: c[0], P2: c[1], P3: c[2], P4: c[3], P5: c[4], P6: c[5], UNSPECIFIED: null};
 }
 
 /** WCAG relative-luminance contrast ratio (used for ink choice and tests). */

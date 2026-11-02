@@ -52,7 +52,7 @@
  *     Panel mode land opens one host at venue level (its building in the data colour, x-ray, eye camera).
  * URL: chains=1 (+ rq=query), chain, company, outlet, land.
  */
-import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink} from './model.js';
+import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, LEGACY_PRICE, LEGACY_PRICE_LABELS, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, attachSegments, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink} from './model.js';
 import {buildAreaIndex, areaWord, districtWord, areaLocator} from './areas.js';
 import {summarizeAreaInsight, filterAreaRows, MIN_AREA_ROWS} from './area-insight.js';
 import {renderInsightChart} from './charts.js';
@@ -81,7 +81,7 @@ import {classify} from './scales.js';
 import {cueMarkup} from './cues.js';
 
 const $ = id => document.getElementById(id);
-const FIELDS = ['search', 'group', 'price', 'province', 'brand'];
+const FIELDS = ['search', 'group', 'price', 'size', 'province', 'brand'];
 const BANGKOK = {center: [100.535, 13.745], zoom: 12.2};
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobilePortrait = () => matchMedia('(max-width: 760px) and (orientation: portrait)').matches;
@@ -249,7 +249,7 @@ function update({fit = false} = {}) {
   const s = summarize(state.rows);
   $('filter-count').textContent = activeFilterCount(f) ? String(activeFilterCount(f)) : '';
   $('filter-chips').innerHTML = renderFilterChips(f, {
-    group: Object.fromEntries(state.data.groups.map(g => [g.id, g.th])), price: PRICE_LABELS,
+    group: Object.fromEntries(state.data.groups.map(g => [g.id, g.th])), price: {...PRICE_LABELS, ...LEGACY_PRICE_LABELS}, size: SIZE_LABELS,
     province: Object.fromEntries(ALL_PROVINCES.map(p => [p.code, p.th])), brand: Object.fromEntries((state.chains?.list || []).map(c => [c.key, c.name])), venue: {}});
   renderPanel(s);
   renderLegend();
@@ -1107,6 +1107,13 @@ function filterBrand(id) {
   $('panel').scrollTop = 0;
 }
 
+/** A price tier or chain size picked from a panel's bars: the same path as the filter select (keeps the open area). */
+function filterField(field, value) {
+  if (!['price', 'size'].includes(field) || ![...$(field).options].some(o => o.value === value)) return;
+  $(field).value = value;
+  $(field).dispatchEvent(new Event('change'));
+}
+
 function onPanelAction(event) {
   const target = event.target.closest('[data-action]');
   if (!target) return;
@@ -1124,6 +1131,7 @@ function onPanelAction(event) {
     case 'select-outlet': selectOutlet(id); break;
     case 'select-land': selectLand(id); break;
     case 'filter-brand': filterBrand(value); break;
+    case 'filter-field': filterField(id, value); break;
     case 'back': goBack(); break;
     case 'explore-top': exploreTop(); break;
     case 'clear-focus': clearFocus(); break;
@@ -1226,7 +1234,7 @@ function renderTable() {
       <td>${outlet ? '<span class="hint">—</span>' : esc(PRICE_LABELS[r.price])}</td>
       <td>${Number.isFinite(r.rating) ? `★ <span class="data-number">${dec(r.rating)}</span>` : `<span class="hint">${outlet ? '—' : 'ไม่มีคะแนน'}</span>`}<small>${Number.isFinite(r.reviews) ? `${num(r.reviews)} รีวิว` : ''}</small></td>
       <td>${a ? `${esc(areaWord(a.province))}${esc(a.name)}<small>${esc(districtWord(a.province))}${esc(a.districtName)} · ${esc(provinceByCode(a.province)?.th || '')}</small>` : r.province ? `${esc(provinceByCode(r.province)?.th || r.province)}<small>${outlet ? 'จังหวัดจากทะเบียน · ไม่มีแขวง/ตำบล' : 'ไม่มีแขวง/ตำบล'}</small>` : '<span class="hint">ไม่ทราบจังหวัด</span>'}</td>
-      <td>${r.brand ? esc(r.brand.name) : '<span class="hint">—</span>'}${r.venue ? `<small>${esc(r.venue.name)}</small>` : ''}</td>
+      <td>${r.brand ? esc(r.brand.name) : '<span class="hint">—</span>'}${r.brand && r.size ? `<small>${esc(SIZE_LABELS[r.size])}</small>` : ''}${r.venue ? `<small>${esc(r.venue.name)}</small>` : ''}</td>
       <td>${hasPoint(r) ? `<small class="data-number">${(r.sourceLatitude ?? r.latitude).toFixed(5)}, ${(r.sourceLongitude ?? r.longitude).toFixed(5)}</small>` : '<span class="hint">ยังไม่มีพิกัด</span>'}</td></tr>`;
   }).join('') || '<tr><td colspan="6">ไม่พบร้านตามตัวกรอง</td></tr>';
   $('page-label').textContent = list.length ? `${num(start + 1)}–${num(Math.min(start + pageSize, list.length))} / ${num(list.length)}` : '0 ร้าน';
@@ -1800,7 +1808,12 @@ function options(id, items) {
 
 function restoreFromURL() {
   const p = new URLSearchParams(location.search);
-  for (const f of FIELDS) if (p.has(f)) { const v = f === 'province' ? provinceCodeFrom(p.get(f)) : f === 'brand' ? chainKeyOf(p.get(f)) : p.get(f); if (f === 'search' || [...($(f).options || [])].some(o => o.value === v)) $(f).value = v; }
+  for (const f of FIELDS) if (p.has(f)) {
+    let v = f === 'province' ? provinceCodeFrom(p.get(f)) : f === 'brand' ? chainKeyOf(p.get(f)) : p.get(f);
+    // A price link of 0.1–0.7 names an API bucket: it opens the tiers that bucket covered (100–300 → 101–200 + 201–300).
+    if (f === 'price' && LEGACY_PRICE[v]) { v = LEGACY_PRICE[v]; if (LEGACY_PRICE_LABELS[v] && ![...$('price').options].some(o => o.value === v)) options('price', [[v, LEGACY_PRICE_LABELS[v]]]); }
+    if (f === 'search' || [...($(f).options || [])].some(o => o.value === v)) $(f).value = v;
+  }
   // A chain link of 0.3–0.6 (?chain=<register brand id>) is the brand filter now.
   if (p.get('chain') && !p.has('brand')) { const v = chainKeyOf(p.get('chain')); if ([...$('brand').options].some(o => o.value === v)) $('brand').value = v; }
   if (['density', 'mix', 'price'].includes(p.get('view'))) state.view = p.get('view');
@@ -1895,7 +1908,7 @@ function wireEvents() {
 async function init() {
   try {
     // One population (owner 2026-10-28 22:36): the chain register loads with the snapshot, before the first paint.
-    const resources = ['data/restaurants.json', 'data/areas.geojson', 'data/districts.geojson', 'data/provinces.geojson', 'data/venue-buildings.geojson', 'data/brand-logos.json', 'data/venue-logos.json', 'data/chains.json'];
+    const resources = ['data/restaurants.json', 'data/areas.geojson', 'data/districts.geojson', 'data/provinces.geojson', 'data/venue-buildings.geojson', 'data/brand-logos.json', 'data/venue-logos.json', 'data/chains.json', 'data/segments.json'];
     const results = await Promise.allSettled(resources.map(r => fetchJSON(r, {timeout: r.includes('restaurants') || r.includes('chains') ? 45000 : 20000})));
     for (const i of [0, 1, 2]) if (results[i].status === 'rejected') throw results[i].reason;
     for (const i of [1, 2]) if (!validFeatureCollection(results[i].value)) { const e = new Error('Invalid boundary FeatureCollection'); e.resource = resources[i]; e.phase = 'data-schema'; throw e; }
@@ -1926,6 +1939,18 @@ async function init() {
       state.data.rows = [...state.data.rows, ...state.data.outlets];
       state.data.meta = {...state.data.meta, registerChecked: registerChecked(state.register.meta)};
     } else state.data.outlets = [];
+    // Chain size (0.8.0, register workbook 10_CLASSIFICATION): aligned to the two id arrays of this build; a missing or
+    // misaligned file leaves every row unsized and the size filter hidden — never a guessed band.
+    state.segments = null;
+    if (results[8].status === 'fulfilled') {
+      const att = attachSegments(results[8].value, {rows: state.data.rows.filter(r => r.kind !== 'outlet'), outlets: state.data.outlets,
+        keys: results[0].value.cols.key, ids: results[7].status === 'fulfilled' && state.register ? results[7].value.cols.id : []});
+      if (att.ok) {
+        state.segments = {meta: results[8].value.meta, attached: att.attached, lifted: att.lifted};
+        state.data.meta = {...state.data.meta, segmentsOn: results[8].value.meta.classifiedOn};
+      }
+      else console.warn('Segments do not match this build', att);
+    } else console.warn('Segments', results[8].reason);
     state.rowById = new Map([...state.data.rows, ...state.data.moved].map(r => [r.id, r]));
     state.coveredIds = new Set(state.data.rows.map(r => r.area).filter(Boolean));
     state.coverage = scopedCoverage();
@@ -1936,6 +1961,10 @@ async function init() {
     for (const r of state.data.rows) priceCounts[r.price]++;
     // Only buckets that hold rows are offered (a bucket with no row would always return an empty map).
     options('price', PRICE_BUCKETS.filter(b => priceCounts[b] > 0).map(b => [b, `${PRICE_LABELS[b]} (${num(priceCounts[b])})`]));
+    const sizeCounts = Object.fromEntries(SIZE_BANDS.map(b => [b, 0]));
+    for (const r of state.data.rows) if (r.size) sizeCounts[r.size]++;
+    options('size', SIZE_BANDS.filter(b => sizeCounts[b] > 0).map(b => [b, `${SIZE_SHORT[b]} (${num(sizeCounts[b])})`]));
+    $('size').closest('label').hidden = !state.segments;
     const groupCounts = new Map();
     for (const r of state.data.rows) groupCounts.set(r.groupId, (groupCounts.get(r.groupId) || 0) + 1);
     options('group', state.data.groups.filter(g => groupCounts.get(g.id)).map(g => [g.id, `${g.th} (${num(groupCounts.get(g.id))})`]));

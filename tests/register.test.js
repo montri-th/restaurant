@@ -40,12 +40,12 @@ function setup() {
 }
 const PRIVATE = /(docs|drive)\.google\.com|googleusercontent\.com|drive\.usercontent/;
 
-test('chains.json keeps the register unit: 27,120 outlet_ids, unique, every column complete', () => {
+test('chains.json keeps the register unit: 27,527 outlet_ids, unique, every column complete', () => {
   const {raw, reg} = setup();
   assert.equal(raw.meta.schema, 'citymeter-chain-register-1');
   const n = raw.cols.id.length;
-  // Snapshot values of the register read on 2026-10-28 (regression fixtures, never UI constants).
-  assert.equal(n, 27120);
+  // Snapshot values of the register read on 2026-11-03 (regression fixtures, never UI constants; 0.7.1: 27,120).
+  assert.equal(n, 27527);
   assert.equal(raw.meta.outlets, n);
   assert.equal(String(raw.meta.readmeCounts['จำนวนตัวตนสาขา/จุดขาย']), String(n), 'equals the register README count');
   for (const [k, col] of Object.entries(raw.cols)) assert.equal(col.length, n, `column ${k}`);
@@ -65,7 +65,7 @@ test('coordinates: only the register\'s selected points, inside Thailand; no poi
     assert.ok(o.latitude > 5 && o.latitude < 21 && o.longitude > 97 && o.longitude < 106, o.id);
   }
   assert.equal(withPoint, raw.meta.stats.withPoint);
-  assert.equal(withPoint, 22182);
+  assert.equal(withPoint, 22547, 'register of 2026-11-03 (0.7.1: 22,182)');
 });
 
 test('province and แขวง/ตำบล are derived and say how: point-in-polygon first, register text second, unknown stays unknown', () => {
@@ -358,8 +358,10 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   assert.ok(landHtml.includes(`${(inside.length + outletsIn.length).toLocaleString('th-TH')} ร้านในอาคาร`), 'one total');
   const buttons = (listHtml.match(/data-action="select-store"/g) || []).length;
   const matched = new Set(inside.filter(r => r.register === 2).flatMap(r => r.registerTargets || []).filter(t => outletsIn.some(o => o.id === t)));
-  assert.ok(inside.length + outletsIn.length <= 40, 'Siam Paragon fits one page of the list');
-  assert.equal(buttons, inside.length + outletsIn.length - matched.size, 'every row and outlet in the one list, a matched one carried by its row');
+  // Since the register of 2026-11-03 Siam Paragon holds more than one page (40): the list is cut and says so.
+  const entries = inside.length + outletsIn.length - matched.size;
+  assert.equal(buttons, Math.min(40, entries), 'every row and outlet in the one list up to a page, a matched one carried by its row');
+  if (entries > 40) assert.ok(landHtml.includes(`แสดง 40 จาก ${entries.toLocaleString('th-TH')} ร้าน`), 'a cut list says how many it holds');
   assert.ok(!listHtml.includes('data-action="select-outlet"'), 'one action for every entry');
   assert.ok(landHtml.includes('สาขาเครือ'), 'an outlet entry names itself as a chain outlet in its meta line');
 });

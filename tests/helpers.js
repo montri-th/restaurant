@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {dirname, join} from 'node:path';
-import {decodeDataset, outletRows, deriveChainGroups, registerProvinces} from '../js/model.js';
+import {decodeDataset, outletRows, deriveChainGroups, registerProvinces, attachSegments} from '../js/model.js';
 import {buildAreaIndex} from '../js/areas.js';
 import {decodeRegister} from '../js/register.js';
 
@@ -32,6 +32,8 @@ export function load() {
   data.outlets = outletRows(register, data.groups, {snapshotOf, index, chainGroups});
   data.chainGroups = chainGroups;
   data.rows = [...data.restaurants, ...data.outlets];
+  // 0.8.0: chain size from the register workbook's classification tab, aligned to this build's two id arrays.
+  data.segments = attachSegments(readJSON('data/segments.json'), {rows: data.restaurants, outlets: data.outlets, keys: raw.cols.key, ids: readJSON('data/chains.json').cols.id});
   const covered = new Set(data.rows.map(r => r.area).filter(Boolean));
   let km2 = 0;
   for (const id of covered) km2 += index.byId.get(id)?.km2 || 0;

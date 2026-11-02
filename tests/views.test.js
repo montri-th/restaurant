@@ -40,7 +40,7 @@ test('every panel view ends with dataset · source · date · boundary and the p
     assert.ok(t.includes('ไม่ใช่ยอดขาย'), `${name}: rating/reviews are popularity proxies`);
   }
   // One population (0.6.0): the first Aha reads restaurants and chain outlets together (fixture in tests/insight.test.js).
-  assert.ok(text(views.overview).includes('164.6 ร้าน/ตร.กม.'), text(views.overview).slice(0, 300));
+  assert.ok(text(views.overview).includes('169.4 ร้าน/ตร.กม.'), text(views.overview).slice(0, 300));
   // One vocabulary (0.7.0): the two sheets are told apart in the provenance line only — never in a tile, an Aha or a hint.
   const ov = text(views.overview);
   assert.ok(ov.includes('ร้าน = ร้านในชุดข้อมูล CityMETER Restaurants (7 จังหวัด) + สาขาเครือจากทะเบียนร้านเครือ (ทั่วประเทศ) นับรวมกัน'), 'the split lives in the provenance line');
@@ -62,7 +62,8 @@ test('missing stays missing in views: no rating → “ไม่มีคะแ�
   assert.ok(t.includes('ไม่ระบุราคา (ไม่ใช่ราคา 0)'));
   const priced = data.rows.find(x => Number.isFinite(x.p0) && Number.isFinite(x.p1) && x.p0 !== x.p1);
   assert.match(describePrice(priced).range, /–/);
-  assert.equal(PRICE_LABELS.R100_300, '100–300 บาท', 'labels read as ranges (N18): the bucket (100, 300]');
+  assert.equal(PRICE_LABELS.P2, '101–200 บาท', 'labels read as ranges (N18): the tier (100, 200]');
+  assert.equal(PRICE_LABELS.P6, 'เริ่ม 1,000 บาทขึ้นไป', 'the open top tier says it starts at 1,000');
   assert.match(describeGeometry(r).label, /^ตำแหน่งจาก tile z10\/\d+\/\d+ · ช่อง 9\.55 ม\.$/);
 });
 
@@ -117,6 +118,33 @@ test('filter chips escape user text and offer one clear-all', () => {
     {group: {thai: 'อาหารไทย'}, price: {}, province: {BKK: 'กรุงเทพมหานคร'}, brand: {}, venue: {}});
   assert.ok(!html.includes('<b>'));
   assert.equal((html.match(/data-id="all"/g) || []).length, 1);
+});
+
+test('0.8.0 segments in views: price tiers and chain sizes are labelled bars that filter; a store says how its size was counted', async () => {
+  const {data, index} = setup();
+  const {renderOutlet} = await import('../js/register-panel.js');
+  const {SIZE_LABELS, LEGACY_PRICE_LABELS} = await import('../js/model.js');
+  const html = renderArea(buildAreaProfile(data.rows, '100402', index, data.groups), {...data.meta, segmentsOn: '2026-11-02'});
+  const t = text(html);
+  assert.ok(t.includes('ขนาดเครือ') && t.includes('200+ สาขา') && html.includes('title="ดูเฉพาะเครือระดับชาติ 200+ สาขา"'), 'the area profile reads chain size (short bars, full name in the title)');
+  assert.ok(/data-action="filter-field" data-id="size" data-value="S5"/.test(html) && /data-action="filter-field" data-id="price" data-value="P2"/.test(html), 'bars filter by tier and size');
+  assert.ok(t.includes('1 สาขา = พบแถวเดียว ไม่ได้แปลว่าเป็นร้านอิสระ'), 'one observed row is never an independent shop');
+  assert.ok(t.includes('ขนาดเครือจัดกลุ่ม 2 พ.ย. 2569'), 'the size bars cite the classification date in the one provenance line');
+  assert.ok(!/size-fill[^"]*" style="[^"]*background/.test(html), 'size bars use one neutral fill, no second colour family');
+  // A store with a chain: band + basis; a lifted row says it took its chain's larger size.
+  const lifted = data.restaurants.find(r => r.sizeLifted && r.venue);
+  const st = text(renderStore(buildStoreDetail(lifted, {scopeRows: data.rows, index, groups: data.groups}), {...data.meta, index}));
+  assert.ok(st.includes(`ขนาดเครือ ${SIZE_LABELS[lifted.size]}`) && st.includes('ใช้ขนาดที่ใหญ่ที่สุดที่นับได้ของเครือเดียวกัน'), st.slice(0, 400));
+  const single = data.restaurants.find(r => !r.brand && Number.isFinite(r.p1));
+  const sst = text(renderStore(buildStoreDetail(single, {scopeRows: data.rows, index, groups: data.groups}), {...data.meta, index}));
+  assert.ok(sst.includes('1 สาขาที่พบในข้อมูล') && sst.includes('ไม่ได้แปลว่าเป็นร้านอิสระ') && sst.includes('จัดช่วงจากราคาสูงสุดที่ระบุ'));
+  // The point-of-sale registry is never sized.
+  const cpf = data.outlets.find(o => o.sizeBasis === 'x');
+  const ot = text(renderOutlet({reg: load().register, outlet: cpf, area: null, land: null, sameBrand: [], group: data.groups[cpf.group]}));
+  assert.ok(ot.includes('ไม่จัดขนาด') && !ot.includes('เครือระดับชาติ'), ot.slice(0, 300));
+  // Chips name the size and a legacy two-tier price link.
+  const chips = text(renderFilterChips({search: '', group: '', price: 'P2,P3', size: 'S5', province: '', brand: '', venue: ''}, {group: {}, price: {...PRICE_LABELS, ...LEGACY_PRICE_LABELS}, size: SIZE_LABELS, province: {}, brand: {}, venue: {}}));
+  assert.ok(chips.includes('101–300 บาท (ช่วงของลิงก์เดิม)') && chips.includes('เครือระดับชาติ 200+ สาขา'));
 });
 
 test('density format: a measured non-zero density never prints as zero; labels and panel share it', () => {

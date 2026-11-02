@@ -3,8 +3,8 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.7.1",
-  "updatedOn": "2026-10-30",
+  "productVersion": "0.8.0",
+  "updatedOn": "2026-11-03",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
   "evidenceLabels": {
@@ -138,6 +138,7 @@
     "พื้นที่นี้เป็นร้านแบบไหน ราคาระดับไหน",
     "เครือ X อยู่พื้นที่ไหนบ้าง",
     "เครือไหนมีสาขาอยู่แถวนี้ และทั่วประเทศอยู่ที่ไหน",
+    "พื้นที่นี้มีร้านช่วงราคาเดียวกับเรากี่ร้าน และเป็นเครือขนาดไหน",
     "ในศูนย์/โรงแรม/อาคารสำนักงานนี้มีร้านแบบไหน ต่างจากรอบอาคารอย่างไร"
   ],
   "channel_readiness": {
@@ -220,7 +221,7 @@
     {
       "name": "CityMETER Chain Restaurants Thailand — Research Master (national chain register)",
       "owner": "Landometer · CityMETER research",
-      "url_or_reference": "internal research sheet (not published); data/chains.json",
+      "url_or_reference": "internal research sheet (not published); data/chains.json; since 0.8.0 its tab 10_CLASSIFICATION (classified 2026-11-02, unreviewed) → data/segments.json (chain size only; price tiers checked against it)",
       "update_frequency": "ad hoc",
       "license_or_permission": "internal research; per-outlet public source links"
     },
@@ -233,23 +234,24 @@
     }
   ],
   "spatial_granularity": "display point → แขวง/ตำบล (analytical unit) → เขต/อำเภอ → จังหวัด (production code) → ประเทศ",
-  "temporal_coverage": "restaurant snapshot retrieved 2026-10-22 (sheets read 2026-10-28); chain register checked 2026-10-25 to 2026-10-28; Land join 2026-10-28; upstream collection date not exposed",
+  "temporal_coverage": "restaurant snapshot retrieved 2026-10-22 (sheet 1 read 2026-10-28, unchanged since); chain register checked 2026-10-25 to 2026-10-31, logo/GPS read-back 2026-10-30, workbook read 2026-11-03; classification 2026-11-02 (unreviewed); Land join 2026-11-03; upstream collection date not exposed",
   "update_frequency": "ad hoc",
-  "last_updated": "2026-10-30",
+  "last_updated": "2026-11-03",
   "key_metrics": [
-    "restaurants and chain outlets per km² per แขวง/ตำบล (one population since 0.6.0; register of 2026-10-30 since 0.7.1: 96,100 rows)",
+    "restaurants and chain outlets per km² per แขวง/ตำบล (one population since 0.6.0; register of 2026-11-03 since 0.8.0: 96,507 rows — 0.7.1: 96,100)",
     "combined density of the three densest areas",
     "coverage baseline density",
     "restaurants + chain outlets per province (count, all 77 provinces)",
     "rows by food-type group",
-    "rows by price bucket (priced rows)",
+    "rows by price tier P1–P6 from the price the source states (priced rows; 0.8.0 — the API's five buckets before): ไม่เกิน 100 · 101–200 · 201–300 · 301–500 · 501–1,000 · เริ่ม 1,000 บาทขึ้นไป",
+    "rows by chain size S1–S5 (0.8.0): counts of rows as the source counts them, shown with the basis; one chain, one size (the largest band, never a sum)",
     "reviews (popularity proxy)",
     "rating mean (rated rows)",
     "chain outlets of the register counted as ร้าน with the restaurants (0.6.0), under one vocabulary since 0.7.0 (owner 2026-10-29): chain first, the split stated in the provenance line only, each outlet typed by its chain (derived, labelled); evidence per outlet",
     "restaurants whose points lie in a Land building (inside or within 10 m, drawn inside)",
     "in-vs-around food types of a Land host",
-    "chains across both sheets (857): restaurants + outlets as one count per chain, a chain page per filter",
-    "first Aha on the current population: ตลาดยอด · สีลม · สุริยวงศ์ 164.6 ร้าน/ตร.กม. (380 rows / 2.31 km²), baseline 9.8 — moved from สุริยวงศ์ · สีลม · วังใหม่ 122.0 when the register of 2026-10-30 located 5,454 more outlets"
+    "chains across both sheets (942 since 0.8.0; 857 in 0.7.1): restaurants + outlets as one count per chain, a chain page per filter",
+    "first Aha on the current population (0.8.0): สีลม · ตลาดยอด · สุริยวงศ์ 169.4 ร้าน/ตร.กม. (391 rows / 2.31 km²), baseline 9.9 over 476 frames — the same three frames, สีลม passed ตลาดยอด after 11 more located outlets; 0.7.1: ตลาดยอด · สีลม · สุริยวงศ์ 164.6 (380 rows / 2.31 km²), baseline 9.8 — moved from สุริยวงศ์ · สีลม · วังใหม่ 122.0 when the register of 2026-10-30 located 5,454 more outlets"
   ],
   "visual_layers": [
     "choropleth",
@@ -299,7 +301,10 @@
     },
     "0.7.0: an outlet's food type is derived from its chain (majority of the chain's typed sheet-1 rows, else the register format) and says so — Inference, never a source attribute; price, rating and reviews are never derived",
     "0.7.0: outbound AI Mode / Street View / Maps links are ways to search outside, labelled “ค้นต่อ”, never evidence of the product",
-    "every sequential colour scale uses the full 41-value LDS LUT with a ramp legend (head · middle · tail); zero and no-data stay outside the ramp (0.7.1)"
+    "every sequential colour scale uses the full 41-value LDS LUT with a ramp legend (head · middle · tail); zero and no-data stay outside the ramp (0.7.1)",
+    "0.8.0: price tiers P1–P6 are calculated by the page from the start / end price the source states (register workbook rules.price; equal to price_band_observed on all 68,980 classified rows) — a stated range, not spend per person; a row with no stated price stays ไม่ระบุราคา, never 0; outlets carry no price; the six colours are exact samples of the 41-value price LUT",
+    "0.8.0: chain size S1–S5 comes from the register workbook's 10_CLASSIFICATION — register rows per brand_id, or sheet-1 rows sharing a name candidate (a candidate, not a confirmed chain); S1 means one observed row, network unknown, never an independent shop; a chain takes the largest band any of its rows has, never a sum across the sheets; the CPF point-of-sale registry is not sized; nothing in the tab is reviewed yet (Observed fact of counts, not a judgement)",
+    "0.8.0: food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view are classified but unreviewed — held off the web until each sub-segment passes the workbook's QA rule (a human sample of 50, at least 48 correct; 1,550 samples in all)"
   ],
   "known_limitations": [
     "ไม่ใช่สำมะโน",
@@ -315,13 +320,16 @@
     "นิคมอุตสาหกรรมยังไม่เทียบจนกว่าขอบเขตผ่านการตรวจรับ",
     "Register of 28 Oct: 10,091 outlets have no coordinate (625 of 756 chains none at all — e.g. TP TEA 12/12); they are counted and listed, never drawn; the owner's 29 Oct refresh (coordinates + logos) is pending (N22)",
     "register of 2026-10-30: 4,938 of 27,120 outlets still have no coordinate (576 of 821 chains none at all; the CPF set of 1,166 rows by the owner's order) and 2,213 no province — in the totals, on no map; 936 rows carry only an approximate venue point that is never drawn",
-    "brand logos: 563 files (34.3 MB) loaded lazily; a logo identifies the chain, never a branch, a tenancy or an open status"
+    "brand logos: 563 files (34.3 MB) loaded lazily; a logo identifies the chain, never a branch, a tenancy or an open status",
+    "register of 2026-11-03 (0.8.0): 4,980 of 27,527 outlets have no coordinate (the CPF set of 1,166 rows by the owner's order) and 2,236 no province — in the totals, on no map; 938 rows carry only an approximate venue point that is never drawn",
+    "ผลจัดกลุ่มร้าน 2 พ.ย. 2569 ทุกแถวยังไม่ผ่านการตรวจ: เว็บแสดงเฉพาะขนาดเครือ (จำนวนแถวตามที่แหล่งข้อมูลนับ) และช่วงราคา (ราคาที่แหล่งระบุ) — ประเภทอาหาร รูปแบบร้าน โอกาส ป้ายพิเศษ ราคาที่อนุมาน และมุมมองคู่แข่งรอผลสุ่มตรวจ; ช่วงราคาไม่ใช่ค่าใช้จ่ายต่อคน และ “1 สาขาที่พบ” ไม่ได้แปลว่าร้านอิสระ"
   ],
   "methodology_note": "DATA_METHOD.md, docs/AREA_METHOD.md, docs/CHART_SELECTION.md",
   "example_use_cases": [
     "คัดแขวงสำหรับสาขาใหม่ของเครือร้านก๋วยเตี๋ยว",
     "เทียบประเภทร้านรอบ community mall กับรอบศูนย์คู่แข่ง",
-    "ภาพความหนาแน่นร้านอาหารสำหรับรายงานพื้นที่ของหน่วยงานท้องถิ่น"
+    "ภาพความหนาแน่นร้านอาหารสำหรับรายงานพื้นที่ของหน่วยงานท้องถิ่น",
+    "หาแขวงที่เครือระดับชาติ (200+ สาขา) หนาแน่น หรือที่ร้านราคาเริ่ม 1,000 บาทขึ้นไปกระจุกตัว ก่อนวางตำแหน่งร้านใหม่"
   ],
   "hypotheses_to_validate": [
     {
@@ -356,5 +364,5 @@
     }
   ],
   "owner_team": "Landometer · CityMETER",
-  "last_reviewed": "2026-10-30"
+  "last_reviewed": "2026-11-03"
 }

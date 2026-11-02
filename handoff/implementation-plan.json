@@ -3,8 +3,8 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.7.1",
-  "updatedOn": "2026-10-30",
+  "productVersion": "0.8.0",
+  "updatedOn": "2026-11-03",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
   "humanPlan": "IMPLEMENTATION_PLAN.md",
@@ -43,7 +43,7 @@
     "modules": [
       {
         "path": "js/app.js",
-        "role": "orchestration: row scopes (scopeRows/baseRows/rows/venue rows/building rows), focus modes, scoped coverage, panel modes and back stack, URL state, map lifecycle and theme reinstall, camera calls, single map click priority (x-ray → host → pin → building → province → area-hit), hover, neighbour labels (refreshLabelView), building join refresh and venue highlight (refreshJoin/applyJoin), legend switch by zoom, counter/table sync"
+        "role": "orchestration: row scopes (scopeRows/baseRows/rows/venue rows/building rows), focus modes, scoped coverage, panel modes and back stack, URL state, map lifecycle and theme reinstall, camera calls, single map click priority (x-ray → host → pin → building → province → area-hit), hover, neighbour labels (refreshLabelView), building join refresh and venue highlight (refreshJoin/applyJoin), legend switch by zoom, counter/table sync; 0.8.0: loads data/segments.json with the core files and attaches it (attachSegments; a misaligned file hides the size filter), the ‘ขนาดเครือ’ filter (FIELDS size, ?size=), legacy price links (?price=UNDER_100 … OVER_1000 → LEGACY_PRICE), the filter-field action (filterField: a price or size bar sets the select through its own change path, so the open area stays), the size line under the brand in the table"
       },
       {
         "path": "js/building-join.js",
@@ -51,7 +51,7 @@
       },
       {
         "path": "js/model.js",
-        "role": "decode data/restaurants.json (grid → lon/lat), PROVINCES, price buckets and labels, GROUP_SHORT, filterRows, summarize, mixOf, productionLink"
+        "role": "decode data/restaurants.json (grid → lon/lat), PROVINCES, price tiers and labels, GROUP_SHORT, filterRows, summarize, mixOf, productionLink; 0.8.0: priceTier(p0, p1) (the workbook's rules.price from the stated bounds; PRICE_BUCKETS P1–P6 + UNSPECIFIED, PRICE_LABELS, PRICE_SHORT, PRICED), LEGACY_PRICE / LEGACY_PRICE_LABELS for 0.1–0.7 links, the chain-size vocabulary SIZE_BANDS / SIZE_LABELS / SIZE_SHORT / SIZE_BASIS / SIZE_LIFTED, attachSegments (aligns data/segments.json to cols.key and cols.id; one chain, one size — the largest band, never a sum; own band in sizeOwn), filterRows with price comma sets and size, mixOf bySize"
       },
       {
         "path": "js/areas.js",
@@ -63,7 +63,7 @@
       },
       {
         "path": "js/scales.js",
-        "role": "density.area / count / price LUTs (41 samples), classColors, buildDensityClasses (precision by magnitude), buildCountClasses, classify (EVID-05), priceColors, inkFor, contrastRatio"
+        "role": "density.area / count / price LUTs (41 samples), classColors, buildDensityClasses (precision by magnitude), buildCountClasses, classify (EVID-05), priceColors, inkFor, contrastRatio; 0.8.0: lutPicks(k, scale) — k exact LUT samples at round(i × 40 / (k − 1)) for a fixed class set of the source; priceColors = lutPicks(6, price) for P1–P6, UNSPECIFIED no colour"
       },
       {
         "path": "js/cues.js",
@@ -111,7 +111,7 @@
       },
       {
         "path": "js/panel.js",
-        "role": "panel HTML (pure), metric tiles, rankings (eligible ranked, others unranked), provenance()"
+        "role": "panel HTML (pure), metric tiles, rankings (eligible ranked, others unranked), provenance(); 0.8.0: price bars of the six tiers and sizeBars (‘ขนาดเครือ’, short band names, codebook name in the title, one neutral fill) as filter-field buttons, sizeFact (band + how it was counted; ‘ไม่จัดขนาด’ for the CPF registry), store price fact with the tier and its basis"
       },
       {
         "path": "js/chart-model.js · js/charts.js",
@@ -147,7 +147,7 @@
       },
       {
         "path": "js/register-panel.js",
-        "role": "register and Land panel views (chains, chain, company, outlet, land) and the register / Land sections inside snapshot views; registerProvenance / landProvenance"
+        "role": "register and Land panel views (chains, chain, company, outlet, land) and the register / Land sections inside snapshot views; registerProvenance / landProvenance; 0.8.0: the outlet's chain-size fact (sizeFact)"
       },
       {
         "path": "js/land.js",
@@ -164,6 +164,14 @@
       {
         "path": "scripts/xlsx-dump.py",
         "role": "dump every tab of a research xlsx to JSON (inputs of the build scripts)"
+      },
+      {
+        "path": "scripts/build-segments.py",
+        "role": "0.8.0: register workbook 10_CLASSIFICATION (+ 06_DATA_DICTIONARY codebook) → data/segments.json (schema citymeter-restaurant-segments-1): one chain-size character and basis per row of restaurants.json cols.key and per outlet of chains.json cols.id, the sha256 of both id arrays, meta.priceCheck (the page's tiers vs price_band_observed), meta.held (axes waiting for rules.QA), meta.reviewStatus; never writes a private sheet link or id"
+      },
+      {
+        "path": "data/segments.json",
+        "role": "0.8.0 data file (199,896 bytes): chain size per row and outlet, attached by js/model.js#attachSegments only when both id arrays line up; the held axes are named in meta, never shipped"
       }
     ]
   },
@@ -172,6 +180,7 @@
       "search",
       "group",
       "price",
+      "size",
       "province",
       "brand"
     ],
@@ -179,6 +188,7 @@
       "search",
       "group",
       "price",
+      "size",
       "province",
       "brand",
       "district",
@@ -228,7 +238,8 @@
       "select-chain",
       "select-company",
       "select-outlet",
-      "select-land"
+      "select-land",
+      "filter-field"
     ]
   },
   "tasks": [
@@ -659,6 +670,42 @@
         "handoff/VERIFICATION.md"
       ],
       "status": "done"
+    },
+    {
+      "id": "P19",
+      "title": "0.8.0: register of 2026-11-03 and the parts of the 2 Nov segmentation that need no review (owner 2026-11-03 01:04 “update ตาม googlesheet ที่อัพเดทใหม่ แล้ว leverage ให้ได้ value ตาม product statement ให้มากที่สุด”; QA gate choice “ขึ้นส่วนที่ไม่ต้องรอ QA ก่อน (Recommended)”) — refreshed register (chains.json) and Land join rerun --checked-on 2026-11-03; six price tiers from the source bounds (priceTier, P1–P6, LEGACY_PRICE, lutPicks colours); chain size S1–S5 from 10_CLASSIFICATION (build-segments → segments.json → attachSegments; one chain, one size; CPF never sized); size filter, clickable price/size bars, store/outlet size fact, table size line; food taxonomy, format, occasion, special labels, inferred price and the competitor view held until rules.QA passes; fixtures refreshed from a run",
+      "dependsOn": [
+        "P18"
+      ],
+      "acceptanceCriteria": [
+        "AC54",
+        "AC55",
+        "AC56",
+        "AC57",
+        "AC58"
+      ],
+      "files": [
+        "scripts/build-segments.py",
+        "data/segments.json",
+        "data/chains.json",
+        "data/land.json",
+        "data/land-buildings.geojson",
+        "docs/land-join-check.json",
+        "js/model.js",
+        "js/scales.js",
+        "js/app.js",
+        "js/panel.js",
+        "js/register-panel.js",
+        "index.html",
+        "styles.css",
+        "tests/data.test.js",
+        "tests/views.test.js",
+        "tests/scales.test.js",
+        "tests/insight.test.js",
+        "tests/register.test.js",
+        "tests/helpers.js"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -1029,15 +1076,50 @@
     {
       "id": "AC53",
       "scenario": "41-colour scales",
-      "expected": "the แขวง/ตำบล choropleth, the province frames, the ranking bars and the matrix cells take their fills from the 41 LUT values (class i = lut[i], max class = lut[40]); the map key and the matrix legend show a ramp bar with head · middle · tail labels (e.g. “>0 · 84 · 172 ร้าน/ตร.กม.”, “1 · 25,200 · 51,659 ร้าน”) plus the zero and no-data cues; identical HEX on both themes; the price bars keep their five bucket colours",
+      "expected": "the แขวง/ตำบล choropleth, the province frames, the ranking bars and the matrix cells take their fills from the 41 LUT values (class i = lut[i], max class = lut[40]); the map key and the matrix legend show a ramp bar with head · middle · tail labels (e.g. “>0 · 84 · 172 ร้าน/ตร.กม.”, “1 · 25,200 · 51,659 ร้าน”) plus the zero and no-data cues; identical HEX on both themes; the price bars keep their five bucket colours (0.7.1 — since 0.8.0 the six tier colours of AC55)",
       "verificationType": "tests (scales) + harness screenshots + live (light/dark, desktop + 390 px)",
       "result": "see VERIFICATION.md R14"
+    },
+    {
+      "id": "AC54",
+      "scenario": "Register of 2026-11-03 in the population",
+      "expected": "96,507 rows (68,980 + 27,527); 22,547 outlets with a point; the first Aha reads 169.4 ร้าน/ตร.กม. — สีลม · ตลาดยอด · สุริยวงศ์ (391 ร้าน ใน 2.31 ตร.กม.), baseline 9.9 (9.85) over 476 covered frames; 105 frames hatched as no-data, never 0; the brand filter lists 942 chains; register numbers cite “ทะเบียนร้านเครือ ตรวจ 25 ต.ค. 2569–31 ต.ค. 2569 · เติมพิกัดและโลโก้ 30 ต.ค. 2569”; the CPF registry (1,166 outlets) stays without coordinates and is never a chain",
+      "verificationType": "tests (data, insight, register, views) + harness + live",
+      "result": "unit: npm test 94/94 on 2026-11-03; rendered and live: see VERIFICATION.md"
+    },
+    {
+      "id": "AC55",
+      "scenario": "Price tiers from the stated bounds",
+      "expected": "priceTier(p0, p1) gives P1 ≤ 100 · P2 101–200 · P3 201–300 · P4 301–500 · P5 501–1,000 · P6 starts at ≥ 1,000 with no ceiling (a closed 1,000 ceiling is P5; no bound = UNSPECIFIED, never 0); the 70,214 snapshot rows hold P1 9,056 · P2 6,090 · P3 2,844 · P4 937 · P5 165 · P6 907 · unspecified 50,215; the tier identities with the API bucket hold (P1 = ≤100; P2 + P3 = 100–300; P4 = 300–500; P5 + P6 = 500–1,000 + over 1,000; unspecified equal) and the API's “over 1,000” holds no row; the tiers equal price_band_observed on all 68,980 classified rows (meta.priceCheck); LEGACY_PRICE opens UNDER_100 → P1, R100_300 → P2,P3, R300_500 → P4, R500_1000 → P5, OVER_1000 → P6, and a comma set filters both tiers; the colours are six exact price-LUT samples at indices 0, 8, 16, 24, 32, 40 (unspecified has none), the same HEX on both themes; labels read as ranges (P2 ‘101–200 บาท’, P6 ‘เริ่ม 1,000 บาทขึ้นไป’)",
+      "verificationType": "unit (tests/data.test.js “decoded rows reconcile … price tiers …” with the tier identities, and the segments test; tests/scales.test.js “price tiers take six exact samples …”; tests/views.test.js labels) + harness (light/dark)",
+      "result": "unit: npm test 94/94 on 2026-11-03; rendered and live: see VERIFICATION.md"
+    },
+    {
+      "id": "AC56",
+      "scenario": "Chain size from the register workbook",
+      "expected": "data/segments.json (schema citymeter-restaurant-segments-1) is aligned to restaurants.json cols.key and chains.json cols.id by sha256; every sheet-1 row and every outlet except the CPF registry carries S1–S5 (the 1,166 registry outlets: basis x, unsized); each chain has one size and a lift only raises (726 rows lifted, none lowered); a row without a chain candidate is S1 with basis s (one observed row, never independent); population S1 67,411 · S2 1,162 · S3 3,398 · S4 6,338 · S5 17,032; a misaligned file attaches nothing and the size filter hides",
+      "verificationType": "unit (tests/data.test.js “segments (0.8.0) …”) + harness (size filter hidden when segments.json does not load)",
+      "result": "unit: npm test 94/94 on 2026-11-03; rendered and live: see VERIFICATION.md"
+    },
+    {
+      "id": "AC57",
+      "scenario": "Segments in views",
+      "expected": "the area profile shows ‘ขนาดเครือ’ bars beside ‘ระดับราคา’ with short band names (‘200+ สาขา’) and the codebook name in the title (‘ดูเฉพาะเครือระดับชาติ 200+ สาขา’); price and size bars are filter-field buttons (data-id price / size) that keep the open area; size bars use one neutral fill; the area reads ‘1 สาขา = พบแถวเดียว ไม่ได้แปลว่าเป็นร้านอิสระ’; a lifted store reads ‘ขนาดเครือ {band}’ + ‘ใช้ขนาดที่ใหญ่ที่สุดที่นับได้ของเครือเดียวกัน’; a store without a chain reads ‘1 สาขาที่พบในข้อมูล’ + ‘ไม่ได้แปลว่าเป็นร้านอิสระ’ and its tier basis ‘จัดช่วงจากราคาสูงสุดที่ระบุ’; the CPF registry outlet reads ‘ไม่จัดขนาด’ and never ‘เครือระดับชาติ’; filter chips name the size and the legacy two-tier link ‘101–300 บาท (ช่วงของลิงก์เดิม)’; ?size= and ?price= restore the filter",
+      "verificationType": "unit (tests/views.test.js “0.8.0 segments in views …”) + harness + live (desktop and 390 px, light and dark)",
+      "result": "unit: npm test 94/94 on 2026-11-03; rendered and live: see VERIFICATION.md"
+    },
+    {
+      "id": "AC58",
+      "scenario": "Unreviewed axes stay off the web",
+      "expected": "data/segments.json meta.reviewStatus counts every classified row as unreviewed and meta.held.fields names food_category_id, food_group_id, food_subgroup_primary_id, format_id, occasion_ids, special_label_ids and price_band_inferred; no food taxonomy (6 / 19 / 31), format, occasion, special label, inferred price or competitor view reaches a view, filter, chip, chart or table — not even as “(อนุมาน)”; segments.json holds no private Google Docs / Drive / Sheets link or id; a sub-segment ships only after its sample of 50 has at least 48 correct (rules.QA)",
+      "verificationType": "unit (tests/data.test.js “segments (0.8.0) …”: held fields, review status, no private sheet link) + review of every view",
+      "result": "unit: npm test 94/94 on 2026-11-03"
     }
   ],
   "developerWorkflow": [
     "Read AGENTS.md, then handoff/README.md, PRODUCT_STATEMENT.md and the paired human/machine briefs",
     "Run npm test before changes; keep the row scopes, focus modes, metric and coverage contracts and the panel action contract",
-    "Change one bounded task at a time; preserve invariant IDs INV01–INV26",
+    "Change one bounded task at a time; preserve invariant IDs INV01–INV40",
     "Validate calculations with the real data in tests/ (tests/helpers.js loads it once)",
     "Review rendered Thai at 390 px and desktop in both themes; use the stub-tile harness when CDN/tiles are blocked, then confirm the real-tile look live",
     "Tune camera and layers live via window.__citymeter in the console before changing constants",
@@ -1167,7 +1249,7 @@
     },
     {
       "id": "N21",
-      "title": "Outlets without a coordinate (10,091; 3,241 with no province either) sit in the totals but on no map and in no density — a coordinate pass on the register would move them into the frames (research task) — 0.7.1: the register of 2026-10-30 located 5,454 more outlets (22,182 with a point); 4,938 remain without one (CPF 1,166 by the owner's order; 936 have only an approximate venue point, not drawn)",
+      "title": "Outlets without a coordinate (10,091; 3,241 with no province either) sit in the totals but on no map and in no density — a coordinate pass on the register would move them into the frames (research task) — 0.7.1: the register of 2026-10-30 located 5,454 more outlets (22,182 with a point); 4,938 remain without one (CPF 1,166 by the owner's order; 936 have only an approximate venue point, not drawn) — 0.8.0: the register of 2026-11-03 has 22,547 outlets with a point (+365) of 27,527; 4,980 remain without one (CPF 1,166 by the owner's order; 938 have only an approximate venue point, not drawn), 2,236 with no province",
       "ownerRole": "research",
       "priority": "P3",
       "status": "partly closed 0.7.1"
@@ -1190,6 +1272,27 @@
       "title": "Brand-logo payload is 34.3 MB over 563 files (largest: an SVG of 3.7 MB, PNGs up to 1.5 MB); files load lazily, but a web-size derivative set with a recorded derivation (bytes of the originals kept in the registry) would cut first-logo latency on phones",
       "ownerRole": "engineering",
       "priority": "P3"
+    },
+    {
+      "id": "N25",
+      "title": "QA helper for the 2 Nov classification: draw the 1,550 deterministic samples (50 per sub-segment × 31 sub-segments; seed six-axes-20261102-v1, selection = lowest SHA256(seed|classification_id)) for human reviewers; a sub-segment passes rules.QA with at least 48 of its 50 correct",
+      "ownerRole": "data + research",
+      "priority": "P1",
+      "status": "next (after 0.8.0)"
+    },
+    {
+      "id": "N26",
+      "title": "Ship each held axis only for the sub-segments that pass N25 — food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view (same sub-segment + same แขวง/ตำบล; group from 5, shares from 30); until then nothing of them reaches the page (INV40, AC58)",
+      "ownerRole": "product + data",
+      "priority": "P1",
+      "status": "blocked by N25"
+    },
+    {
+      "id": "N27",
+      "title": "The price-by-food-group sheet (v1, 2026-11-02) still says “ยังไม่ตัดสิน” in 3 places — open question to the owner: update that sheet through the connector, or issue a v2",
+      "ownerRole": "owner (decision)",
+      "priority": "P2",
+      "status": "open question"
     }
   ]
 }

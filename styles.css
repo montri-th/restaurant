@@ -117,6 +117,7 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 6px; }
 .filter-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text-secondary); min-width: 0; }
 .filter-grid select { font-size: 13px; padding: 8px 10px; min-height: 40px; }
+.filter-grid label:has(#brand) { grid-column: 1 / -1; } /* chain names are long; five filters leave it alone on its row */
 .filter-actions { display: flex; justify-content: flex-end; padding-top: 8px; }
 .filter-actions .btn { min-height: 36px; font-size: 12px; }
 .filter-chips { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
@@ -586,6 +587,7 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 .register-search input { width: 100%; }
 /* Register bars share the register dots' data role (LDS map.activeLayer, same HEX in both themes). */
 .mix-fill.register-fill { background: var(--map-active-layer); }
+.mix-fill.size-fill { background: var(--map-active-layer); }
 .register .metrics.compact, .register-brand .metrics.compact, .register-company .metrics.compact, .register-outlet .metrics.compact, .land-host .metrics.compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 /* In-building vs around-building food types (Land host): counts with the column share, cue + label per row. */
 /* The results table's rules (min-width 820 px, sticky nowrap headers) must not reach this small panel table. */

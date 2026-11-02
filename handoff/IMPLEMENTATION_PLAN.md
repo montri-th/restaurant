@@ -1,6 +1,8 @@
-# Implementation Plan — CityMETER · Restaurants 0.7
+# Implementation Plan — CityMETER · Restaurants 0.8
 
-รุ่น 0.7.1 · 30 ตุลาคม 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
+รุ่น 0.8.0 · 3 พ.ย. 2569 · คู่กับ [implementation-plan.json](implementation-plan.json) (schema 1.5.0)
+
+> **รุ่น 0.8.0 (P19, AC54–AC58, N25–N27; เจ้าของ 3 พ.ย. 2569 01:04 · เรื่องการตรวจคุณภาพเลือก “ขึ้นส่วนที่ไม่ต้องรอ QA ก่อน (Recommended)”):** ข้อมูล: ทะเบียนฉบับ 3 พ.ย. (xlsx เป็นอินพุตภายใน ไม่ commit) → `data/chains.json` (27,527 สาขา 22,547 มีพิกัด; โลโก้ 408 ไฟล์ที่สร้างใหม่ไบต์ตรงกับที่ส่งแล้ว `data/brand-logos.json` คงเดิม) · `scripts/build-segments.py` อ่านแท็บ `10_CLASSIFICATION` + codebook `06_DATA_DICTIONARY` → `data/segments.json` (199,896 ไบต์; ขนาดเครือหนึ่งอักขระต่อแถวของ `restaurants.json` `cols.key` และต่อสาขาของ `chains.json` `cols.id` พร้อม sha256 ของ id ทั้งสองชุด; `meta.priceCheck`, `meta.held`, `meta.reviewStatus`; ไม่มีลิงก์หรือ id ของชีต) · Land join รันใหม่ `--checked-on 2026-11-03` (tile และกติกาเดิม) · `restaurants.json` ไม่เปลี่ยน (ชีต 1 ไบต์ตรงเดิม) · โค้ด: `js/model.js` (`priceTier` + ศัพท์ P1–P6, `LEGACY_PRICE`, ศัพท์ `SIZE_*`, `attachSegments` — ไม่แนบเลยเมื่อ id ไม่ตรง และหนึ่งเครือหนึ่งขนาด; `filterRows` รับชุดราคาคั่นจุลภาคและขนาด; `mixOf` คืน `bySize`) · `js/scales.js` (`lutPicks`, `priceColors` P1–P6) · `js/app.js` (ตัวกรองขนาดเครือ โหลด segments พร้อมไฟล์หลัก ลิงก์ราคาเดิม action `filter-field` บรรทัดขนาดในตาราง) · `js/panel.js` (`sizeBars`, `sizeFact`, แท่งราคาและขนาดกดกรองได้ ข้อความช่วงราคาของร้าน) · `js/register-panel.js` (ขนาดเครือของสาขา) · `index.html` (select ขนาด; cache tag `20261103-r1`) · `styles.css` · acceptance: AC54 ทะเบียน 3 พ.ย. และข้อค้นพบแรก (fixtures จากการรัน: insight 169.4 / 9.85, data 96,507, ความครอบคลุม 476 / 105) · AC55 ช่วงราคา (`tests/data.test.js` จำนวนต่อช่วงและการแยก bucket ของ API เป็นช่วงเต็ม: P1 = ≤100, P2+P3 = 100–300, P4 = 300–500, P5+P6 = 500–1,000 + เกิน 1,000; `tests/scales.test.js` สี 6 ค่า) · AC56 ขนาดเครือ (`tests/data.test.js` “segments (0.8.0)”) · AC57 มุมมอง (`tests/views.test.js` “0.8.0 segments in views”) · AC58 ส่วนที่รอตรวจไม่ขึ้นเว็บ (held fields, review status, ไม่มีลิงก์ชีต) · backlog: N25 เครื่องมือดึงตัวอย่าง 1,550 แถวให้ผู้ตรวจ (ทำหลังออกรุ่น) · N26 ขึ้นแกนที่รอตรวจเฉพาะกลุ่มย่อยที่ผ่าน · N27 ชีตราคาตามกลุ่มอาหาร (v1, 2 พ.ย.) ยังเขียน “ยังไม่ตัดสิน” 3 จุด รอเจ้าของตัดสิน · ทดสอบ 94/94
 
 > **รุ่น 0.7.1 (P18, AC51–AC53, N23–N24; เจ้าของ 30 ต.ค. 2569 00:43 / 00:54):** ข้อมูล: `scripts/xlsx-dump.py` ชีต 2 ฉบับ 30 ต.ค. → `scripts/build-data.py` (restaurants.json ไม่เปลี่ยน) → `scripts/build-chains.py --logo-files <โฟลเดอร์โลโก้ของทะเบียน>` (ตรวจ sha256 ทุกไฟล์กับ `01_BRANDS.logo_sha256`; metadata จาก `20_CHAIN_LOGOS`; พื้นรองจาก `build-data.py#image_info`; `meta.readBackOn`; `stats.approxOnly`) → `scripts/build-land.py --checked-on 2026-10-30` · สี: `js/scales.js` `RAMP_CLASSES = 41` เป็นค่าเริ่มต้นของ `buildCountClasses` / `buildDensityClasses`, `classColors(41)` = LUT, `rampAnchors`; `js/legend.js#rampMarkup` ใช้ในคำอธิบายแผนที่ (`js/app.js#updateLegend`) และ matrix (`js/charts.js`); `js/provinces.js` ไม่ส่ง 5 อีก · `js/register-panel.js#checkedRange` เติม “เติมพิกัดและโลโก้ <วันที่>” · fixtures ใหม่จากการรัน (insight 164.6 / 9.83, data 96,100, register 27,120 / 22,182, logos 563, views 164.6, scales 41) · import map เพิ่ม `legend.js` · cache tag `20261030-r2` · ทดสอบ 92/92
 
@@ -40,12 +42,12 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 
 | ไฟล์ | หน้าที่ |
 |---|---|
-| `js/app.js` | ประกอบทั้งหมด: row scopes, focus modes, coverage ตามจังหวัด/เขต, panel modes + back stack, URL, map lifecycle + reinstall เมื่อเปลี่ยนธีม, camera, ลำดับการคลิกแผนที่ (x-ray → อาคารของสถานที่ → หมุด → อาคารในโฟกัส → จังหวัด → แขวงทุกซูม), hover, ป้ายพื้นที่บนจอ (`refreshLabelView`), join อาคารและสีอาคารของสถานที่ (`refreshJoin`/`applyJoin`), legend ตาม zoom, ตัวนับ/ตาราง |
+| `js/app.js` | ประกอบทั้งหมด: row scopes, focus modes, coverage ตามจังหวัด/เขต, panel modes + back stack, URL, map lifecycle + reinstall เมื่อเปลี่ยนธีม, camera, ลำดับการคลิกแผนที่ (x-ray → อาคารของสถานที่ → หมุด → อาคารในโฟกัส → จังหวัด → แขวงทุกซูม), hover, ป้ายพื้นที่บนจอ (`refreshLabelView`), join อาคารและสีอาคารของสถานที่ (`refreshJoin`/`applyJoin`), legend ตาม zoom, ตัวนับ/ตาราง; 0.8.0: โหลด `data/segments.json` พร้อมไฟล์หลักแล้ว `attachSegments` (ไฟล์ไม่ตรง build → ซ่อนตัวกรองขนาด), ตัวกรองขนาดเครือ (`?size=`), ลิงก์ราคาเดิม (`LEGACY_PRICE`), action `filter-field` (`filterField` ตั้งค่า select ผ่านเส้นทาง change เดิม พื้นที่ที่เปิดอยู่จึงคงอยู่), ขนาดใต้ชื่อเครือในตาราง |
 | `js/building-join.js` | จับจุดแสดงผลกับขอบอาคารที่วาด (ขอบเล็กสุดที่มีจุด), อาคารของสถานที่ (ข้อมูลอาคาร หรือ ≥ max(1, 20 %) ของจุด), ผลการกดอาคาร, ร้านอื่นในอาคารของสถานที่, พื้นที่โฟกัสรอบสถานที่ |
-| `js/model.js` | ถอดข้อมูล (กริด → lon/lat), PROVINCES, ราคา, GROUP_SHORT, filterRows, summarize, mixOf, productionLink |
+| `js/model.js` | ถอดข้อมูล (กริด → lon/lat), PROVINCES, ราคา, GROUP_SHORT, filterRows, summarize, mixOf, productionLink; 0.8.0: `priceTier(p0, p1)` (ช่วงราคา P1–P6 จากราคาที่แหล่งระบุ ตามกติกา `rules.price`) + `LEGACY_PRICE` ของลิงก์ 0.1–0.7, ศัพท์ขนาดเครือ `SIZE_BANDS` / `SIZE_LABELS` / `SIZE_SHORT` / `SIZE_BASIS` / `SIZE_LIFTED`, `attachSegments` (ผูก segments.json กับ id ของ build นี้; เครือหนึ่งใช้ช่วงใหญ่สุด ไม่บวก; ช่วงของแถวเองใน `sizeOwn`), `filterRows` รับชุดราคาคั่นจุลภาคและขนาด, `mixOf` คืน `bySize` |
 | `js/areas.js` | index แขวง/ตำบล เขต/อำเภอ จังหวัด, คำระดับ, summarizeAreas/Districts, combinedDensity, `areaLocator` (วางป้ายเท่านั้น ไม่ใช่สมาชิก) |
 | `js/area-insight.js` | ข้อค้นพบแรก + filterAreaRows |
-| `js/scales.js` | LUT density.area / count / price, การจัดระดับ, EVID-05, ink |
+| `js/scales.js` | LUT density.area / count / price, การจัดระดับ, EVID-05, ink; 0.8.0: `lutPicks(k)` (k ค่าตรงจาก LUT 41 ค่าที่ตำแหน่ง round(i × 40 / (k − 1))) และ `priceColors` ของ P1–P6 = ตำแหน่ง 0 · 8 · 16 · 24 · 32 · 40 ของ LUT `price` |
 | `js/cues.js` | กลุ่มประเภท → series + รูปทรง, SVG และ icon แผนที่ |
 | `js/map-layers.js` | choropleth แขวง/ตำบล, `area-hit` (เป้ากดทุกซูม) + เส้น hover, hatch, เส้นเขต, ป้าย HTML (วัดขนาดครั้งเดียว) |
 | `js/provinces.js` | กรอบจังหวัด (count) |
@@ -54,16 +56,17 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | `js/massing.js` | มวลอาคาร quiet/focus จาก OpenFreeMap + id คงที่ต่อหลัง (`focusFeatureId`), ขอบเดิมสำหรับ join, ชั้นสีอาคารของสถานที่ (`focus-massing-venue`), hitTest; คำนวณรูปทรงหลังกล้องหยุด |
 | `js/venue-xray.js`, `js/geometry.js`, `js/mvt.js`, `js/map-style.js`, `js/camera.js` | x-ray, เรขาคณิต, ถอด MVT, basemap, กล้อง (จาก Luxury Brands 0.5 ไม่เปลี่ยนตรรกะ) |
 | `js/breadcrumb.js` | breadcrumb + ลิงก์ production |
-| `js/profile-model.js`, `js/panel.js` | view models + HTML ของแผง (รวมแผงอาคาร วิธีจับคู่สถานที่ และร้านอื่นที่จุดตกในอาคารเดียวกัน) + provenance |
+| `js/profile-model.js`, `js/panel.js` | view models + HTML ของแผง (รวมแผงอาคาร วิธีจับคู่สถานที่ และร้านอื่นที่จุดตกในอาคารเดียวกัน) + provenance; 0.8.0: แท่งราคา 6 ช่วงและ `sizeBars` (ขนาดเครือ ชื่อสั้น ชื่อเต็มใน title สีกลางสีเดียว) เป็นปุ่ม `filter-field`, `sizeFact` (ขนาด + วิธีนับ; CPF “ไม่จัดขนาด”) ใช้ในหน้าร้านและหน้าสาขา (`js/register-panel.js`) |
 | `js/chart-model.js`, `js/charts.js` | กราฟ HTML ไม่มี vendor |
 | `js/brand-logos.js`, `js/venue-logos.js` | registry โลโก้ |
 | `js/navigation.js`, `js/launch.js`, `js/vendors.js` | ไอคอน/help, launch overlay, MapLibre loader |
 | `scripts/build-boundaries.py` | ขอบเขตจาก production + ใบรับ |
 | `scripts/build-data.py` | ข้อมูล โลโก้ อาคาร จากชีตวิจัยและ manifest + สถานที่จากท้ายชื่อร้าน (`suffix_venue_rules`) |
+| `scripts/build-segments.py` → `data/segments.json` | 0.8.0: แท็บ `10_CLASSIFICATION` ของทะเบียน → ขนาดเครือรายแถวและรายสาขาพร้อมวิธีนับ ผูกด้วย sha256 ของ id สองชุด, `meta.priceCheck` (ช่วงราคาของเว็บเทียบ `price_band_observed`), `meta.held` (แกนที่รอตรวจ), `meta.reviewStatus`; ไม่เขียนลิงก์หรือ id ของชีต |
 
 ## 3. Selection
 
-ตัวกรอง: `search` `group` `price` `province` `brand` · URL: + `district` `area` `areas` `view` `store` `place` `view3d` `cam` · Row scopes: scopeRows → baseRows → rows (+ ร้านของสถานที่, ร้านในอาคาร) · Panel actions: `select-area` `select-district` `select-store` `select-venue` `select-building` `select-province` `filter-brand` `back` `explore-top` `clear-focus` `open-charts` `open-table` `clear-filter` `crumb-*` `toggle-3d`
+ตัวกรอง: `search` `group` `price` `size` `province` `brand` (`price` รับชุดคั่นจุลภาค เช่น `P2,P3` จากลิงก์เดิม; `size` ตั้งแต่ 0.8.0) · URL: + `district` `area` `areas` `view` `store` `place` `view3d` `cam` · Row scopes: scopeRows → baseRows → rows (+ ร้านของสถานที่, ร้านในอาคาร) · Panel actions: `select-area` `select-district` `select-store` `select-venue` `select-building` `select-province` `filter-brand` `back` `explore-top` `clear-focus` `open-charts` `open-table` `clear-filter` `crumb-*` `toggle-3d` `filter-field`
 
 ## 4. งาน (ทำแล้วในรุ่น 0.1, 0.1.1, 0.2.0 และ 0.2.1)
 
@@ -117,7 +120,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 
 1. อ่าน AGENTS.md แล้ว handoff/README.md, PRODUCT_STATEMENT.md และ brief คู่ md/json
 2. `npm test` ก่อนแก้; คง row scopes, focus modes, metric/coverage contracts และ panel actions
-3. แก้ทีละงาน คง INV01–INV26
+3. แก้ทีละงาน คง INV01–INV40
 4. ตรวจการคำนวณด้วยข้อมูลจริงใน tests/ (`tests/helpers.js` โหลดครั้งเดียว)
 5. ดูภาษาไทยจริงที่ 390 px และ desktop ทั้งสองธีม; ใช้ harness แบบ stub tiles เมื่อ CDN/tiles ถูกบล็อก แล้วยืนยันภาพจริงบนเว็บ
 6. ปรับกล้อง/ชั้นสดผ่าน `window.__citymeter` ใน console ก่อนเปลี่ยนค่าคงที่

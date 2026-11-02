@@ -1,5 +1,5 @@
 {
- "checkedOn": "2026-10-30",
+ "checkedOn": "2026-11-03",
  "landPoints": {
   "shopping": 3262,
   "hotel": 2266,
@@ -34,7 +34,7 @@
   "office:iou>=0.5": 6
  },
  "publishedBuildingsByLod": {
-  "lod1": 974,
+  "lod1": 976,
   "lod2": 15
  },
  "publishedParts": 64,
@@ -53,8 +53,8 @@
    "fp_edge_osm": 276,
    "snapshot_near": 3617,
    "snapshot_in": 1811,
-   "chain_in": 3171,
-   "chain_near": 1391
+   "chain_in": 3227,
+   "chain_near": 1438
   },
   "hotel": {
    "points": 2266,
@@ -63,8 +63,8 @@
    "fp_edge_osm": 341,
    "snapshot_near": 1417,
    "snapshot_in": 344,
-   "chain_near": 270,
-   "chain_in": 149
+   "chain_near": 285,
+   "chain_in": 154
   },
   "office": {
    "points": 378,
@@ -73,8 +73,8 @@
    "fp_edge_osm": 50,
    "snapshot_near": 522,
    "snapshot_in": 273,
-   "chain_in": 671,
-   "chain_near": 267
+   "chain_in": 693,
+   "chain_near": 273
   }
  },
  "snapshotJoined": {
@@ -82,27 +82,27 @@
   "in": 2239
  },
  "chainJoined": {
-  "near": 1842,
-  "in": 3396
+  "near": 1908,
+  "in": 3464
  },
  "inFromWithin10m": {
   "snapshot": 595,
-  "chain": 478
+  "chain": 494
  },
  "displayPositions": {
   "snapshot": 595,
-  "chain": 478
+  "chain": 494
  },
  "snapshotPoints": 70214,
- "chainPointsInCoveredProvinces": 11353,
+ "chainPointsInCoveredProvinces": 11649,
  "pointsInNestedBuildings": {
   "snapshot": 11,
-  "chain": 33
+  "chain": 34
  },
  "nameLinkReview": [
   {
    "row": "23f7a63ccb42",
-   "basis": "uuid",
+   "basis": "common_retail",
    "status": "candidate",
    "linkedHost": "SC-002060",
    "linkedName": "เซ็นทรัล พระราม9",
@@ -119,7 +119,7 @@
   },
   {
    "row": "23f7a63ccb42",
-   "basis": "common_retail",
+   "basis": "uuid",
    "status": "candidate",
    "linkedHost": "SC-002060",
    "linkedName": "เซ็นทรัล พระราม9",
@@ -151,7 +151,7 @@
   },
   {
    "row": "3df7a5370aea",
-   "basis": "uuid",
+   "basis": "common_retail",
    "status": "candidate",
    "linkedHost": "SC-001897",
    "linkedName": "ตลาดวงศกร",
@@ -166,7 +166,7 @@
   },
   {
    "row": "3df7a5370aea",
-   "basis": "common_retail",
+   "basis": "uuid",
    "status": "candidate",
    "linkedHost": "SC-001897",
    "linkedName": "ตลาดวงศกร",
@@ -241,7 +241,7 @@
   },
   {
    "row": "c56043fc6c33",
-   "basis": "uuid",
+   "basis": "common_retail",
    "status": "candidate",
    "linkedHost": "SC-006489",
    "linkedName": "คอสโม บาซาร์",
@@ -256,7 +256,7 @@
   },
   {
    "row": "c56043fc6c33",
-   "basis": "common_retail",
+   "basis": "uuid",
    "status": "candidate",
    "linkedHost": "SC-006489",
    "linkedName": "คอสโม บาซาร์",
@@ -473,7 +473,7 @@
    "total": 2
   },
   "hotel:guesthouse": {
-   "withPoints": 22,
+   "withPoints": 23,
    "total": 125
   },
   "hotel:homestay": {
@@ -897,7 +897,7 @@
    "total": 1
   },
   "shopping:supermarket_store_or_host_component": {
-   "withPoints": 48,
+   "withPoints": 49,
    "total": 613
   },
   "shopping:supermarket_with_managed_foodcourt_component": {
@@ -949,7 +949,7 @@
    "total": 1
   }
  },
- "buildingsPublished": 989,
- "featuresPublished": 1053,
- "hostsPublished": 1089
+ "buildingsPublished": 991,
+ "featuresPublished": 1055,
+ "hostsPublished": 1091
 }

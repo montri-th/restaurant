@@ -1,6 +1,6 @@
 {
   "name": "citymeter-restaurants",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "description": "CityMETER · Restaurants — subdistrict-first 3D map of restaurant density, food types and price levels from the public CityMETER Restaurants overlay",
@@ -16,6 +16,7 @@
     "handoff:bundle": "node scripts/build-handoff.mjs --zip dist/CityMETER-Restaurants-Developer-Handoff.zip",
     "verify:live": "node scripts/verify-live.mjs",
     "build:chains": "python3 -I scripts/build-chains.py --help",
-    "build:land": "python3 -I scripts/build-land.py --help"
+    "build:land": "python3 -I scripts/build-land.py --help",
+    "build:segments": "python3 -I scripts/build-segments.py --help"
   }
 }

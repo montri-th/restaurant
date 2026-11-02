@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {ROOT} from './helpers.js';
-import {COUNT_SCALE, DENSITY_SCALE, PRICE_SCALE, classColors, buildCountClasses, buildDensityClasses, classify, priceColors, inkFor, contrastRatio, rampAnchors} from '../js/scales.js';
+import {COUNT_SCALE, DENSITY_SCALE, PRICE_SCALE, classColors, lutPicks, buildCountClasses, buildDensityClasses, classify, priceColors, inkFor, contrastRatio, rampAnchors} from '../js/scales.js';
 import {PRICED} from '../js/model.js';
 
 test('the three families are exact 41-sample LUTs with anchors at 0/20/40, same HEX on both themes', () => {
@@ -70,9 +70,14 @@ test('count classes: closed integer intervals over [1, max]; zero is measured_ze
   assert.equal(tiny.classes.length, 2);
 });
 
-test('price buckets take the five price classes in order; unspecified has no colour', () => {
+test('price tiers take six exact samples of the 41-value price LUT in order; unspecified has no colour', () => {
   const c = priceColors();
-  assert.deepEqual(PRICED.map(b => c[b]), classColors(5, PRICE_SCALE));
+  assert.deepEqual(PRICED, ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']);
+  // Six is not one of LDS's 3/5/7/9 class sets: the owner's 41 rule picks index round(i × 40 / 5) — head and tail kept.
+  assert.deepEqual(PRICED.map(b => c[b]), [0, 8, 16, 24, 32, 40].map(i => PRICE_SCALE.lut[i]));
+  assert.deepEqual(lutPicks(5, COUNT_SCALE), classColors(5, COUNT_SCALE), 'k = 5 lands on the LDS five-class indices');
+  assert.deepEqual(lutPicks(41, COUNT_SCALE), [...COUNT_SCALE.lut]);
+  assert.throws(() => lutPicks(0));
   assert.equal(c.UNSPECIFIED, null);
 });
 

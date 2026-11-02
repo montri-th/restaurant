@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {load, readJSON, sha256} from './helpers.js';
-import {PROVINCES, PRICE_BUCKETS, GRID, gridToLngLat, sourceTile, hasPoint} from '../js/model.js';
+import {PROVINCES, PRICE_BUCKETS, GRID, gridToLngLat, sourceTile, hasPoint, priceTier, LEGACY_PRICE, filterRows, SIZE_BANDS} from '../js/model.js';
 
 // One population since 0.6.0 (owner 2026-10-28 22:36): data.rows = sheet-1 restaurants + register outlets; the rows the
 // owner moved to the register (data.moved) are counted there and stay reachable by id. The snapshot itself is still
@@ -18,13 +18,16 @@ test('restaurants.json decodes to the 70,214 observations of the snapshot, nothi
   assert.equal(data.restaurants.length, 68980, 'sheet 1');
   assert.equal(data.moved.length, 1234, 'rows moved to the chain register, counted there');
   assert.equal(data.outlets.length, register.outlets.length);
-  assert.equal(data.rows.length, 68980 + 27120, 'one population: sheet 1 + the register (owner 2026-10-28 22:36; register of 2026-10-29/30 since 0.7.1)');
+  assert.equal(data.rows.length, 68980 + 27527, 'one population: sheet 1 + the register (owner 2026-10-28 22:36; register of 2026-11-03 since 0.8.0 — 0.7.1: 27,120)');
   assert.equal(data.dropped, 0, 'every row resolves to a subdistrict frame');
   assert.equal(new Set([...data.rows, ...data.moved].map(r => r.id)).size, data.rows.length + data.moved.length, 'row keys are unique across both sheets');
   for (const k of Object.keys(raw.cols)) assert.equal(raw.cols[k].length, 70214, `column ${k} is complete`);
 });
 
-test('decoded rows reconcile with the build receipt: provinces, price buckets, reviews, ratings, prices', () => {
+// The API's own price bucket (cols.price, COALESCE(end, start)) — kept in the data, no longer used by the page.
+const API_BUCKETS = ['UNDER_100', 'R100_300', 'R300_500', 'R500_1000', 'OVER_1000', 'UNSPECIFIED'];
+
+test('decoded rows reconcile with the build receipt: provinces, price tiers, reviews, ratings, prices', () => {
   const {raw, data} = load();
   const byProvince = {}, byPrice = Object.fromEntries(PRICE_BUCKETS.map(b => [b, 0]));
   let reviews = 0, rated = 0, priced = 0;
@@ -36,14 +39,55 @@ test('decoded rows reconcile with the build receipt: provinces, price buckets, r
     if (r.price !== 'UNSPECIFIED') priced++;
   }
   assert.deepEqual(byProvince, raw.meta.rowsByProvince);
-  assert.deepEqual(byPrice, raw.meta.priceBuckets);
+  const api = Object.fromEntries(API_BUCKETS.map(b => [b, 0]));
+  for (const v of raw.cols.price) api[API_BUCKETS[v] || 'UNSPECIFIED']++;
+  assert.deepEqual(api, raw.meta.priceBuckets, 'the API bucket still reconciles with the build receipt');
+  // 0.8.0: six tiers from the stated bounds (register workbook rules.price). Each API bucket splits into whole tiers,
+  // so links of 0.1–0.7 map without loss; the API's “500–1,000” held the 907 “from 1,000” rows, now P6.
+  assert.deepEqual(byPrice, {P1: 9056, P2: 6090, P3: 2844, P4: 937, P5: 165, P6: 907, UNSPECIFIED: 50215});
+  assert.equal(byPrice.P1, api.UNDER_100);
+  assert.equal(byPrice.P2 + byPrice.P3, api.R100_300);
+  assert.equal(byPrice.P4, api.R300_500);
+  assert.equal(byPrice.P5 + byPrice.P6, api.R500_1000 + api.OVER_1000);
+  assert.equal(byPrice.UNSPECIFIED, api.UNSPECIFIED);
+  assert.deepEqual(LEGACY_PRICE, {UNDER_100: 'P1', R100_300: 'P2,P3', R300_500: 'P4', R500_1000: 'P5', OVER_1000: 'P6'});
+  assert.equal(filterRows(data.restaurants, {price: 'P2,P3'}).length, filterRows(data.restaurants, {price: 'P2'}).length + filterRows(data.restaurants, {price: 'P3'}).length, 'a legacy 100–300 link opens both tiers');
+  for (const [p0, p1, t] of [[null, null, 'UNSPECIFIED'], [100, null, 'P1'], [101, 150, 'P2'], [150, 300, 'P3'], [1000, null, 'P6'], [500, 1000, 'P5'], [1500, null, 'P6'], [null, 1200, 'P6']]) assert.equal(priceTier(p0, p1), t, `${p0}–${p1}`);
   assert.equal(reviews, raw.meta.reviewsTotal);
   assert.equal(rated, raw.meta.rowsWithRating);
   assert.equal(priced, raw.meta.rowsWithPrice);
   // Snapshot values (regression fixtures, never UI constants).
   assert.deepEqual(raw.meta.rowsByProvince, {BKK: 44086, NBI: 11532, SPK: 11505, PTE: 1999, SKN: 883, CCO: 189, NPT: 20});
   assert.equal(raw.meta.reviewsTotal, 6185635);
-  assert.equal(byPrice.OVER_1000, 0, 'the > 1,000 baht bucket exists in the source vocabulary but holds no row');
+  assert.equal(api.OVER_1000, 0, 'the API bucket “over 1,000” held no row: the open-ended “from 1,000” rows sat in 500–1,000');
+});
+
+test('segments (0.8.0): chain size from the register workbook, aligned to this build, the held axes stay off the page', () => {
+  const {raw, data} = load();
+  const seg = readJSON('data/segments.json'), m = seg.meta;
+  assert.equal(m.schema, 'citymeter-restaurant-segments-1');
+  assert.equal(seg.rows.size.length, raw.cols.key.length);
+  assert.equal(seg.outlets.size.length, readJSON('data/chains.json').cols.id.length);
+  assert.equal(m.rows.keySha256, sha256(Buffer.from(raw.cols.key.join('\n'))), 'rows aligned to restaurants.json cols.key');
+  assert.equal(m.outlets.idSha256, sha256(Buffer.from(readJSON('data/chains.json').cols.id.join('\n'))), 'outlets aligned to chains.json cols.id');
+  assert.deepEqual(m.priceCheck, {agree: 68980}, 'the page\'s tiers equal price_band_observed on every classified row');
+  assert.deepEqual(m.reviewStatus, {unreviewed: 95341}, 'nothing reviewed yet: only counts ship');
+  for (const f of ['food_category_id', 'food_group_id', 'food_subgroup_primary_id', 'format_id', 'occasion_ids', 'special_label_ids', 'price_band_inferred']) assert.ok(m.held.fields.includes(f), f);
+  assert.ok(!/docs\.google|drive\.google|spreadsheets\/d\//.test(JSON.stringify(seg)), 'no private sheet link');
+  // Every kept row and every outlet but the point-of-sale registry is sized; moved rows are sized on the register side.
+  assert.deepEqual(data.segments, {attached: 95341, lifted: 726, ok: true});
+  assert.ok(data.restaurants.every(r => SIZE_BANDS.includes(r.size)));
+  assert.ok(data.outlets.every(o => SIZE_BANDS.includes(o.size) || (o.sizeBasis === 'x' && o.brand.id === 'ROOT-BR-cpf-pos-network')), 'only the registry is unsized');
+  assert.equal(data.outlets.filter(o => o.sizeBasis === 'x').length, 1166);
+  // One chain, one size: a chain's rows all carry the largest band the source gives any of them, never a smaller one.
+  const byKey = new Map();
+  for (const r of data.rows) { if (!r.size || !(r.kind === 'outlet' ? r.brand?.id : r.brand)) continue; const k = r.kind === 'outlet' ? r.brand.id : (r.brand.national?.[0] || r.brand.id); (byKey.get(k) || byKey.set(k, new Set()).get(k)).add(r.size); }
+  assert.ok([...byKey.values()].every(s => s.size === 1), 'every chain has one size');
+  assert.ok(data.rows.filter(r => r.sizeLifted).every(r => SIZE_BANDS.indexOf(r.size) > SIZE_BANDS.indexOf(r.sizeOwn)), 'a lift only raises');
+  // A row without a chain candidate is “one observed row”, never “an independent shop”.
+  assert.ok(data.restaurants.filter(r => !r.brand).every(r => r.size === 'S1' && r.sizeBasis === 's'));
+  const bySize = Object.fromEntries(SIZE_BANDS.map(b => [b, data.rows.filter(r => r.size === b).length]));
+  assert.deepEqual(bySize, {S1: 67411, S2: 1162, S3: 3398, S4: 6338, S5: 17032});
 });
 
 test('membership is the source subdistrict: every row sits in an existing frame of its own district and province', () => {
@@ -153,12 +197,13 @@ test('boundaries: 581 subdistrict frames with production areas, 90 districts, 77
   assert.equal(sha256(Buffer.from(python)), areasGeo.metadata.receiptsSha256);
 });
 
-test('coverage: 475 frames hold restaurants or outlets; the other 106 are no-data, never zero', () => {
+test('coverage: 476 frames hold restaurants or outlets; the other 105 are no-data, never zero', () => {
   const {covered, coverage, index, data} = load();
-  // Snapshot fixtures (one population): sheet-1 rows cover 308 frames; outlets with a point add 167 more.
+  // Snapshot fixtures (one population): sheet-1 rows cover 308 frames; outlets with a point add 168 more
+  // (register of 2026-11-03; 0.7.1: 167 more, 475 covered, 106 no-data).
   assert.equal(new Set(data.restaurants.map(r => r.area)).size, 308);
-  assert.equal(covered.size, 475);
-  assert.equal(index.areas.length - covered.size, 106);
+  assert.equal(covered.size, 476);
+  assert.equal(index.areas.length - covered.size, 105);
   assert.ok(coverage.km2 > 3899.11, `coverage ${coverage.km2}`);
 });
 

@@ -17,7 +17,7 @@
  * Missing is never shown as 0. Metric tiles and headings carry the pictogram subset
  * (js/navigation.js PICTOGRAM_CONTRACT); text is the meaning.
  */
-import {PRICED, PRICE_LABELS, PRICE_SHORT, productionLink, provinceByCode, PRODUCTION, entryParts, hasPoint} from './model.js';
+import {PRICED, PRICE_LABELS, PRICE_SHORT, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, SIZE_BASIS, SIZE_LIFTED, productionLink, provinceByCode, PRODUCTION, entryParts, hasPoint} from './model.js';
 import {areaWord, districtWord} from './areas.js';
 import {brandLogoMarkup, getBrandLogo} from './brand-logos.js';
 import {venueLogoMarkup, getVenueLogo} from './venue-logos.js';
@@ -70,7 +70,9 @@ export function provenance(meta = {}, boundary = '', note = PROXY_NOTE) {
   const date = thaiDate(meta.retrievedOn || meta.asOf || '');
   const source = link(meta.sourcePage || `${PRODUCTION}?d=restaurant`, 'CityMETER Restaurants API สาธารณะ');
   const register = meta.registerChecked ? ` · ทะเบียนร้านเครือ ตรวจ ${esc(meta.registerChecked)}` : ' · ทะเบียนร้านเครือ';
-  return `<p class="hint panel-foot provenance"><span>ชุดข้อมูล CityMETER Restaurants + ทะเบียนร้านเครือ</span> · <span>แหล่ง ${source}${register}</span> · <span>ดึงข้อมูล ${esc(date)}</span> · <span>ขอบเขต ${esc(boundary)}</span>${note ? `<br>${esc(note)}` : ''}</p>`;
+  // Chain size and the price tiers' check come from the register's classification tab (0.8.0): its own date.
+  const segments = meta.segmentsOn ? ` · ขนาดเครือจัดกลุ่ม ${esc(thaiDate(meta.segmentsOn))}` : '';
+  return `<p class="hint panel-foot provenance"><span>ชุดข้อมูล CityMETER Restaurants + ทะเบียนร้านเครือ</span> · <span>แหล่ง ${source}${register}${segments}</span> · <span>ดึงข้อมูล ${esc(date)}</span> · <span>ขอบเขต ${esc(boundary)}</span>${note ? `<br>${esc(note)}` : ''}</p>`;
 }
 
 const ratingText = rating => (rating == null ? 'ไม่มีคะแนน' : `${dec(rating)}`);
@@ -131,12 +133,36 @@ function priceBars(byPrice) {
   const priced = PRICED.reduce((s, b) => s + byPrice[b], 0);
   const max = Math.max(1, ...PRICED.map(b => byPrice[b]));
   const rows = PRICED.filter(b => byPrice[b] > 0).map(b => `
-    <li><span class="mix-label"><i class="price-swatch" style="background:${colors[b]}" aria-hidden="true"></i>${esc(PRICE_LABELS[b])}</span>
+    <li><button type="button" class="mix-label link-button" data-action="filter-field" data-id="price" data-value="${b}" title="ดูเฉพาะร้านราคา ${esc(PRICE_LABELS[b])}"><i class="price-swatch" style="background:${colors[b]}" aria-hidden="true"></i>${esc(PRICE_LABELS[b])}</button>
       <span class="mix-track" aria-hidden="true"><span class="mix-fill" style="width:${Math.max(3, Math.round((byPrice[b] / max) * 100))}%;background:${colors[b]}"></span></span>
       <span class="mix-value data-number">${num(byPrice[b])}</span></li>`).join('');
   const unspecified = (byPrice.UNSPECIFIED || 0) + (byPrice.outlets || 0);
   return `${priced ? `<ul class="mix-list" aria-label="ระดับราคา (ร้านที่ระบุราคา)">${rows}</ul>` : '<p class="hint">ไม่มีร้านที่ระบุราคา</p>'}
     ${unspecified ? `<p class="hint">ไม่ระบุราคา ${num(unspecified)} ร้าน</p>` : ''}`;
+}
+
+/**
+ * Chain size (0.8.0): rows per band, one neutral fill — the band name carries the order, so no second colour family
+ * sits beside the price tiers. “1 สาขาที่พบ” is one observed row, never “an independent shop”.
+ */
+function sizeBars(bySize) {
+  const sized = SIZE_BANDS.reduce((s, b) => s + (bySize?.[b] || 0), 0);
+  if (!sized) return `<p class="hint">ไม่มีข้อมูลขนาดเครือ${bySize?.registry ? ` · ทะเบียนจุดขายหลายแบรนด์ ${num(bySize.registry)} ร้าน ไม่จัดขนาด` : ''}</p>`;
+  const max = Math.max(1, ...SIZE_BANDS.map(b => bySize[b]));
+  const rows = SIZE_BANDS.filter(b => bySize[b] > 0).map(b => `
+    <li><button type="button" class="mix-label link-button" data-action="filter-field" data-id="size" data-value="${b}" title="ดูเฉพาะ${esc(SIZE_LABELS[b])}">${esc(SIZE_SHORT[b])}</button>
+      <span class="mix-track" aria-hidden="true"><span class="mix-fill size-fill" style="width:${Math.max(3, Math.round((bySize[b] / max) * 100))}%"></span></span>
+      <span class="mix-value data-number">${num(bySize[b])}</span></li>`).join('');
+  const notes = [bySize.S1 ? '1 สาขา = พบแถวเดียว ไม่ได้แปลว่าเป็นร้านอิสระ' : '', bySize.registry ? `ทะเบียนจุดขายหลายแบรนด์ ${num(bySize.registry)} ร้าน ไม่จัดขนาด` : '',
+    bySize.unknown ? `ไม่มีข้อมูลขนาดเครือ ${num(bySize.unknown)} ร้าน` : ''].filter(Boolean);
+  return `<ul class="mix-list" aria-label="ขนาดเครือ (ร้าน)">${rows}</ul>${notes.length ? `<p class="hint">${esc(notes.join(' · '))}</p>` : ''}`;
+}
+
+/** The chain-size fact of one store or outlet: the band (a filter link) and how the source counted it. */
+export function sizeFact(r) {
+  if (!r?.size) return r?.sizeBasis === 'x' ? `<dt>ขนาดเครือ</dt><dd>ไม่จัดขนาด<br><span class="hint">${esc(SIZE_BASIS.x)}</span></dd>` : '';
+  const how = r.sizeLifted ? SIZE_LIFTED : SIZE_BASIS[r.sizeBasis] || '';
+  return `<dt>ขนาดเครือ</dt><dd><button type="button" class="link-button" data-action="filter-field" data-id="size" data-value="${esc(r.size)}">${esc(SIZE_LABELS[r.size])}</button>${how ? `<br><span class="hint">${esc(how)}</span>` : ''}</dd>`;
 }
 
 function restaurantList(rows, {showArea = false, index = null} = {}) {
@@ -351,6 +377,7 @@ export function renderDistrict(p, classOf, meta = {}, extra = '') {
   return `${head}    ${areaRanking(ranked, classOf, {title: `${w.area}ใน${w.district}นี้`, note: `${num(ranked.length)} ${w.area} · ร้าน/ตร.กม.`, limit: 40, minRows: p.minRows})}
     <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}<span class="hint">ร้าน</span></div>${groupBars(p.byGroup, p.count)}</section>
     <section class="panel-section"><div class="section-heading">${heading('plain', 'ระดับราคา')}<span class="hint">ร้านที่ระบุราคา</span></div>${priceBars(p.byPrice)}</section>
+    <section class="panel-section"><div class="section-heading">${heading('brand', 'ขนาดเครือ')}<span class="hint">ร้าน</span></div>${sizeBars(p.bySize)}</section>
     <section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้าน')}<span class="hint">${num(p.chainTotal ?? p.chains.length)} เครือ</span></div>${chainChips(p.chains)}${shownOf(p.chains.length, p.chainTotal ?? p.chains.length, 'เครือ', 'ร้านมากก่อน')}</section>
     ${p.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(p.venueTotal ?? p.venues.length)} แห่ง</span></div>${venueRows(p.venues)}${shownOf(p.venues.length, p.venueTotal ?? p.venues.length, 'แห่ง', 'ร้านมากก่อน')}</section>` : ''}
     ${extra}${provenance(meta, `${w.district}${d.name} ${provinceName(d.province)} (ขอบเขต CityMETER)`)}`;
@@ -376,6 +403,7 @@ export function renderArea(p, meta = {}, extra = '') {
   if (!p.count) return `${head}${extra}${provenance(meta, `${place} ${w.district}${a.districtName} ${provinceName(a.province)} (ขอบเขต CityMETER)`)}`;
   return `${head}    <section class="panel-section"><div class="section-heading">${heading('segment', 'ประเภทร้าน')}<span class="hint">ร้าน</span></div>${groupBars(p.byGroup, p.count)}</section>
     <section class="panel-section"><div class="section-heading">${heading('plain', 'ระดับราคา')}<span class="hint">ร้านที่ระบุราคา</span></div>${priceBars(p.byPrice)}</section>
+    <section class="panel-section"><div class="section-heading">${heading('brand', 'ขนาดเครือ')}<span class="hint">ร้าน</span></div>${sizeBars(p.bySize)}</section>
     ${p.topReviewed.length ? `<section class="panel-section"><div class="section-heading">${heading('exclusive', 'รีวิวมากที่สุด')}<span class="hint">${num(p.topReviewed.length)} ร้าน</span></div>${restaurantList(p.topReviewed)}</section>` : ''}
     <section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้านในพื้นที่')}<span class="hint">${num(p.chainTotal ?? p.chains.length)} เครือ</span></div>${chainChips(p.chains)}${shownOf(p.chains.length, p.chainTotal ?? p.chains.length, 'เครือ', 'ร้านมากก่อน')}</section>
     ${p.venues.length ? `<section class="panel-section"><div class="section-heading">${heading('venue', 'สถานที่ที่ชื่อร้านอ้างถึง')}<span class="hint">${num(p.venueTotal ?? p.venues.length)} แห่ง</span></div>${venueRows(p.venues)}${shownOf(p.venues.length, p.venueTotal ?? p.venues.length, 'แห่ง', 'ร้านมากก่อน')}</section>` : ''}
@@ -449,7 +477,8 @@ export function renderStore(d, meta = {}, {extraFacts = '', extra = ''} = {}) {
   const lat = r.sourceLatitude ?? r.latitude, lon = r.sourceLongitude ?? r.longitude;
   const coords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
   const rating = Number.isFinite(r.rating) ? `★ <span class="data-number">${dec(r.rating)}</span>${Number.isFinite(r.reviews) ? ` · <span class="data-number">${num(r.reviews)}</span> รีวิว` : ''}` : 'ไม่มีคะแนนในแหล่งข้อมูล';
-  const price = r.price === 'UNSPECIFIED' ? 'ไม่ระบุราคา (ไม่ใช่ราคา 0)' : `${esc(PRICE_LABELS[r.price])}${d.price.range ? `<br><span class="hint">ช่วงราคาที่ระบุ ${esc(d.price.range)} · จัดระดับจากราคาสูงสุดที่ระบุ</span>` : ''}`;
+  const tierHow = Number.isFinite(r.p1) ? 'จัดช่วงจากราคาสูงสุดที่ระบุ' : r.price === 'P6' ? 'ระบุแต่ราคาเริ่ม 1,000 บาทขึ้นไป' : 'ระบุแต่ราคาเริ่ม จัดช่วงจากราคาเริ่ม';
+  const price = r.price === 'UNSPECIFIED' ? 'ไม่ระบุราคา (ไม่ใช่ราคา 0)' : `<button type="button" class="link-button" data-action="filter-field" data-id="price" data-value="${esc(r.price)}">${esc(PRICE_LABELS[r.price])}</button>${d.price.range ? `<br><span class="hint">ราคาที่ระบุ ${esc(d.price.range)} · ${tierHow}</span>` : ''}`;
   const brand = r.brand ? `<dt>เครือร้าน</dt><dd class="fact-brand"><span><button type="button" class="link-button" data-action="filter-brand" data-value="${esc(r.brand.national?.[0] || r.brand.id)}">${esc(r.brand.name)}</button><br><span class="hint">${r.brand.hold ? 'รอยืนยันตัวตนเครือ' : 'จับคู่จากชื่อร้าน'}</span></span></dd>` : '';
   const venueHint = r.venueEntity ? 'รายการนี้คือชื่อสถานที่เอง' : r.venueMatch === 'suffix' ? 'ชื่อร้านลงท้ายด้วยชื่อสถานที่นี้'
     : r.venueMatch === 'auto' ? 'ชื่อร้านลงท้ายด้วยชื่อนี้ · สถานที่จากชื่อร้าน' : 'ชื่อร้านอ้างถึงสถานที่นี้';
@@ -468,7 +497,7 @@ export function renderStore(d, meta = {}, {extraFacts = '', extra = ''} = {}) {
       <dl class="facts">
         <dt>คะแนน</dt><dd>${rating}</dd>
         <dt>ราคา</dt><dd>${price}</dd>
-        ${brand}${venue}${building}${extraFacts}
+        ${brand}${sizeFact(r)}${venue}${building}${extraFacts}
         <dt>พื้นที่</dt><dd>${area}</dd>
         <dt>พิกัด</dt><dd><span class="data-number">${esc(coords)}</span><br><span class="hint" title="${esc(d.geometry.note)}">${esc(d.geometry.label)}${d.coLocated ? ` · ตำแหน่งเดียวกับอีก ${num(d.coLocated)} ร้าน` : ''}${r.snapped ? ' · หมุดแสดงในอาคาร Land' : ''}</span></dd>
         <dt>แหล่งข้อมูล</dt><dd>CityMETER Restaurants API สาธารณะ · ดึงข้อมูล ${esc(thaiDate(meta.retrievedOn || meta.asOf || ''))}<br><span class="hint data-number" title="รหัสสังเกตการณ์ในชุดข้อมูลนี้ (ย่อ)">รหัส R-${esc(r.id.split('-')[0])}…</span></dd>
@@ -490,6 +519,7 @@ export function renderFilterChips(values, labels) {
   if (values.search) push('search', `ค้นหา “${values.search}”`);
   if (values.group) push('group', labels.group[values.group] || values.group);
   if (values.price) push('price', labels.price[values.price] || values.price);
+  if (values.size) push('size', labels.size?.[values.size] || values.size);
   if (values.province) push('province', labels.province[values.province] || values.province);
   if (values.brand) push('brand', labels.brand[values.brand] || values.brand);
   if (values.venue) push('venue', labels.venue[values.venue] || values.venue);

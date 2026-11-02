@@ -3,9 +3,9 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.7.1",
-  "updatedOn": "2026-10-30",
-  "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/28, read back 2026-10-29 · Land join 2026-10-30",
+  "productVersion": "0.8.0",
+  "updatedOn": "2026-11-03",
+  "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/31, read back 2026-10-30, workbook read 2026-11-03 · classification 2026-11-02 (unreviewed; chain size and price tiers only) · Land join 2026-11-03",
   "language": "th",
   "productName": "CityMETER · Restaurants",
   "repository": "https://github.com/montri-th/restaurant",
@@ -42,6 +42,7 @@
     "open a Land host (shopping centre, hotel, office) from a list, a store or an outlet: in-vs-around food types, register outlets in the building, the building at venue level (LOD2 parts when the registry has them)",
     "click a building in the focus (venue · store · ร้านที่จุดตกในอาคารนี้)",
     "click the next แขวง/ตำบล on the map (or its label) to move there",
+    "read the price tiers and chain sizes of an area (0.8.0); click a bar to filter (?price=P1…P6, ?size=S1…S5) and stay in the area",
     "compare areas (density · type · price) and table",
     "open the same area in CityMETER production",
     "switch to ร้านเครือ · ทั่วประเทศ: search a chain or company → brand (outlets by province, evidence, status) → outlet (source, checked date, coordinate source, Land building) — a separate unit, never added to the restaurant counts"
@@ -104,11 +105,22 @@
       "chain index 857 chains (792); 15,800 of 27,120 outlets typed by 190 chains (83 by rows, 107 by format); Siam Paragon 38 rows in the building (9 + 29) → its in-vs-around column prints shares (≥ 30)",
       "Land join rerun 2026-10-30 (scripts/build-land.py --checked-on): 1,089 hosts published (1,036), 989 buildings / 1,053 features (942 / 1,006), register points in 3,396 (2,038), near 1,842, 478 display positions from within 10 m (299); snapshot side unchanged (in 2,239, 595 from within 10 m)",
       "provenance: the register's later read-back is a second date on the same register — “ทะเบียนร้านเครือ ตรวจ 25–28 ต.ค. 2569 · เติมพิกัดและโลโก้ 29 ต.ค. 2569” (meta.readBackOn from the README key “จุดตรวจ Logo / GPS — <date>”), never a re-check of every row; checked_on per row still spans 25–28 Oct"
+    ],
+    "release080": [
+      "register of 2026-11-03 (owner 2026-11-03 01:04 “update ตาม googlesheet ที่อัพเดทใหม่ แล้ว leverage ให้ได้ value ตาม product statement ให้มากที่สุด”; the workbook is an internal input, never committed): 27,527 outlets (27,120; +407), 907 brands with outlets (821), 397 company/role records (336); 22,547 outlets with a selected point (22,182; +365), 938 approximate-only points counted, never drawn (936), 2,236 without a province (2,213); checked_on 25–31 Oct 2026 (25–28), logo/GPS read-back 30 Oct 2026 (29); brand logos unchanged (the rebuilt 408 files are byte-identical to the shipped ones; 563 files in the registry); the CPF / Five Star multi-banner point-of-sale registry (1,166 outlets) still has no coordinates by the owner's order — a registry, never a chain; Sheet 1 is byte-identical, restaurants.json unchanged",
+      "population 96,507 = 68,980 + 27,527 (96,100); chain index 942 chains (857); covered แขวง/ตำบล frames 476 of 581, no-data 105 (475 / 106; sheet-1 rows alone still cover 308); the first Aha moves with the data (fixture from a run, never by hand): สีลม · ตลาดยอด · สุริยวงศ์ 391 rows / 2.31 km² = 169.4 ร้าน/ตร.กม. — the same three frames, สีลม (261 rows, 172.3) passed ตลาดยอด (171.9) after 11 more located outlets; baseline 9.85, shown 9.9, over 476 frames (9.83 → 9.8 over 475); most reviews แขวงคลองตันเหนือ 214,826 (unchanged)",
+      "owner choice on the QA gate (2026-11-03): “ขึ้นส่วนที่ไม่ต้องรอ QA ก่อน (Recommended)” — the register workbook's new tab 10_CLASSIFICATION (classified 2026-11-02, six axes per sheet-1 row and register outlet, CPF excluded by the owner's earlier stop, every row review_status = unreviewed) ships only what is a count or a stated value: chain size and the price tiers (segmentContract)",
+      "six price tiers from the source bounds (workbook rules.price; js/model.js#priceTier): P1 ≤ 100 · P2 101–200 · P3 201–300 · P4 301–500 · P5 501–1,000 · P6 starts at ≥ 1,000 with no ceiling; equal to price_band_observed on all 68,980 classified rows (data/segments.json meta.priceCheck); replaces the API bucket (cols.price) that put 886 sheet-1 rows priced “from 1,000” (907 with moved rows) in 500–1,000 and left “over 1,000” empty; links of 0.1–0.7 map whole buckets (LEGACY_PRICE; R100_300 → P2,P3, shown as “101–300 บาท (ช่วงของลิงก์เดิม)”); colours are six exact samples of the price LUT (js/scales.js#lutPicks, indices 0, 8, 16, 24, 32, 40)",
+      "chain size S1–S5 from 10_CLASSIFICATION chain_size_band + chain_link_status (scripts/build-segments.py → data/segments.json → js/model.js#attachSegments): counts of rows with their basis, not a judgement, nothing reviewed; one chain, one size — every row of a chain takes the largest band the source gives any of its rows, never a sum across the sheets (726 rows lifted: 725 sheet-1 rows + 1 outlet; none lowered); the CPF registry is never sized (1,166)",
+      "where the segments show: filter ‘ขนาดเครือ’ (?size=S1…S5), area / district profile bars ‘ระดับราคา’ and ‘ขนาดเครือ’ (size bars in one neutral fill) that click to filter and keep the open area (action filter-field), the store / outlet fact with its basis, the table's brand column, the filter chips",
+      "held off the web until each sub-segment passes the workbook's rules.QA (a human sample of 50 per sub-segment, at least 48 correct; 31 sub-segments × 50 = 1,550 samples): food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view; next step: a QA helper that draws the 1,550 deterministic samples for reviewers (built after the release)",
+      "Land join rerun 2026-11-03 (scripts/build-land.py --checked-on; same tiles, same rule): register outlets in Land buildings 3,464, near 1,908, 494 display positions from within 10 m; snapshot side unchanged",
+      "cache tag ?v=20261103-r1; 94 tests pass (new: segments, tier identities, segments in views; fixtures refreshed from a run)"
     ]
   },
   "rowScopes": {
     "scopeRows": {
-      "definition": "rows of the population (sheet-1 restaurants + register outlets) after search/group/price/province/brand filters, before any area selection or area focus; scopeRestaurants / scopeOutlets split it by kind for the two mark layers (symbols vs pins)",
+      "definition": "rows of the population (sheet-1 restaurants + register outlets) after search/group/price/size/province/brand filters (price takes a tier or a comma set of tiers; size since 0.8.0), before any area selection or area focus; scopeRestaurants / scopeOutlets split it by kind for the two mark layers (symbols vs pins)",
       "consumers": [
         "first Aha (no district selected)",
         "choropleth",
@@ -182,40 +194,40 @@
     "model": "js/area-insight.js#summarizeAreaInsight",
     "filter": "js/area-insight.js#filterAreaRows",
     "defaultSnapshot": {
-      "asOf": "2026-10-30",
-      "population": "sheet 1 + register of 2026-10-30 (0.7.1)",
+      "asOf": "2026-11-03",
+      "population": "sheet 1 + register of 2026-11-03 (0.8.0)",
       "areaIds": [
-        "100108",
         "100402",
+        "100108",
         "100403"
       ],
       "names": [
-        "ตลาดยอด",
         "สีลม",
+        "ตลาดยอด",
         "สุริยวงศ์"
       ],
       "rows": [
+        261,
         32,
-        250,
         98
       ],
-      "count": 380,
+      "count": 391,
       "km2": 2.3079,
-      "density": 164.65,
-      "baselineDensity": 9.83,
-      "framedRows": 80333,
-      "totalRows": 96100,
+      "density": 169.41,
+      "baselineDensity": 9.85,
+      "framedRows": 80629,
+      "totalRows": 96507,
       "coverage": {
-        "areas": 475,
-        "km2": 8171.79
+        "areas": 476,
+        "km2": 8185.59
       },
       "mostReviewed": {
         "id": "103902",
         "name": "คลองตันเหนือ",
         "reviews": 214826
       },
-      "previous": "0.6.0–0.7.0 (register of 2026-10-28): สุริยวงศ์ · สีลม · วังใหม่ 121.99 ร้าน/ตร.กม., baseline 9.37, 76,610 framed rows; 0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66, baseline 18.01, coverage 308 / 3,899.11 km²",
-      "status": "regression fixture — never a UI constant"
+      "previous": "0.7.1 (register of 2026-10-30): ตลาดยอด · สีลม · สุริยวงศ์ 164.65 ร้าน/ตร.กม., baseline 9.83, 80,333 framed rows over 475 frames; 0.6.0–0.7.0 (register of 2026-10-28): สุริยวงศ์ · สีลม · วังใหม่ 121.99 ร้าน/ตร.กม., baseline 9.37, 76,610 framed rows; 0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66, baseline 18.01, coverage 308 / 3,899.11 km²",
+      "status": "regression fixture (tests/insight.test.js) — never a UI constant; km2, density, framedRows and coverage.km2 read from a run of tests/helpers.js#load + js/area-insight.js#summarizeAreaInsight on 2026-11-03"
     },
     "fallbacks": {
       "noRows": "ไม่พบร้านตามตัวกรองนี้ + ล้างตัวกรอง",
@@ -224,6 +236,31 @@
       "outletsOnly": "a scope with outlets and no restaurant row and no area (a จังหวัด outside the covered seven): ‘N สาขาในทะเบียนร้านเครือใน{จังหวัด}’ + the coverage sentence; never ‘0% … 0 พื้นที่’"
     },
     "previousSnapshots": [
+      {
+        "asOf": "2026-10-30",
+        "population": "sheet 1 + register of 2026-10-30 (0.7.1)",
+        "areaIds": [
+          "100108",
+          "100402",
+          "100403"
+        ],
+        "names": [
+          "ตลาดยอด",
+          "สีลม",
+          "สุริยวงศ์"
+        ],
+        "rows": [
+          32,
+          250,
+          98
+        ],
+        "count": 380,
+        "km2": 2.3079,
+        "density": 164.65,
+        "baselineDensity": 9.83,
+        "framedRows": 80333,
+        "totalRows": 96100
+      },
       {
         "asOf": "2026-10-28",
         "population": "sheet 1 + register (0.6.0–0.7.0)",
@@ -261,13 +298,13 @@
       "family": "density.area",
       "unit": "ร้าน/ตร.กม.",
       "formula": "rows of the population with the frame's membership (restaurants by source subdistrict code; outlets by point-in-polygon of the outlet point, display only) ÷ (areaSqm / 1e6) of the production frame",
-      "classes": "5 equal-interval classes over (0, top] with top = max rounded up at the label precision (integers ≥ 20, one decimal ≥ 2, two decimals below); [lower, upper) with the last closed"
+      "classes": "equal-interval classes over (0, top] — 41 since 0.7.1 (RAMP_CLASSES, class i = LUT value i; 5 before) — with top = max rounded up at the label precision (integers ≥ 20, one decimal ≥ 2, two decimals below); [lower, upper) with the last closed"
     },
     "provinces": {
       "family": "count",
       "unit": "ร้าน (ร้านในชุดข้อมูล + สาขาในทะเบียน)",
       "reason": "outside BKK/NBI/SPK the restaurant source covers only some ตำบล and 70 provinces hold outlets only; a per-km² province value would measure coverage",
-      "classes": "5 closed integer intervals over [1, max] across all 77 provinces (0.6.0: 1–10,199 … 40,800–50,999)"
+      "classes": "closed integer intervals over [1, max] across all 77 provinces — 41 since 0.7.1 (0.6.0: 5 classes, 1–10,199 … 40,800–50,999)"
     },
     "matrix": {
       "family": "count",
@@ -276,7 +313,15 @@
     },
     "price": {
       "family": "price",
-      "buckets": "≤100, >100–300, >300–500, >500–1,000, >1,000 baht by COALESCE(end_price, start_price) as in the source; unspecified counted apart, never a price"
+      "tiers": "six tiers from the price the source states (0.8.0; register workbook rules.price; js/model.js#priceTier(p0, p1)): P1 ≤ 100 · P2 101–200 · P3 201–300 · P4 301–500 · P5 501–1,000 · P6 starts at ≥ 1,000 with no ceiling; otherwise the ceiling (the start when there is none), so a closed 1,000 ceiling is P5; no stated bound = UNSPECIFIED, counted apart, never a price; outlets carry no price; a tier is a stated range, not spend per person",
+      "colours": "six exact samples of the 41-value price LUT at indices round(i × 40 / 5) = 0, 8, 16, 24, 32, 40 (js/scales.js#lutPicks → priceColors), the same HEX on both themes; UNSPECIFIED has no colour",
+      "buckets": "0.1–0.7.1: ≤100, >100–300, >300–500, >500–1,000, >1,000 baht by COALESCE(end_price, start_price) as the API buckets them (cols.price, still in the data, no longer read by the page — it put the 886 sheet-1 rows priced “from 1,000” in 500–1,000 and left “over 1,000” empty)"
+    },
+    "size": {
+      "family": "none — size bars use one neutral fill; the band name carries the order (a second colour family would sit beside the price tiers in the same panel)",
+      "unit": "ร้าน",
+      "bands": "S1 1 สาขาที่พบในข้อมูล · S2 เครือเล็ก 2–9 สาขา · S3 เครือกลาง 10–49 สาขา · S4 เครือใหญ่ 50–199 สาขา · S5 เครือระดับชาติ 200+ สาขา (codebook names in chips, facts and titles; short names 1 สาขาที่พบ / 2–9 / 10–49 / 50–199 / 200+ สาขา in bars and the select)",
+      "rule": "segmentContract.chainSize — counts of rows, never a judgement; the CPF registry is not sized"
     },
     "eligibility": {
       "minRows": 30,
@@ -287,7 +332,7 @@
     "popularity": "reviews = Σ rating_count of rows that state it; rating mean over rated rows only; both are popularity proxies, not sales; outlets carry none, so a tile shows — (never 0) when no row in the scope has a review count"
   },
   "coverageContract": {
-    "covered": "แขวง/ตำบล with ≥ 1 row (restaurant or outlet with a point in the frame) in the full population (475 of 581 since 0.6.0; 308 on restaurants alone)",
+    "covered": "แขวง/ตำบล with ≥ 1 row (restaurant or outlet with a point in the frame) in the full population (476 of 581 since 0.8.0, no-data 105; 475 / 106 in 0.6.0–0.7.1; 308 on restaurants alone)",
     "states": {
       "measured": "class fill",
       "measured_zero": "covered frame with no row under the filter — lowest class fill + 2 px dataState.zero outline",
@@ -693,7 +738,8 @@
       "select-chain",
       "select-company",
       "select-outlet",
-      "select-land"
+      "select-land",
+      "filter-field"
     ],
     "models": {
       "overview": "js/profile-model.js#buildOverview + js/area-insight.js#summarizeAreaInsight",
@@ -708,7 +754,7 @@
       "company": "js/register.js#brandsIn + outletMix",
       "outlet": "js/register.js (decoded outlet) + js/land.js#landOfOutlet"
     },
-    "renderer": "js/panel.js (pure HTML strings, delegated data-action clicks); provenance() ends every view: ชุดข้อมูล · แหล่ง · ดึงข้อมูล · ขอบเขต + popularity caveat; register and Land views: js/register-panel.js (registerProvenance / landProvenance end every view: ชุดข้อมูล · แหล่ง · ตรวจ · ขอบเขต + the unit note)"
+    "renderer": "js/panel.js (pure HTML strings, delegated data-action clicks); provenance() ends every view: ชุดข้อมูล · แหล่ง · ดึงข้อมูล · ขอบเขต + popularity caveat (since 0.8.0, when the segments attach, the date clause adds “ขนาดเครือจัดกลุ่ม 2 พ.ย. 2569” from meta.segmentsOn = data/segments.json meta.classifiedOn); register and Land views: js/register-panel.js (registerProvenance / landProvenance end every view: ชุดข้อมูล · แหล่ง · ตรวจ · ขอบเขต + the unit note)"
   },
   "data": {
     "observationGrain": "one observation of the public CityMETER Restaurants overlay (owning-tile view); never merged by name or coordinate",
@@ -734,46 +780,48 @@
       "hostedVenues": 26,
       "sheet1Rows": 68980,
       "movedToChainRegister": 1234,
-      "population": 96100,
-      "populationRule": "sheet1Rows 68,980 + register outlets 27,120 = 96,100 (the 1,234 moved rows counted on the register side); coveredAreas 475 and reviewsTotal 5,922,059 on this population (reviews = sheet-1 rows only); 0.6–0.7.0: 95,799 with the register of 2026-10-28",
-      "noDataAreasOnPopulation": 106,
-      "coveredAreasOnPopulation": 475,
-      "chainsTotal": 857,
-      "outletsTyped": 15800,
-      "framedRows": 80333
+      "population": 96507,
+      "populationRule": "sheet1Rows 68,980 + register outlets 27,527 = 96,507 (the 1,234 moved rows counted on the register side); coveredAreas 476 and reviewsTotal 5,922,059 on this population (reviews = sheet-1 rows only); 0.7.1: 96,100 with the register of 2026-10-30; 0.6–0.7.0: 95,799 with the register of 2026-10-28",
+      "noDataAreasOnPopulation": 105,
+      "coveredAreasOnPopulation": 476,
+      "chainsTotal": 942,
+      "outletsTyped": 15931,
+      "framedRows": 80629,
+      "fromRun": "outletsTyped (15,931 outlets typed by 250 chains: 83 by rows, 167 by format), framedRows and the population reviews read from a run of tests/helpers.js#load on 2026-11-03; the same probe on the 0.7.1 tree returns its recorded 15,800 / 190 chains; 0.7.1: chainsTotal 857, outletsTyped 15,800, framedRows 80,333"
     },
+    "segments": "data/segments.json (0.8.0; 199,896 bytes; schema citymeter-restaurant-segments-1): chain size per row of restaurants.json cols.key and per outlet of chains.json cols.id, aligned by the sha256 of both id arrays; held fields named in meta.held; no private sheet link or id — see segmentContract",
     "verification": "fresh reproduction of the public API matched all 70,214 rows on every compared field (handoff/VERIFICATION.md)",
     "coordinatePolicy": "MVT display positions (z10, extent 4096, 9.55 m) stored as grid integers; decoded with the research formula; screen-space displacement only; precision described, never upgraded",
     "membershipPolicy": "source subdistrict code; no point-in-polygon on display positions; no name matching",
     "register": "data/chains.json (columnar; meta, provinces (77), areas, companies, brands, urls, cols id/name/brand/company/lat/lon/prov/provBy/area/ev/st/geo/floor/unit/addr/src/checked)",
     "land": "data/land.json (meta, hosts, snapshot [[key, building, rel, d]], chains [[outlet_id, building, rel, d]]) + data/land-buildings.geojson (land_host_building outline/LOD1 block + land_host_building_part LOD2 parts)",
     "registerSnapshot": {
-      "asOf": "2026-10-30 (owner read-back 2026-10-29)",
-      "outlets": 27120,
-      "brandsWithOutlets": 821,
-      "brandProfiles": 1149,
-      "companyRecords": 336,
-      "withPoint": 22182,
-      "approxOnly": 936,
-      "inCoveredSubdistricts": 11353,
-      "provinceByPoint": 22174,
-      "provinceByText": 2733,
-      "noProvince": 2213,
+      "asOf": "2026-11-03 (workbook read 2026-11-03; owner read-back 2026-10-30)",
+      "outlets": 27527,
+      "brandsWithOutlets": 907,
+      "brandProfiles": 1249,
+      "companyRecords": 397,
+      "withPoint": 22547,
+      "approxOnly": 938,
+      "inCoveredSubdistricts": 11649,
+      "provinceByPoint": 22539,
+      "provinceByText": 2752,
+      "noProvince": 2236,
       "pointOutsideProvinces": 8,
       "evidence": {
-        "primary": 20260,
-        "secondary": 4442,
+        "primary": 20375,
+        "secondary": 4734,
         "cart": 2418
       },
       "status": {
-        "listed": 21607,
-        "pending": 5365,
+        "listed": 21992,
+        "pending": 5387,
         "temporary": 104,
         "closed": 44
       },
       "geometry": {
-        "brand": 13104,
-        "other": 9078,
+        "brand": 13115,
+        "other": 9432,
         "host": 0
       },
       "logos": {
@@ -783,19 +831,20 @@
         "folderFiles": 577,
         "filesAdded": 408
       },
-      "checked": "2026-10-25/2026-10-28 · readBackOn 2026-10-29",
+      "checked": "2026-10-25/2026-10-31 · readBackOn 2026-10-30",
+      "receipt": "data/chains.json meta of the 2026-11-03 build (brandProfiles, stats, evidence, status, geometry, logos); logos unchanged since 0.7.1 (the rebuilt 408 files are byte-identical)",
       "previous": {
-        "asOf": "2026-10-28",
-        "outlets": 26819,
-        "brandsWithOutlets": 756,
-        "brandProfiles": 1049,
-        "companyRecords": 311,
-        "withPoint": 16728,
-        "inCoveredSubdistricts": 7630,
-        "provinceByPoint": 16720,
-        "provinceByText": 6858,
-        "noProvince": 3241,
-        "logosLinked": 78
+        "asOf": "2026-10-30",
+        "outlets": 27120,
+        "brandsWithOutlets": 821,
+        "brandProfiles": 1149,
+        "companyRecords": 336,
+        "withPoint": 22182,
+        "inCoveredSubdistricts": 11353,
+        "provinceByPoint": 22174,
+        "provinceByText": 2733,
+        "noProvince": 2213,
+        "logosLinked": 541
       }
     },
     "landSnapshot": {
@@ -804,9 +853,9 @@
         "hotel": 2266,
         "office": 378
       },
-      "hostsPublished": 1089,
-      "buildings": 989,
-      "features": 1053,
+      "hostsPublished": 1091,
+      "buildings": 991,
+      "features": 1055,
       "lod2Buildings": 15,
       "lod2Parts": 64,
       "snapshotPoints": {
@@ -816,23 +865,24 @@
         "nested": 11
       },
       "registerPoints": {
-        "in": 3396,
-        "near": 1842,
-        "inFromWithin10m": 478,
-        "nested": 33
+        "in": 3464,
+        "near": 1908,
+        "inFromWithin10m": 494,
+        "nested": 34
       },
-      "checkedOn": "2026-10-30",
+      "checkedOn": "2026-11-03",
       "report": "docs/LAND_JOIN_CHECK.md + docs/land-join-check.json",
       "source": "openfreemap_osm (OpenFreeMap planet 20261025_080012_pt z14 building layer)",
+      "receipt": "rerun 2026-11-03 with the same tiles and rule; hostsPublished, buildings, features and registerPoints.nested read from data/land.json, data/land-buildings.geojson and docs/land-join-check.json of that run",
       "previous": {
-        "checkedOn": "2026-10-28",
-        "hostsPublished": 1036,
-        "buildings": 942,
-        "features": 1006,
+        "checkedOn": "2026-10-30",
+        "hostsPublished": 1089,
+        "buildings": 989,
+        "features": 1053,
         "registerPoints": {
-          "in": 2038,
-          "inFromWithin10m": 299,
-          "nested": 21
+          "in": 3396,
+          "inFromWithin10m": 478,
+          "nested": 33
         }
       }
     }
@@ -851,7 +901,7 @@
       "lutSamples": 41,
       "themePolicy": "identical light HEX on both themes",
       "source": "js/scales.js",
-      "classes": "41 equal-interval classes per sequential encoding since 0.7.1 (owner 2026-10-30 “color scale always go for 41 colors”): class i = LUT value i; legends = ramp with head · middle · tail anchors (js/legend.js); 3/5/7/9 pickers remain for the price buckets",
+      "classes": "41 equal-interval classes per sequential encoding since 0.7.1 (owner 2026-10-30 “color scale always go for 41 colors”): class i = LUT value i; legends = ramp with head · middle · tail anchors (js/legend.js); since 0.8.0 a fixed class set of the source whose size is not 3/5/7/9 takes exact LUT samples at round(i × 40 / (k − 1)) (js/scales.js#lutPicks) — the six price tiers = price LUT indices 0, 8, 16, 24, 32, 40 (0.7.1: five price buckets on the 3/5/7/9 pickers)",
       "legend": "js/legend.js#rampMarkup + js/scales.js#rampAnchors"
     },
     "categoricalSeries": {
@@ -870,7 +920,11 @@
       "headingThai": "IBM Plex Sans Thai Looped 700",
       "numbers": "JetBrains Mono 400 tabular"
     },
-    "reportedDifference": "dark no-data/zero colours differ between the analytical scale records (#3B4849 / #BAC6C0) and machine.tokens.dataState (#404844 / #93A398); the EVID-05 treatments reference dataState, which the map uses"
+    "reportedDifference": "dark no-data/zero colours differ between the analytical scale records (#3B4849 / #BAC6C0) and machine.tokens.dataState (#404844 / #93A398); the EVID-05 treatments reference dataState, which the map uses",
+    "reportedConflicts": [
+      "0.8.0: six price tiers are not one of LDS DATAVIZ-02's 3/5/7/9 class counts; the owner's rule of 2026-10-30 “color scale always go for 41 colors” governs — six exact samples of the 41-value price LUT, the same picks the ramps already make for few classes (reported to the owner as a conflict, resolved by the owner rule)",
+      "0.8.0: the source sizes chains per sheet (register rows per brand_id; sheet-1 rows per name candidate) while the 0.7.0 rule keeps one chain one key — one chain could carry two bands; the page gives every row of a chain the largest band, never a sum (reported to the owner as a conflict)"
+    ]
   },
   "invariants": [
     {
@@ -1020,6 +1074,18 @@
     {
       "id": "INV37",
       "rule": "A logo file ships only when its sha256 equals the logo_sha256 the register (01_BRANDS) or the portable manifest records for a brand with rows; bytes never change, the lookup stays by brand id; files the registers do not point at, and SVGs with script/event/foreignObject, are never shipped; the register's separate approximate coordinate (latitude_approx) is counted, never drawn"
+    },
+    {
+      "id": "INV38",
+      "rule": "Price tiers (0.8.0) come from the price the source states, by js/model.js#priceTier(p0, p1) — the workbook's rules.price: P1 ≤ 100 · P2 101–200 · P3 201–300 · P4 301–500 · P5 501–1,000 · P6 starts at ≥ 1,000 with no ceiling (a closed 1,000 ceiling is P5) — never from the API bucket cols.price; a row with no stated price is ไม่ระบุราคา, never 0; outlets carry no price; a tier is a stated range, never spend per person; the six colours are exact price-LUT samples (indices 0, 8, 16, 24, 32, 40), the same HEX on both themes; links of 0.1–0.7 open the tiers their bucket covers (LEGACY_PRICE)"
+    },
+    {
+      "id": "INV39",
+      "rule": "Chain size (0.8.0) is a count of rows from 10_CLASSIFICATION, never a judgement, always shown with its basis: register rows per brand_id; sheet-1 rows sharing a name candidate (a candidate, not a confirmed chain); one observed row — network unknown, never “an independent shop”. One chain, one size: every row of a chain takes the largest band the source gives any of its rows, never a sum across the sheets (the row's own band stays in sizeOwn); the CPF / Five Star multi-banner point-of-sale registry is never sized; size bars use one neutral fill"
+    },
+    {
+      "id": "INV40",
+      "rule": "No classification result reaches the web before its sub-segment passes the workbook's rules.QA (a human sample of 50 per sub-segment, at least 48 correct): food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view stay off the page (data/segments.json meta.held) — never shown as a label, not even “(อนุมาน)”; data/segments.json attaches only when both id arrays line up and carries no private sheet link or id"
     }
   ],
   "chartContracts": [
@@ -1051,8 +1117,8 @@
       "viewKey": "price",
       "title": "ระดับราคา",
       "question": "พื้นที่เหล่านั้นอยู่ในระดับราคาแบบไหน",
-      "encoding": "100% stacked bars of priced rows in the price family; unspecified counted beside the bar",
-      "metric": "share of priced rows per bucket",
+      "encoding": "100% stacked bars of priced rows over the six tiers P1–P6 (0.8.0; six exact price-LUT samples); unspecified counted beside the bar",
+      "metric": "share of priced rows per tier",
       "scope": "scopeRows (12 densest areas)",
       "action": {
         "type": "area",
@@ -1084,7 +1150,7 @@
     "data": "data/provinces.geojson — 77 provinces: the 7 covered ones dissolved from the production subdistrict frames (unchanged, so the mosaic nests), the other 70 from the production PROVINCE outline (GET …/restaurant/info/geom/{uuid}/PROVINCE, receipts in data/boundary-receipts.json provinceReceipts) simplified at 300 m for the country view (scripts/build-provinces.py); id = production code (BKK …), code = DOPA two-digit, frame = dissolved_subdistricts | production_province_outline",
     "module": "js/provinces.js#installProvinceLayers(map, geojson) → {update({rows, selectedCode, visible}), dispose, model}; buildProvinceModel(rows, geojson)",
     "rows": "filterRows(data.rows, {...filters, province: ''}) so each frame keeps its own count",
-    "metric": "rows per province (restaurants + outlets; count family, 5 equal-interval classes over the 77); measured_zero = lowest fill + zero outline; nothing is out of scope any more",
+    "metric": "rows per province (restaurants + outlets; count family, equal-interval classes over the 77 — 41 since 0.7.1, 5 before); measured_zero = lowest fill + zero outline; nothing is out of scope any more",
     "zoomWindows": {
       "fill": "< 8.5",
       "outline": "< 12",
@@ -1129,15 +1195,15 @@
     "site": "GitHub Pages from main /root",
     "handoff": "dist/CityMETER-Restaurants-Developer-Handoff.zip (START_HERE.md, RELEASE_RECEIPT.json, evidence/, source/)",
     "liveCheck": "npm run verify:live",
-    "cacheTag": "?v=20261028-r13 on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
-    "extras": "data/chains.json (7.8 MB, gzip ≈ 1.5 MB), data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint"
+    "cacheTag": "?v=20261103-r1 (0.8.0) on every entry file and, through the import map in index.html, on every ES module; bump it with package.json version (tests/release.test.js)",
+    "extras": "data/chains.json loads with the snapshot before the first paint since 0.6.0 (one population), and data/segments.json (199,896 bytes, 0.8.0) with them — missing or misaligned, every row stays unsized and the size filter hides; data/land.json + land-buildings.geojson (≈ 1.6 MB) load after the first paint (before it when the URL opens a Land view)"
   },
   "registerContract": {
     "unit": "one outlet_id per listed branch / point of sale with qualifying evidence (incl. delivery kitchens and carts with their own status) — not a field count of open shops. ONE POPULATION since 0.6.0 (owner 2026-10-28 22:36 “จำนวนร้านต้อง 7x,xxx + 26,xxx แสดงนับรวมกัน”): the outlets are rows of the snapshot population (group REGISTER_GROUP ‘สาขาร้านเครือ’, kind outlet), counted with the sheet-1 restaurants in every ร้าน figure (overview tiles, province frames and list, แขวง/ตำบล densities, area/district/venue/building/Land panels, charts, table); the split ‘ร้าน = N ร้านในชุดข้อมูล + M สาขาในทะเบียน’ is stated once per view; the 1,234 moved rows are counted once, on the register side. This supersedes the 0.3.0 rule ‘never added to the snapshot’ for counting and presentation; the register keeps its own views, evidence and provenance. ONE VOCABULARY since 0.7.0 (owner 2026-10-29): the outlets read as ร้าน everywhere (meta line “สาขาเครือ”), the split is stated in the provenance line only, the outlets carry their chain's derived food type, and a chain is the brand filter — the register keeps its directory (chains), company and outlet views, its evidence and its provenance.",
     "views": "chains (directory + search) · chain (brand) · company · outlet; there the snapshot frames, labels, context dots, charts tray and table step aside and the register search replaces the snapshot filters (data-set switch). In every snapshot view the outlets are rows: filters reach them (group = สาขาร้านเครือ, province by the register's province, brand through brandKeys / 01_BRANDS.national_brand_ids, search over name · brand · company · province), cue series ‘register’ (pin path) in the legend; outlet rows carry no price, rating, reviews or type (UNSPECIFIED / null — never imputed)",
-    "map": "js/register-layer.js: one pin per outlet with a selected coordinate (16,728 of 26,819) (LDS map data role), selected outlet stroke; logos as buttons from zoom 15 (≤ 60); never clustered; from city zoom (REGISTER_MIN_ZOOM) for a full scope; a scope of outlets only (a จังหวัด outside the covered seven, ?group=register, a chain-only brand) draws its outlets at every zoom (registerSelection().scoped) and the status line counts them as ร้านในจอ",
+    "map": "js/register-layer.js: one pin per outlet with a selected coordinate (22,547 of 27,527 in the register of 2026-11-03; 0.6: 16,728 of 26,819) (LDS map data role), selected outlet stroke; logos as buttons from zoom 15 (≤ 60); never clustered; from city zoom (REGISTER_MIN_ZOOM) for a full scope; a scope of outlets only (a จังหวัด outside the covered seven, ?group=register, a chain-only brand) draws its outlets at every zoom (registerSelection().scoped) and the status line counts them as ร้านในจอ",
     "derivations": {
-      "province": "point-in-polygon on the 77 production provinces (provBy point) → register province text (provBy text) → unknown (3,241), listed apart as ‘ไม่ทราบจังหวัด’ in the province list and counted in the totals, never in a frame or a density",
+      "province": "point-in-polygon on the 77 production provinces (provBy point) → register province text (provBy text) → unknown (2,236 in the register of 2026-11-03; 0.6: 3,241), listed apart as ‘ไม่ทราบจังหวัด’ in the province list and counted in the totals, never in a frame or a density",
       "area": "point-in-polygon on the covered subdistricts (display only)"
     },
     "links": "snapshot brand → register brands by 01_BRANDS.national_brand_ids; moved row → registerOutlets ids; names are search keys only",
@@ -1229,5 +1295,140 @@
       "text labels only (no borrowed icon)",
       "the question is the link title"
     ]
+  },
+  "segmentContract": {
+    "decision": "owner 2026-11-03 01:04 “update ตาม googlesheet ที่อัพเดทใหม่ แล้ว leverage ให้ได้ value ตาม product statement ให้มากที่สุด”; on the QA gate the owner chose “ขึ้นส่วนที่ไม่ต้องรอ QA ก่อน (Recommended)” (2026-11-03): ship the refreshed register, six price tiers from the source bounds and chain size now; build a helper for the 1,550-sample check",
+    "source": "register workbook tab 10_CLASSIFICATION (classified 2026-11-02; six axes for every sheet-1 observation and register outlet, CPF excluded by the owner's earlier stop; rule version in data/segments.json meta.ruleVersion) + the 06_DATA_DICTIONARY codebook; workbook read 2026-11-03, an internal input never committed",
+    "build": "scripts/build-segments.py → data/segments.json (schema citymeter-restaurant-segments-1, 199,896 bytes): one size character per row of restaurants.json cols.key and per outlet of chains.json cols.id, with the sha256 of both id arrays in meta; no private sheet links or ids",
+    "attach": "js/model.js#attachSegments — nothing is attached when the id arrays do not line up (another build); the size filter then hides and no band is guessed",
+    "evidence": "Observed fact for the counts the source lists; nothing in the tab is reviewed (meta.reviewStatus: every row unreviewed)",
+    "priceTiers": {
+      "rule": "metricContract.price.tiers (js/model.js#priceTier, PRICE_BUCKETS P1–P6 + UNSPECIFIED, PRICE_LABELS, PRICE_SHORT)",
+      "labels": {
+        "P1": "ไม่เกิน 100 บาท",
+        "P2": "101–200 บาท",
+        "P3": "201–300 บาท",
+        "P4": "301–500 บาท",
+        "P5": "501–1,000 บาท",
+        "P6": "เริ่ม 1,000 บาทขึ้นไป",
+        "UNSPECIFIED": "ไม่ระบุราคา"
+      },
+      "check": "equal to the workbook's price_band_observed on all 68,980 classified rows (data/segments.json meta.priceCheck = {agree: 68980})",
+      "replaces": "the API bucket (cols.price, COALESCE(end, start) over ≤100 / ≤300 / ≤500 / ≤1,000 / >1,000), which put 886 sheet-1 rows priced “from 1,000” (907 with moved rows) in 500–1,000 and left “over 1,000” empty",
+      "identities": "each API bucket splits into whole tiers: P1 = ≤100; P2 + P3 = 100–300; P4 = 300–500; P5 + P6 = 500–1,000 + over 1,000; unspecified equal (tests/data.test.js)",
+      "legacyLinks": {
+        "UNDER_100": "P1",
+        "R100_300": "P2,P3",
+        "R300_500": "P4",
+        "R500_1000": "P5",
+        "OVER_1000": "P6",
+        "note": "js/model.js#LEGACY_PRICE; filterRows accepts the comma set; R100_300 reads “101–300 บาท (ช่วงของลิงก์เดิม)” (LEGACY_PRICE_LABELS)"
+      },
+      "colours": "metricContract.price.colours (js/scales.js#lutPicks(6, price LUT) → priceColors)",
+      "counts": {
+        "snapshotRows": {
+          "rows": 70214,
+          "P1": 9056,
+          "P2": 6090,
+          "P3": 2844,
+          "P4": 937,
+          "P5": 165,
+          "P6": 907,
+          "UNSPECIFIED": 50215
+        },
+        "sheet1PopulationRows": {
+          "rows": 68980,
+          "P1": 9048,
+          "P2": 5942,
+          "P3": 2658,
+          "P4": 832,
+          "P5": 155,
+          "P6": 886,
+          "UNSPECIFIED": 49459
+        },
+        "outlets": "no price — kept apart from ไม่ระบุราคา",
+        "status": "regression fixture (tests/data.test.js) — never a UI constant"
+      }
+    },
+    "chainSize": {
+      "source": "10_CLASSIFICATION chain_size_band + chain_link_status",
+      "bands": {
+        "S1": "1 สาขาที่พบในข้อมูล",
+        "S2": "เครือเล็ก 2–9 สาขา",
+        "S3": "เครือกลาง 10–49 สาขา",
+        "S4": "เครือใหญ่ 50–199 สาขา",
+        "S5": "เครือระดับชาติ 200+ สาขา"
+      },
+      "shortLabels": {
+        "S1": "1 สาขาที่พบ",
+        "S2": "2–9 สาขา",
+        "S3": "10–49 สาขา",
+        "S4": "50–199 สาขา",
+        "S5": "200+ สาขา"
+      },
+      "basis": {
+        "c": "register rows per brand_id (confirmed_brand_registry_count)",
+        "n": "sheet-1 rows sharing a name candidate (candidate_name_count) — a candidate, not a confirmed chain",
+        "s": "one observed row, network unknown — never “an independent shop”",
+        "x": "CPF / Five Star multi-banner point-of-sale registry — a registry, never a chain; not sized"
+      },
+      "rule": "counts of rows, not a judgement; nothing reviewed (js/model.js SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, SIZE_BASIS)",
+      "oneChainOneSize": "the source counts the two sheets apart, so one chain of the app index (brandKey) could carry two bands (e.g. 120 name-matched restaurants in seven provinces vs 400 register outlets); every row of a chain takes the LARGEST band the source gives any of its rows — never a sum across the sheets, which can list the same shop twice; the row's own band stays in sizeOwn, sizeLifted marks the raise and the fact reads “ใช้ขนาดที่ใหญ่ที่สุดที่นับได้ของเครือเดียวกัน” (SIZE_LIFTED); 726 rows lifted (725 sheet-1 rows + 1 outlet), none lowered; reported to the owner as a conflict between the source's separate counting and the 0.7.0 one-chain rule",
+      "sourceBands": {
+        "sheet1Rows": {
+          "S1:s": 66962,
+          "S1:n": 26,
+          "S2:n": 349,
+          "S3:n": 600,
+          "S4:n": 715,
+          "S5:n": 328
+        },
+        "outlets": {
+          "S1:s": 431,
+          "S2:c": 1033,
+          "S3:c": 2889,
+          "S4:c": 5569,
+          "S5:c": 16439,
+          "notSized:x": 1166
+        }
+      },
+      "population": {
+        "S1": 67411,
+        "S2": 1162,
+        "S3": 3398,
+        "S4": 6338,
+        "S5": 17032,
+        "notSized": 1166,
+        "status": "after the one-chain rule; regression fixture (tests/data.test.js) — never a UI constant"
+      },
+      "where": [
+        "filter ‘ขนาดเครือ’ (#size, ?size=S1…S5; hidden when the segments do not attach)",
+        "area / district profile bars ‘ขนาดเครือ’ beside ‘ระดับราคา’ (js/panel.js#sizeBars; short names, the codebook name in the title; one neutral fill)",
+        "store and outlet fact with its basis (js/panel.js#sizeFact, also in js/register-panel.js; the CPF registry reads ‘ไม่จัดขนาด’)",
+        "table brand column (the band under the chain name)",
+        "filter chips (codebook names)"
+      ],
+      "click": "price and size bars are buttons (data-action=\"filter-field\", js/app.js#filterField) that set the filter through the select's own change path, so the open area stays open"
+    },
+    "examples": {
+      "evidence": "Observed fact — counts of what the sources list on the current population (filter only), not demand, spend per person, sales or footfall",
+      "sizeS5": "?size=S5 (chains of 200+): densest three วังใหม่ · ถนนพญาไท · ปทุมวัน — 40.0 ร้าน/ตร.กม., 187 rows in 4.67 km² (baseline for the filter 0.93)",
+      "sizeS1": "?size=S1 (one observed row): สี่แยกมหานาค · ตลาดน้อย · สัมพันธวงศ์ — 96.8 ร้าน/ตร.กม.",
+      "priceP6": "?price=P6 (from 1,000 baht, 886 rows — a small selection, so count mode): คลองตันเหนือ 107 · ลุมพินี 73 · ทุ่งมหาเมฆ 35 = 215 rows, 24.3 % of P6"
+    },
+    "held": {
+      "items": [
+        "food taxonomy (6 categories / 19 groups / 31 sub-groups)",
+        "format",
+        "occasion",
+        "special labels",
+        "inferred price",
+        "competitor view (same sub-segment + same แขวง/ตำบล; group from 5, shares from 30)"
+      ],
+      "fields": "data/segments.json meta.held.fields",
+      "why": "every classification row is review_status = unreviewed; workbook rules.QA: no automatic result goes to the web before a human sample of 50 per sub-segment with at least 48 correct (seed six-axes-20261102-v1, selection lowest SHA256(seed|classification_id)) — 31 sub-segments × 50 = 1,550 samples",
+      "rule": "INV40 — never show an unreviewed label, not even “(อนุมาน)”; a sub-segment ships only after it passes",
+      "next": "QA helper: 1,550 deterministic samples (50 per sub-segment) for reviewers, built after the release (implementation-plan N25)"
+    }
   }
 }

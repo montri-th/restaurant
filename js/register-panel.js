@@ -13,7 +13,7 @@
  * Actions (delegated, data-action): open-chains · select-company · select-store · select-land · select-area ·
  * select-venue · filter-brand · back.
  */
-import {esc, num, dec, link, thaiDate, metricTile, heading, entryMarkup, chainChips, outboundRow} from './panel.js';
+import {esc, num, dec, link, thaiDate, metricTile, heading, entryMarkup, chainChips, outboundRow, sizeFact} from './panel.js';
 import {brandLogoMarkup, getBrandLogo} from './brand-logos.js';
 import {cueMarkup} from './cues.js';
 import {areaWord, districtWord} from './areas.js';
@@ -180,6 +180,7 @@ export function renderOutlet({reg, outlet: o, area = null, land = null, sameBran
       <dl class="facts">
         <dt>เครือ</dt><dd><button type="button" class="link-button" data-action="filter-brand" data-value="${esc(o.brand.id)}">${esc(brandLabel(o.brand))}</button> <span class="data-number">${num(o.brand.outlets || 0)}</span> สาขาเครือ<br><span class="hint">${esc(completenessTh(o.brand.completeness))}</span></dd>
         <dt>ประเภท</dt><dd>${group ? esc(group.th) : 'ไม่ระบุประเภท'}<br><span class="hint">${esc(typeHow)}</span></dd>
+        ${sizeFact(o)}
         <dt>หลักฐาน</dt><dd>${esc(EVIDENCE_TH[o.evidence])}<br><span class="hint">${esc(STATUS_TH[o.status])}</span></dd>
         ${o.address ? `<dt>ที่อยู่</dt><dd>${esc(o.address)}</dd>` : ''}
         ${o.floor || o.unit ? `<dt>ชั้น/ยูนิต</dt><dd>${esc([o.floor && `ชั้น ${o.floor}`, o.unit && `ยูนิต ${o.unit}`].filter(Boolean).join(' · '))}<br><span class="hint">ตามแหล่งข้อมูล</span></dd>` : ''}

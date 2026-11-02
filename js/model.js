@@ -42,16 +42,94 @@ export const provinceCodeFrom = value => {
   return p ? p.code : '';
 };
 
-/** Price buckets of the source (COALESCE(end_price, start_price); thresholds ≤100, ≤300, ≤500, ≤1,000, >1,000). */
-export const PRICE_BUCKETS = Object.freeze(['UNDER_100', 'R100_300', 'R300_500', 'R500_1000', 'OVER_1000', 'UNSPECIFIED']);
-/** Bucket labels read as ranges (N18, 0.7.0): the bucket (100, 300] is “100–300 บาท”, the open top “เกิน 1,000 บาท”. */
+/**
+ * Price tiers (0.8.0, the 2 Nov segmentation, register workbook rules.price): six ranges of the price the source states
+ * — P6 = starts at 1,000 with no ceiling; otherwise the ceiling (the start when there is none) against 100 / 200 / 300 /
+ * 500 / 1,000 (a closed 1,000 ceiling is P5). Computed from the bounds (p0/p1), never from the API's own bucket
+ * (`cols.price`, COALESCE(end, start) over ≤100 / ≤300 / ≤500 / ≤1,000 / >1,000), which put the 886 sheet-1 rows
+ * priced “from 1,000” with no ceiling (907 with the moved rows) in 500–1,000 and left “over 1,000” empty. A range the
+ * source states, not spend per person.
+ */
+export const PRICE_BUCKETS = Object.freeze(['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'UNSPECIFIED']);
 export const PRICE_LABELS = Object.freeze({
-  UNDER_100: 'ไม่เกิน 100 บาท', R100_300: '100–300 บาท', R300_500: '300–500 บาท',
-  R500_1000: '500–1,000 บาท', OVER_1000: 'เกิน 1,000 บาท', UNSPECIFIED: 'ไม่ระบุราคา',
+  P1: 'ไม่เกิน 100 บาท', P2: '101–200 บาท', P3: '201–300 บาท', P4: '301–500 บาท',
+  P5: '501–1,000 บาท', P6: 'เริ่ม 1,000 บาทขึ้นไป', UNSPECIFIED: 'ไม่ระบุราคา',
 });
 export const PRICE_SHORT = Object.freeze({
-  UNDER_100: '≤100', R100_300: '>100–300', R300_500: '>300–500', R500_1000: '>500–1,000', OVER_1000: '>1,000', UNSPECIFIED: 'ไม่ระบุ',
+  P1: '≤100', P2: '101–200', P3: '201–300', P4: '301–500', P5: '501–1,000', P6: '1,000+', UNSPECIFIED: 'ไม่ระบุ',
 });
+/** The tier of one row from the source's start / end price (null bounds = not stated, never 0). */
+export function priceTier(p0, p1) {
+  const lo = Number.isFinite(p0) ? p0 : null, hi = Number.isFinite(p1) ? p1 : null;
+  if (lo == null && hi == null) return 'UNSPECIFIED';
+  if (hi == null && lo >= 1000) return 'P6';
+  const top = hi ?? lo;
+  return top <= 100 ? 'P1' : top <= 200 ? 'P2' : top <= 300 ? 'P3' : top <= 500 ? 'P4' : top <= 1000 ? 'P5' : 'P6';
+}
+/** Links of 0.1–0.7 named the API buckets; each opens the tiers it covers (100–300 = P2 + P3). */
+export const LEGACY_PRICE = Object.freeze({UNDER_100: 'P1', R100_300: 'P2,P3', R300_500: 'P4', R500_1000: 'P5', OVER_1000: 'P6'});
+export const LEGACY_PRICE_LABELS = Object.freeze({'P2,P3': '101–300 บาท (ช่วงของลิงก์เดิม)'});
+
+/**
+ * Chain size (0.8.0): register workbook 10_CLASSIFICATION `chain_size_band` + `chain_link_status` (data/segments.json).
+ * Counts of rows, not a judgement — register outlets by the register rows of the same brand_id; a sheet-1 row by the
+ * sheet-1 rows sharing its name candidate (a candidate, not a confirmed chain); one observed row is “network unknown”,
+ * never “independent”. The rest of the six axes waits for the human sample check (rules.QA).
+ */
+export const SIZE_BANDS = Object.freeze(['S1', 'S2', 'S3', 'S4', 'S5']);
+export const SIZE_LABELS = Object.freeze({
+  S1: '1 สาขาที่พบในข้อมูล', S2: 'เครือเล็ก 2–9 สาขา', S3: 'เครือกลาง 10–49 สาขา', S4: 'เครือใหญ่ 50–199 สาขา', S5: 'เครือระดับชาติ 200+ สาขา',
+});
+/** Short band names for bars and the filter select, where the heading already says ขนาดเครือ. */
+export const SIZE_SHORT = Object.freeze({S1: '1 สาขาที่พบ', S2: '2–9 สาขา', S3: '10–49 สาขา', S4: '50–199 สาขา', S5: '200+ สาขา'});
+export const SIZE_BASIS = Object.freeze({
+  c: 'นับสาขาตามทะเบียนของเครือนี้',
+  n: 'นับร้านชื่อเดียวกันในชุดข้อมูล 7 จังหวัด (จับคู่จากชื่อ)',
+  s: 'พบแถวเดียว ยังไม่รู้ว่ามีสาขาอื่นหรือไม่ — ไม่ได้แปลว่าเป็นร้านอิสระ',
+  r: 'นับสาขาตามทะเบียนของเครือนี้',
+  x: 'ทะเบียนจุดขายหลายแบรนด์ ไม่ใช่เครือเดียว — ไม่จัดขนาด',
+});
+/** A row whose chain is larger in the other sheet takes that size (one chain, one size — the 0.7.0 one-chain rule). */
+export const SIZE_LIFTED = 'ใช้ขนาดที่ใหญ่ที่สุดที่นับได้ของเครือเดียวกัน';
+/**
+ * Attach the segments to the rows. `keys` / `ids` are the arrays the segment strings are aligned to (restaurants.json
+ * cols.key, chains.json cols.id); a length mismatch means another build and nothing is attached.
+ *
+ * The source sizes the two sheets apart (rules.chain: register rows per brand_id; sheet-1 rows per name candidate), so
+ * one chain of the app's index (`brandKey`) can carry two bands — e.g. a chain with 120 name-matched restaurants in the
+ * seven provinces and 400 register outlets. The app keeps one chain one size: every row of a chain takes the largest
+ * band the source gives any of its rows (never a sum across the sheets, which may list the same shop twice); the row's
+ * own band stays in `sizeOwn` and `sizeLifted` says it was raised.
+ */
+export function attachSegments(segments, {rows = [], outlets = [], keys = [], ids = []} = {}) {
+  // Without the register (ids empty) only the restaurant rows are sized; a register of another build sizes nothing.
+  const ok = segments?.rows?.size?.length === keys.length && (!ids.length || segments?.outlets?.size?.length === ids.length);
+  if (!ok) return {attached: 0, lifted: 0, ok: false};
+  let attached = 0;
+  const put = (r, size, basis) => {
+    const k = Number(size);
+    if (basis && basis !== '.') r.sizeBasis = basis;
+    if (size === '.' || !Number.isInteger(k) || k < 0 || k > 4) return;
+    r.size = SIZE_BANDS[k]; r.sizeOwn = r.size; r.sizeLifted = false; attached++;
+  };
+  const keyIndex = new Map(keys.map((k, i) => [k, i]));
+  for (const r of rows) { const i = keyIndex.get(r.id); if (i != null) put(r, segments.rows.size[i], segments.rows.basis[i]); }
+  const idIndex = new Map(ids.map((k, i) => [k, i]));
+  for (const o of outlets) { const i = idIndex.get(o.id); if (i != null) put(o, segments.outlets.size[i], segments.outlets.basis[i]); }
+  const top = new Map();
+  const all = [...rows, ...outlets];
+  for (const r of all) {
+    const key = r.size ? brandKey(r) : '';
+    if (key) top.set(key, Math.max(top.get(key) ?? -1, SIZE_BANDS.indexOf(r.size)));
+  }
+  let lifted = 0;
+  for (const r of all) {
+    const key = r.size ? brandKey(r) : '';
+    const k = key ? top.get(key) : -1;
+    if (k > SIZE_BANDS.indexOf(r.size)) { r.size = SIZE_BANDS[k]; r.sizeLifted = true; lifted++; }
+  }
+  return {attached, lifted, ok: true};
+}
 export const PRICED = PRICE_BUCKETS.filter(b => b !== 'UNSPECIFIED');
 
 /** Overlay quantization: z10 × extent 4096. */
@@ -110,7 +188,7 @@ export function decodeDataset(json, areas) {
     const row = {
       id: c.key[i], name: c.name[i] || '', gx: c.gx[i], gy: c.gy[i], longitude, latitude,
       type, group: group?.index ?? 0, groupId: group?.id || 'unspecified', series: group?.series ?? seriesOf('unspecified'),
-      price: PRICE_BUCKETS[c.price[i]] || 'UNSPECIFIED', p0: c.p0[i], p1: c.p1[i],
+      price: priceTier(c.p0[i], c.p1[i]), p0: c.p0[i], p1: c.p1[i], size: '', sizeBasis: '',
       rating: c.rating[i], reviews: c.reviews[i],
       area: code, district: a.district, province: a.province,
       brand, venue, venueEntity: venueEntity.has(i),
@@ -228,15 +306,18 @@ export const brandKey = r => (r.kind === 'outlet' ? r.brand?.id || '' : r.brand 
 
 /**
  * Shared filter used by map, counters, charts, panel and table.
- * f = {search, group, price, province, district, brand, venue}; area selection
- * and area focus are applied by the caller (row scopes, see app.js).
+ * f = {search, group, price, size, province, district, brand, venue}; area selection
+ * and area focus are applied by the caller (row scopes, see app.js). `price` may name
+ * several tiers joined by commas (a 0.1–0.7 link to “100–300 บาท” opens P2,P3).
  */
 export function filterRows(rows, f = {}) {
   const q = lower(f.search).trim();
   const brand = f.brand || '', venue = f.venue || '';
+  const prices = f.price ? new Set(String(f.price).split(',')) : null;
   return rows.filter(r => {
     if (f.group && r.groupId !== f.group) return false;
-    if (f.price && r.price !== f.price) return false;
+    if (prices && !prices.has(r.price)) return false;
+    if (f.size && r.size !== f.size) return false;
     if (f.province && r.province !== f.province) return false;
     if (f.district && r.district !== f.district) return false;
     if (brand && r.brand?.id !== brand && !(r.brandKeys && r.brandKeys.has(brand)) && !(r.brand?.national || []).includes(brand)) return false;
@@ -266,15 +347,25 @@ export function summarize(rows) {
     brands: brands.size, venues: venues.size, areas: areas.size};
 }
 
-/** Rows per group / price bucket for a selection (every category listed, zero kept as a measured 0). */
+/**
+ * Rows per group / price tier / chain size for a selection (every category listed, zero kept as a measured 0).
+ * Outlets have no price field at all: they are counted apart from the sheet-1 rows that left the price unspecified.
+ * Chain size counts both kinds; `registry` = the multi-banner point-of-sale registry (not a chain, never sized),
+ * `unknown` = rows the segments file did not reach — neither is folded into S1.
+ */
 export function mixOf(rows, groups) {
   const byGroup = groups.map(g => ({id: g.id, index: g.index, series: g.series, th: g.th, count: 0}));
   const byPrice = Object.fromEntries(PRICE_BUCKETS.map(b => [b, 0]));
-  let outlets = 0;
-  // Outlets have no price field at all: they are counted apart from the sheet-1 rows that left the price unspecified.
-  for (const r of rows) { byGroup[r.group].count++; if (r.kind === 'outlet') outlets++; else byPrice[r.price]++; }
+  const bySize = Object.fromEntries(SIZE_BANDS.map(b => [b, 0]));
+  let outlets = 0, unknown = 0, registry = 0, candidates = 0;
+  for (const r of rows) {
+    byGroup[r.group].count++;
+    if (r.kind === 'outlet') outlets++; else byPrice[r.price]++;
+    if (r.size) { bySize[r.size]++; if (r.sizeBasis === 'n') candidates++; } else if (r.sizeBasis === 'x') registry++; else unknown++;
+  }
   byPrice.outlets = outlets;
-  return {byGroup, byPrice};
+  bySize.unknown = unknown; bySize.registry = registry; bySize.candidates = candidates;
+  return {byGroup, byPrice, bySize};
 }
 
 export const safeURL = value => {
