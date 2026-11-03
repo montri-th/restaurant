@@ -148,7 +148,7 @@ Owner (with a screenshot of Café Amazon at Q House Lumpini, only the tower's cr
 - The focus building of an outlet is known only after the join, and an outlet panel does not re-render: `applyJoin` redraws the occlusion scene and the x-ray when `pointBuildingIds` changes (0.8.4 live: the tower stayed behind its neighbour, x-ray empty), and re-syncs “มุมสถาปนิก” (`syncEyeToggle`; 0.8.5 live: the camera was in the eye preset while the button stayed disabled).
 - Tests: `tests/building-join.test.js` (a synthetic stack — body, crown, podium, neighbour; a building with parts — tower, podium, fin, a piece across the tile border, a neighbour merged under the same id; the Land data — four osm_parts hosts each with a part from the ground, one floating block), `tests/massing.test.js` (the hidden outline is kept, only in focus).
 
-## 0.9.0 — three lenses for the first Aha, icons beside the words, no caveats (owner 2026-11-03 11:04 and answers)
+## 0.9.0–0.9.1 — three lenses for the first Aha, icons beside the words, no caveats (owner 2026-11-03 11:04 and answers)
 
 Owner 11:04: “Who จาก product statement น่าจะอยากได้คำตอบเรื่องอะไร / first aha ควรจะเป็นอะไร / จากข้อมูลที่มีเพิ่มขึ้น … ปรับการแสดงผลได้ดีกว่านี้ยังไงบ้าง / เราใช้ symbol / icon / images / etc มาช่วยทำให้ข้อความในเวบกระชับขึ้น เขียนด้วย tone and voice ที่ตรงกับตลาด และ context ของ icp มากขึ้นกว่านี้ได้มั้ย / ไม่แสดง caveats”. Answers to the three questions asked back (AskUserQuestion): first Aha “สลับดูได้ 3 มุม”; food taxonomy “รอผลตรวจ 1,550 ตัวอย่าง (Recommended)”; icons “อนุมัติราว 12 ตัว (Recommended)”. Each rule names the files it binds:
 
@@ -160,4 +160,4 @@ Owner 11:04: “Who จาก product statement น่าจะอยากไ�
 - A place's character in one line (`js/profile-model.js#areaCharacter`, `js/panel.js#characterLine`, area and district heads): the top type group with its share, the tier stated most with “N จาก M ร้านที่ระบุราคา”, and the share of 200+ chains beside everywhere — from the place's whole population whatever the filters (it describes the place). Silom reads คาเฟ่และของหวาน 27 % · เริ่ม 1,000 บาทขึ้นไป (32 จาก 64) · เครือ 200+ 20.3 % (ทุกพื้นที่ 9.4 %).
 - The food taxonomy (6/19/31), format, occasion, special labels, inferred price and competitor view stay off the page until their sub-segments pass the workbook's `rules.QA` (owner, 2026-11-03: wait for the 1,550-sample check). When they pass, they replace the 10 groups in the bars and the character line and get the same pictogram treatment.
 - A size×price cross-tab per area was considered and not built: outlets carry no price and about seven in ten restaurant rows state none (49,459 of 68,980), so the grid would read “national chains have no price”.
-
+- 0.9.1: a character token may wrap inside itself (only the bold value stays on one line) — on the live 0.9.0 at 390 px the price token ended 14 px from the edge, so a 360 px phone would have overflowed (`styles.css` `.character`).
