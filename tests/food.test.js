@@ -112,6 +112,6 @@ test('a mall serves: the venue panel carries the food mix too', () => {
 
 test('the filter select exists beside the type select and is labelled อนุมาน', () => {
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
-  assert.ok(/<label>หมวดอาหาร <small class="inferred">อนุมาน<\/small><select id="food"><option value="">ทุกหมวด<\/option><\/select><\/label>/.test(html));
+  assert.ok(/<label><span class="label-line">หมวดอาหาร <small class="inferred">อนุมาน<\/small><\/span><select id="food"><option value="">ทุกหมวด<\/option><\/select><\/label>/.test(html), 'the word sits on the label line, not as a row of its own');
   assert.ok(html.indexOf('id="group"') < html.indexOf('id="food"') && html.indexOf('id="food"') < html.indexOf('id="price"'));
 });

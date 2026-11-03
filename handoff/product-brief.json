@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.9.2",
+  "productVersion": "0.9.3",
   "updatedOn": "2026-11-03",
   "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/31, read back 2026-10-30, workbook read 2026-11-03 · classification 2026-11-02 (unreviewed; chain size, price tiers and — by owner decision 2026-11-03 16:59 — the food taxonomy labelled อนุมาน) · Land join 2026-11-03",
   "language": "th",
@@ -121,7 +121,8 @@
       "owner 2026-11-03 16:59: “พวกกลุ่มร้านอาหารที่แบ่งไว้ ตอนนี้จะดูใน web demo ต้องทำยังไง หาไม่เจอเลย” → choice “เปิดให้ทุกคนเห็นตอนนี้”",
       "food taxonomy 6/19/31 from 10_CLASSIFICATION on the page, labelled อนุมาน: filter, overview chips, area / district / venue / building section, store / outlet fact (segmentContract.food, INV43)",
       "INV40 narrowed: format, occasion, special labels, inferred price and the competitor view stay held",
-      "data/segments.json 400,574 bytes (size and basis strings unchanged; food and sub added; meta.food codebook, meta.released)"
+      "data/segments.json 400,574 bytes (size and basis strings unchanged; food and sub added; meta.food codebook, meta.released)",
+      "0.9.3: “อนุมาน” sits on the filter's label line (live 0.9.2 showed it as a row of its own that read like a text field, and the food select sat lower than the type select); จังหวัด takes a row of its own so six filters pair up"
     ]
   },
   "rowScopes": {
