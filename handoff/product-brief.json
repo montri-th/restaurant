@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.8.4",
+  "productVersion": "0.8.5",
   "updatedOn": "2026-11-03",
   "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/31, read back 2026-10-30, workbook read 2026-11-03 · classification 2026-11-02 (unreviewed; chain size and price tiers only) · Land join 2026-11-03",
   "language": "th",
@@ -993,7 +993,7 @@
     },
     {
       "id": "INV17",
-      "rule": "Only venue buildings carry the data colour (official host geometry or joined OSM buildings): in the area view for the venues named by the focused rows, at venue level only that venue's (official ones kept visible by the x-ray), in building mode only the open building; since 0.8.4 also the building of an open store or outlet (js/app.js#pointBuildingIds: the ground-standing tile building its point joins plus the parts stacked on it — never a crown alone), x-rayed and framed by the eye camera like a venue"
+      "rule": "Only venue buildings carry the data colour (official host geometry or joined OSM buildings): in the area view for the venues named by the focused rows, at venue level only that venue's (official ones kept visible by the x-ray), in building mode only the open building; since 0.8.4 also the building of an open store or outlet (js/app.js#pointBuildingIds: the ground-standing tile building its point joins, as the whole building — 0.8.5 js/building-join.js#wholeBuilding: every part whose centre lies in the hidden outline (hide_3d, js/massing.js#outlines) holding it, never grouped by OSM id alone; else the parts stacked on it — never a crown or one part alone), x-rayed and framed by the eye camera like a venue"
     },
     {
       "id": "INV18",

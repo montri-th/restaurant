@@ -43,6 +43,9 @@ test('hide_3d features are skipped, holes are kept and edge-crossing buildings a
   const out = shapeTile(tile, layer, {regions: [whole], radiusM: r, offsetM: d});
   const ids = out.features.map(f => f.properties.osm_id).sort((a, b) => a - b);
   assert.deepEqual(ids, [101, 102, 103, 103, 105], 'hide_3d (104) is out; the merged feature yields one polygon per outer ring');
+  // 0.8.4: the hidden outline is never drawn but kept, so the app can group the parts of one building.
+  assert.deepEqual(out.outlines.map(o => [o.osmId, o.tile, o.outer.length]), [[104, '14/12767/7560', 5]]);
+  assert.deepEqual(shapeTile(tile, layer, {regions: [region], radiusM: r, offsetM: d}).outlines, [], 'outside the focus region: no outline');
   assert.equal(new Set(out.features.map(f => f.id)).size, out.features.length, 'the two polygons of merged feature 103 get distinct ids');
   // One OpenFreeMap feature can hold hundreds of polygons (same-height buildings merged under one OSM id):
   // every polygon still gets its own id.

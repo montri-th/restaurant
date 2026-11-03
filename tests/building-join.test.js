@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint, footprint, VENUE_SHARE, stackedOn, grounded} from '../js/building-join.js';
+import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint, footprint, VENUE_SHARE, stackedOn, grounded, wholeBuilding} from '../js/building-join.js';
 import {readJSON} from './helpers.js';
 
 // Synthetic footprints near Siam (lon/lat squares; d = half-size in degrees).
@@ -91,6 +91,28 @@ test('stacked OpenStreetMap parts (0.8.4): a point joins the building that stand
   assert.deepEqual(stackedOn(join.buildings.get('osm:4'), join), [], 'the neighbour beside it carries nothing');
   // Only a crown holds the point: the lowest part still wins over nothing.
   assert.equal(joinRows([crown], [{id: 'x', longitude: 100.50015, latitude: 13.70015}]).byRow.get('x'), 'osm:2');
+});
+
+test('the whole building (0.8.4): the hidden outline of a building mapped with parts gathers its parts; an id alone never does', () => {
+  // S&P Sathorn Square, seen live: the outlet's point falls in the 160 m tower, one part of a building OpenStreetMap
+  // maps with parts; OpenMapTiles hides the building's outline (hide_3d) and draws the parts.
+  const sq = (x0, y0, w, h = w) => [[x0, y0], [x0 + w, y0], [x0 + w, y0 + h], [x0, y0 + h], [x0, y0]];
+  const tower = {key: 'osm:1', kind: 'osm', ref: 1, outer: sq(100.5001, 13.7001, 0.0002), base: 0, height: 160};
+  const podium = {key: 'osm:2', kind: 'osm', ref: 2, outer: sq(100.5004, 13.7001, 0.0004, 0.0002), base: 0, height: 20};
+  const fin = {key: 'osm:3', kind: 'osm', ref: 3, outer: sq(100.50085, 13.7001, 0.00002, 0.0002), base: 0, height: 160};
+  const crossBorder = {key: 'osm:4', kind: 'osm', ref: 4, outer: sq(100.5011, 13.7001, 0.0001, 0.0002), base: 0, height: 20};
+  const street = {key: 'osm:5', kind: 'osm', ref: 5, outer: sq(100.5016, 13.7001, 0.0002), base: 0, height: 12};
+  const join = joinRows([tower, podium, fin, crossBorder, street], [{id: 'sp', longitude: 100.5002, latitude: 13.7002}]);
+  const outlines = [
+    {osmId: 9, tile: 'A', outer: sq(100.5, 13.7, 0.00105, 0.0004)}, // the building, cut at the tile border
+    {osmId: 9, tile: 'B', outer: sq(100.50105, 13.7, 0.0003, 0.0004)}, // its piece in the next tile
+    {osmId: 9, tile: 'A', outer: sq(100.5015, 13.7, 0.0004)}, // an unrelated building merged under the same id, same tile
+  ];
+  const b = join.buildings.get(join.byRow.get('sp'));
+  assert.equal(b.ref, 1, 'the point joins the tower part');
+  assert.deepEqual(wholeBuilding(b, join, outlines).map(x => x.ref), [1, 2, 3, 4], 'tower, podium, fin and the piece across the border — not the neighbour sharing the id');
+  assert.deepEqual(wholeBuilding(b, join, []).map(x => x.ref), [1], 'no outline: the footprint (and anything stacked on it)');
+  assert.deepEqual(wholeBuilding(join.buildings.get('osm:5'), join, outlines).map(x => x.ref), [5], 'the neighbour is its own building');
 });
 
 test('Land buildings stand on the ground (0.8.4): a host on a stacked tower is the body with its parts, never only the crown', () => {

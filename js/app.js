@@ -72,7 +72,7 @@ import {installAreaLayers, installAreaLabels, buildAreaModel, featureBounds, FIL
 import {installProvinceLayers, buildProvinceModel, provinceBounds, PROVINCE_FILL_MAX_ZOOM, PROVINCE_LABEL_MAX_ZOOM} from './provinces.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile, buildBuildingProfile} from './profile-model.js';
 import {renderOverview, renderBrandHead, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate, heading} from './panel.js';
-import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint, stackedOn} from './building-join.js';
+import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint, wholeBuilding} from './building-join.js';
 import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE, SOURCE_ID} from './map-style.js';
 import {streetView, streetLines, namedStreetLines, aimCamera} from './outbound.js';
 import {installMassing, outerRings} from './massing.js';
@@ -978,7 +978,8 @@ function panelSpatialSig() {
 /**
  * The building an open store's or outlet's point falls in (0.8.4, owner 2026-11-03 10:58 “หลายอาคารที่มีแบรนด์ผูกอยู่
  * ก็ไม่ highlight”): when the point is in no Land building and the store's venue has no official host building, the
- * drawn OpenStreetMap building it falls in (display-time join, ground-standing first) with the parts stacked on it, as
+ * drawn OpenStreetMap building it falls in (display-time join, ground-standing first) — the whole building: every part
+ * of a building OpenStreetMap maps with parts, else the footprint and the parts stacked on it (wholeBuilding) — as
  * massing ids. It is the building being looked at: data colour, two-point camera and x-ray, like a Land building.
  */
 function pointBuildingIds() {
@@ -986,10 +987,15 @@ function pointBuildingIds() {
   if (!['store', 'outlet'].includes(mode) || !state.join || storeLand() || outletLand()) return [];
   const v = mode === 'store' ? currentVenue() : null;
   if (v && state.hosted.has(v.id)) return [];
+  const memo = pointBuildingIds.memo;
+  if (memo && memo.join === state.join && memo.key === `${mode}|${id}`) return memo.ids;
   const b = state.join.buildings.get(state.join.byRow.get(id));
-  if (!b || b.kind !== 'osm') return [];
-  return [b.ref, ...stackedOn(b, state.join).map(x => x.ref)];
+  const ids = b && b.kind === 'osm' ? wholeOf(b) : [];
+  pointBuildingIds.memo = {join: state.join, key: `${mode}|${id}`, ids};
+  return ids;
 }
+/** Massing ids of the whole building a joined OSM footprint belongs to (js/building-join.js#wholeBuilding). */
+const wholeOf = b => wholeBuilding(b, state.join, state.massing?.outlines?.() || []).map(x => x.ref);
 
 /** OSM buildings drawn in the data colour: the building / venue / shop being looked at, else the venues of the focused rows. */
 function highlightIds() {
@@ -1002,13 +1008,16 @@ function highlightIds() {
   // A register view draws its own data; an outlet still shows the building its point falls in.
   if (registerMode()) return own;
   const b = currentBuilding();
-  if (b) return b.kind === 'osm' ? [b.footprint.ref, ...stackedOn(j.buildings.get(b.key), j).map(x => x.ref)] : [];
+  if (b) return b.kind === 'osm' ? wholeOf(j.buildings.get(b.key) || b.footprint) : [];
   const v = currentVenue();
   if (state.panel.mode === 'venue') return v && !state.hosted.has(v.id) ? refs(j.venueKeys.get(v.id) || []) : [];
   if (state.panel.mode === 'store') return [...new Set([...own, ...(v && !state.hosted.has(v.id) ? refs(j.venueKeys.get(v.id) || []) : [])])];
   const venues = new Set(detailRows().map(r => r.venue?.id).filter(id => id && !state.hosted.has(id)));
   return refs([...venues].flatMap(id => j.venueKeys.get(id) || []));
 }
+
+/** The data colour of the building being looked at (LDS map.activeLayer) and its outline, read from the theme. */
+const hostColors = () => { const css = getComputedStyle(document.documentElement); return {fill: css.getPropertyValue('--map-active-layer').trim(), stroke: css.getPropertyValue('--map-selected-stroke').trim()}; };
 
 function applyJoin() {
   refreshJoin();
@@ -1019,6 +1028,17 @@ function applyJoin() {
   const label = $('legend-building-label');
   if (label) label.textContent = currentLand() || outletLand() || storeLand() ? 'อาคารในทะเบียน Land' : currentBuilding() || pointBuildingIds().length ? 'อาคารที่เปิดอยู่' : 'อาคารของสถานที่';
   if (['venue', 'store'].includes(state.panel.mode) && panelSpatialSig() !== state.renderedSig) renderPanel();
+  // The building of a store or outlet is known only after the join (0.8.4): when it changes, the occlusion scene and
+  // the x-ray follow at once — a store re-renders its panel, which redraws them; an outlet does not (seen live:
+  // S&P Sathorn Square's tower stayed behind its neighbour).
+  const own = pointBuildingIds(), fk = `${state.panel.mode}|${state.panel.id}|${own.join(',')}`;
+  if (fk !== applyJoin.focusKey) {
+    applyJoin.focusKey = fk;
+    if (own.length) {
+      state.massing?.setScene(cameraPreset() === 'eye' ? 'eye' : 'default', focusTargets());
+      state.xray?.update(focusBuildingFeatures(), {colors: hostColors()});
+    }
+  }
   // A name-only venue's blocks are known only after the join: frame them under the two-point camera once per venue.
   // Likewise a store's or outlet's own building (0.8.4): known after the join, framed once under the two-point camera.
   const vk = state.panel.mode === 'venue' || (['store', 'outlet'].includes(state.panel.mode) && pointBuildingIds().length) ? `${state.panel.mode}|${state.panel.id}|${state.scopeKey}` : '';
@@ -1470,7 +1490,6 @@ function updateSpatialLayers() {
   state.massing?.update({regions: region ? [region] : [...(storeBox ? [storeBox] : []), ...focusFeatures.flatMap(outerRings)], hosts: massingHosts, anchors, enabled: true, city: state.view3d, zoom: state.map.getZoom(), latitude: state.map.getCenter().lat})?.catch(e => console.warn('Massing', e));
   state.massing?.setScene(cameraPreset() === 'eye' ? 'eye' : 'default', focusTargets());
   applyJoin();
-  const hostColors = () => { const s = getComputedStyle(document.documentElement); return {fill: s.getPropertyValue('--map-active-layer').trim(), stroke: s.getPropertyValue('--map-selected-stroke').trim()}; };
   state.xray?.update(focusBuildingFeatures(), {colors: hostColors()});
   state.xray?.setEnabled(state.view3d);
   // Outlet pins on the same map: a selection (a chain, a search, a company, an outlet, a Land host, a province of

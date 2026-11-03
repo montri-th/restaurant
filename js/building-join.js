@@ -76,8 +76,8 @@ const better = (b, best) => (grounded(b) !== grounded(best) ? grounded(b) : b.ar
 
 /**
  * The parts stacked on a building of the join: footprints of the same kind that start above its base or rise above
- * its top, whose outline lies inside its outline (bounding box within, every vertex not outside by more than a hair) —
- * a crown, a roof, masts. Highlighting the building with them draws the whole silhouette, not one slab.
+ * its top, whose bounding box lies within its own and whose centre (mean of its vertices) lies inside it — a crown,
+ * a roof, masts. Highlighting the building with them draws the whole silhouette, not one slab.
  */
 export function stackedOn(b, join) {
   if (!b || !join) return [];
@@ -90,8 +90,44 @@ export function stackedOn(b, join) {
     const [xw, xs, xe, xn] = x.bbox;
     if (xw < w - eps || xe > e + eps || xs < s - eps || xn > n + eps) continue;
     // The part's own centre (mean of its vertices) must sit in the building: a neighbour's tower beside it never rides along.
-    const c = x.outer.reduce((acc, [px, py]) => [acc[0] + px / x.outer.length, acc[1] + py / x.outer.length], [0, 0]);
-    if (containsPoint(b, c)) out.push(x);
+    if (containsPoint(b, centreOf(x.outer))) out.push(x);
+  }
+  return out;
+}
+
+const centreOf = ring => ring.reduce((acc, [px, py]) => [acc[0] + px / ring.length, acc[1] + py / ring.length], [0, 0]);
+const asFootprint = o => ({...o, holes: o.holes || [], bbox: o.bbox || bboxOf(o.outer)});
+const boxesTouch = (a, b, eps = 1e-7) => a[0] <= b[2] + eps && b[0] <= a[2] + eps && a[1] <= b[3] + eps && b[1] <= a[3] + eps;
+
+/**
+ * The whole building a footprint of the join belongs to (0.8.4, owner 2026-11-03 10:58). OpenMapTiles hides the
+ * outline of a building that OpenStreetMap maps with parts (`hide_3d`) and draws the parts, so a point falls in one
+ * part — a tower, a podium, a fin. `outlines` are those hidden outlines ({osmId, outer}, clipped per tile; js/massing.js
+ * #outlines): the smallest one holding the part's centre gathers every footprint whose centre it holds, together with
+ * its pieces cut off in neighbouring tiles (same OSM id, another tile, touching boxes — OpenFreeMap merges unrelated
+ * same-height buildings under one id, so an id alone never groups). With no outline: the building and the parts
+ * stacked on it.
+ * Returns footprints of the join, the given one first.
+ */
+export function wholeBuilding(b, join, outlines = []) {
+  if (!b || !join) return [];
+  const c = centreOf(b.outer);
+  const all = outlines.map(asFootprint);
+  const holding = all.filter(o => containsPoint(o, c));
+  if (!holding.length) return [b, ...stackedOn(b, join)];
+  const own = holding.reduce((m, o) => (areaOf(o.outer) < areaOf(m.outer) ? o : m));
+  const pieces = [own];
+  if (own.osmId != null) {
+    for (let grew = true; grew;) {
+      grew = false;
+      for (const o of all) if (o.osmId === own.osmId && !pieces.includes(o) && pieces.some(p => p.tile !== o.tile && boxesTouch(p.bbox, o.bbox))) { pieces.push(o); grew = true; }
+    }
+  }
+  const out = [b];
+  for (const x of join.buildings.values()) {
+    if (x === b || x.kind !== b.kind) continue;
+    const cx = centreOf(x.outer);
+    if (pieces.some(p => containsPoint(p, cx))) out.push(x);
   }
   return out;
 }

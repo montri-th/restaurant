@@ -164,11 +164,23 @@ export function shapeTile(tile, layer, {regions = [], hosts = [], radiusM, offse
   const regionRings = regions.map(toTile);
   const hostRings = hosts.map(h => toTile(Array.isArray(h) ? h : h.ring)), hostKeep = hosts.map(h => !Array.isArray(h) && Boolean(h.keepNested));
   const hostInterior = hostRings.map(interiorPoint);
-  const features = [], footprints = [], hiddenIds = new Set();
+  const features = [], footprints = [], outlines = [], hiddenIds = new Set();
   let kept = 0, dropped = 0, ordinal = 0;
   for (let fi = 0; fi < layer.features.length; fi++) {
     const f = layer.features[fi];
-    if (f.type !== 3 || f.properties.hide_3d === true) continue;
+    if (f.type !== 3) continue;
+    if (f.properties.hide_3d === true) {
+      // The outline of a building OpenStreetMap maps with parts: OpenMapTiles hides it in 3D and draws the parts.
+      // Never drawn here either, but kept (in focus, clipped to the tile) so the app can tell which parts make one
+      // building — the whole building is highlighted, not the one part a point falls in (0.8.4).
+      for (const raw of f.rings()) {
+        const ring = cleanRing(raw);
+        if (!ring || !isClockwise(ring)) continue;
+        const outer = clipRingToBox(ring, box);
+        if (outer && regionRings.some(region => ringsIntersect(outer, region))) outlines.push({osmId: f.id ?? null, tile: `${tile.z}/${tile.x}/${tile.y}`, outer: toLonLat(outer)});
+      }
+      continue;
+    }
     const height = Number(f.properties.render_height);
     const base = Number(f.properties.render_min_height) || 0;
     if (!Number.isFinite(height) || height <= 0) continue;
@@ -204,7 +216,7 @@ export function shapeTile(tile, layer, {regions = [], hosts = [], radiusM, offse
       kept++;
     });
   }
-  return {features, footprints, hiddenIds, kept, dropped};
+  return {features, footprints, outlines, hiddenIds, kept, dropped};
 }
 
 /** Tiles needed for a set of lon/lat regions (deduplicated, bounded by MAX_TILES). */
@@ -338,17 +350,17 @@ export function installMassing(map, {sourceId = 'openmaptiles', beforeId, colors
       await new Promise(resolve => map.once('moveend', resolve));
       if (my !== token || disposed) return {features: 0, tiles: 0, stale: true};
     }
-    const features = [], footprints = [], hidden = new Set();
+    const features = [], footprints = [], outlines = [], hidden = new Set();
     let kept = 0, dropped = 0;
     layers.forEach((layer, i) => {
       if (!layer) return;
       const shaped = shapeTile(tiles[i], layer, {regions, hosts, radiusM, offsetM});
-      features.push(...shaped.features); footprints.push(...shaped.footprints);
+      features.push(...shaped.features); footprints.push(...shaped.footprints); outlines.push(...shaped.outlines);
       shaped.hiddenIds.forEach(id => hidden.add(id)); kept += shaped.kept; dropped += shaped.dropped;
     });
     // Ids are stable per tile building (focusFeatureId); the OSM id stays in properties.
     currentFeatures = features;
-    setFootprints(footprints);
+    setFootprints(footprints, outlines);
     map.getSource(FOCUS_SOURCE)?.setData({type: 'FeatureCollection', features});
     setHidden(hidden);
     updateOcclusion();
@@ -367,14 +379,17 @@ export function installMassing(map, {sourceId = 'openmaptiles', beforeId, colors
   }
 
   /* ---------- footprints for the spatial join, venue highlight, hit test ---------- */
-  let footprintList = [], footprintById = new Map(), version = 0;
-  function setFootprints(list) {
+  let footprintList = [], footprintById = new Map(), outlineList = [], version = 0;
+  function setFootprints(list, outlines = []) {
     footprintList = Object.freeze(list.map(b => Object.freeze({...b, bbox: bboxOfRings([b.outer])})));
+    outlineList = Object.freeze(outlines.map(o => Object.freeze({...o, bbox: bboxOfRings([o.outer])})));
     footprintById = new Map(footprintList.map(b => [b.id, b]));
     version++;
   }
   /** Original footprints of the buildings currently in the focus tier (lon/lat, with stable ids). */
   function buildings() { return footprintList; }
+  /** Hidden outlines (hide_3d) of the buildings mapped with parts in the focus tier: {osmId, tile, outer, bbox} (0.8.4). */
+  function outlines() { return outlineList; }
   /** Draw these focus buildings in the data colour (the venue being looked at); [] clears. */
   function setHighlight(ids = []) {
     const next = [...new Set(ids)].filter(id => footprintById.has(id)).sort((a, b) => a - b);
@@ -522,7 +537,7 @@ export function installMassing(map, {sourceId = 'openmaptiles', beforeId, colors
     if (map.getSource(FOCUS_SOURCE)) map.removeSource(FOCUS_SOURCE);
     footprintList = []; footprintById = new Map();
   }
-  return {update, retheme, setScene, setAnchors, updateFade, dispose, buildings, setHighlight, hitTest,
+  return {update, retheme, setScene, setAnchors, updateFade, dispose, buildings, outlines, setHighlight, hitTest,
     layerIds: {city: CITY_LAYER, focus: FOCUS_LAYER, occluder: OCCLUDER_LAYER, venue: VENUE_LAYER},
     get occluders() { return occluderIds.slice(); }, get highlighted() { return highlightIds.slice(); }, get faded() { return stated.size; }, get version() { return version; }};
 }
