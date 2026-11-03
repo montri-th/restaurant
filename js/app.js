@@ -1034,6 +1034,7 @@ function applyJoin() {
   const own = pointBuildingIds(), fk = `${state.panel.mode}|${state.panel.id}|${own.join(',')}`;
   if (fk !== applyJoin.focusKey) {
     applyJoin.focusKey = fk;
+    syncEyeToggle(); // มุมสถาปนิก becomes available once the building is known
     if (own.length) {
       state.massing?.setScene(cameraPreset() === 'eye' ? 'eye' : 'default', focusTargets());
       state.xray?.update(focusBuildingFeatures(), {colors: hostColors()});
