@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.8.0",
+  "productVersion": "0.8.1",
   "updatedOn": "2026-11-03",
   "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/31, read back 2026-10-30, workbook read 2026-11-03 · classification 2026-11-02 (unreviewed; chain size and price tiers only) · Land join 2026-11-03",
   "language": "th",
@@ -1277,15 +1277,16 @@
     "module": "js/outbound.js#outboundFor · js/panel.js#outboundRow",
     "label": "“ค้นต่อ” — a way to search outside, never evidence of the product; numbers of the product never change",
     "targets": {
-      "aiMode": "https://www.google.com/search?udm=50&q=…",
-      "streetView": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=lat,lng",
+      "googleSearch": "https://www.google.com/search?q=… (0.8.1; AI Overview on top when Google has one, AI Mode tab continues without a confirmation)",
+      "aiModeRetired": "https://www.google.com/search?udm=50&q=… (0.7.0–0.8.0; Google asks “Continue with this search?” before running an AI Mode question that arrives through a link — its own safety check, never worked around)",
+      "streetView": "https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=lat,lng (+ &heading=…&pitch=5&fov=80 when aimed)",
       "maps": "https://www.google.com/maps/search/?api=1&query=…"
     },
     "contexts": {
-      "store": "brand · branch · area · province → รีวิว เมนู ราคา เวลาเปิด; Street View at the point; Maps at the point",
+      "store": "brand · branch (said once) · area · province → รีวิว เมนู ราคา เวลาเปิด; Street View aimed at the point; Maps at the point",
       "chain": "สาขาและข่าวล่าสุด; แฟรนไชส์และคู่แข่ง; Maps search",
-      "area": "ร้านดังและราคาแถวนี้; ทำเลและค่าเช่า; Street View at the frame's label anchor",
-      "venue": "ร้านในสถานที่นี้; พื้นที่เช่า; Street View at the point",
+      "area": "ร้านดังและราคาแถวนี้; ทำเลและค่าเช่า; Street View at the frame's label anchor (not aimed)",
+      "venue": "ร้านในสถานที่นี้; พื้นที่เช่า; Street View aimed at the point (also the building view)",
       "company": "แบรนด์ในเครือ",
       "country": "เครือร้านอาหารในไทย"
     },
@@ -1294,7 +1295,14 @@
       "public URL schemes, no API key",
       "text labels only (no borrowed icon)",
       "the question is the link title"
-    ]
+    ],
+    "aim": {
+      "rule": "0.8.1 (owner 2026-11-03 07:20): a Street View link of a store, outlet, venue or building carries data-aim-lat/lng; when used (pointerdown/focus/click/auxclick, js/app.js#aimStreetView) the camera stands on the nearest street of the map's own OpenFreeMap transportation features within 150 m (trunk, primary, secondary, tertiary, minor, service, busway; no motorway, ramp, tunnel, path, rail) and turns toward the point; viewpoint = that street point, heading = bearing to the point",
+      "fallback": "no street within 150 m, or the point within 3 m of the street → Google's default view at the point",
+      "limits": "faces the place, not a surveyed door: display positions (≈ 9.55 m grid) or publisher points; a shop inside a mall shows the building; Google may pick another panorama near the viewpoint",
+      "functions": "js/outbound.js#streetLines, #cameraToward, #streetView",
+      "tests": "tests/views.test.js “outbound (0.8.1)”"
+    }
   },
   "segmentContract": {
     "decision": "owner 2026-11-03 01:04 “update ตาม googlesheet ที่อัพเดทใหม่ แล้ว leverage ให้ได้ value ตาม product statement ให้มากที่สุด”; on the QA gate the owner chose “ขึ้นส่วนที่ไม่ต้องรอ QA ก่อน (Recommended)” (2026-11-03): ship the refreshed register, six price tiers from the source bounds and chain size now; build a helper for the 1,550-sample check",

@@ -84,14 +84,18 @@ const words = areas => {
 /* ---------- shared pieces ---------- */
 
 /**
- * Outbound searches of a view (owner 2026-10-29): Google AI Mode with the question the user is likely holding,
- * Street View at the point, Google Maps — labelled “ค้นต่อ”, never evidence of the product.
+ * Outbound searches of a view (owner 2026-10-29; 0.8.1 2026-11-03): a Google search with the question the user is
+ * likely holding (answers at once, AI Overview on top when Google has one), Street View turned toward the place,
+ * Google Maps — labelled “ค้นต่อ”, never evidence of the product. A Street View link that aims carries its target in
+ * `data-aim-lat/lng`; the app places the camera from the map's streets when the link is used (js/app.js#aimStreetView).
  */
 export function outboundRow(context, {label = 'ค้นต่อ'} = {}) {
   const links = Array.isArray(context) ? context : outboundFor(context);
   if (!links.length) return '';
+  const title = l => (l.question ? `${l.question} — ค้นใน Google (กดแท็บ AI Mode ในหน้านั้นเพื่อถามต่อ)` : l.aim ? 'Street View หันกล้องจากถนนที่ใกล้ที่สุดเข้าหาจุดนี้' : '');
+  const aim = l => (l.aim ? ` data-aim-lat="${esc(Number(l.aim.lat).toFixed(6))}" data-aim-lng="${esc(Number(l.aim.lng).toFixed(6))}"` : '');
   return `<div class="outbound" role="group" aria-label="ค้นต่อภายนอก (Google)"><span class="outbound-label">${esc(label)}</span>${links.map(l =>
-    `<a class="outbound-link is-${esc(l.kind)}" href="${esc(l.href)}" target="_blank" rel="noopener"${l.question ? ` title="${esc(l.question)}"` : ''}>${esc(l.label)}</a>`).join('')}</div>`;
+    `<a class="outbound-link is-${esc(l.kind)}" href="${esc(l.href)}" target="_blank" rel="noopener"${title(l) ? ` title="${esc(title(l))}"` : ''}${aim(l)}>${esc(l.label)}</a>`).join('')}</div>`;
 }
 
 /** The mark of an entry: the chain's logo when a verified file exists, else the food-type cue. */

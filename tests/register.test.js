@@ -275,11 +275,13 @@ test('register and Land views: one provenance line each (dataset · source · da
     assert.ok(/ชุดข้อมูล \S/.test(t) && /แหล่ง \S/.test(t) && /ตรวจ \d/.test(t) && /ขอบเขต \S/.test(t), `${name}: dataset · source · date · boundary`);
     assert.ok((t.match(caveats) || []).length <= 1, `${name}: caveats said once at most — ${t.match(caveats)}`);
     assert.ok(!/สาขาในทะเบียน/.test(t), `${name}: one vocabulary (0.7.0) — no register framing`);
-    assert.ok(t.includes('ค้นต่อ') && /AI Mode/.test(t), `${name}: outbound searches offered`);
+    assert.ok(t.includes('ค้นต่อ') && /Google ·/.test(t), `${name}: outbound searches offered`);
+    assert.ok(!html.includes('udm=50'), `${name}: no AI Mode link (Google asks to confirm those; 0.8.1)`);
   }
   assert.ok(text(views.chains).includes('ไม่ใช่จำนวนร้านที่เปิดอยู่จริง'), 'the register unit is explained once');
   assert.ok(text(views.outlet).includes(outlet.brand.name) && views.outlet.indexOf(`<h2>${outlet.brand.name}`) > 0, 'an outlet is headed by its chain');
-  assert.ok(views.outlet.includes('maps/@?api=1&amp;map_action=pano') && views.outlet.includes('udm=50'), 'Street View at the point and an AI Mode question');
+  assert.ok(views.outlet.includes('maps/@?api=1&amp;map_action=pano') && views.outlet.includes('https://www.google.com/search?q='), 'Street View at the point and a Google question');
+  assert.ok(/class="outbound-link is-street"[^>]*data-aim-lat="[-\d.]+" data-aim-lng="[-\d.]+"/.test(views.outlet), 'the outlet Street View carries the point it turns toward');
   assert.ok(text(views.land).includes(LAND_RULE) && text(views.land).includes('ร้านในอาคาร') && !text(views.land).includes('ติดขอบ'));
   const row = rowById.get(landOfRow(land, [...land.rowRel.keys()][0]) ? [...land.rowRel.keys()][0] : '');
   const storeLand = text(renderStoreLand(landOfRow(land, row.id)));

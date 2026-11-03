@@ -47,7 +47,7 @@ test('every panel view ends with dataset · source · date · boundary and the p
   assert.equal((ov.match(/นับรวมกัน/g) || []).length, 1, 'the split is stated once');
   assert.ok(!/สาขาในทะเบียน|ทะเบียนร้านเครือ · ทั่วประเทศ|ดูทะเบียนร้านเครือ/.test(ov), 'no register framing in the main flow');
   assert.ok(ov.includes('อันดับเฉพาะพื้นที่ ≥ 30 ร้าน'));
-  assert.ok(ov.includes('ค้นต่อ') && /AI Mode/.test(ov), 'the overview offers an outbound AI Mode search');
+  assert.ok(ov.includes('ค้นต่อ') && /Google ·/.test(ov) && !views.overview.includes('udm=50'), 'the overview offers an outbound Google question (no AI Mode link: 0.8.1)');
   assert.ok(text(views.venue).includes('ไม่ได้ยืนยันว่าร้านตั้งอยู่ภายใน'));
   assert.ok(text(views.store).includes('จับคู่จากชื่อร้าน'));
   assert.ok(!text(views.store).includes('สาขาอื่น'), 'a name match is never called a branch');
@@ -145,6 +145,37 @@ test('0.8.0 segments in views: price tiers and chain sizes are labelled bars tha
   // Chips name the size and a legacy two-tier price link.
   const chips = text(renderFilterChips({search: '', group: '', price: 'P2,P3', size: 'S5', province: '', brand: '', venue: ''}, {group: {}, price: {...PRICE_LABELS, ...LEGACY_PRICE_LABELS}, size: SIZE_LABELS, province: {}, brand: {}, venue: {}}));
   assert.ok(chips.includes('101–300 บาท (ช่วงของลิงก์เดิม)') && chips.includes('เครือระดับชาติ 200+ สาขา'));
+});
+
+test('outbound (0.8.1): questions open Google Search at once; the store name is said once; Street View turns toward the place', async () => {
+  const {outboundFor, streetView, streetLines, cameraToward, googleSearch} = await import('../js/outbound.js');
+  const store = outboundFor({kind: 'store', brand: 'Prime Burger', branch: 'Prime Burger Khaosan Road', area: 'แขวงบวรนิเวศ', district: 'เขตพระนคร', province: 'กรุงเทพมหานคร', lat: 13.7588, lng: 100.4973});
+  const ask = store.find(l => l.kind === 'ai');
+  assert.equal(ask.question, 'Prime Burger Khaosan Road แขวงบวรนิเวศ เขตพระนคร กรุงเทพมหานคร รีวิว เมนู ราคา เวลาเปิด-ปิด', 'the brand is not said twice');
+  assert.equal(ask.href, googleSearch(ask.question));
+  assert.ok(ask.href.startsWith('https://www.google.com/search?q=') && !ask.href.includes('udm='), 'a plain search: no confirmation step');
+  assert.equal(outboundFor({kind: 'store', brand: 'MK', branch: 'Siam Paragon', lat: 13.7, lng: 100.5}).find(l => l.kind === 'ai').question.startsWith('MK Siam Paragon'), true);
+  const sv = store.find(l => l.kind === 'street');
+  assert.deepEqual(sv.aim, {lat: 13.7588, lng: 100.4973});
+  assert.equal(outboundFor({kind: 'area', area: 'แขวงสีลม', lat: 13.72, lng: 100.53}).find(l => l.kind === 'street').aim, null, 'an area label point is not aimed at');
+  // A street 20 m south of the point, running east–west: stand on it and look north (0°); one 30 m east: look west (270°).
+  const p = {lat: 13.75, lng: 100.5}, m = 1 / 111320, mx = m / Math.cos((13.75 * Math.PI) / 180);
+  const south = [[100.5 - 50 * mx, 13.75 - 20 * m], [100.5 + 50 * mx, 13.75 - 20 * m]];
+  const east = [[100.5 + 30 * mx, 13.75 - 60 * m], [100.5 + 30 * mx, 13.75 + 60 * m]];
+  const c1 = cameraToward(p, [south]);
+  assert.ok(Math.abs(c1.distance - 20) < 0.1 && (c1.heading < 0.5 || c1.heading > 359.5), JSON.stringify(c1));
+  assert.ok(Math.abs(cameraToward(p, [east]).heading - 270) < 0.5);
+  assert.ok(Math.abs(cameraToward(p, [south, east]).distance - 20) < 0.1, 'the nearest street wins');
+  assert.equal(cameraToward(p, [[[100.5 - mx, 13.75], [100.5 + mx, 13.75]]]), null, 'a point on the street: side unknown, keep the default view');
+  assert.equal(cameraToward(p, [[[100.5 - mx, 13.75 - 400 * m], [100.5 + mx, 13.75 - 400 * m]]]), null, 'no street within reach');
+  const url = streetView(p.lat, p.lng, c1);
+  assert.ok(url.includes('map_action=pano') && url.includes('heading=0') && url.includes(`viewpoint=${c1.lat.toFixed(6)}%2C${c1.lng.toFixed(6)}`), url);
+  assert.equal(streetView(p.lat, p.lng), 'https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=13.750000%2C100.500000');
+  // Map features: streets only (no expressway, ramp, tunnel, path or rail), lines near the point only.
+  const f = (cls, coords, extra = {}) => ({properties: {class: cls, ...extra}, geometry: {type: 'LineString', coordinates: coords}});
+  const lines = streetLines([f('minor', south), f('motorway', east), f('path', east), f('primary', east, {brunnel: 'tunnel'}), f('primary', east, {ramp: 1}), f('rail', south),
+    f('secondary', [[101.5, 14.5], [101.6, 14.6]]), {properties: {class: 'service'}, geometry: {type: 'MultiLineString', coordinates: [east]}}], p);
+  assert.deepEqual(lines, [south, east]);
 });
 
 test('density format: a measured non-zero density never prints as zero; labels and panel share it', () => {

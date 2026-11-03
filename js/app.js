@@ -73,7 +73,8 @@ import {installProvinceLayers, buildProvinceModel, provinceBounds, PROVINCE_FILL
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile, buildBuildingProfile} from './profile-model.js';
 import {renderOverview, renderBrandHead, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate, heading} from './panel.js';
 import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint} from './building-join.js';
-import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE} from './map-style.js';
+import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE, SOURCE_ID} from './map-style.js';
+import {streetView, streetLines, cameraToward} from './outbound.js';
 import {installMassing, outerRings} from './massing.js';
 import {presetFor, applyPreset, fitPitched, framePoint} from './camera.js';
 import {buildBreadcrumb, renderBreadcrumb, breadcrumbText} from './breadcrumb.js';
@@ -1839,7 +1840,27 @@ function restoreFromURL() {
 /** URL parameters that open a Land view (its data is awaited before the first render). */
 const EXTRA_PARAMS = ['land'];
 
+/**
+ * Street View that looks at the place (owner 2026-11-03 “หันกล้องไปให้เจอหน้าร้านทุกครั้ง”): when a link that aims is
+ * used, stand on the nearest street of the map's own road data (OpenFreeMap `transportation`, the tiles on screen) and
+ * turn toward the point. Placed at use time because the panel renders before the camera has flown in and the tiles
+ * around the point have loaded. No street within reach → the link keeps Google's default view at the point.
+ */
+function aimStreetView(a) {
+  const target = {lat: Number(a.dataset.aimLat), lng: Number(a.dataset.aimLng)};
+  if (!Number.isFinite(target.lat) || !Number.isFinite(target.lng)) return;
+  let features = [];
+  try { features = state.map?.querySourceFeatures(SOURCE_ID, {sourceLayer: 'transportation'}) || []; } catch { features = []; }
+  const camera = cameraToward(target, streetLines(features, target));
+  a.href = streetView(target.lat, target.lng, camera);
+  a.dataset.aimed = camera ? `${Math.round(camera.heading)}° · ${Math.round(camera.distance)} ม.` : 'default';
+}
+
 function wireEvents() {
+  // Before the browser follows a Street View link (mouse, touch, keyboard or a middle click), place its camera.
+  for (const type of ['pointerdown', 'focusin', 'click', 'auxclick']) {
+    document.addEventListener(type, e => { const a = e.target?.closest?.('a.outbound-link[data-aim-lat]'); if (a) aimStreetView(a); }, true);
+  }
   let timer;
   for (const f of FIELDS) $(f).addEventListener(f === 'search' ? 'input' : 'change', () => {
     clearTimeout(timer);
