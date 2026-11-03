@@ -667,6 +667,18 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 .brand-head .metrics.compact { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .mix-list .mix-label.link-button { font-weight: 400; text-decoration: none; justify-content: flex-start; }
 .mix-list .mix-label.link-button:hover { text-decoration: underline; }
+/* Food taxonomy (0.9.2): category bars with their pictogram, group bars, menu chips; one neutral fill (.size-fill). */
+.food-section .food-sub-title { margin: 10px 0 4px; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.food-section .mix-label .fact-pic { margin-right: 0; }
+/* Food names are long (“ฟาสต์ฟู้ด (ไก่ทอด/เบอร์เกอร์)”): a wider label column that wraps, never an ellipsis. */
+.food-section .mix-list li { grid-template-columns: minmax(0, 164px) minmax(0, 1fr) 44px; }
+.food-section .mix-label { white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.25; text-align: left; }
+.section-heading > .inferred { margin-right: auto; }
+.food-entry .section-heading .link-button { font-size: 12px; white-space: nowrap; }
+.food-chip { padding-left: 10px; }
+.food-chip .pictogram { font-size: 16px; line-height: 1; }
+.food-chip small { color: var(--text-secondary); }
+.food-chip[aria-pressed="true"] { background: var(--surface-alt); border-color: var(--border-emphasis); }
 .map-panel .maplibregl-popup-content h3 .entry-branch { display: block; font-size: 13px; font-weight: 400; }
 @media (max-width: 760px) {
   .brand-head .metrics.compact { grid-template-columns: 1fr 1fr; }

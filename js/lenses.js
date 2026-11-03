@@ -14,7 +14,7 @@ export const LENSES = Object.freeze([
   Object.freeze({id: 'density', label: 'แน่นที่สุด', short: 'แน่นที่สุด', preset: Object.freeze({}), pictogram: 'gla'}),
 ]);
 export const DEFAULT_LENS = 'chains';
-const LENS_FIELDS = ['group', 'price', 'size'];
+const LENS_FIELDS = ['group', 'food', 'price', 'size'];
 const SCOPE_FIELDS = ['search', 'province', 'brand'];
 
 /** Lens chips are offered on the national overview: no search, province or chain narrows it. */

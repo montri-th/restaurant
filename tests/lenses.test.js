@@ -15,7 +15,7 @@ import {buildChainIndex, chainsOf} from '../js/chains.js';
 import {configureBrandLogos} from '../js/brand-logos.js';
 
 const text = html => html.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ');
-const F = (o = {}) => ({search: '', group: '', price: '', size: '', province: '', brand: '', ...o});
+const F = (o = {}) => ({search: '', group: '', food: '', price: '', size: '', province: '', brand: '', ...o});
 
 test('a lens is exactly its preset: national chains by default, 1,000+ baht, density; anything else is no lens', () => {
   assert.deepEqual(LENSES.map(l => l.id), ['chains', 'premium', 'density']);
@@ -24,11 +24,12 @@ test('a lens is exactly its preset: national chains by default, 1,000+ baht, den
   assert.equal(lensOf(F({size: 'S5'})), 'chains');
   assert.equal(lensOf(F({price: 'P6'})), 'premium');
   assert.equal(lensOf(F({size: 'S5', group: '4'})), null, 'a type on top of a preset is the user’s own selection');
+  assert.equal(lensOf(F({size: 'S5', food: 'FC03'})), null, 'so is a food category (0.9.2)');
   assert.equal(lensOf(F({size: 'S5', province: 'BKK'})), null, 'a province narrows the scope: no lens');
   assert.equal(lensOf(F({search: 'kfc'})), null);
   assert.equal(lensesOffered(F({brand: 'RBR-kfc'})), false);
-  assert.deepEqual(lensFilters('chains'), {group: '', price: '', size: 'S5'});
-  assert.deepEqual(lensFilters('density'), {group: '', price: '', size: ''});
+  assert.deepEqual(lensFilters('chains'), {group: '', food: '', price: '', size: 'S5'}, 'a lens clears the food filter too');
+  assert.deepEqual(lensFilters('density'), {group: '', food: '', price: '', size: ''});
   assert.equal(lensFilters('nope'), null);
 });
 

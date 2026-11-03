@@ -52,7 +52,7 @@
  *     Panel mode land opens one host at venue level (its building in the data colour, x-ray, eye camera).
  * URL: chains=1 (+ rq=query), chain, company, outlet, land.
  */
-import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, LEGACY_PRICE, LEGACY_PRICE_LABELS, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, attachSegments, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink} from './model.js';
+import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, LEGACY_PRICE, LEGACY_PRICE_LABELS, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, attachSegments, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink, FOOD, foodLabel, foodMix} from './model.js';
 import {buildAreaIndex, areaWord, districtWord, areaLocator} from './areas.js';
 import {summarizeAreaInsight, filterAreaRows, MIN_AREA_ROWS} from './area-insight.js';
 import {LENSES, DEFAULT_LENS, LENS_TEST, lensOf, lensFilters, lensesOffered, lensShare} from './lenses.js';
@@ -83,7 +83,7 @@ import {classify} from './scales.js';
 import {cueMarkup} from './cues.js';
 
 const $ = id => document.getElementById(id);
-const FIELDS = ['search', 'group', 'price', 'size', 'province', 'brand'];
+const FIELDS = ['search', 'group', 'food', 'price', 'size', 'province', 'brand'];
 const BANGKOK = {center: [100.535, 13.745], zoom: 12.2};
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobilePortrait = () => matchMedia('(max-width: 760px) and (orientation: portrait)').matches;
@@ -219,6 +219,7 @@ function update({fit = false} = {}) {
     state.scopeRestaurants = state.scopeRows.filter(r => r.kind !== 'outlet');
     state.scopeOutlets = state.scopeRows.filter(r => r.kind === 'outlet');
     state.scopeAllOutlets = state.scopeOutlets.length === (state.data.outlets || []).length;
+    state.scopeFood = null;
   }
   const area = state.selectedArea ? areaById(state.selectedArea) : null;
   const district = !area && state.selectedDistrict ? districtById(state.selectedDistrict) : null;
@@ -254,7 +255,7 @@ function update({fit = false} = {}) {
   const s = summarize(state.rows);
   $('filter-count').textContent = activeFilterCount(f) ? String(activeFilterCount(f)) : '';
   $('filter-chips').innerHTML = renderFilterChips(f, {
-    group: Object.fromEntries(state.data.groups.map(g => [g.id, g.th])), price: {...PRICE_LABELS, ...LEGACY_PRICE_LABELS}, size: SIZE_LABELS,
+    group: Object.fromEntries(state.data.groups.map(g => [g.id, g.th])), food: f.food ? {[f.food]: foodLabel(f.food)} : {}, price: {...PRICE_LABELS, ...LEGACY_PRICE_LABELS}, size: SIZE_LABELS,
     province: Object.fromEntries(ALL_PROVINCES.map(p => [p.code, p.th])), brand: Object.fromEntries((state.chains?.list || []).map(c => [c.key, c.name])), venue: {}});
   renderPanel(s);
   renderLegend();
@@ -627,7 +628,7 @@ function renderPanel(summary = summarize(state.rows)) {
     html = renderOverview({insight, summary, overview, focusMode: focusMode(), classOf: densityClassOf, provinces, meta, coverage: state.coverage, province, extra: overviewExtras(),
       unknownProvince: province ? 0 : (pmodel.unknown ?? state.scopeRows.filter(r => r.kind === 'outlet' && !r.province).length),
       chains, chainTotal: chains.total, noPoint, filtered: activeFilterCount(f) > 0, listRows, brandHead, search: f.search.trim(), searchChains, index: state.index,
-      lens, lenses: lensesOffered(f), lensStats, lensChains});
+      lens, lenses: lensesOffered(f), lensStats, lensChains, byFood: overviewFood(f), food: f.food});
     renderMapAha(insight, summary, {noPoint, lens, lensStats});
   } else {
     $('map-aha').hidden = true;
@@ -1193,17 +1194,27 @@ function openLens(id) {
   update({fit: true});
   announce(`มุมมอง ${LENSES.find(l => l.id === id)?.label || ''}`);
 }
-/** “ลองกับร้านแบบคุณ”: open the filters at the type select (price follows it). */
-function openFilters() {
+/** “ลองกับร้านแบบคุณ”: open the filters at the type select (price follows it); “กลุ่มและเมนูทั้งหมด” at the food select. */
+function openFilters(id = '') {
   const d = $('filter-details');
   if (!d) return;
   d.open = true;
-  $('group')?.focus({preventScroll: false});
+  const target = id === 'food' && !$('food').closest('label').hidden ? 'food' : 'group';
+  $(target)?.focus({preventScroll: false});
+}
+/**
+ * The overview's food chips (0.9.2): rows per category in the scope without the food filter, so the chip of another
+ * category is one tap away; cached per scope.
+ */
+function overviewFood(f) {
+  if (!FOOD.groups.length || !state.segments) return null;
+  if (!state.scopeFood) state.scopeFood = foodMix(f.food ? filterRows(state.data.rows, {...f, food: ''}) : state.scopeRows);
+  return state.scopeFood;
 }
 
-/** A price tier or chain size picked from a panel's bars: the same path as the filter select (keeps the open area). */
+/** A price tier, chain size or food id picked from a panel's bars: the same path as the filter select (keeps the open area). */
 function filterField(field, value) {
-  if (!['price', 'size'].includes(field) || ![...$(field).options].some(o => o.value === value)) return;
+  if (!['price', 'size', 'food'].includes(field) || ![...$(field).options].some(o => o.value === value)) return;
   $(field).value = value;
   $(field).dispatchEvent(new Event('change'));
 }
@@ -1227,7 +1238,7 @@ function onPanelAction(event) {
     case 'filter-brand': filterBrand(value); break;
     case 'filter-field': filterField(id, value); break;
     case 'lens': openLens(id); break;
-    case 'open-filters': openFilters(); break;
+    case 'open-filters': openFilters(id); break;
     case 'back': goBack(); break;
     case 'explore-top': exploreTop(); break;
     case 'clear-focus': clearFocus(); break;
@@ -1902,9 +1913,29 @@ function options(id, items) {
   const s = $(id);
   for (const [value, label] of items) { const o = document.createElement('option'); o.value = value; o.textContent = label; s.append(o); }
 }
+/**
+ * The food select (0.9.2): one optgroup per category — the category itself (“ทุกกลุ่ม”), each group, and the group's
+ * sub-groups indented under it — with the population's counts; ids with no row and the “ไม่ระบุชนิด” fallbacks (their
+ * group covers them) are left out.
+ */
+function foodOptions(rows) {
+  const mix = foodMix(rows), s = $('food');
+  const add = (parent, value, label) => { const o = document.createElement('option'); o.value = value; o.textContent = label; parent.append(o); };
+  for (const c of FOOD.categories) {
+    if (!mix.cats.get(c.id)) continue;
+    const og = document.createElement('optgroup'); og.label = c.label;
+    add(og, c.id, `${c.label} · ทุกกลุ่ม (${num(mix.cats.get(c.id))})`);
+    for (const g of FOOD.groups.filter(x => x.category === c.id && mix.groups.get(x.id))) {
+      add(og, g.id, `\u2003${g.label} (${num(mix.groups.get(g.id))})`);
+      for (const x of FOOD.subgroups.filter(y => y.group === g.id && !y.fallback && mix.subs.get(y.id))) add(og, x.id, `\u2003\u2003${x.label} (${num(mix.subs.get(x.id))})`);
+    }
+    s.append(og);
+  }
+  return mix.classified;
+}
 
 /** Parameters the app reads; a URL with none of them is bare and opens the default lens (cache-busters do not count). */
-const KNOWN_PARAMS = ['search', 'group', 'price', 'size', 'province', 'brand', 'chain', 'district', 'area', 'areas', 'view', 'rdots', 'store', 'place', 'land',
+const KNOWN_PARAMS = ['search', 'group', 'food', 'price', 'size', 'province', 'brand', 'chain', 'district', 'area', 'areas', 'view', 'rdots', 'store', 'place', 'land',
   'outlet', 'company', 'chains', 'rq', 'view3d', 'cam', 'lens'];
 
 function restoreFromURL() {
@@ -2091,6 +2122,8 @@ async function init() {
     for (const r of state.data.rows) if (r.size) sizeCounts[r.size]++;
     options('size', SIZE_BANDS.filter(b => sizeCounts[b] > 0).map(b => [b, `${SIZE_SHORT[b]} (${num(sizeCounts[b])})`]));
     $('size').closest('label').hidden = !state.segments;
+    // Food taxonomy (0.9.2, owner 2026-11-03 16:59 “เปิดให้ทุกคนเห็นตอนนี้”): offered only when the segments attached.
+    $('food').closest('label').hidden = !(state.segments && FOOD.groups.length && foodOptions(state.data.rows));
     const groupCounts = new Map();
     for (const r of state.data.rows) groupCounts.set(r.groupId, (groupCounts.get(r.groupId) || 0) + 1);
     options('group', state.data.groups.filter(g => groupCounts.get(g.id)).map(g => [g.id, `${g.th} (${num(groupCounts.get(g.id))})`]));

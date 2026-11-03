@@ -38,6 +38,8 @@ export const PICTOGRAM_CONTRACT = Object.freeze({
       'g-grill': '\uEA47', 'g-western': '\uEA57', price: '\uEF63', building: '\uEA40', place: '\uF1DB', tune: '\uE429'}),
   }),
 });
+/** Pictogram role of a food category (0.9.2, register taxonomy) — the approved food glyphs, no new glyph. */
+export const FOOD_CATEGORY_PICTOGRAM = Object.freeze({FC01: 'g-thai', FC02: 'g-general', FC03: 'g-cafe', FC04: 'g-fastfood', FC05: 'g-japanese', FC06: 'g-grill'});
 /** Pictogram role of a restaurant type group (js/model.js groups); 'other' and 'unspecified' have none. */
 export const GROUP_PICTOGRAM = Object.freeze({general: 'g-general', thai: 'g-thai', fastfood: 'g-fastfood', japanese: 'g-japanese', cafe: 'g-cafe',
   asian: 'g-asian', grill: 'g-grill', western: 'g-western'});

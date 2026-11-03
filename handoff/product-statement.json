@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-statement",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.9.1",
+  "productVersion": "0.9.2",
   "updatedOn": "2026-11-03",
   "humanDocument": "../PRODUCT_STATEMENT.md",
   "standard": "Product Brief — CityMETER v6 §1.6.3 metadata block; Master Brand Brief v0.5.3 §7.2 / §3.7",
@@ -304,7 +304,7 @@
     "every sequential colour scale uses the full 41-value LDS LUT with a ramp legend (head · middle · tail); zero and no-data stay outside the ramp (0.7.1)",
     "0.8.0: price tiers P1–P6 are calculated by the page from the start / end price the source states (register workbook rules.price; equal to price_band_observed on all 68,980 classified rows) — a stated range, not spend per person; a row with no stated price stays ไม่ระบุราคา, never 0; outlets carry no price; the six colours are exact samples of the 41-value price LUT",
     "0.8.0: chain size S1–S5 comes from the register workbook's 10_CLASSIFICATION — register rows per brand_id, or sheet-1 rows sharing a name candidate (a candidate, not a confirmed chain); S1 means one observed row, network unknown, never an independent shop; a chain takes the largest band any of its rows has, never a sum across the sheets; the CPF point-of-sale registry is not sized; nothing in the tab is reviewed yet (Observed fact of counts, not a judgement)",
-    "0.8.0: food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view are classified but unreviewed — held off the web until each sub-segment passes the workbook's QA rule (a human sample of 50, at least 48 correct; 1,550 samples in all)"
+    "0.8.0: format, occasion, special labels, inferred price and the competitor view are classified but unreviewed — held off the web until each sub-segment passes the workbook's QA rule (a human sample of 50, at least 48 correct; 1,550 samples in all) · 0.9.2: the food taxonomy (6 categories / 19 groups / 31 sub-groups) is on the page ahead of that check by owner decision 2026-11-03 16:59, every value labelled อนุมาน; its accuracy per sub-group is not yet known"
   ],
   "known_limitations": [
     "ไม่ใช่สำมะโน",

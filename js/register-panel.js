@@ -13,7 +13,7 @@
  * Actions (delegated, data-action): open-chains · select-company · select-store · select-land · select-area ·
  * select-venue · filter-brand · back.
  */
-import {esc, num, dec, link, thaiDate, metricTile, heading, entryMarkup, chainChips, outboundRow, sizeFact} from './panel.js';
+import {esc, num, dec, link, thaiDate, metricTile, heading, entryMarkup, chainChips, outboundRow, sizeFact, foodFact} from './panel.js';
 import {brandLogoMarkup, getBrandLogo} from './brand-logos.js';
 import {cueMarkup} from './cues.js';
 import {areaWord, districtWord} from './areas.js';
@@ -183,7 +183,7 @@ export function renderOutlet({reg, outlet: o, area = null, land = null, sameBran
       <dl class="facts">
         <dt>${pic('brand')}เครือ</dt><dd><button type="button" class="link-button" data-action="filter-brand" data-value="${esc(o.brand.id)}">${esc(brandLabel(o.brand))}</button> <span class="data-number">${num(o.brand.outlets || 0)}</span> สาขาเครือ</dd>
         <dt>${groupPicOf(group) || pic('segment')}ประเภท</dt><dd>${group ? `<span${typeHow ? ` title="${esc(typeHow)}"` : ''}>${esc(group.th)}</span>${o.groupBy ? ` ${INFERRED}` : ''}` : 'ไม่ระบุประเภท'}</dd>
-        ${sizeFact(o)}
+        ${foodFact(o)}${sizeFact(o)}
         <dt>หลักฐาน</dt><dd>${esc(EVIDENCE_TH[o.evidence])}${status}</dd>
         ${o.address ? `<dt>${pic('place')}ที่อยู่</dt><dd>${esc(o.address)}</dd>` : ''}
         ${o.floor || o.unit ? `<dt>ชั้น/ยูนิต</dt><dd>${esc([o.floor && `ชั้น ${o.floor}`, o.unit && `ยูนิต ${o.unit}`].filter(Boolean).join(' · '))}</dd>` : ''}

@@ -132,7 +132,7 @@ test('0.8.0 segments in views: price tiers and chain sizes are labelled bars tha
   assert.ok(t.includes('ขนาดเครือ') && t.includes('200+ สาขา') && html.includes('title="ดูเฉพาะเครือระดับชาติ 200+ สาขา"'), 'the area profile reads chain size (short bars, full name in the title)');
   assert.ok(/data-action="filter-field" data-id="size" data-value="S5"/.test(html) && /data-action="filter-field" data-id="price" data-value="P2"/.test(html), 'bars filter by tier and size');
   assert.ok(!t.includes('ร้านอิสระ'), 'one observed row is never called an independent shop — and no caveat says so either (0.9.0)');
-  assert.ok(t.includes('ขนาดเครือจัดกลุ่ม 2 พ.ย. 2569'), 'the size bars cite the classification date in the one provenance line');
+  assert.ok(t.includes('ขนาดเครือและหมวดอาหารจัดกลุ่ม 2 พ.ย. 2569'), 'the size and food bars cite the classification date in the one provenance line');
   assert.ok(!/size-fill[^"]*" style="[^"]*background/.test(html), 'size bars use one neutral fill, no second colour family');
   // A store with a chain: band + basis; a lifted row says it took its chain's larger size.
   const lifted = data.restaurants.find(r => r.sizeLifted && r.venue);

@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.9.1",
+  "productVersion": "0.9.2",
   "updatedOn": "2026-11-03",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -710,6 +710,39 @@
         "tests/helpers.js"
       ],
       "status": "done"
+    },
+    {
+      "id": "P20",
+      "title": "0.9.2: the food taxonomy on the page, labelled อนุมาน (owner 2026-11-03 16:59 “เปิดให้ทุกคนเห็นตอนนี้”) — build-segments emits group and sub-group per row with the codebook in meta.food; attachSegments → FOOD, foodMatch, foodLabel, foodMix; filter #food (?food=), overview chips, area / district / venue / building section, store / outlet fact; lens clears it; INV40 narrowed, INV43 added",
+      "dependsOn": [
+        "P19"
+      ],
+      "acceptanceCriteria": [
+        "AC58",
+        "AC59"
+      ],
+      "files": [
+        "scripts/build-segments.py",
+        "data/segments.json",
+        "js/model.js",
+        "js/app.js",
+        "js/panel.js",
+        "js/register-panel.js",
+        "js/lenses.js",
+        "js/navigation.js",
+        "index.html",
+        "styles.css",
+        "tests/food.test.js",
+        "tests/data.test.js",
+        "tests/lenses.test.js",
+        "tests/views.test.js",
+        "AGENTS.md",
+        "DATA_METHOD.md",
+        "PRODUCT_STATEMENT.md",
+        "README.md",
+        "handoff/VERIFICATION.md"
+      ],
+      "status": "done"
     }
   ],
   "acceptanceCriteria": [
@@ -1115,15 +1148,22 @@
     {
       "id": "AC58",
       "scenario": "Unreviewed axes stay off the web",
-      "expected": "data/segments.json meta.reviewStatus counts every classified row as unreviewed and meta.held.fields names food_category_id, food_group_id, food_subgroup_primary_id, format_id, occasion_ids, special_label_ids and price_band_inferred; no food taxonomy (6 / 19 / 31), format, occasion, special label, inferred price or competitor view reaches a view, filter, chip, chart or table — not even as “(อนุมาน)”; segments.json holds no private Google Docs / Drive / Sheets link or id; a sub-segment ships only after its sample of 50 has at least 48 correct (rules.QA)",
+      "expected": "data/segments.json meta.reviewStatus counts every classified row as unreviewed and meta.held.fields names the secondary food fields, format_id, occasion_ids, special_label_ids and price_band_inferred; no format, occasion, special label, inferred price or competitor view reaches a view, filter, chip, chart or table — not even as “(อนุมาน)”; segments.json holds no private Google Docs / Drive / Sheets link or id; a sub-segment ships only after its sample of 50 has at least 48 correct (rules.QA). The food taxonomy left this criterion by owner decision 2026-11-03 16:59 (AC59)",
       "verificationType": "unit (tests/data.test.js “segments (0.8.0) …”: held fields, review status, no private sheet link) + review of every view",
-      "result": "unit: npm test 94/94 on 2026-11-03"
+      "result": "unit: npm test 94/94 on 2026-11-03 · 0.9.2: npm test 110/110 on 2026-11-03 (held list without the three food fields)"
+    },
+    {
+      "id": "AC59",
+      "scenario": "Food taxonomy on the page, labelled อนุมาน (0.9.2)",
+      "expected": "the filter “หมวดอาหาร อนุมาน” offers six categories, their groups and their sub-groups (fallbacks left out) with population counts and restores from ?food=; the overview shows “ดูตามหมวดอาหาร อนุมาน” with six chips (counted without the food filter, the active one pressed) and “กลุ่มและเมนูทั้งหมด”; area, district, venue and building panels show “หมวดอาหาร อนุมาน” after “ประเภทร้าน” with category bars, group bars, menu chips (≥ 3 rows) and “ไม่จัดหมวด N ร้าน”; a store reads “หมวดอาหาร ไทยจานเดียว › ก๋วยเตี๋ยว/เส้น › บะหมี่/เกี๊ยว อนุมาน” and every part filters; the filter chip reads “{label} · อนุมาน”; a lens clears the food filter; no caveat phrase; 68,887 classified rows (FC01 21,786 · FC02 12,669 · FC03 17,872 · FC04 8,080 · FC05 4,561 · FC06 3,919)",
+      "verificationType": "unit (tests/food.test.js, tests/lenses.test.js, tests/views.test.js) + harness + live (desktop and 390 px, light and dark)",
+      "result": "unit: npm test 110/110 on 2026-11-03; rendered and live: see VERIFICATION.md §R19"
     }
   ],
   "developerWorkflow": [
     "Read AGENTS.md, then handoff/README.md, PRODUCT_STATEMENT.md and the paired human/machine briefs",
     "Run npm test before changes; keep the row scopes, focus modes, metric and coverage contracts and the panel action contract",
-    "Change one bounded task at a time; preserve invariant IDs INV01–INV40",
+    "Change one bounded task at a time; preserve invariant IDs INV01–INV43",
     "Validate calculations with the real data in tests/ (tests/helpers.js loads it once)",
     "Review rendered Thai at 390 px and desktop in both themes; use the stub-tile harness when CDN/tiles are blocked, then confirm the real-tile look live",
     "Tune camera and layers live via window.__citymeter in the console before changing constants",
@@ -1286,7 +1326,7 @@
     },
     {
       "id": "N26",
-      "title": "Ship each held axis only for the sub-segments that pass N25 — food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view (same sub-segment + same แขวง/ตำบล; group from 5, shares from 30); until then nothing of them reaches the page (INV40, AC58)",
+      "title": "Ship each held axis only for the sub-segments that pass N25 — format, occasion, special labels, inferred price and the competitor view (same sub-segment + same แขวง/ตำบล; group from 5, shares from 30); until then nothing of them reaches the page (INV40, AC58). The food taxonomy is on the page since 0.9.2 by owner decision, labelled อนุมาน (INV43); N25's result decides when that word may go",
       "ownerRole": "product + data",
       "priority": "P1",
       "status": "blocked by N25"

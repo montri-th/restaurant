@@ -62,7 +62,7 @@ test('decoded rows reconcile with the build receipt: provinces, price tiers, rev
   assert.equal(api.OVER_1000, 0, 'the API bucket “over 1,000” held no row: the open-ended “from 1,000” rows sat in 500–1,000');
 });
 
-test('segments (0.8.0): chain size from the register workbook, aligned to this build, the held axes stay off the page', () => {
+test('segments (0.8.0; food 0.9.2): chain size and the food taxonomy from the register workbook, aligned to this build; the other held axes stay off the page', () => {
   const {raw, data} = load();
   const seg = readJSON('data/segments.json'), m = seg.meta;
   assert.equal(m.schema, 'citymeter-restaurant-segments-1');
@@ -71,11 +71,25 @@ test('segments (0.8.0): chain size from the register workbook, aligned to this b
   assert.equal(m.rows.keySha256, sha256(Buffer.from(raw.cols.key.join('\n'))), 'rows aligned to restaurants.json cols.key');
   assert.equal(m.outlets.idSha256, sha256(Buffer.from(readJSON('data/chains.json').cols.id.join('\n'))), 'outlets aligned to chains.json cols.id');
   assert.deepEqual(m.priceCheck, {agree: 68980}, 'the page\'s tiers equal price_band_observed on every classified row');
-  assert.deepEqual(m.reviewStatus, {unreviewed: 95341}, 'nothing reviewed yet: only counts ship');
-  for (const f of ['food_category_id', 'food_group_id', 'food_subgroup_primary_id', 'format_id', 'occasion_ids', 'special_label_ids', 'price_band_inferred']) assert.ok(m.held.fields.includes(f), f);
+  assert.deepEqual(m.reviewStatus, {unreviewed: 95341}, 'nothing reviewed yet');
+  // 0.9.2: the food taxonomy ships by owner decision (2026-11-03 16:59) ahead of the QA check; the other axes stay held.
+  for (const f of ['format_id', 'occasion_ids', 'special_label_ids', 'price_band_inferred', 'food_subgroup_secondary_ids', 'food_group_secondary_ids']) assert.ok(m.held.fields.includes(f), f);
+  for (const f of ['food_category_id', 'food_group_id', 'food_subgroup_primary_id']) assert.ok(!m.held.fields.includes(f), f);
+  assert.ok(/owner decision 2026-11-03 16:59/.test(m.released['food taxonomy']), 'the release says whose decision put it on the page');
+  assert.deepEqual([m.food.categories.length, m.food.groups.length, m.food.subgroups.length], [6, 19, 31]);
+  assert.deepEqual(m.food.basis, {inference: 68887}, 'every classified row is an inference of the workbook');
+  assert.equal(seg.rows.food.length, raw.cols.key.length);
+  assert.equal(seg.outlets.sub.length, readJSON('data/chains.json').cols.id.length);
+  // Attached as the browser does: a group carries its category; a sub-group sits under its group (the build checks the codebook).
+  const grouped = data.rows.filter(r => r.food);
+  assert.equal(grouped.length, 46626 + 22261, 'sheet-1 rows + outlets with a food group');
+  assert.equal(data.rows.filter(r => r.foodSub).length, 28265 + 4852);
+  const groupOf = new Map(m.food.groups.map(g => [g.id, g.category])), subOf = new Map(m.food.subgroups.map(x => [x.id, x.group]));
+  assert.ok(grouped.every(r => groupOf.get(r.food) === r.foodCat && (!r.foodSub || subOf.get(r.foodSub) === r.food)));
+  assert.ok(data.moved.every(r => !r.food), 'a moved row is classified on the register side');
   assert.ok(!/docs\.google|drive\.google|spreadsheets\/d\//.test(JSON.stringify(seg)), 'no private sheet link');
   // Every kept row and every outlet but the point-of-sale registry is sized; moved rows are sized on the register side.
-  assert.deepEqual(data.segments, {attached: 95341, lifted: 726, ok: true});
+  assert.deepEqual(data.segments, {attached: 95341, lifted: 726, ok: true, food: 68887});
   assert.ok(data.restaurants.every(r => SIZE_BANDS.includes(r.size)));
   assert.ok(data.outlets.every(o => SIZE_BANDS.includes(o.size) || (o.sizeBasis === 'x' && o.brand.id === 'ROOT-BR-cpf-pos-network')), 'only the registry is unsized');
   assert.equal(data.outlets.filter(o => o.sizeBasis === 'x').length, 1166);

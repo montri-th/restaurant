@@ -104,18 +104,28 @@ export const SIZE_LIFTED = 'ใช้ขนาดที่ใหญ่ที่�
 export function attachSegments(segments, {rows = [], outlets = [], keys = [], ids = []} = {}) {
   // Without the register (ids empty) only the restaurant rows are sized; a register of another build sizes nothing.
   const ok = segments?.rows?.size?.length === keys.length && (!ids.length || segments?.outlets?.size?.length === ids.length);
-  if (!ok) return {attached: 0, lifted: 0, ok: false};
-  let attached = 0;
-  const put = (r, size, basis) => {
+  if (!ok) return {attached: 0, lifted: 0, ok: false, food: 0};
+  setFood(segments.meta?.food);
+  const alpha = segments.meta?.food?.alphabet || '';
+  let attached = 0, food = 0;
+  const put = (r, size, basis, g, sg) => {
+    // Food taxonomy (0.9.2, an inference of the workbook, labelled อนุมาน on the page): group → its category; sub-group.
+    const group = g && g !== '.' ? FOOD.groups[alpha.indexOf(g)] : null;
+    if (group) {
+      r.food = group.id; r.foodCat = group.category; food++;
+      const sub = sg && sg !== '.' ? FOOD.subgroups[alpha.indexOf(sg)] : null;
+      if (sub) r.foodSub = sub.id;
+    }
     const k = Number(size);
     if (basis && basis !== '.') r.sizeBasis = basis;
     if (size === '.' || !Number.isInteger(k) || k < 0 || k > 4) return;
     r.size = SIZE_BANDS[k]; r.sizeOwn = r.size; r.sizeLifted = false; attached++;
   };
+  const at = (side, key, i) => segments[side]?.[key]?.[i];
   const keyIndex = new Map(keys.map((k, i) => [k, i]));
-  for (const r of rows) { const i = keyIndex.get(r.id); if (i != null) put(r, segments.rows.size[i], segments.rows.basis[i]); }
+  for (const r of rows) { const i = keyIndex.get(r.id); if (i != null) put(r, segments.rows.size[i], segments.rows.basis[i], at('rows', 'food', i), at('rows', 'sub', i)); }
   const idIndex = new Map(ids.map((k, i) => [k, i]));
-  for (const o of outlets) { const i = idIndex.get(o.id); if (i != null) put(o, segments.outlets.size[i], segments.outlets.basis[i]); }
+  for (const o of outlets) { const i = idIndex.get(o.id); if (i != null) put(o, segments.outlets.size[i], segments.outlets.basis[i], at('outlets', 'food', i), at('outlets', 'sub', i)); }
   const top = new Map();
   const all = [...rows, ...outlets];
   for (const r of all) {
@@ -128,7 +138,45 @@ export function attachSegments(segments, {rows = [], outlets = [], keys = [], id
     const k = key ? top.get(key) : -1;
     if (k > SIZE_BANDS.indexOf(r.size)) { r.size = SIZE_BANDS[k]; r.sizeLifted = true; lifted++; }
   }
-  return {attached, lifted, ok: true};
+  return {attached, lifted, ok: true, food};
+}
+
+/**
+ * The food taxonomy of the register's classification tab (0.9.2): 6 categories · 19 groups · 31 sub-groups, read from
+ * data/segments.json meta.food. Every row's value is an unreviewed inference of the workbook (shown by owner decision
+ * 2026-11-03 16:59 ahead of the 1,550-sample check) — the page says อนุมาน wherever it shows one.
+ */
+export const FOOD = {categories: [], groups: [], subgroups: [], byId: new Map()};
+function setFood(t) {
+  FOOD.categories = t?.categories || []; FOOD.groups = t?.groups || []; FOOD.subgroups = t?.subgroups || [];
+  FOOD.byId = new Map([...FOOD.categories.map(c => [c.id, {...c, level: 'category'}]), ...FOOD.groups.map(g => [g.id, {...g, level: 'group'}]),
+    ...FOOD.subgroups.map(x => [x.id, {...x, level: 'subgroup'}])]);
+}
+/** A food filter value (FCxx · FGxx · FSGxx) against one row. */
+export function foodMatch(r, value) {
+  if (!value) return true;
+  if (value.startsWith('FSG')) return r.foodSub === value;
+  if (value.startsWith('FG')) return r.food === value;
+  if (value.startsWith('FC')) return r.foodCat === value;
+  return false;
+}
+/** The label of a food id; a sub-group that only says “not specified within the group” reads with its group. */
+export function foodLabel(id) {
+  const e = FOOD.byId.get(id);
+  if (!e) return '';
+  return e.level === 'subgroup' && e.fallback ? `${FOOD.byId.get(e.group)?.label || ''} · ${e.label}` : e.label;
+}
+/** Rows per category / group / sub-group (unclassified kept apart, never 0 of a category). */
+export function foodMix(rows) {
+  const cats = new Map(), groups = new Map(), subs = new Map();
+  let unclassified = 0;
+  for (const r of rows) {
+    if (!r.food) { unclassified++; continue; }
+    cats.set(r.foodCat, (cats.get(r.foodCat) || 0) + 1);
+    groups.set(r.food, (groups.get(r.food) || 0) + 1);
+    if (r.foodSub) subs.set(r.foodSub, (subs.get(r.foodSub) || 0) + 1);
+  }
+  return {cats, groups, subs, unclassified, classified: rows.length - unclassified};
 }
 export const PRICED = PRICE_BUCKETS.filter(b => b !== 'UNSPECIFIED');
 
@@ -318,6 +366,7 @@ export function filterRows(rows, f = {}) {
     if (f.group && r.groupId !== f.group) return false;
     if (prices && !prices.has(r.price)) return false;
     if (f.size && r.size !== f.size) return false;
+    if (f.food && !foodMatch(r, f.food)) return false;
     if (f.province && r.province !== f.province) return false;
     if (f.district && r.district !== f.district) return false;
     if (brand && r.brand?.id !== brand && !(r.brandKeys && r.brandKeys.has(brand)) && !(r.brand?.national || []).includes(brand)) return false;
@@ -365,7 +414,7 @@ export function mixOf(rows, groups) {
   }
   byPrice.outlets = outlets;
   bySize.unknown = unknown; bySize.registry = registry; bySize.candidates = candidates;
-  return {byGroup, byPrice, bySize};
+  return {byGroup, byPrice, bySize, byFood: foodMix(rows)};
 }
 
 export const safeURL = value => {

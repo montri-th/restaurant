@@ -3,9 +3,9 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.9.1",
+  "productVersion": "0.9.2",
   "updatedOn": "2026-11-03",
-  "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/31, read back 2026-10-30, workbook read 2026-11-03 · classification 2026-11-02 (unreviewed; chain size and price tiers only) · Land join 2026-11-03",
+  "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/31, read back 2026-10-30, workbook read 2026-11-03 · classification 2026-11-02 (unreviewed; chain size, price tiers and — by owner decision 2026-11-03 16:59 — the food taxonomy labelled อนุมาน) · Land join 2026-11-03",
   "language": "th",
   "productName": "CityMETER · Restaurants",
   "repository": "https://github.com/montri-th/restaurant",
@@ -116,6 +116,12 @@
       "held off the web until each sub-segment passes the workbook's rules.QA (a human sample of 50 per sub-segment, at least 48 correct; 31 sub-segments × 50 = 1,550 samples): food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view; next step: a QA helper that draws the 1,550 deterministic samples for reviewers (built after the release)",
       "Land join rerun 2026-11-03 (scripts/build-land.py --checked-on; same tiles, same rule): register outlets in Land buildings 3,464, near 1,908, 494 display positions from within 10 m; snapshot side unchanged",
       "cache tag ?v=20261103-r1; 94 tests pass (new: segments, tier identities, segments in views; fixtures refreshed from a run)"
+    ],
+    "release092": [
+      "owner 2026-11-03 16:59: “พวกกลุ่มร้านอาหารที่แบ่งไว้ ตอนนี้จะดูใน web demo ต้องทำยังไง หาไม่เจอเลย” → choice “เปิดให้ทุกคนเห็นตอนนี้”",
+      "food taxonomy 6/19/31 from 10_CLASSIFICATION on the page, labelled อนุมาน: filter, overview chips, area / district / venue / building section, store / outlet fact (segmentContract.food, INV43)",
+      "INV40 narrowed: format, occasion, special labels, inferred price and the competitor view stay held",
+      "data/segments.json 400,574 bytes (size and basis strings unchanged; food and sub added; meta.food codebook, meta.released)"
     ]
   },
   "rowScopes": {
@@ -1162,7 +1168,7 @@
     },
     {
       "id": "INV40",
-      "rule": "No classification result reaches the web before its sub-segment passes the workbook's rules.QA (a human sample of 50 per sub-segment, at least 48 correct): food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view stay off the page (data/segments.json meta.held) — never shown as a label, not even “(อนุมาน)”; data/segments.json attaches only when both id arrays line up and carries no private sheet link or id"
+      "rule": "No classification result reaches the web before its sub-segment passes the workbook's rules.QA (a human sample of 50 per sub-segment, at least 48 correct): format, occasion, special labels, inferred price and the competitor view stay off the page (data/segments.json meta.held) — never shown as a label, not even “(อนุมาน)”. Exception by owner decision 2026-11-03 16:59 (“เปิดให้ทุกคนเห็นตอนนี้”, superseding this rule for the food taxonomy only): the food taxonomy (6 categories / 19 groups / 31 sub-groups) shows ahead of the check, with the word อนุมาน on every value (INV43). data/segments.json attaches only when both id arrays line up and carries no private sheet link or id"
     },
     {
       "id": "INV41",
@@ -1171,6 +1177,10 @@
     {
       "id": "INV42",
       "rule": "A place's character line (js/profile-model.js#areaCharacter, js/panel.js#characterLine) describes the place from its whole population whatever the filters: the top type group (not other / not stated) with its share of every row, the tier its restaurants state most with its count of priced rows, and the share of 200+ chains beside the same share everywhere; no priced row → no price token"
+    },
+    {
+      "id": "INV43",
+      "rule": "The food taxonomy (0.9.2, segmentContract.food) is an unreviewed inference of the register: every place that shows a value — the filter label, the overview chips' heading, the panel section heading, each store / outlet fact, the filter chip — says อนุมาน, and nothing else is added (no caveat sentence, INV41); rows without a class are counted apart (“ไม่จัดหมวด N ร้าน”), never a zero of a category; a ‘not specified within the group’ sub-group (fallback: FSG13, FSG22, FSG28) reads with its group and is never an option or menu chip of its own; the ten type groups stay the map's cue system — the taxonomy never colours a map symbol, legend or matrix; its bars use the one neutral fill of the size bars and its six category pictograms reuse approved glyphs only; a lens clears the food filter"
     }
   ],
   "chartContracts": [
@@ -1530,7 +1540,6 @@
     },
     "held": {
       "items": [
-        "food taxonomy (6 categories / 19 groups / 31 sub-groups)",
         "format",
         "occasion",
         "special labels",
@@ -1539,8 +1548,49 @@
       ],
       "fields": "data/segments.json meta.held.fields",
       "why": "every classification row is review_status = unreviewed; workbook rules.QA: no automatic result goes to the web before a human sample of 50 per sub-segment with at least 48 correct (seed six-axes-20261102-v1, selection lowest SHA256(seed|classification_id)) — 31 sub-segments × 50 = 1,550 samples",
-      "rule": "INV40 — never show an unreviewed label, not even “(อนุมาน)”; a sub-segment ships only after it passes",
+      "rule": "INV40 — never show an unreviewed label of these axes, not even “(อนุมาน)”; a sub-segment ships only after it passes (the food taxonomy left this list by owner decision 2026-11-03 16:59 — segmentContract.food)",
       "next": "QA helper: 1,550 deterministic samples (50 per sub-segment) for reviewers, built after the release (implementation-plan N25)"
+    },
+    "food": {
+      "decision": "owner 2026-11-03 16:59 “พวกกลุ่มร้านอาหารที่แบ่งไว้ ตอนนี้จะดูใน web demo ต้องทำยังไง หาไม่เจอเลย”; asked back whether to wait for the 1,550-sample check, the owner chose “เปิดให้ทุกคนเห็นตอนนี้” (“ขึ้นเป็นตัวกรองและแถบในแผงพื้นที่ พร้อมป้าย “อนุมาน” — ข้ามกติกา QA ของทะเบียน”) — supersedes INV40 and the 0.9.0 choice to wait, for the food taxonomy only",
+      "evidence": "Inference of the register (automatic classification from the name and type, every row review_status = unreviewed); labelled อนุมาน on the page (INV43)",
+      "source": "10_CLASSIFICATION food_category_id · food_group_id · food_subgroup_primary_id + the 06_DATA_DICTIONARY codebook (categories.FCxx, groups.FGxx with category_id, subgroups.FSGxx with group_id and fallback_within_known_group)",
+      "encoding": "data/segments.json meta.food = {basis, alphabet, categories[{id,label}], groups[{id,label,category}], subgroups[{id,label,group,fallback}], rows, outlets}; rows/outlets .food and .sub = one character per row (index into the codebook order over meta.food.alphabet; '.' = none); the category is the group's parent — the build stops on a mismatch; secondary groups / sub-groups stay held (meta.held)",
+      "codebook": {
+        "categories": 6,
+        "groups": 19,
+        "subgroups": 31,
+        "fallbacks": [
+          "FSG13 ก๋วยเตี๋ยว/เส้น · ไม่ระบุชนิด",
+          "FSG22 ส้มตำ/ยำ/อีสาน · ไม่ระบุชนิด",
+          "FSG28 ญี่ปุ่น · อื่น ๆ"
+        ]
+      },
+      "counts": {
+        "population": 96507,
+        "classified": 68887,
+        "restaurants": 46626,
+        "outlets": 22261,
+        "unclassified": 27620,
+        "categories": {
+          "FC01 ไทยจานเดียว": 21786,
+          "FC02 ไทยนั่งทาน": 12669,
+          "FC03 เครื่องดื่ม/ของหวาน": 17872,
+          "FC04 ตะวันตก/ฟาสต์ฟู้ด": 8080,
+          "FC05 เอเชีย": 4561,
+          "FC06 กินเป็นกลุ่ม": 3919
+        },
+        "status": "regression fixture (tests/food.test.js) — never a UI constant"
+      },
+      "views": {
+        "filter": "#food “หมวดอาหาร อนุมาน” (?food= FCxx · FGxx · FSGxx): one optgroup per category — the category (“ทุกกลุ่ม”), its groups, their sub-groups indented — with population counts; fallbacks and ids without rows left out (js/app.js#foodOptions); hidden when the segments do not attach",
+        "overview": "“ดูตามหมวดอาหาร อนุมาน”: six category chips with the pictogram, counted on the scope without the food filter (js/app.js#overviewFood); the active one is pressed; “กลุ่มและเมนูทั้งหมด” opens the filters at the food select; not on a chain page (js/panel.js#foodChips)",
+        "panels": "area, district, venue and building panels: “หมวดอาหาร อนุมาน” right after “ประเภทร้าน” — category bars with the pictogram, the top groups (8; 6 in venue / building) as bars, menus with ≥ 3 rows as chips (8), “ไม่จัดหมวด N ร้าน” apart (js/panel.js#foodSection)",
+        "facts": "store and outlet: “หมวดอาหาร หมวด › กลุ่ม › เมนู อนุมาน”, each a filter link (js/panel.js#foodFact)",
+        "provenance": "“ขนาดเครือและหมวดอาหารจัดกลุ่ม {date}” in the one provenance line",
+        "lens": "LENS_FIELDS includes food: a lens clears it; a food filter is no lens"
+      },
+      "next": "the 1,550-sample check (implementation-plan N25) still decides the accuracy; a failing sub-segment gets its rule fixed and rebuilt; the word อนุมาน stays until the owner decides the check has passed"
     }
   }
 }
