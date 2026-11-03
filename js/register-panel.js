@@ -169,7 +169,7 @@ export function renderOutlet({reg, outlet: o, area = null, land = null, sameBran
   const landHtml = renderStoreLand(land);
   const branch = o.name && o.name !== o.brand.name ? o.name : '';
   const typeHow = o.groupBy ? (o.groupBy.how === 'rows' ? `ตามร้านชื่อเดียวกัน ${num(o.groupBy.rows)} ร้านในชุดข้อมูล (อนุมาน)` : 'ตามรูปแบบที่ทะเบียนระบุ (อนุมาน)') : 'ทะเบียนไม่ระบุประเภทอาหาร';
-  const outbound = outboundRow({kind: 'store', brand: o.brand.name, branch, name: o.name, area: area ? `${areaWord(area.province)}${area.name}` : '', district: area ? `${districtWord(area.province)}${area.districtName}` : '', province: o.provinceTh, lat: o.hasPoint ? lat : null, lng: o.hasPoint ? lon : null});
+  const outbound = outboundRow({kind: 'store', brand: o.brand.name, branch, name: o.name, hint: [o.name, o.address].filter(Boolean).join(' '), area: area ? `${areaWord(area.province)}${area.name}` : '', district: area ? `${districtWord(area.province)}${area.districtName}` : '', province: o.provinceTh, lat: o.hasPoint ? lat : null, lng: o.hasPoint ? lon : null});
   return `<section class="detail-head store register-outlet">
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
       ${logo ? brandLogoMarkup(o.brand, {size: 'lg', className: 'detail-logo', decorative: false}) : ''}

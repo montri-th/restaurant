@@ -156,7 +156,8 @@ test('outbound (0.8.1): questions open Google Search at once; the store name is 
   assert.ok(ask.href.startsWith('https://www.google.com/search?q=') && !ask.href.includes('udm='), 'a plain search: no confirmation step');
   assert.equal(outboundFor({kind: 'store', brand: 'MK', branch: 'Siam Paragon', lat: 13.7, lng: 100.5}).find(l => l.kind === 'ai').question.startsWith('MK Siam Paragon'), true);
   const sv = store.find(l => l.kind === 'street');
-  assert.deepEqual(sv.aim, {lat: 13.7588, lng: 100.4973});
+  assert.deepEqual(sv.aim, {lat: 13.7588, lng: 100.4973, hint: ''});
+  assert.equal(outboundFor({kind: 'store', name: 'ร้านข้าวมันไก่', hint: 'ร้านข้าวมันไก่ ถนนข้าวสาร', lat: 13.7588, lng: 100.4973}).find(l => l.kind === 'street').aim.hint, 'ร้านข้าวมันไก่ ถนนข้าวสาร');
   assert.equal(outboundFor({kind: 'area', area: 'แขวงสีลม', lat: 13.72, lng: 100.53}).find(l => l.kind === 'street').aim, null, 'an area label point is not aimed at');
   // A street 20 m south of the point, running east–west: stand on it and look north (0°); one 30 m east: look west (270°).
   const p = {lat: 13.75, lng: 100.5}, m = 1 / 111320, mx = m / Math.cos((13.75 * Math.PI) / 180);
@@ -176,6 +177,28 @@ test('outbound (0.8.1): questions open Google Search at once; the store name is 
   const lines = streetLines([f('minor', south), f('motorway', east), f('path', east), f('primary', east, {brunnel: 'tunnel'}), f('primary', east, {ramp: 1}), f('rail', south),
     f('secondary', [[101.5, 14.5], [101.6, 14.6]]), {properties: {class: 'service'}, geometry: {type: 'MultiLineString', coordinates: [east]}}], p);
   assert.deepEqual(lines, [south, east]);
+  // A corner shop named after one of its streets faces that street (Prime Burger Khaosan Road, live 3 Nov: Tanao Road
+  // 12 m west, Khao San Road 14 m south) — the nearest street alone would show the neighbours on Tanao Road.
+  const {streetCore, namedStreetLines, aimCamera} = await import('../js/outbound.js');
+  assert.equal(streetCore('Khao San Road'), 'khaosan');
+  assert.equal(streetCore('ถนนข้าวสาร'), 'ข้าวสาร');
+  assert.equal(streetCore('Soi Sukhumvit 24'), 'sukhumvit24');
+  const tanao = [[100.5 - 12 * mx, 13.75 - 60 * m], [100.5 - 12 * mx, 13.75 + 60 * m]];
+  const khaosan = [[100.5 - 80 * mx, 13.75 - 14 * m], [100.5 + 80 * mx, 13.75 - 14 * m]];
+  const names = [{properties: {class: 'tertiary', name: 'ถนนตะนาว', 'name:en': 'Tanao Road'}, geometry: {type: 'LineString', coordinates: tanao}},
+    {properties: {class: 'minor', name: 'ถนนข้าวสาร', 'name:en': 'Khao San Road'}, geometry: {type: 'LineString', coordinates: khaosan}}];
+  const plain = aimCamera(p, [tanao, khaosan], []);
+  assert.ok(plain.by === 'nearest' && Math.abs(plain.heading - 90) < 0.5, 'without a hint: the nearest street (Tanao), looking east');
+  const named = namedStreetLines(names, p, 'Prime Burger Khaosan Road');
+  assert.deepEqual(named, [khaosan]);
+  const aimed = aimCamera(p, [tanao, khaosan], named);
+  assert.ok(aimed.by === 'name' && (aimed.heading < 0.5 || aimed.heading > 359.5) && Math.abs(aimed.distance - 14) < 0.1, JSON.stringify(aimed));
+  assert.deepEqual(namedStreetLines(names, p, 'ร้านข้าวมันไก่ ถนนข้าวสาร'), [khaosan], 'a Thai address names the street too');
+  assert.deepEqual(namedStreetLines(names, p, 'Prime Burger'), [], 'no street word in the hint');
+  const far = [[100.5 - 80 * mx, 13.75 - 100 * m], [100.5 + 80 * mx, 13.75 - 100 * m]];
+  assert.equal(aimCamera(p, [tanao, far], [far]).by, 'nearest', 'a named street far beyond the nearest one is not used');
+  // The store's Maps link opens the business (name + area), whose card shows the storefront.
+  assert.equal(store.find(l => l.kind === 'maps').href, 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Prime Burger Khaosan Road แขวงบวรนิเวศ เขตพระนคร กรุงเทพมหานคร'));
 });
 
 test('density format: a measured non-zero density never prints as zero; labels and panel share it', () => {

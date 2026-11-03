@@ -74,7 +74,7 @@ import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail,
 import {renderOverview, renderBrandHead, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate, heading} from './panel.js';
 import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint} from './building-join.js';
 import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE, SOURCE_ID} from './map-style.js';
-import {streetView, streetLines, cameraToward} from './outbound.js';
+import {streetView, streetLines, namedStreetLines, aimCamera} from './outbound.js';
 import {installMassing, outerRings} from './massing.js';
 import {presetFor, applyPreset, fitPitched, framePoint} from './camera.js';
 import {buildBreadcrumb, renderBreadcrumb, breadcrumbText} from './breadcrumb.js';
@@ -1842,18 +1842,19 @@ const EXTRA_PARAMS = ['land'];
 
 /**
  * Street View that looks at the place (owner 2026-11-03 “หันกล้องไปให้เจอหน้าร้านทุกครั้ง”): when a link that aims is
- * used, stand on the nearest street of the map's own road data (OpenFreeMap `transportation`, the tiles on screen) and
+ * used, stand on the street the place's name or address mentions (`transportation_name`) when it is about as near as the
+ * nearest street, else on the nearest street of the map's own road data (`transportation`, the tiles on screen), and
  * turn toward the point. Placed at use time because the panel renders before the camera has flown in and the tiles
  * around the point have loaded. No street within reach → the link keeps Google's default view at the point.
  */
 function aimStreetView(a) {
   const target = {lat: Number(a.dataset.aimLat), lng: Number(a.dataset.aimLng)};
   if (!Number.isFinite(target.lat) || !Number.isFinite(target.lng)) return;
-  let features = [];
-  try { features = state.map?.querySourceFeatures(SOURCE_ID, {sourceLayer: 'transportation'}) || []; } catch { features = []; }
-  const camera = cameraToward(target, streetLines(features, target));
+  const query = layer => { try { return state.map?.querySourceFeatures(SOURCE_ID, {sourceLayer: layer}) || []; } catch { return []; } };
+  const named = a.dataset.aimHint ? namedStreetLines(query('transportation_name'), target, a.dataset.aimHint) : [];
+  const camera = aimCamera(target, streetLines(query('transportation'), target), named);
   a.href = streetView(target.lat, target.lng, camera);
-  a.dataset.aimed = camera ? `${Math.round(camera.heading)}° · ${Math.round(camera.distance)} ม.` : 'default';
+  a.dataset.aimed = camera ? `${Math.round(camera.heading)}° · ${Math.round(camera.distance)} ม. · ${camera.by}` : 'default';
 }
 
 function wireEvents() {

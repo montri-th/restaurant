@@ -92,8 +92,8 @@ const words = areas => {
 export function outboundRow(context, {label = 'ค้นต่อ'} = {}) {
   const links = Array.isArray(context) ? context : outboundFor(context);
   if (!links.length) return '';
-  const title = l => (l.question ? `${l.question} — ค้นใน Google (กดแท็บ AI Mode ในหน้านั้นเพื่อถามต่อ)` : l.aim ? 'Street View หันกล้องจากถนนที่ใกล้ที่สุดเข้าหาจุดนี้' : '');
-  const aim = l => (l.aim ? ` data-aim-lat="${esc(Number(l.aim.lat).toFixed(6))}" data-aim-lng="${esc(Number(l.aim.lng).toFixed(6))}"` : '');
+  const title = l => (l.kind === 'maps' && l.question ? `${l.question} — เปิดร้านใน Google Maps (รูปหน้าร้าน เวลาเปิด รีวิว)` : l.question ? `${l.question} — ค้นใน Google (กดแท็บ AI Mode ในหน้านั้นเพื่อถามต่อ)` : l.aim ? 'Street View หันกล้องจากถนนเข้าหาจุดนี้ (ถนนที่ชื่อร้านหรือที่อยู่ระบุ ถ้าอยู่ใกล้พอ)' : '');
+  const aim = l => (l.aim ? ` data-aim-lat="${esc(Number(l.aim.lat).toFixed(6))}" data-aim-lng="${esc(Number(l.aim.lng).toFixed(6))}"${l.aim.hint ? ` data-aim-hint="${esc(l.aim.hint)}"` : ''}` : '');
   return `<div class="outbound" role="group" aria-label="ค้นต่อภายนอก (Google)"><span class="outbound-label">${esc(label)}</span>${links.map(l =>
     `<a class="outbound-link is-${esc(l.kind)}" href="${esc(l.href)}" target="_blank" rel="noopener"${title(l) ? ` title="${esc(title(l))}"` : ''}${aim(l)}>${esc(l.label)}</a>`).join('')}</div>`;
 }
@@ -490,7 +490,7 @@ export function renderStore(d, meta = {}, {extraFacts = '', extra = ''} = {}) {
   const bd = d.building;
   const building = bd ? `<dt>อาคาร</dt><dd>${bd.others ? `<button type="button" class="link-button" data-action="select-building" data-id="${esc(bd.key)}">จุดของร้านตกในอาคารเดียวกับอีก ${num(bd.others)} ร้าน</button>` : 'จุดของร้านตกในอาคารบนแผนที่ · ไม่มีร้านอื่นในอาคารนี้ตามตัวกรอง'}<br><span class="hint">ขอบอาคาร OpenStreetMap ที่แผนที่วาด</span></dd>` : '';
   const area = d.area ? `<button type="button" class="link-button" data-action="select-area" data-id="${esc(d.area.id)}">${esc(w.area)}${esc(d.area.name)}</button> · <button type="button" class="link-button" data-action="select-district" data-id="${esc(d.area.district)}">${esc(w.district)}${esc(d.area.districtName)}</button>` : '—';
-  const outbound = outboundRow({kind: 'store', brand: r.brand?.name || '', branch: parts.secondary, name: r.name, area: d.area ? `${w.area}${d.area.name}` : '', district: d.area ? `${w.district}${d.area.districtName}` : '', province: provinceName(r.province), lat, lng: lon});
+  const outbound = outboundRow({kind: 'store', brand: r.brand?.name || '', branch: parts.secondary, name: r.name, hint: r.name, area: d.area ? `${w.area}${d.area.name}` : '', district: d.area ? `${w.district}${d.area.districtName}` : '', province: provinceName(r.province), lat, lng: lon});
   return `<section class="detail-head store">
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
       ${blogo ? brandLogoMarkup(r.brand, {size: 'lg', className: 'detail-logo', decorative: false}) : ''}

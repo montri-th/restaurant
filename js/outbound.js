@@ -11,8 +11,10 @@
  *    runs an AI Mode question that arrives through a link — its own safety check, which a page must not try to get
  *    around. A search link opens at once with Google's AI Overview on top when Google has one, and Google's own
  *    AI Mode tab continues the same question without the check (both seen in Chrome on 3 Nov 2026).
- *  - Street View looks at the place: the camera stands on the nearest street of the map's own road data and turns
- *    toward the point (`cameraToward`). The point is a display position (restaurants ≈ 9.55 m grid) or a publisher
+ *  - Street View looks at the place: the camera stands on the street the place's own name or address mentions when it
+ *    is about as near as the nearest street, else on the nearest street of the map's own road data, and turns toward
+ *    the point (`aimCamera`). The store's Google Maps link opens the business (name + area), whose card shows the
+ *    storefront. The point is a display position (restaurants ≈ 9.55 m grid) or a publisher
  *    point, so the view faces the place, not a surveyed shop door; without a street within reach the link keeps
  *    Google's default view at the point.
  */
@@ -54,6 +56,41 @@ export function streetLines(features = [], target, {radiusM = 200} = {}) {
   return out;
 }
 
+/** The distinctive part of a street name: no “Road / Soi / ถนน / ซอย …”, no spaces or punctuation, lower case. */
+const LATIN_GENERIC = /\b(road|rd|street|st|soi|alley|lane|trok|thanon|avenue|ave|yaek)\b\.?/g;
+const THAI_GENERIC = /(ถนน|ถ\.|ซอย|ซ\.|ตรอก|แยก)/g;
+const squash = s => String(s || '').toLowerCase().normalize('NFC').replace(/[\s\-–—_.,·'’()\/]+/g, '');
+export const streetCore = name => squash(String(name || '').toLowerCase().replace(LATIN_GENERIC, ' ').replace(THAI_GENERIC, ' '));
+const longEnough = core => core.length >= (/[\u0E00-\u0E7F]/.test(core) ? 3 : 4);
+
+/**
+ * Named streets near a point that the place's own words mention (`hint`: its name, branch, the register's address):
+ * a `transportation_name` feature whose name, English, Latin or Thai name — without the generic word — appears in the
+ * hint. “Prime Burger Khaosan Road” finds “Khao San Road” / “ถนนข้าวสาร”. Area names are never part of a hint.
+ */
+export function namedStreetLines(features = [], target, hint = '', {radiusM = 200} = {}) {
+  const text = squash(hint);
+  if (!text) return [];
+  const named = features.filter(f => {
+    const p = f?.properties || {};
+    if (!STREET_CLASSES.has(p.class) && !(p.class === 'path' && p.subclass === 'pedestrian')) return false;
+    return [p.name, p['name:en'], p.name_en, p['name:latin'], p['name:th']].some(n => { const c = streetCore(n); return longEnough(c) && text.includes(c); });
+  });
+  // the class test above is done; keep the geometry filter of streetLines without its class filter
+  return streetLines(named.map(f => ({...f, properties: {...f.properties, class: 'minor', brunnel: null, ramp: 0}})), target, {radiusM});
+}
+
+/**
+ * The camera for a place: the street its own words name when that street is about as near as the nearest street
+ * (within `slackM` more), else the nearest street. A corner shop named after one of its two streets faces that one.
+ */
+export function aimCamera(target, lines = [], named = [], {slackM = 30, maxM = 150, minM = 3} = {}) {
+  const nearest = cameraToward(target, lines, {maxM, minM});
+  const byName = named.length ? cameraToward(target, named, {maxM, minM}) : null;
+  if (byName && (!nearest || byName.distance <= nearest.distance + slackM)) return {...byName, by: 'name'};
+  return nearest ? {...nearest, by: 'nearest'} : null;
+}
+
 /**
  * Where to stand to look at a point: the nearest point on the given street lines ([[lng, lat], …]) and the compass
  * heading from there to the point. Null when no street lies within `maxM`, or the point sits on the street itself
@@ -92,20 +129,21 @@ const storeName = c => {
 
 /**
  * Links for a context: {kind: 'store' | 'chain' | 'area' | 'district' | 'venue' | 'company' | 'country',
- * name, brand, branch, company, area, district, province, lat, lng}. Returns [{kind, label, question, href, aim}];
+ * name, brand, branch, company, area, district, province, lat, lng, hint}. Returns [{kind, label, question, href, aim}];
  * `aim` = the point a Street View link turns toward (the panel lets the app place the camera when it is clicked).
  */
 export function outboundFor(c = {}) {
   const out = [];
   const ask = (label, question) => out.push({kind: 'ai', label, question, href: googleSearch(question)});
-  const street = aim => hasPoint(c) && out.push({kind: 'street', label: 'Street View', question: '', href: streetView(c.lat, c.lng), aim: aim ? {lat: c.lat, lng: c.lng} : null});
+  const street = aim => hasPoint(c) && out.push({kind: 'street', label: 'Street View', question: '', href: streetView(c.lat, c.lng), aim: aim ? {lat: c.lat, lng: c.lng, hint: String(c.hint || '').slice(0, 240)} : null});
   const name = c.name || c.brand || '';
   switch (c.kind) {
     case 'store': {
       const full = storeName(c);
       ask('Google · รีวิว เมนู เวลาเปิด', `${full} ${place(c)} รีวิว เมนู ราคา เวลาเปิด-ปิด`);
       street(true);
-      out.push({kind: 'maps', label: 'Google Maps', question: '', href: hasPoint(c) ? mapsPoint(c.lat, c.lng) : mapsSearch(`${full} ${place(c)}`)});
+      // The business itself (0.8.1): Google's place card shows the storefront photo, hours and its own aimed Street View.
+      out.push({kind: 'maps', label: 'Google Maps', question: `${full} ${place(c)}`, href: mapsSearch(`${full} ${place(c)}`)});
       break;
     }
     case 'chain':
