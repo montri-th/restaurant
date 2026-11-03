@@ -19,7 +19,10 @@ const setup = () => {
   return ctx;
 };
 
-test('every panel view ends with dataset · source · date · boundary and the popularity caveat', () => {
+// Owner 2026-11-03 11:04 “ไม่แสดง caveats” (0.9.0): no limitation sentence in a view; provenance and the word อนุมาน stay.
+const CAVEATS = /ไม่ใช่ยอดขาย|ไม่ได้ยืนยัน|ยังไม่ยืนยัน|ไม่ใช่ราคา 0|ไม่ได้แปลว่า|ไม่ใช่ผลรังวัด|ตามแหล่ง|อยู่ในตัวเลข|ไม่ใช่ร้านทั้งหมด|ศูนย์ที่วัดได้|อันดับเฉพาะพื้นที่/;
+
+test('every panel view ends with dataset · source · date · boundary, and carries no caveat (0.9.0)', () => {
   const {data, index, coverage} = setup();
   const meta = data.meta;
   const insight = summarizeAreaInsight(data.rows, index, {coverage});
@@ -37,29 +40,29 @@ test('every panel view ends with dataset · source · date · boundary and the p
     assert.ok(t.includes('แหล่ง CityMETER Restaurants API สาธารณะ'), `${name}: source`);
     assert.ok(t.includes('ดึงข้อมูล 22 ต.ค. 2569'), `${name}: date`);
     assert.ok(/ขอบเขต \S/.test(t), `${name}: boundary`);
-    assert.ok(t.includes('ไม่ใช่ยอดขาย'), `${name}: rating/reviews are popularity proxies`);
+    assert.ok(!CAVEATS.test(t), `${name}: no caveat — ${t.match(CAVEATS)}`);
   }
   // One population (0.6.0): the first Aha reads restaurants and chain outlets together (fixture in tests/insight.test.js).
   assert.ok(text(views.overview).includes('169.4 ร้าน/ตร.กม.'), text(views.overview).slice(0, 300));
   // One vocabulary (0.7.0): the two sheets are told apart in the provenance line only — never in a tile, an Aha or a hint.
   const ov = text(views.overview);
-  assert.ok(ov.includes('ร้าน = ร้านในชุดข้อมูล CityMETER Restaurants (7 จังหวัด) + สาขาเครือจากทะเบียนร้านเครือ (ทั่วประเทศ) นับรวมกัน'), 'the split lives in the provenance line');
-  assert.equal((ov.match(/นับรวมกัน/g) || []).length, 1, 'the split is stated once');
+  assert.ok(ov.includes('ร้าน = ร้านในชุดข้อมูล 7 จังหวัด + สาขาเครือทั่วประเทศ'), 'the split lives in the provenance line, as a definition');
+  assert.equal((ov.match(/ร้าน = /g) || []).length, 1, 'the split is stated once');
   assert.ok(!/สาขาในทะเบียน|ทะเบียนร้านเครือ · ทั่วประเทศ|ดูทะเบียนร้านเครือ/.test(ov), 'no register framing in the main flow');
-  assert.ok(ov.includes('อันดับเฉพาะพื้นที่ ≥ 30 ร้าน'));
+  assert.ok(!ov.includes('อันดับเฉพาะพื้นที่'), 'the eligibility rule still ranks, but is method, not page copy (0.9.0)');
   assert.ok(ov.includes('ค้นต่อ') && /Google ·/.test(ov) && !views.overview.includes('udm=50'), 'the overview offers an outbound Google question (no AI Mode link: 0.8.1)');
-  assert.ok(text(views.venue).includes('ไม่ได้ยืนยันว่าร้านตั้งอยู่ภายใน'));
-  assert.ok(text(views.store).includes('จับคู่จากชื่อร้าน'));
+  assert.ok(!text(views.venue).includes('ไม่ได้ยืนยัน'));
+  assert.ok(/เครือร้าน \S+.* อนุมาน/.test(text(views.store)), 'a name-matched chain says อนุมาน, in one word');
   assert.ok(!text(views.store).includes('สาขาอื่น'), 'a name match is never called a branch');
   assert.match(provenance(meta, 'x'), /href="https:\/\/landometer\.com\/v3\/citymeter\?d=restaurant"/);
 });
 
-test('missing stays missing in views: no rating → “ไม่มีคะแนน…”, no price → “ไม่ระบุราคา (ไม่ใช่ราคา 0)”', () => {
+test('missing stays missing in views: no rating → “ไม่มีคะแนน”, no price → “ไม่ระบุราคา” (never 0)', () => {
   const {data, index} = setup();
   const r = data.rows.find(x => !Number.isFinite(x.rating) && x.price === 'UNSPECIFIED');
   const t = text(renderStore(buildStoreDetail(r, {scopeRows: data.rows, index, groups: data.groups}), {...data.meta, index}));
-  assert.ok(t.includes('ไม่มีคะแนนในแหล่งข้อมูล'));
-  assert.ok(t.includes('ไม่ระบุราคา (ไม่ใช่ราคา 0)'));
+  assert.ok(t.includes('ไม่มีคะแนน') && !/คะแนน\s*0\b/.test(t));
+  assert.ok(t.includes('ไม่ระบุราคา') && !/ราคา\s*0\b/.test(t));
   const priced = data.rows.find(x => Number.isFinite(x.p0) && Number.isFinite(x.p1) && x.p0 !== x.p1);
   assert.match(describePrice(priced).range, /–/);
   assert.equal(PRICE_LABELS.P2, '101–200 บาท', 'labels read as ranges (N18): the tier (100, 200]');
@@ -120,7 +123,7 @@ test('filter chips escape user text and offer one clear-all', () => {
   assert.equal((html.match(/data-id="all"/g) || []).length, 1);
 });
 
-test('0.8.0 segments in views: price tiers and chain sizes are labelled bars that filter; a store says how its size was counted', async () => {
+test('0.8.0 segments in views: price tiers and chain sizes are labelled bars that filter; a store shows its band (how it was counted in the title)', async () => {
   const {data, index} = setup();
   const {renderOutlet} = await import('../js/register-panel.js');
   const {SIZE_LABELS, LEGACY_PRICE_LABELS} = await import('../js/model.js');
@@ -128,16 +131,18 @@ test('0.8.0 segments in views: price tiers and chain sizes are labelled bars tha
   const t = text(html);
   assert.ok(t.includes('ขนาดเครือ') && t.includes('200+ สาขา') && html.includes('title="ดูเฉพาะเครือระดับชาติ 200+ สาขา"'), 'the area profile reads chain size (short bars, full name in the title)');
   assert.ok(/data-action="filter-field" data-id="size" data-value="S5"/.test(html) && /data-action="filter-field" data-id="price" data-value="P2"/.test(html), 'bars filter by tier and size');
-  assert.ok(t.includes('1 สาขา = พบแถวเดียว ไม่ได้แปลว่าเป็นร้านอิสระ'), 'one observed row is never an independent shop');
+  assert.ok(!t.includes('ร้านอิสระ'), 'one observed row is never called an independent shop — and no caveat says so either (0.9.0)');
   assert.ok(t.includes('ขนาดเครือจัดกลุ่ม 2 พ.ย. 2569'), 'the size bars cite the classification date in the one provenance line');
   assert.ok(!/size-fill[^"]*" style="[^"]*background/.test(html), 'size bars use one neutral fill, no second colour family');
   // A store with a chain: band + basis; a lifted row says it took its chain's larger size.
   const lifted = data.restaurants.find(r => r.sizeLifted && r.venue);
   const st = text(renderStore(buildStoreDetail(lifted, {scopeRows: data.rows, index, groups: data.groups}), {...data.meta, index}));
-  assert.ok(st.includes(`ขนาดเครือ ${SIZE_LABELS[lifted.size]}`) && st.includes('ใช้ขนาดที่ใหญ่ที่สุดที่นับได้ของเครือเดียวกัน'), st.slice(0, 400));
-  const single = data.restaurants.find(r => !r.brand && Number.isFinite(r.p1));
-  const sst = text(renderStore(buildStoreDetail(single, {scopeRows: data.rows, index, groups: data.groups}), {...data.meta, index}));
-  assert.ok(sst.includes('1 สาขาที่พบในข้อมูล') && sst.includes('ไม่ได้แปลว่าเป็นร้านอิสระ') && sst.includes('จัดช่วงจากราคาสูงสุดที่ระบุ'));
+  const liftedHtml = renderStore(buildStoreDetail(lifted, {scopeRows: data.rows, index, groups: data.groups}), {...data.meta, index});
+  assert.ok(st.includes(`ขนาดเครือ ${SIZE_LABELS[lifted.size]} อนุมาน`) && liftedHtml.includes('title="ใช้ขนาดที่ใหญ่ที่สุดที่นับได้ของเครือเดียวกัน"'), st.slice(0, 400));
+  const single = data.restaurants.find(r => !r.brand && Number.isFinite(r.p1) && Number.isFinite(r.p0) && r.p0 !== r.p1);
+  const singleDetail = buildStoreDetail(single, {scopeRows: data.rows, index, groups: data.groups});
+  const sst = text(renderStore(singleDetail, {...data.meta, index}));
+  assert.ok(sst.includes('1 สาขาที่พบในข้อมูล') && !sst.includes('ร้านอิสระ') && sst.includes(`ราคา ${singleDetail.price.range}`), 'the stated price, not the tier mechanics');
   // The point-of-sale registry is never sized.
   const cpf = data.outlets.find(o => o.sizeBasis === 'x');
   const ot = text(renderOutlet({reg: load().register, outlet: cpf, area: null, land: null, sameBrand: [], group: data.groups[cpf.group]}));
@@ -223,7 +228,7 @@ test('venue header says how much of its total is the venue\'s own listing (e.g. 
   assert.equal(all.count, 12); assert.equal(all.reviews, 30900);
   assert.equal(p.entityRows, 1);
   assert.equal(p.entityReviews, 24563);
-  assert.ok(text(renderVenue(p, index, {})).includes('ตัวเลขรวม 1 รายการที่เป็นชื่อสถานที่เอง (24,563 รีวิว)'));
+  assert.ok(text(renderVenue(p, index, {})).includes('รวม 1 รายการที่เป็นชื่อสถานที่เอง (24,563 รีวิว)'));
 });
 
 test('empty selections: no_data is never shown as 0; measured_zero offers the areas where the filters match', () => {
@@ -234,13 +239,13 @@ test('empty selections: no_data is never shown as 0; measured_zero offers the ar
   assert.equal(p.coverageState, 'no_data');
   assert.equal(p.density, null);
   const t = text(renderArea(p, {}));
-  assert.ok(t.includes(`ไม่มีข้อมูลร้านจากแหล่งข้อมูลใน${p.words.area}${unc.name}`), t.slice(0, 300));
+  assert.ok(t.includes(`ไม่มีข้อมูลร้านใน${p.words.area}${unc.name}`), t.slice(0, 300));
   assert.ok(!t.includes('ร้าน/ตร.กม.') && !/\b0 ร้าน\b/.test(t), 'no zero tiles for no_data');
   // An uncovered district is no_data too.
   const ud = [...index.districtById.values()].find(d => !d.areas.some(a => covered.has(a.id)));
   const dp = buildDistrictProfile(data.rows, ud.id, index, data.groups, {covered});
   assert.equal(dp.coverageState, 'no_data');
-  assert.ok(text(renderDistrict(dp, () => ({}), {})).includes('ไม่มีข้อมูลร้านจากแหล่งข้อมูล'));
+  assert.ok(text(renderDistrict(dp, () => ({}), {})).includes('ไม่มีข้อมูลร้านใน'));
   // Covered area, filter leaves 0: measured zero + the count found elsewhere.
   const kfc = filterRows(data.rows, {brand: 'RBR-kfc'});
   const z = buildAreaProfile(kfc, '100204', index, data.groups, {covered});
@@ -254,7 +259,7 @@ test('empty selections: no_data is never shown as 0; measured_zero offers the ar
   assert.equal(buildAreaProfile(data.rows, '100204', index, data.groups, {covered}).coverageState, 'measured');
 });
 
-test('venue and store copy say how the name link was made; spatial results say “จุดตกในอาคาร”, never “ตั้งอยู่ใน”', () => {
+test('venue and store copy mark name links อนุมาน; spatial results say “จุดตกในอาคาร”, never “ตั้งอยู่ใน”; no caveats (0.9.0)', () => {
   const {data, index} = setup();
   const meta = data.meta;
   // Name-derived place.
@@ -263,32 +268,29 @@ test('venue and store copy say how the name link was made; spatial results say �
   assert.equal(pc.nameDerived, true);
   assert.equal(pc.matched.auto, 13, 'one of the 14 name-derived rows was moved to the register (0.6.0)');
   const tc = text(renderVenue(pc, index, meta));
-  assert.ok(tc.includes('สถานที่จากชื่อร้าน') && tc.includes('ทุกจุดอยู่ในรัศมี 200 ม. จากจุดกลาง'), tc.slice(0, 400));
+  assert.ok(tc.includes('สถานที่จากชื่อร้าน') && !CAVEATS.test(tc), tc.slice(0, 400));
   // Sheet venue with rows found by their name ending.
   const pm = data.venues.find(v => v.name === 'Panya Market');
   const suffix = data.rows.filter(r => r.venue?.id === pm.id && r.venueMatch === 'suffix').length;
   assert.ok(suffix >= 1);
   const tg = text(renderVenue(buildVenueProfile(data.rows, pm, index, data.groups), index, meta));
-  assert.ok(tg.includes(`${suffix} ร้านจับจากชื่อที่ลงท้ายด้วยชื่อสถานที่`), tg.slice(0, 400));
+  assert.ok(!CAVEATS.test(tg), tg.slice(0, 400));
   // Store facts.
   const store = name => text(renderStore(buildStoreDetail(data.rows.find(r => r.name === name), {scopeRows: data.rows, index, groups: data.groups}), {...meta, index}));
-  assert.ok(store('Shabu Shabu Nangnai (Panya Market Branch)').includes('ชื่อร้านลงท้ายด้วยชื่อสถานที่นี้'));
+  assert.ok(/สถานที่ Panya Market อนุมาน/.test(store('Shabu Shabu Nangnai (Panya Market Branch)')), 'a venue found by the name ending says อนุมาน');
   const autoRow = data.rows.find(r => r.venue?.id === charn.id);
-  assert.ok(store(autoRow.name).includes('ชื่อร้านลงท้ายด้วยชื่อนี้ · สถานที่จากชื่อร้าน'));
+  assert.ok(store(autoRow.name).includes('Charn At The Avenue อนุมาน'));
   // Spatial join results (venue section, store fact, building panel).
   const sp = {buildings: 2, own: 9, others: data.rows.filter(r => !r.venue).slice(0, 3)};
   const ts = text(renderVenue(buildVenueProfile(data.rows, charn, index, data.groups, {spatial: sp}), index, meta));
-  assert.ok(ts.includes('ร้านอื่นที่จุดตกในอาคารเดียวกัน') && ts.includes('ตกในอาคาร 2 หลัง'));
-  // One located-in caveat per view (owner 2026-10-28 18:27): the name-link note carries it, the spatial section does not repeat it.
-  assert.equal((ts.match(/ไม่ได้ยืนยัน/g) || []).length, 1, 'the venue view says it once');
-  assert.ok(ts.includes('อาคารสีน้ำเงินคืออาคารที่จุดของร้านเหล่านี้ตกอยู่'));
+  assert.ok(ts.includes('ร้านอื่นที่จุดตกในอาคารเดียวกัน') && !CAVEATS.test(ts));
   const r0 = data.rows.find(r => r.area === '100204');
   const tb = text(renderStore(buildStoreDetail(r0, {scopeRows: data.rows, index, groups: data.groups, building: {key: 'osm:7', others: 4}}), {...meta, index}));
-  assert.ok(tb.includes('จุดของร้านตกในอาคารเดียวกับอีก 4 ร้าน'));
+  assert.ok(tb.includes('จุดตกในอาคารเดียวกันอีก 4 ร้าน'));
   const b = buildBuildingProfile({key: 'osm:1', kind: 'osm', rows: data.rows.filter(r => r.area === '100204').slice(0, 5), height: 24.4}, index, data.groups);
   const tbu = text(renderBuilding(b, {...meta, index}));
-  assert.ok(tbu.includes('ร้านที่จุดตกในอาคารนี้') && tbu.includes('ไม่ได้ยืนยันว่าร้านตั้งอยู่ในอาคารนี้') && tbu.includes('ความสูงบนแผนที่ราว 24 ม.'));
-  for (const t of [tc, tg, ts, tb, tbu]) assert.ok(!/ตั้งอยู่ใน(?!ภายใน)/.test(t.replace(/ไม่ได้ยืนยันว่า(ร้าน)?ตั้งอยู่ใน\S*/g, '')), 'no located-inside claim');
+  assert.ok(tbu.includes('ร้านที่จุดตกในอาคารนี้') && tbu.includes('สูงราว 24 ม.') && !CAVEATS.test(tbu));
+  for (const t of [tc, tg, ts, tb, tbu]) assert.ok(!/ตั้งอยู่ใน/.test(t), 'no located-inside claim');
   // A building without reviewed rows shows no review total (missing ≠ 0).
   const noReviews = buildBuildingProfile({key: 'osm:2', rows: data.rows.filter(r => !Number.isFinite(r.reviews)).slice(0, 2)}, index, data.groups);
   assert.ok(text(renderBuilding(noReviews, meta)).includes('— รีวิว'));
@@ -304,7 +306,7 @@ test('one population, one vocabulary (0.7.0): a จังหวัด outside th
   const noPoint = rows.filter(r => !Number.isFinite(r.latitude)).length;
   const html = text(renderOverview({insight, summary: summarize(rows), overview: buildOverview(rows, index), focusMode: 'auto', classOf: () => '#000', provinces: [], meta, coverage: {km2: 0, areas: 0}, province: 'CBI', noPoint}));
   assert.ok(html.includes(`${rows.length.toLocaleString('en-US')} ร้าน · สาขาเครือในชลบุรี`), html.slice(0, 400));
-  assert.ok(html.includes('ครอบคลุม 7 จังหวัด'));
+  assert.ok(html.includes('ดูเป็นหมุดบนแผนที่') && !html.includes('ครอบคลุม 7 จังหวัด'), 'says where to look, not why the map is quiet (0.9.0)');
   assert.ok(!/0% ของร้าน|0 พื้นที่นี้/.test(html), 'never a 0 % / 0 areas finding');
   assert.ok(/—\s*รีวิว/.test(html), 'reviews tile shows — (outlets carry none)');
   assert.ok(!/สาขาในทะเบียน/.test(html), 'no register framing');
@@ -314,7 +316,7 @@ test('one population, one vocabulary (0.7.0): a จังหวัด outside th
   const tpInsight = summarizeAreaInsight(tp, index, {coverage: {km2: 0, areas: 0}});
   const tpNoPoint = tp.filter(r => !Number.isFinite(r.latitude)).length;
   const tpHtml = text(renderOverview({insight: tpInsight, summary: summarize(tp), overview: buildOverview(tp, index), focusMode: 'auto', classOf: () => '#000', provinces: [], meta, coverage: {km2: 0, areas: 0}, province: '', noPoint: tpNoPoint, listRows: tp, search: 'tp tea', index}));
-  if (tpNoPoint === tp.length) assert.ok(tpHtml.includes('ยังไม่มีพิกัดในทะเบียน'), tpHtml.slice(0, 400));
+  if (tpNoPoint === tp.length) assert.ok(tpHtml.includes('ยังไม่มีพิกัด — ดูรายชื่อด้านล่าง'), tpHtml.slice(0, 400));
   assert.ok(tpHtml.includes('รายการ') && tpHtml.includes('TP TEA'), 'the rows are listed, chain first');
   // An area with both kinds keeps the outlets out of the price bars (they are counted as unspecified) and names no split.
   const area = text(renderArea(buildAreaProfile(data.rows, '100703', index, data.groups), meta));

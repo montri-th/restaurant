@@ -19,7 +19,7 @@ export const LAND_DATASETS = Object.freeze({shopping: 'ศูนย์การ�
 export const RELATIONS = Object.freeze(['in', 'in', 'near']);
 export const RELATION_TH = Object.freeze({in: 'ในอาคาร', near: 'รอบอาคาร (ไม่เกิน 100 ม.)'});
 /** The in-rule in one clause, for the one provenance line of a Land view. */
-export const LAND_RULE = 'ในอาคาร = จุดของร้านอยู่ในขอบอาคาร (รวมจุดห่างขอบไม่เกิน 10 ม.) ไม่ใช่การยืนยันผู้เช่าหรือชั้น';
+export const LAND_RULE = 'ในอาคาร = จุดของร้านอยู่ในขอบอาคาร หรือห่างขอบไม่เกิน 10 ม.';
 
 const HOTEL_TYPES = {hotel: 'โรงแรม', resort: 'รีสอร์ต', guesthouse: 'เกสต์เฮาส์', motel: 'โมเต็ล', serviced_apartment: 'เซอร์วิสอพาร์ตเมนต์',
   homestay: 'โฮมสเตย์', bungalow: 'บังกะโล', youth_lodging: 'โฮสเทล'};

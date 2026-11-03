@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.8.6",
+  "productVersion": "0.9.0",
   "updatedOn": "2026-11-03",
   "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/31, read back 2026-10-30, workbook read 2026-11-03 · classification 2026-11-02 (unreviewed; chain size and price tiers only) · Land join 2026-11-03",
   "language": "th",
@@ -181,15 +181,15 @@
   "firstAha": {
     "scope": "scopeRows, or baseRows when a เขต/อำเภอ is selected",
     "ranking": "แขวง/ตำบล with ≥ 30 rows (MIN_AREA_ROWS), by restaurants per km² of the production area, then rows, then code; top three",
-    "headlineTemplate": "{density} ร้าน/ตร.กม. — ร้านอาหารแน่นที่สุดใน {areaCount} {แขวง|ตำบล|พื้นที่}นี้",
+    "headlineTemplate": "lens-specific (see lenses); density lens: {density} ร้าน/ตร.กม. — แน่นที่สุดใน {areaCount} {แขวง|ตำบล|พื้นที่}นี้",
     "numerator": "rows of the population in the three areas (restaurants by source subdistrict membership; outlets whose point lies in the frame)",
     "denominator": "sum of the three areas' production km² (Σrows ÷ Σkm², never an average of ratios)",
     "baseline": "rows with a frame in the selection ÷ km² of the covered frames (≥ 1 row in the full population) inside the province/district filter",
     "secondaryFinding": "area with the most reviews in the selection (popularity proxy, rows with a review count only)",
-    "eligibilityCopy": "จัดอันดับเฉพาะพื้นที่ที่มีอย่างน้อย 30 ร้าน",
+    "eligibilityCopy": "(0.9.0: not printed — method, not page copy; owner 2026-11-03 “ไม่แสดง caveats”; the ≥ 30-row eligibility still ranks)",
     "defaultFocus": "auto",
     "defaultCamera": "city preset, fitPitched over the union of the focused polygons with every vertex inside the padded viewport",
-    "action": "ดูทุกพื้นที่ (?areas=all); เปรียบเทียบพื้นที่ (opens charts); area names are links",
+    "action": "ดูทุกพื้นที่ (?areas=all); ลองกับร้านแบบคุณ (opens the type / price filters) on the national overview, else เปรียบเทียบพื้นที่ (opens charts); area names are links",
     "explicitAction": "โฟกัส {areaCount} {แขวง|ตำบล}นี้ (when focus mode is none)",
     "model": "js/area-insight.js#summarizeAreaInsight",
     "filter": "js/area-insight.js#filterAreaRows",
@@ -291,7 +291,84 @@
         "population": "restaurants only (0.5.x)",
         "note": "0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66 ร้าน/ตร.กม., baseline 18.01, coverage 308 / 3,899.11 km²"
       }
-    ]
+    ],
+    "lenses": {
+      "decision": "owner 2026-11-03 (AskUserQuestion) “สลับดูได้ 3 มุม”: open on national chains, chips switch to 1,000+ baht and to density (Who / first-Aha proposal of 11:04)",
+      "module": "js/lenses.js (LENSES, DEFAULT_LENS, lensOf, lensFilters, lensesOffered, lensShare, LENS_TEST); chips js/panel.js#lensRow; app js/app.js#lensFinding / #openLens / #openFilters",
+      "rule": "a lens is a filter preset (type / price / size), so the map's density, ranking, chain list and Aha read the same rows; active exactly when those filters equal the preset and no search, province or chain narrows the scope; a bare URL (no known parameter) opens the default; ?lens=chains|premium|density names one; the unfiltered overview writes ?lens=density so a reload keeps it",
+      "chains": {
+        "preset": {
+          "size": "S5"
+        },
+        "headlineTemplate": "{share}% ของร้านใน {areaCount} {แขวง|ตำบล|พื้นที่}นี้ เป็นเครือ 200+ สาขา",
+        "share": "200+ chain rows ÷ every framed row of the three areas where 200+ chains are densest (whole population, unfiltered), beside the same share over every framed row ('ทุกพื้นที่')",
+        "chains": "top chains of those areas by logo chip (js/chains.js#chainsOf — chains, not names: KFC's three operator networks stay apart)",
+        "snapshot": {
+          "asOf": "2026-11-03",
+          "areaIds": [
+            "100702",
+            "100703",
+            "103702"
+          ],
+          "names": [
+            "วังใหม่",
+            "ปทุมวัน",
+            "ถนนพญาไท"
+          ],
+          "count": 187,
+          "total": 695,
+          "share": 26.91,
+          "baselineCount": 7605,
+          "baselineTotal": 80629,
+          "baseline": 9.43,
+          "topChains": [
+            [
+              "Café Amazon",
+              30
+            ],
+            [
+              "Starbucks",
+              23
+            ],
+            [
+              "Dairy Queen",
+              13
+            ]
+          ],
+          "chainsInAreas": 22,
+          "status": "regression fixture (tests/lenses.test.js)"
+        }
+      },
+      "premium": {
+        "preset": {
+          "price": "P6"
+        },
+        "headlineTemplate": "{share}% ของร้านราคาเริ่ม 1,000 บาทขึ้นไป อยู่ใน {areaCount} {แขวง|ตำบล}นี้ (count mode: 886 rows < 1,000)",
+        "snapshot": {
+          "asOf": "2026-11-03",
+          "names": [
+            "คลองตันเหนือ",
+            "ลุมพินี",
+            "ทุ่งมหาเมฆ"
+          ],
+          "rows": [
+            107,
+            73,
+            35
+          ],
+          "count": 215,
+          "total": 886,
+          "share": 24.27,
+          "status": "regression fixture (tests/lenses.test.js)"
+        }
+      },
+      "density": {
+        "preset": {},
+        "headlineTemplate": "{density} ร้าน/ตร.กม. — แน่นที่สุดใน {areaCount} {แขวง|ตำบล|พื้นที่}นี้",
+        "snapshot": "defaultSnapshot (169.4, unchanged)"
+      },
+      "tryYours": "“ลองกับร้านแบบคุณ” (pictogram tune) opens the filter details at the type select — the expansion team's own question"
+    }
   },
   "metricContract": {
     "areas": {
@@ -1086,6 +1163,14 @@
     {
       "id": "INV40",
       "rule": "No classification result reaches the web before its sub-segment passes the workbook's rules.QA (a human sample of 50 per sub-segment, at least 48 correct): food taxonomy (6 categories / 19 groups / 31 sub-groups), format, occasion, special labels, inferred price and the competitor view stay off the page (data/segments.json meta.held) — never shown as a label, not even “(อนุมาน)”; data/segments.json attaches only when both id arrays line up and carries no private sheet link or id"
+    },
+    {
+      "id": "INV41",
+      "rule": "No caveats in the page (owner 2026-11-03 11:04 “ไม่แสดง caveats”): a claim is worded as narrowly as its evidence instead of being followed by a limitation sentence; what stays: one provenance line per view (dataset · source · date · boundary, with at most one clause that DEFINES the unit — never hedges it), the one word “อนุมาน” on an inferred value (a chain or venue matched by name, a size taken from the chain, an outlet's derived type), and the states ไม่มีข้อมูล · ไม่ระบุราคา · ยังไม่มีพิกัด · ไม่จัดขนาด; limits live in DATA_METHOD.md and PRODUCT_STATEMENT.md (tests/views.test.js CAVEATS, tests/register.test.js)"
+    },
+    {
+      "id": "INV42",
+      "rule": "A place's character line (js/profile-model.js#areaCharacter, js/panel.js#characterLine) describes the place from its whole population whatever the filters: the top type group (not other / not stated) with its share of every row, the tier its restaurants state most with its count of priced rows, and the share of 200+ chains beside the same share everywhere; no priced row → no price token"
     }
   ],
   "chartContracts": [
@@ -1189,6 +1274,25 @@
       "exclusive": "รีวิว / คะแนน",
       "gla": "ร้าน/ตร.กม.",
       "segment": "ประเภทร้าน"
+    },
+    "extension": {
+      "status": "12-glyph extension approved by the owner 2026-11-03 (AskUserQuestion “อนุมัติราว 12 ตัว (Recommended)”) — same family and axes, its own file so the 2026-10-22 subset stays byte-identical",
+      "font": "assets/icons/material-pictogram-food-300.woff2 (2380 bytes, sha256 de2167a8c4f2695c4b5f700190304e4cb13dc415d81c6599a6ea8aa7d0acccd0), manifest assets/icons/material-pictogram-food-300.json (source sha256 + codepoints sha256), built reproducibly by scripts/build-pictogram-food.py from google/material-design-icons master (read 2026-11-03)",
+      "glyphs": {
+        "g-general": "restaurant U+E56C",
+        "g-thai": "rice_bowl U+F1F5",
+        "g-fastfood": "lunch_dining U+EA61",
+        "g-japanese": "ramen_dining U+EA64",
+        "g-cafe": "local_cafe U+EB44",
+        "g-asian": "takeout_dining U+EA74",
+        "g-grill": "outdoor_grill U+EA47",
+        "g-western": "dinner_dining U+EA57",
+        "price": "payments U+EF63",
+        "building": "apartment U+EA40",
+        "place": "location_on U+F1DB",
+        "tune": "tune U+E429"
+      },
+      "usage": "beside fact labels of store / outlet / Land panels, the place character line, the lens chips and “ลองกับร้านแบบคุณ”; type groups map by id (js/navigation.js#GROUP_PICTOGRAM; none for other / unspecified); never on the map (the map's type symbols are the data cue system, DATAVIZ-05) and never instead of a category, evidence or rating label (LDS ICON-01)"
     }
   },
   "delivery": {

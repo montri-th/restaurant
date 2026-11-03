@@ -30,16 +30,15 @@ function colors(theme) {
   };
 }
 
+/** A building's height in a few words (no caveat clause — owner 2026-11-03 11:04; a model estimate still says so). */
 export function buildingHeightLabel(properties = {}) {
-  if (properties.height_status === 'model_height_review') return 'ความสูงแบบจำลองรอตรวจ · 3 ม. เพื่อแสดงรูปทรง';
-  if (properties.height_status === 'unknown_display_fallback') {
-    return properties.render_as === 'outline' ? 'ความสูง footprint ไม่ระบุ · ส่วนอาคารใช้ baseM/topM จากแหล่งข้อมูล' : 'ไม่มีข้อมูลความสูง · 3 ม. เป็นความสูงแสดงผลเท่านั้น';
-  }
+  if (properties.height_status === 'model_height_review') return 'ความสูงแบบจำลองรอตรวจ';
+  if (properties.height_status === 'unknown_display_fallback') return properties.render_as === 'outline' ? 'ความสูงตามส่วนอาคาร' : 'ไม่มีข้อมูลความสูง';
   const top = Number(properties.height_m), base = Number(properties.base_m) || 0;
   if (!Number.isFinite(top)) return 'ไม่มีข้อมูลความสูง';
   const label = new Intl.NumberFormat('th-TH', {maximumFractionDigits: 2});
-  if (properties.geometry_role === 'host_building_part_not_shop_unit') return `ส่วนอาคาร ${label.format(base)}–${label.format(top)} ม. ตาม CityMETER · ไม่ใช่ผลรังวัด`;
-  return `ความสูง${properties.height_status === 'citymeter_model_estimate' ? 'ประมาณจากแบบจำลอง' : 'ตามแหล่งข้อมูล'} ${label.format(top)} ม. · ไม่ใช่ผลรังวัด`;
+  if (properties.geometry_role === 'host_building_part_not_shop_unit') return `ส่วนอาคาร ${label.format(base)}–${label.format(top)} ม.`;
+  return `${properties.height_status === 'citymeter_model_estimate' ? 'สูงประมาณ' : 'สูง'} ${label.format(top)} ม.`;
 }
 
 /** venue ids that have a host building in this data set. */

@@ -55,6 +55,7 @@
 import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, LEGACY_PRICE, LEGACY_PRICE_LABELS, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, attachSegments, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink} from './model.js';
 import {buildAreaIndex, areaWord, districtWord, areaLocator} from './areas.js';
 import {summarizeAreaInsight, filterAreaRows, MIN_AREA_ROWS} from './area-insight.js';
+import {LENSES, DEFAULT_LENS, LENS_TEST, lensOf, lensFilters, lensesOffered, lensShare} from './lenses.js';
 import {renderInsightChart} from './charts.js';
 import {loadMapLibrary} from './vendors.js';
 import {installRestaurantPins, PIN_LAYERS} from './pins.js';
@@ -70,7 +71,7 @@ import {configureBrandLogos, brandLogoMarkup} from './brand-logos.js';
 import {configureVenueLogos} from './venue-logos.js';
 import {installAreaLayers, installAreaLabels, buildAreaModel, featureBounds, FILL_MAX_ZOOM, AREA_MIN_ZOOM} from './map-layers.js';
 import {installProvinceLayers, buildProvinceModel, provinceBounds, PROVINCE_FILL_MAX_ZOOM, PROVINCE_LABEL_MAX_ZOOM} from './provinces.js';
-import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile, buildBuildingProfile} from './profile-model.js';
+import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile, buildBuildingProfile, areaCharacter} from './profile-model.js';
 import {renderOverview, renderBrandHead, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate, heading} from './panel.js';
 import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint, wholeBuilding} from './building-join.js';
 import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE, SOURCE_ID} from './map-style.js';
@@ -182,6 +183,8 @@ function saveURL() {
   if (state.panel.mode === 'land' && state.panel.id) p.set('land', state.panel.id);
   if (!state.view3d) p.set('view3d', '0');
   if (!state.twoPoint) p.set('cam', 'model');
+  // A bare URL opens the default lens, so the unfiltered overview names its own lens to survive a reload or a share.
+  if (!p.size && DEFAULT_LENS !== 'density') p.set('lens', 'density');
   history.replaceState(null, '', location.pathname + (p.size ? '?' + p : ''));
 }
 
@@ -591,10 +594,14 @@ function renderPanel(summary = summarize(state.rows)) {
   if (registerMode() || mode === 'land') html = renderExtraView(mode, id);
   else if (mode === 'area') {
     const a = areaById(id);
-    html = renderArea(buildAreaProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds}), meta, a ? placeExtras(`${areaWord(a.province)}${a.name}`, [id]) : '');
+    const profile = buildAreaProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds});
+    if (profile) profile.character = areaCharacter(state.data.rows.filter(r => r.area === id), groups, {chainBaseline: chainBaseline()});
+    html = renderArea(profile, meta, a ? placeExtras(`${areaWord(a.province)}${a.name}`, [id]) : '');
   } else if (mode === 'district') {
     const d = districtById(id);
-    html = renderDistrict(buildDistrictProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds}), densityClassOf, meta, d ? placeExtras(`${districtWord(d.province)}${d.name}`, (d.areas || []).map(a => a.id)) : '');
+    const profile = buildDistrictProfile(state.scopeRows, id, state.index, groups, {covered: state.coveredIds});
+    if (profile) profile.character = areaCharacter(state.data.rows.filter(r => r.district === id), groups, {chainBaseline: chainBaseline()});
+    html = renderDistrict(profile, densityClassOf, meta, d ? placeExtras(`${districtWord(d.province)}${d.name}`, (d.areas || []).map(a => a.id)) : '');
   }
   else if (mode === 'venue') html = renderVenue(buildVenueProfile(state.scopeRows, state.venueById.get(id), state.index, groups, {hosted: state.hosted.has(id), spatial: venueSpatial(id)}), state.index, meta, venueExtras(id));
   else if (mode === 'building') html = renderBuilding(buildBuildingProfile(currentBuilding(), state.index, groups), {...meta, index: state.index}, buildingExtras());
@@ -616,10 +623,12 @@ function renderPanel(summary = summarize(state.rows)) {
     // A small scope (a search, a chain, a province of a few outlets) is listed in the panel, chain first.
     const listRows = !f.brand && state.scopeRows.length <= 40 && (q || noPoint) ? [...state.scopeRows].sort((a, b) => (b.reviews ?? -1) - (a.reviews ?? -1) || (a.brand?.name || a.name).localeCompare(b.brand?.name || b.name, 'th')) : null;
     const brandHead = f.brand ? brandPageHead(f.brand, province) : '';
+    const {lens, lensStats, lensChains} = lensFinding(f, insight);
     html = renderOverview({insight, summary, overview, focusMode: focusMode(), classOf: densityClassOf, provinces, meta, coverage: state.coverage, province, extra: overviewExtras(),
       unknownProvince: province ? 0 : (pmodel.unknown ?? state.scopeRows.filter(r => r.kind === 'outlet' && !r.province).length),
-      chains, chainTotal: chains.total, noPoint, filtered: activeFilterCount(f) > 0, listRows, brandHead, search: f.search.trim(), searchChains, index: state.index});
-    renderMapAha(insight, summary, {noPoint});
+      chains, chainTotal: chains.total, noPoint, filtered: activeFilterCount(f) > 0, listRows, brandHead, search: f.search.trim(), searchChains, index: state.index,
+      lens, lenses: lensesOffered(f), lensStats, lensChains});
+    renderMapAha(insight, summary, {noPoint, lens, lensStats});
   } else {
     $('map-aha').hidden = true;
   }
@@ -631,7 +640,7 @@ function renderPanel(summary = summarize(state.rows)) {
   renderPanel.lastKey = key;
 }
 
-function renderMapAha(insight, summary = null, {noPoint = 0} = {}) {
+function renderMapAha(insight, summary = null, {noPoint = 0, lens = null, lensStats = null} = {}) {
   const el = $('map-aha');
   const crumb = `<p class="map-aha-crumb">${esc(breadcrumbText(buildBreadcrumb({province: $('province').value})))}</p>`;
   const brand = $('brand').value ? state.chains?.byKey.get($('brand').value) : null;
@@ -660,7 +669,7 @@ function renderMapAha(insight, summary = null, {noPoint = 0} = {}) {
   const names = insight.areas.map(a => esc(a.name)).join(' · ');
   el.innerHTML = mode === 'explicit'
     ? `<div>${crumb}<h2>กำลังสำรวจ ${num(insight.areas.length)} พื้นที่</h2><p>${num(insight.count)} ร้าน</p></div><button type="button" class="btn" data-action="clear-focus">ดูทุกพื้นที่</button>`
-    : `<div>${crumb}<h2>${insight.mode === 'density' ? `${dens(insight.density)} ร้าน/ตร.กม. ใน ${num(insight.areas.length)} พื้นที่ที่แน่นที่สุด` : `${num(Math.round(insight.share))}% ของร้านอยู่ใน ${num(insight.areas.length)} พื้นที่`}</h2><p>${names}</p></div>${mode === 'auto'
+    : `<div>${crumb}<h2>${lens === 'chains' && lensStats?.share != null ? `เครือ 200+ สาขา ${dec(lensStats.share)}% ของร้านใน ${num(insight.areas.length)} พื้นที่` : lens === 'premium' && insight.mode !== 'density' ? `ร้าน 1,000+ บาท ${dec(insight.share)}% อยู่ใน ${num(insight.areas.length)} พื้นที่` : insight.mode === 'density' ? `${dens(insight.density)} ร้าน/ตร.กม. ใน ${num(insight.areas.length)} พื้นที่ที่แน่นที่สุด` : `${num(Math.round(insight.share))}% ของร้านอยู่ใน ${num(insight.areas.length)} พื้นที่`}</h2><p>${names}</p></div>${mode === 'auto'
       ? '<button type="button" class="btn" data-action="clear-focus">ดูทุกพื้นที่</button>'
       : '<button type="button" class="btn primary" data-action="explore-top">โฟกัส</button>'}`;
 }
@@ -1159,6 +1168,39 @@ function filterBrand(id) {
   $('panel').scrollTop = 0;
 }
 
+/**
+ * The lens of the overview (js/lenses.js): which one the filters show, and for national chains the share of 200+ chains
+ * among every restaurant of the three areas (the whole population, unfiltered) with the chains there by logo.
+ */
+/** The share of 200+ chains among every framed row of the population (the “ทุกพื้นที่” beside a place's share). */
+function chainBaseline() {
+  if (chainBaseline.rows !== state.data.rows) { chainBaseline.rows = state.data.rows; chainBaseline.value = lensShare(state.data.rows, [], LENS_TEST.chains).baseline; }
+  return chainBaseline.value;
+}
+function lensFinding(f, insight) {
+  const lens = lensOf(f);
+  if (lens !== 'chains' || !insight?.areaIds?.length) return {lens, lensStats: null, lensChains: []};
+  return {lens, lensStats: lensShare(state.data.rows, insight.areaIds, LENS_TEST.chains), lensChains: chainsOf(filterAreaRows(state.scopeRows, new Set(insight.areaIds)), state.chains, 6)};
+}
+/** One tap on a lens chip: its preset replaces the type, price and size filters; nothing else changes. */
+function openLens(id) {
+  const values = lensFilters(id);
+  if (!values) return;
+  for (const [k, v] of Object.entries(values)) if ([...$(k).options].some(o => o.value === v)) $(k).value = v;
+  state.focusAreaIds = []; state.autoFocus = true;
+  state.selectedArea = ''; state.selectedDistrict = '';
+  state.panel = overviewPanel(); state.history = [];
+  update({fit: true});
+  announce(`มุมมอง ${LENSES.find(l => l.id === id)?.label || ''}`);
+}
+/** “ลองกับร้านแบบคุณ”: open the filters at the type select (price follows it). */
+function openFilters() {
+  const d = $('filter-details');
+  if (!d) return;
+  d.open = true;
+  $('group')?.focus({preventScroll: false});
+}
+
 /** A price tier or chain size picked from a panel's bars: the same path as the filter select (keeps the open area). */
 function filterField(field, value) {
   if (!['price', 'size'].includes(field) || ![...$(field).options].some(o => o.value === value)) return;
@@ -1184,6 +1226,8 @@ function onPanelAction(event) {
     case 'select-land': selectLand(id); break;
     case 'filter-brand': filterBrand(value); break;
     case 'filter-field': filterField(id, value); break;
+    case 'lens': openLens(id); break;
+    case 'open-filters': openFilters(); break;
     case 'back': goBack(); break;
     case 'explore-top': exploreTop(); break;
     case 'clear-focus': clearFocus(); break;
@@ -1221,14 +1265,14 @@ function renderLegend() {
   } else if ($('province').value && !isCoveredProvince($('province').value)) {
     // A จังหวัด outside the covered seven has no แขวง/ตำบล frames: the key says so instead of an empty scale.
     $('legend-title').textContent = `${provinceByCode($('province').value)?.th || 'จังหวัด'} · ร้าน`;
-    steps.innerHTML = '<span class="hint">ข้อมูลร้านครอบคลุม 7 จังหวัด จึงไม่มีสีแขวง/ตำบลที่นี่ · 1 หมุด = 1 ร้าน</span>';
+    steps.innerHTML = '<span class="hint">1 หมุด = 1 ร้าน</span>';
     $('legend-areas').title = 'จังหวัดนอก 7 จังหวัดที่มีกรอบแขวง/ตำบล: ร้านที่มีพิกัดแสดงเป็นหมุด';
   } else {
     const m = state.areaModel;
     $('legend-title').textContent = 'แขวง/ตำบล · ร้าน/ตร.กม.';
     steps.innerHTML = (m?.classes.classes.length ? rampMarkup(m.classes, {unit: 'ร้าน/ตร.กม.'}) : '<span class="hint">ไม่มีร้านในตัวกรองนี้</span>') +
       (m?.zeroCount ? `<span class="legend-step" title="พื้นที่ที่มีร้านในชุดข้อมูล แต่ไม่พบตามตัวกรองนี้"><i class="legend-zero" style="background:${m.classes.zero.fill}" aria-hidden="true"></i>0</span>` : '') +
-      (m?.noDataCount ? '<span class="legend-step" title="แหล่งข้อมูลไม่มีร้านในพื้นที่นี้ ไม่ได้แปลว่าไม่มีร้านอาหาร"><i class="legend-nodata" aria-hidden="true"></i>ไม่มีข้อมูล</span>' : '');
+      (m?.noDataCount ? '<span class="legend-step" title="แหล่งข้อมูลไม่มีร้านในพื้นที่นี้"><i class="legend-nodata" aria-hidden="true"></i>ไม่มีข้อมูล</span>' : '');
     $('legend-areas').title = `ร้านต่อ ตร.กม. ของแขวง/ตำบล (ร้าน ÷ พื้นที่ตาม CityMETER) · ${m?.classes.classCount || 0} ระดับเท่าช่วงจาก LUT 41 ค่าของ LDS [ล่าง, บน) ช่วงสุดท้ายปิด · สีเดียวกันทั้งสองธีม`;
   }
   document.querySelector('.map-panel').classList.toggle('is-3d', state.view3d);
@@ -1859,8 +1903,16 @@ function options(id, items) {
   for (const [value, label] of items) { const o = document.createElement('option'); o.value = value; o.textContent = label; s.append(o); }
 }
 
+/** Parameters the app reads; a URL with none of them is bare and opens the default lens (cache-busters do not count). */
+const KNOWN_PARAMS = ['search', 'group', 'price', 'size', 'province', 'brand', 'chain', 'district', 'area', 'areas', 'view', 'rdots', 'store', 'place', 'land',
+  'outlet', 'company', 'chains', 'rq', 'view3d', 'cam', 'lens'];
+
 function restoreFromURL() {
   const p = new URLSearchParams(location.search);
+  // The overview opens on a lens (owner 2026-11-03 “สลับดูได้ 3 มุม”): a bare URL takes the default, ?lens= names one.
+  const lensParam = p.get('lens') || (![...p.keys()].some(k => KNOWN_PARAMS.includes(k)) ? DEFAULT_LENS : '');
+  const preset = lensFilters(lensParam);
+  if (preset) for (const [k, v] of Object.entries(preset)) if (!p.has(k) && [...$(k).options].some(o => o.value === v)) $(k).value = v;
   for (const f of FIELDS) if (p.has(f)) {
     let v = f === 'province' ? provinceCodeFrom(p.get(f)) : f === 'brand' ? chainKeyOf(p.get(f)) : p.get(f);
     // A price link of 0.1–0.7 names an API bucket: it opens the tiers that bucket covered (100–300 → 101–200 + 201–300).

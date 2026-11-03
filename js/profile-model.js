@@ -107,6 +107,33 @@ export function buildDistrictProfile(scopeRows, districtId, index, groups, {cove
 }
 
 /**
+ * A place's character in one line (0.9.0, owner 2026-11-03: icons and numbers instead of sentences): its most common
+ * type group (not “other” / “not stated”) with its share of every row, the price tier its restaurants state most often,
+ * and the share of 200+ chains beside the same share everywhere. Read from the whole population of the place, whatever
+ * the filters — it describes the place, not the selection. No priced row → no price token (missing stays missing).
+ */
+export function areaCharacter(rows, groups, {chainBaseline = null} = {}) {
+  if (!rows?.length) return null;
+  const counts = new Map(), tiers = new Map();
+  let s5 = 0;
+  for (const r of rows) {
+    const g = groups[r.group];
+    if (g && g.id !== 'unspecified' && g.id !== 'other') counts.set(g.id, (counts.get(g.id) || 0) + 1);
+    if (r.kind !== 'outlet' && r.price && r.price !== 'UNSPECIFIED') tiers.set(r.price, (tiers.get(r.price) || 0) + 1);
+    if (r.size === 'S5') s5++;
+  }
+  const top = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+  const tier = [...tiers].sort((a, b) => b[1] - a[1] || PRICED.indexOf(a[0]) - PRICED.indexOf(b[0]))[0];
+  const group = top ? groups.find(g => g.id === top[0]) : null;
+  return {
+    total: rows.length,
+    group: group ? {id: group.id, th: group.th, series: group.series, count: top[1], share: (top[1] / rows.length) * 100} : null,
+    price: tier ? {tier: tier[0], count: tier[1], priced: [...tiers.values()].reduce((n, v) => n + v, 0)} : null,
+    chains: {count: s5, share: (s5 / rows.length) * 100, baseline: chainBaseline},
+  };
+}
+
+/**
  * `spatial` (optional, from js/building-join.js#venueNeighbours): {buildings, own, others} — the drawn
  * buildings that are this venue's on screen, how many of its own rows' points fall in them and the
  * other rows whose points fall there (not name-linked: listed apart, never added to the venue).

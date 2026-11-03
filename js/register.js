@@ -19,10 +19,10 @@ export const EVIDENCE_TH = Object.freeze({primary: 'แหล่งของแ�
 /** Short labels for bars (the full label stays in the bar's title and on every outlet). */
 export const EVIDENCE_SHORT = Object.freeze({primary: 'แหล่งของแบรนด์', secondary: 'แหล่งรอง', cart: 'จุดขายรถเข็น'});
 export const STATUS = Object.freeze(['listed', 'pending', 'temporary', 'closed']);
-export const STATUS_TH = Object.freeze({listed: 'แหล่งข้อมูลระบุสาขา ยังไม่ยืนยันภาคสนาม', pending: 'รอยืนยันจากแบรนด์หรือการเปิดปัจจุบัน',
-  temporary: 'แหล่งข้อมูลระบุปิดชั่วคราว', closed: 'แหล่งข้อมูลระบุปิดหรือไม่ใช้งาน ยังไม่ยืนยัน'});
+export const STATUS_TH = Object.freeze({listed: 'แหล่งข้อมูลระบุสาขา', pending: 'รอยืนยันจากแบรนด์',
+  temporary: 'แหล่งข้อมูลระบุปิดชั่วคราว', closed: 'แหล่งข้อมูลระบุปิดหรือไม่ใช้งาน'});
 export const GEO = Object.freeze(['brand', 'other', 'host']);
-export const GEO_TH = Object.freeze({brand: 'จุดจากเว็บหรือแอปของแบรนด์/บริษัท ไม่ใช่ผลสำรวจ', other: 'จุดจากแหล่งข้อมูลอื่น ไม่ใช่ผลสำรวจ', host: 'จุดอ้างอิงของสถานที่ ไม่ใช่หน้าร้าน'});
+export const GEO_TH = Object.freeze({brand: 'จุดจากเว็บหรือแอปของแบรนด์/บริษัท', other: 'จุดจากแหล่งข้อมูลอื่น', host: 'จุดอ้างอิงของสถานที่'});
 
 const lower = v => String(v || '').toLocaleLowerCase('th-TH');
 
@@ -83,8 +83,8 @@ export function evidenceTag(mix = {}) {
   const total = EVIDENCE.reduce((n, k) => n + (mix[k] || 0), 0);
   if (!total || (mix.primary || 0) / total > 0.5) return null;
   if ((mix.cart || 0) / total > 0.5) return {short: 'รถเข็น', th: 'ส่วนใหญ่เป็นจุดขายรถเข็น'};
-  if ((mix.secondary || 0) / total > 0.5) return {short: 'แหล่งรอง', th: 'ส่วนใหญ่มาจากแหล่งรอง รอยืนยันจากแบรนด์'};
-  return {short: 'ยังไม่ยืนยัน', th: 'ส่วนใหญ่ยังไม่ใช่แหล่งของแบรนด์'};
+  if ((mix.secondary || 0) / total > 0.5) return {short: 'แหล่งรอง', th: 'ส่วนใหญ่มาจากแหล่งรอง'};
+  return {short: 'แหล่งผสม', th: 'แหล่งของแบรนด์ไม่ถึงครึ่ง'};
 }
 
 /** Brands present in a list of outlets, most outlets first. */

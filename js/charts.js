@@ -95,7 +95,7 @@ function price(element, model, select, selectedId) {
     </button></li>`;
   }).join('');
   const legend = PRICED.map(b => `<span class="legend-step"><i style="background:${colors[b]}" aria-hidden="true"></i>${esc(PRICE_SHORT[b])}</span>`).join('');
-  element.innerHTML = `<p class="chart-caption">สัดส่วนระดับราคาในร้านที่ระบุราคา (บาท) · ตัวเลข = ร้านที่ระบุราคา · “ไม่ระบุ” แยกนับ ไม่ใช่ราคา 0</p>
+  element.innerHTML = `<p class="chart-caption">สัดส่วนระดับราคาในร้านที่ระบุราคา (บาท) · ตัวเลข = ร้านที่ระบุราคา · “ไม่ระบุ” แยกนับ</p>
     <p class="chart-legend"><span class="legend-title">ระดับราคา:</span>${legend}</p><ol class="chart-bars">${rows}</ol>`;
   element.querySelectorAll('[data-area]').forEach(b => b.addEventListener('click', () => select({type: 'area', id: b.dataset.area})));
 }

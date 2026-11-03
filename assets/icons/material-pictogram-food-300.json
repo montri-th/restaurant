@@ -1,0 +1,68 @@
+{
+  "family": "LDS Material Symbols Rounded Pictogram",
+  "file": "material-pictogram-food-300.woff2",
+  "bytes": 2380,
+  "sha256": "de2167a8c4f2695c4b5f700190304e4cb13dc415d81c6599a6ea8aa7d0acccd0",
+  "source": "google/material-design-icons variablefont/MaterialSymbolsRounded[FILL,GRAD,opsz,wght].ttf (master, read 2026-11-03)",
+  "sourceSha256": "7e74e36533ccee12c2b81e75bfcf3ccf123d3bb7e7e46d65d94445f23db0c97c",
+  "codepointsSha256": "a7404d9e5a1b63f496cf05ace45d386075886b5a7f123fba9f29527cb6006fde",
+  "license": "Apache-2.0 (assets/icons/material-symbols-Apache-2.0.txt)",
+  "axes": {
+    "FILL": 0,
+    "wght": 300,
+    "GRAD": 0,
+    "opsz": 24
+  },
+  "glyphs": {
+    "g-general": {
+      "name": "restaurant",
+      "codepoint": "U+E56C"
+    },
+    "g-thai": {
+      "name": "rice_bowl",
+      "codepoint": "U+F1F5"
+    },
+    "g-fastfood": {
+      "name": "lunch_dining",
+      "codepoint": "U+EA61"
+    },
+    "g-japanese": {
+      "name": "ramen_dining",
+      "codepoint": "U+EA64"
+    },
+    "g-cafe": {
+      "name": "local_cafe",
+      "codepoint": "U+EB44"
+    },
+    "g-asian": {
+      "name": "takeout_dining",
+      "codepoint": "U+EA74"
+    },
+    "g-grill": {
+      "name": "outdoor_grill",
+      "codepoint": "U+EA47"
+    },
+    "g-western": {
+      "name": "dinner_dining",
+      "codepoint": "U+EA57"
+    },
+    "price": {
+      "name": "payments",
+      "codepoint": "U+EF63"
+    },
+    "building": {
+      "name": "apartment",
+      "codepoint": "U+EA40"
+    },
+    "place": {
+      "name": "location_on",
+      "codepoint": "U+F1DB"
+    },
+    "tune": {
+      "name": "tune",
+      "codepoint": "U+E429"
+    }
+  },
+  "use": "beside a visible label, aria-hidden; never instead of a category, evidence or rating label (LDS ICON-01)",
+  "status": "extension of the Restaurants pictogram test exception, approved by the owner 2026-11-03 (“อนุมัติราว 12 ตัว”); the 8-glyph subset of 2026-10-22 is unchanged"
+}

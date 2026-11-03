@@ -13,7 +13,7 @@ import {join} from 'node:path';
 import {load, readJSON, readBytes, sha256, ROOT} from './helpers.js';
 import {brandsIn, provincesIn, outletMix, searchRegister, EVIDENCE, STATUS} from '../js/register.js';
 import {decodeLand, geometryContains, distanceToGeometry, landProfile, landOfRow, landOfOutlet, hostsOf, aroundGeometry, landTypeTh, applyRowDisplay, applyOutletDisplay, LAND_RULE} from '../js/land.js';
-import {renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderCompany, renderOutlet, renderLand} from '../js/register-panel.js';
+import {renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderCompany, renderOutlet, renderLand, REGISTER_RULE} from '../js/register-panel.js';
 import {buildChainIndex, chainsOf} from '../js/chains.js';
 import {configureBrandLogos} from '../js/brand-logos.js';
 import {brandKey} from '../js/model.js';
@@ -252,7 +252,7 @@ test('Land profile: rows in the building, the 100 m ring outside it, register ou
   assert.ok(nested.length > 0 && nested.every(l => l.slice(1).every(x => x.rel === 'in')), 'nested links are “in” relations');
 });
 
-test('register and Land views: one provenance line each (dataset · source · date · boundary + the unit once), never “ตั้งอยู่ใน”', () => {
+test('register and Land views: one provenance line each (dataset · source · date · boundary + the unit defined once), no caveats (0.9.0), never “ตั้งอยู่ใน”', () => {
   const {reg, land, rowById, data, index} = setup();
   const chains = buildChainIndex({rows: data.rows, brands: data.brands, register: reg});
   const company = reg.companies.find(c => (reg.byCompany.get(c.id) || []).length);
@@ -266,32 +266,34 @@ test('register and Land views: one provenance line each (dataset · source · da
     outlet: renderOutlet({reg, outlet, area: index.byId.get(outlet.area), land: landOfOutlet(land, outlet.id), sameBrand: [], group: data.groups[outlet.group]}),
     land: renderLand({land, profile, around: [], groups: data.groups, index, chains: chainsOf([...profile.rows.in, ...profile.outlets.in], chains, Infinity)}),
   };
-  const caveats = /ไม่ได้ยืนยัน|ไม่นำมาบวกกัน|ละเอียดราว|คนละหน่วย/g;
+  // Owner 2026-11-03 11:04 “ไม่แสดง caveats”: no limitation sentence anywhere in a view (the unit is defined, not hedged).
+  const caveats = /ไม่ได้ยืนยัน|ยังไม่ยืนยัน|ไม่ใช่จำนวน|ไม่ใช่ผล|ไม่ใช่การยืนยัน|ไม่ได้แปลว่า|ไม่นำมาบวกกัน|ละเอียดราว|คนละหน่วย|อยู่ในตัวเลข|ไม่ใช่ทุกร้าน/g;
   for (const [name, html] of Object.entries(views)) {
     const t = text(html);
     assert.ok(!/ตั้งอยู่ใน/.test(t), `${name}: no located-in claim`);
     // One provenance line per view: the four fields once, and the unit clause at most once (owner 2026-10-28 18:27).
     assert.equal((html.match(/class="hint panel-foot provenance"|class="hint source-line"/g) || []).length, 1, `${name}: one provenance line`);
     assert.ok(/ชุดข้อมูล \S/.test(t) && /แหล่ง \S/.test(t) && /ตรวจ \d/.test(t) && /ขอบเขต \S/.test(t), `${name}: dataset · source · date · boundary`);
-    assert.ok((t.match(caveats) || []).length <= 1, `${name}: caveats said once at most — ${t.match(caveats)}`);
+    assert.equal((t.match(caveats) || []).length, 0, `${name}: no caveats — ${t.match(caveats)}`);
     assert.ok(!/สาขาในทะเบียน/.test(t), `${name}: one vocabulary (0.7.0) — no register framing`);
     assert.ok(t.includes('ค้นต่อ') && /Google ·/.test(t), `${name}: outbound searches offered`);
     assert.ok(!html.includes('udm=50'), `${name}: no AI Mode link (Google asks to confirm those; 0.8.1)`);
   }
-  assert.ok(text(views.chains).includes('ไม่ใช่จำนวนร้านที่เปิดอยู่จริง'), 'the register unit is explained once');
+  assert.ok(text(views.chains).includes(REGISTER_RULE), 'the register unit is defined once');
   assert.ok(text(views.outlet).includes(outlet.brand.name) && views.outlet.indexOf(`<h2>${outlet.brand.name}`) > 0, 'an outlet is headed by its chain');
   assert.ok(views.outlet.includes('maps/@?api=1&amp;map_action=pano') && views.outlet.includes('https://www.google.com/search?q='), 'Street View at the point and a Google question');
   assert.ok(/class="outbound-link is-street"[^>]*data-aim-lat="[-\d.]+" data-aim-lng="[-\d.]+"/.test(views.outlet), 'the outlet Street View carries the point it turns toward');
   assert.ok(text(views.land).includes(LAND_RULE) && text(views.land).includes('ร้านในอาคาร') && !text(views.land).includes('ติดขอบ'));
   const row = rowById.get(landOfRow(land, [...land.rowRel.keys()][0]) ? [...land.rowRel.keys()][0] : '');
-  const storeLand = text(renderStoreLand(landOfRow(land, row.id)));
-  assert.ok(/จุดอยู่ในขอบอาคาร|จุดต้นทางห่างขอบอาคาร [\d.]+ ม\. \(ไม่เกิน 10 ม\. นับเป็นในอาคาร/.test(storeLand) && !/ตั้งอยู่ใน|ติดขอบ/.test(storeLand));
-  // A point counted in from outside says so, with its distance (review 2026-10-28: never “in the outline” for a moved point).
+  const rel = landOfRow(land, row.id);
+  const storeLand = text(renderStoreLand(rel));
+  // The building is named; how near the point lay is method, not shown (0.9.0) — the Land provenance line defines “ในอาคาร”.
+  assert.ok(storeLand.includes(rel.hosts[0].name) && !/ตั้งอยู่ใน|ติดขอบ|ห่างขอบ|ขอบอาคาร/.test(storeLand), storeLand);
   const movedKey = [...land.rowLinks].find(([, l]) => l[0].d > 0)?.[0];
   const movedText = text(renderStoreLand(landOfRow(land, movedKey)));
-  assert.ok(/จุดต้นทางห่างขอบอาคาร [\d.]+ ม\. \(ไม่เกิน 10 ม\. นับเป็นในอาคาร หมุดแสดงในอาคาร\)/.test(movedText) && !movedText.includes('จุดอยู่ในขอบอาคาร'), movedText);
+  assert.ok(movedText.includes(landOfRow(land, movedKey).hosts[0].name) && !/ห่างขอบ|ไม่เกิน 10 ม\./.test(movedText), movedText);
   const moved = data.moved.find(r => r.register === 1);
-  assert.ok(text(renderStoreRegister({row: moved, register: moved.register})).includes('นับครั้งเดียวฝั่งทะเบียนร้านเครือ'));
+  assert.equal(text(renderStoreRegister({row: moved, register: moved.register})).replace(/\s+/g, ' ').trim(), 'สถานะ นับเป็นสาขาเครือแล้ว รอยืนยันสาขา');
   const hostsIn = renderLandHostsIn([{host, rows: 3, outlets: 1}]);
   assert.ok(text(hostsIn).includes(LAND_RULE) && (hostsIn.match(/source-line/g) || []).length === 1 && !text(hostsIn).includes('ไม่ได้ยืนยัน'));
   // One row per building: other registry names on the same footprint ride along; a nested outline says what it repeats.
@@ -333,7 +335,7 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   const others = reg.byBrand.get(outlet.brand.id).filter(x => x !== outlet && x.province === outlet.province);
   const outletHtml = text(renderOutlet({reg, outlet, area: outlet.area ? index.byId.get(outlet.area) : null, land: landOfOutlet(land, outlet.id), sameBrand: {list: others.slice(0, 8), total: others.length, nearest: true}, group: data.groups[outlet.group]}));
   assert.ok(outletHtml.includes(`${others.length.toLocaleString('th-TH')} ร้าน`) && outletHtml.includes(`แสดง 8 จาก ${others.length.toLocaleString('th-TH')} ร้าน`), outletHtml.slice(-600));
-  assert.ok(outletHtml.includes('ฟาสต์ฟู้ด') && outletHtml.includes('(อนุมาน)'), 'the derived type says it is derived');
+  assert.ok(outletHtml.includes('ฟาสต์ฟู้ด อนุมาน'), 'the derived type says it is inferred, in one word (0.9.0)');
   // Land lists: the header is the number of buildings, not the rows shown; the section cites all three inputs.
   const host = land.hosts.find(h => (land.rowsByBuilding.get(h.fp) || []).length > 3);
   const list = [{host, rows: 3, outlets: 1}]; list.total = 1399;
@@ -354,7 +356,7 @@ test('counts are totals, never list lengths; registers and carts are named; smal
   const fewHtml = text(renderLand({land, profile: few, around, groups: data.groups, index, chains: chainsOf([...few.rows.in, ...few.outlets.in], chains, Infinity)}));
   assert.ok(!/\d+%/.test(fewHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1].split('ร้านในอาคาร ')[0]), 'no share on a handful of rows');
   assert.ok(inside.length + outletsIn.length >= 30 && /\d+%/.test(landHtml.split('ประเภทร้าน: ในอาคารเทียบรอบอาคาร')[1]), 'a column of ≥ 30 rows prints its share');
-  assert.ok(landHtml.includes('ร้อยละเมื่อคอลัมน์มีอย่างน้อย 30 ร้าน') && landHtml.includes('ไม่ใช่ทุกร้านในอาคาร'));
+  assert.ok(!landHtml.includes('ร้อยละเมื่อคอลัมน์') && !landHtml.includes('ไม่ใช่ทุกร้านในอาคาร'), 'the share rule and the coverage caveat are method, not page copy (0.9.0)');
   // One list for the building (owner 2026-10-28 22:03; one vocabulary 2026-10-29): rows and outlets together, chain first.
   assert.ok(!landHtml.includes('สาขาในทะเบียน') && !landHtml.includes('ติดขอบ'));
   assert.ok(landHtml.includes(`${(inside.length + outletsIn.length).toLocaleString('th-TH')} ร้านในอาคาร`), 'one total');

@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.8.6",
+  "productVersion": "0.9.0",
   "updatedOn": "2026-11-03",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -152,6 +152,10 @@
       {
         "path": "js/land.js",
         "role": "decode data/land.json + land-buildings.geojson (hosts, building outlines, LOD2 parts, row / outlet links incl. nested buildings), landProfile, aroundGeometry, planar geometry helpers"
+      },
+      {
+        "path": "js/lenses.js",
+        "role": "first-Aha lenses (0.9.0): LENSES presets (national chains S5 · 1,000+ baht P6 · density), lensOf / lensFilters / lensesOffered, lensShare (lens rows among every framed row of the areas vs everywhere); pure, no DOM"
       },
       {
         "path": "scripts/build-chains.py",

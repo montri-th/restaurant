@@ -141,6 +141,26 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .aha.is-focused { background: var(--state-info-surface); }
 .aha.is-focused .eyebrow { color: var(--state-info-content); }
 .aha-map-cue { margin-top: 10px; }
+/* Lenses of the first Aha (0.9.0, owner 2026-11-03 “สลับดูได้ 3 มุม”): a segmented row above the card; the pressed
+   lens reads by its surface and border, never a left rail or bracket. */
+.lens-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.lens-chip { display: inline-flex; align-items: center; gap: 5px; min-height: 36px; padding: 3px 11px 3px 8px; font-size: 12.5px; border-radius: 999px; background: var(--surface-raised); border: 1px solid var(--border-default); color: var(--text-secondary); white-space: nowrap; }
+.lens-chip .pictogram { width: 17px; height: 17px; font-size: 17px; vertical-align: 0; color: inherit; }
+.lens-chip:hover { background: var(--surface-alt); color: var(--text-primary); }
+.lens-chip[aria-pressed="true"] { background: var(--surface-alt); border-color: var(--map-selected-stroke); color: var(--text-primary); font-weight: 600; }
+.aha-chains { margin-top: 12px; }
+/* A place's character (0.9.0): pictogram · label · number tokens, wrapping as whole tokens. */
+.character { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--text-secondary); }
+.character > span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.character b { color: var(--text-primary); font-weight: 600; }
+.character small { font-size: 11px; color: var(--text-secondary); }
+.character .pictogram { width: 18px; height: 18px; font-size: 18px; vertical-align: 0; }
+/* A fact label's pictogram and the one-word inferred tag (no caveat sentences, owner 2026-11-03 11:04). */
+.facts .fact-pic { width: 16px; height: 16px; font-size: 16px; vertical-align: -3px; margin-right: 4px; }
+.inferred { display: inline-block; padding: 0 6px; font-size: 11px; line-height: 18px; border: 1px solid var(--border-default); border-radius: 999px; color: var(--text-secondary); font-weight: 400; vertical-align: 1px; white-space: nowrap; }
+.eyebrow .pictogram { width: 16px; height: 16px; font-size: 16px; vertical-align: -3px; margin-right: 3px; }
+.aha-chains .chip-list { gap: 5px; }
+.aha-actions .btn .pictogram { width: 18px; height: 18px; font-size: 18px; vertical-align: -4px; margin-right: 4px; color: inherit; }
 .metrics-note { margin-top: -8px; }
 
 /* Metrics */
@@ -159,6 +179,14 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
   font-style: normal; font-weight: 300; font-display: block;
   unicode-range: U+EAD5, U+EA12, U+E54C, U+E55B, U+E7F1, U+F09A, U+EA49, U+E72C;
 }
+/* The 12-glyph extension (owner 2026-11-03 “อนุมัติราว 12 ตัว”): food groups, price, building, place, filter —
+   same family and axes, its own file so the 2026-10-22 subset stays byte-identical (scripts/build-pictogram-food.py). */
+@font-face {
+  font-family: "LDS Material Symbols Rounded Pictogram";
+  src: url("assets/icons/material-pictogram-food-300.woff2") format("woff2");
+  font-style: normal; font-weight: 300; font-display: block;
+  unicode-range: U+E56C, U+F1F5, U+EA61, U+EA64, U+EB44, U+EA74, U+EA47, U+EA57, U+EF63, U+EA40, U+F1DB, U+E429;
+}
 .pictogram { display: inline-block; width: 20px; height: 20px; font: 300 20px/1 "LDS Material Symbols Rounded Pictogram"; font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24; letter-spacing: normal; text-transform: none; font-synthesis: none; vertical-align: -4px; visibility: hidden; color: var(--text-secondary); }
 .pictograms-ready .pictogram { visibility: visible; }
 .pictograms-unavailable .pictogram { display: none; }
@@ -170,6 +198,18 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .pic-exclusive::before { content: "\F09A"; }
 .pic-gla::before { content: "\EA49"; }
 .pic-segment::before { content: "\E72C"; }
+.pic-g-general::before { content: "\E56C"; }
+.pic-g-thai::before { content: "\F1F5"; }
+.pic-g-fastfood::before { content: "\EA61"; }
+.pic-g-japanese::before { content: "\EA64"; }
+.pic-g-cafe::before { content: "\EB44"; }
+.pic-g-asian::before { content: "\EA74"; }
+.pic-g-grill::before { content: "\EA47"; }
+.pic-g-western::before { content: "\EA57"; }
+.pic-price::before { content: "\EF63"; }
+.pic-building::before { content: "\EA40"; }
+.pic-place::before { content: "\F1DB"; }
+.pic-tune::before { content: "\E429"; }
 .pic-plain { display: none; }
 /* Pictogram colour follows the mark it stands for: venue = host building; the rest stay in text colour
    (a pictogram is never a data colour). */
@@ -217,7 +257,7 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .detail-actions .btn { min-height: 40px; font-size: 12px; }
 .detail-logo { justify-self: start; margin: 4px 0 6px; }
 .store-status { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 2px; }
-.facts { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px 10px; font-size: 13px; margin-top: 10px; }
+.facts { display: grid; grid-template-columns: 98px minmax(0, 1fr); gap: 8px 10px; font-size: 13px; margin-top: 10px; }
 .facts dt { color: var(--text-metadata); font-size: 12px; padding-top: 1px; }
 .facts dd { margin: 0; overflow-wrap: anywhere; line-height: 1.5; }
 .links { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; margin-top: 4px; }

@@ -28,7 +28,19 @@ export const PICTOGRAM_CONTRACT = Object.freeze({
   glyphs: Object.freeze({brand: '\uEAD5', store: '\uEA12', venue: '\uE54C', area: '\uE55B', province: '\uE7F1', exclusive: '\uF09A', gla: '\uEA49', segment: '\uE72C'}),
   status: 'test exception to LDS nav-7 (owner 2026-10-22)',
   fallback: 'Text labels carry the meaning; pictograms stay hidden until the font has loaded.',
+  // The 12-glyph extension, approved by the owner 2026-11-03 (“อนุมัติราว 12 ตัว”), same family and axes in its own file
+  // (scripts/build-pictogram-food.py); beside a label, never instead of a category, evidence or rating label (ICON-01).
+  extension: Object.freeze({
+    file: 'assets/icons/material-pictogram-food-300.woff2', bytes: 2380,
+    sha256: 'de2167a8c4f2695c4b5f700190304e4cb13dc415d81c6599a6ea8aa7d0acccd0',
+    manifest: 'assets/icons/material-pictogram-food-300.json',
+    glyphs: Object.freeze({'g-general': '\uE56C', 'g-thai': '\uF1F5', 'g-fastfood': '\uEA61', 'g-japanese': '\uEA64', 'g-cafe': '\uEB44', 'g-asian': '\uEA74',
+      'g-grill': '\uEA47', 'g-western': '\uEA57', price: '\uEF63', building: '\uEA40', place: '\uF1DB', tune: '\uE429'}),
+  }),
 });
+/** Pictogram role of a restaurant type group (js/model.js groups); 'other' and 'unspecified' have none. */
+export const GROUP_PICTOGRAM = Object.freeze({general: 'g-general', thai: 'g-thai', fastfood: 'g-fastfood', japanese: 'g-japanese', cafe: 'g-cafe',
+  asian: 'g-asian', grill: 'g-grill', western: 'g-western'});
 export const NAV_ICON_CONTRACT = Object.freeze({
   assetId: 'icon.material-symbols-rounded.nav-7.300.01',
   file: 'assets/icons/material-nav-300.woff2', bytes: 2500,
@@ -131,7 +143,7 @@ export function installNavigation() {
     document.fonts.load('300 24px "LDS Material Symbols Rounded Nav"', '')
       .then(faces => { document.documentElement.classList.add(faces.length ? 'nav-icons-ready' : 'nav-icons-unavailable'); })
       .catch(() => document.documentElement.classList.add('nav-icons-unavailable'));
-    document.fonts.load('300 20px "LDS Material Symbols Rounded Pictogram"', PICTOGRAM_CONTRACT.glyphs.store)
+    document.fonts.load('300 20px "LDS Material Symbols Rounded Pictogram"', PICTOGRAM_CONTRACT.glyphs.store + PICTOGRAM_CONTRACT.extension.glyphs.price)
       .then(faces => { document.documentElement.classList.add(faces.length ? 'pictograms-ready' : 'pictograms-unavailable'); })
       .catch(() => document.documentElement.classList.add('pictograms-unavailable'));
   } else document.documentElement.classList.add('nav-icons-unavailable', 'pictograms-unavailable');
