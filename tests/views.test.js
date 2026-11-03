@@ -185,8 +185,9 @@ test('outbound (0.8.1): questions open Google Search at once; the store name is 
   assert.equal(streetCore('Soi Sukhumvit 24'), 'sukhumvit24');
   const tanao = [[100.5 - 12 * mx, 13.75 - 60 * m], [100.5 - 12 * mx, 13.75 + 60 * m]];
   const khaosan = [[100.5 - 80 * mx, 13.75 - 14 * m], [100.5 + 80 * mx, 13.75 - 14 * m]];
-  const names = [{properties: {class: 'tertiary', name: 'ถนนตะนาว', 'name:en': 'Tanao Road'}, geometry: {type: 'LineString', coordinates: tanao}},
-    {properties: {class: 'minor', name: 'ถนนข้าวสาร', 'name:en': 'Khao San Road'}, geometry: {type: 'LineString', coordinates: khaosan}}];
+  // MapLibre's query features expose `geometry` through a prototype getter (a spread copy loses it — the 0.8.2 live bug).
+  class QueryFeature { constructor(properties, coordinates) { this.properties = properties; this._c = coordinates; } get geometry() { return {type: 'LineString', coordinates: this._c}; } }
+  const names = [new QueryFeature({class: 'tertiary', name: 'ถนนตะนาว', 'name:en': 'Tanao Road'}, tanao), new QueryFeature({class: 'minor', name: 'ถนนข้าวสาร', 'name:en': 'Khao San Road'}, khaosan)];
   const plain = aimCamera(p, [tanao, khaosan], []);
   assert.ok(plain.by === 'nearest' && Math.abs(plain.heading - 90) < 0.5, 'without a hint: the nearest street (Tanao), looking east');
   const named = namedStreetLines(names, p, 'Prime Burger Khaosan Road');

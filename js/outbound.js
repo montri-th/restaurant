@@ -34,16 +34,13 @@ export const mapsPoint = (lat, lng) => `https://www.google.com/maps/search/?api=
 /** Streets a Street View car drives (OpenMapTiles `transportation` classes); expressways, ramps, paths and rail are not. */
 export const STREET_CLASSES = new Set(['trunk', 'primary', 'secondary', 'tertiary', 'minor', 'service', 'busway']);
 
-/**
- * Street lines near a point from map features ({geometry, properties} of the `transportation` source layer, as
- * MapLibre's querySourceFeatures returns them): LineString parts whose bounding box comes within `radiusM`.
- */
-export function streetLines(features = [], target, {radiusM = 200} = {}) {
+/** LineString parts of the features `accept` keeps whose bounding box comes within `radiusM` of the point. */
+function nearLines(features, target, radiusM, accept) {
   const dLat = radiusM / 111320, dLng = radiusM / (111320 * Math.cos((target.lat * Math.PI) / 180));
   const out = [];
   for (const f of features) {
-    const p = f?.properties || {};
-    if (!STREET_CLASSES.has(p.class) || p.brunnel === 'tunnel' || Number(p.ramp) === 1) continue;
+    if (!f || !accept(f.properties || {})) continue;
+    // MapLibre's query features expose `geometry` through a getter: read it from the feature, never from a copy.
     const g = f.geometry || {};
     const parts = g.type === 'LineString' ? [g.coordinates] : g.type === 'MultiLineString' ? g.coordinates : [];
     for (const line of parts) {
@@ -55,6 +52,13 @@ export function streetLines(features = [], target, {radiusM = 200} = {}) {
   }
   return out;
 }
+
+/**
+ * Street lines near a point from map features ({geometry, properties} of the `transportation` source layer, as
+ * MapLibre's querySourceFeatures returns them): LineString parts whose bounding box comes within `radiusM`.
+ */
+export const streetLines = (features = [], target, {radiusM = 200} = {}) =>
+  nearLines(features, target, radiusM, p => STREET_CLASSES.has(p.class) && p.brunnel !== 'tunnel' && Number(p.ramp) !== 1);
 
 /** The distinctive part of a street name: no “Road / Soi / ถนน / ซอย …”, no spaces or punctuation, lower case. */
 const LATIN_GENERIC = /\b(road|rd|street|st|soi|alley|lane|trok|thanon|avenue|ave|yaek)\b\.?/g;
@@ -71,13 +75,8 @@ const longEnough = core => core.length >= (/[\u0E00-\u0E7F]/.test(core) ? 3 : 4)
 export function namedStreetLines(features = [], target, hint = '', {radiusM = 200} = {}) {
   const text = squash(hint);
   if (!text) return [];
-  const named = features.filter(f => {
-    const p = f?.properties || {};
-    if (!STREET_CLASSES.has(p.class) && !(p.class === 'path' && p.subclass === 'pedestrian')) return false;
-    return [p.name, p['name:en'], p.name_en, p['name:latin'], p['name:th']].some(n => { const c = streetCore(n); return longEnough(c) && text.includes(c); });
-  });
-  // the class test above is done; keep the geometry filter of streetLines without its class filter
-  return streetLines(named.map(f => ({...f, properties: {...f.properties, class: 'minor', brunnel: null, ramp: 0}})), target, {radiusM});
+  return nearLines(features, target, radiusM, p => (STREET_CLASSES.has(p.class) || (p.class === 'path' && p.subclass === 'pedestrian'))
+    && [p.name, p['name:en'], p.name_en, p['name:latin'], p['name:th']].some(n => { const c = streetCore(n); return longEnough(c) && text.includes(c); }));
 }
 
 /**
