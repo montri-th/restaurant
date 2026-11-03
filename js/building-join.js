@@ -6,7 +6,8 @@
  * (js/massing.js keeps each original footprint, before rounding/offset) and the
  * official host buildings of the venue candidates (js/buildings.js). A row joins a
  * building when its DISPLAY point (public API, MVT z10 grid ≈ 9.55 m) lies inside
- * the footprint; inside several (an OSM part inside an outline) → the smallest.
+ * the footprint; inside several → one that stands on the ground first (a tower body, not the crown stacked on it —
+ * owner 2026-11-03 10:58 “ไปอยู่แค่ยอดตึก”), then the smallest (an OSM part inside an outline).
  *
  * What it is: "จุดของร้านตกในอาคาร" — the point the API shows falls inside the
  * outline. What it is not: a verified located-inside relationship, an address, a
@@ -69,6 +70,32 @@ function indexOf(buildings) {
  * Join rows (with longitude/latitude) to footprints.
  * Returns {buildings: Map(key → footprint), byBuilding: Map(key → rows[]), byRow: Map(rowId → key)}.
  */
+/** A footprint that starts above the ground (`base` > 0.5 m: a crown, a roof, a sky bridge) is a part, not the building. */
+export const grounded = b => !(Number(b?.base) > 0.5);
+const better = (b, best) => (grounded(b) !== grounded(best) ? grounded(b) : b.area < best.area);
+
+/**
+ * The parts stacked on a building of the join: footprints of the same kind that start above its base or rise above
+ * its top, whose outline lies inside its outline (bounding box within, every vertex not outside by more than a hair) —
+ * a crown, a roof, masts. Highlighting the building with them draws the whole silhouette, not one slab.
+ */
+export function stackedOn(b, join) {
+  if (!b || !join) return [];
+  const base = Number(b.base) || 0, top = Number(b.height) || 0, eps = 2e-6;
+  const [w, s, e, n] = b.bbox;
+  const out = [];
+  for (const x of join.buildings.values()) {
+    if (x === b || x.kind !== b.kind) continue;
+    if (!((Number(x.base) || 0) > base + 0.5 || (Number(x.height) || 0) > top + 0.5)) continue;
+    const [xw, xs, xe, xn] = x.bbox;
+    if (xw < w - eps || xe > e + eps || xs < s - eps || xn > n + eps) continue;
+    // The part's own centre (mean of its vertices) must sit in the building: a neighbour's tower beside it never rides along.
+    const c = x.outer.reduce((acc, [px, py]) => [acc[0] + px / x.outer.length, acc[1] + py / x.outer.length], [0, 0]);
+    if (containsPoint(b, c)) out.push(x);
+  }
+  return out;
+}
+
 export function joinRows(footprints, rows) {
   const list = footprints.map(footprint);
   const buildings = new Map(list.map(b => [b.key, b]));
@@ -80,7 +107,7 @@ export function joinRows(footprints, rows) {
     const candidates = cells.get(`${Math.floor(x / CELL)}:${Math.floor(y / CELL)}`);
     if (!candidates) continue;
     let best = null;
-    for (const b of candidates) if ((!best || b.area < best.area) && containsPoint(b, [x, y])) best = b;
+    for (const b of candidates) if ((!best || better(b, best)) && containsPoint(b, [x, y])) best = b;
     if (!best) continue;
     byRow.set(r.id, best.key);
     const at = byBuilding.get(best.key);

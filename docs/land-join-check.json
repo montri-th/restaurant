@@ -17,7 +17,8 @@
   "office:point_in_osm": 260,
   "office:none": 68,
   "office:edge_osm": 50,
-  "lod2_buildings": 18
+  "lod2_osm_parts": 53,
+  "lod2_buildings": 71
  },
  "osm": {
   "source": "OpenFreeMap planet 20261025_080012_pt z14 building layer",
@@ -34,10 +35,10 @@
   "office:iou>=0.5": 6
  },
  "publishedBuildingsByLod": {
-  "lod1": 976,
-  "lod2": 15
+  "lod1": 945,
+  "lod2": 47
  },
- "publishedParts": 64,
+ "publishedParts": 200,
  "shoppingCenterRelease": {
   "as_of": "2026-10-23",
   "features": 130,
@@ -72,9 +73,9 @@
    "fp_none": 68,
    "fp_edge_osm": 50,
    "snapshot_near": 522,
-   "snapshot_in": 273,
-   "chain_in": 693,
-   "chain_near": 273
+   "snapshot_in": 275,
+   "chain_in": 697,
+   "chain_near": 270
   }
  },
  "snapshotJoined": {
@@ -82,21 +83,21 @@
   "in": 2239
  },
  "chainJoined": {
-  "near": 1908,
-  "in": 3464
+  "near": 1905,
+  "in": 3468
  },
  "inFromWithin10m": {
-  "snapshot": 595,
-  "chain": 494
+  "snapshot": 594,
+  "chain": 492
  },
  "displayPositions": {
-  "snapshot": 595,
-  "chain": 494
+  "snapshot": 594,
+  "chain": 492
  },
  "snapshotPoints": 70214,
  "chainPointsInCoveredProvinces": 11649,
  "pointsInNestedBuildings": {
-  "snapshot": 11,
+  "snapshot": 13,
   "chain": 34
  },
  "nameLinkReview": [
@@ -135,6 +136,96 @@
    ]
   },
   {
+   "row": "3df7a5370aea",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-001897",
+   "linkedName": "ตลาดวงศกร",
+   "relation": "in",
+   "distanceM": 0.3,
+   "spatialHosts": [
+    "SC-SM-04833"
+   ],
+   "spatialNames": [
+    "โลตัส โก เฟรช ตลาดวงศกร"
+   ]
+  },
+  {
+   "row": "3df7a5370aea",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-001897",
+   "linkedName": "ตลาดวงศกร",
+   "relation": "in",
+   "distanceM": 0.3,
+   "spatialHosts": [
+    "SC-SM-04833"
+   ],
+   "spatialNames": [
+    "โลตัส โก เฟรช ตลาดวงศกร"
+   ]
+  },
+  {
+   "row": "5517a86015fe",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
+   "row": "5517a86015fe",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
+   "row": "8ec41a431cee",
+   "basis": "common_retail",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
+   "row": "8ec41a431cee",
+   "basis": "uuid",
+   "status": "candidate",
+   "linkedHost": "SC-012204",
+   "linkedName": "เมกาบางนา",
+   "relation": "in",
+   "distanceM": 0.0,
+   "spatialHosts": [
+    "SC-SM-06664"
+   ],
+   "spatialNames": [
+    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+   ]
+  },
+  {
    "row": "957d8e0b8e07",
    "basis": "common_retail",
    "status": "candidate",
@@ -150,51 +241,6 @@
    ]
   },
   {
-   "row": "3df7a5370aea",
-   "basis": "common_retail",
-   "status": "candidate",
-   "linkedHost": "SC-001897",
-   "linkedName": "ตลาดวงศกร",
-   "relation": "in",
-   "distanceM": 0.3,
-   "spatialHosts": [
-    "SC-SM-04833"
-   ],
-   "spatialNames": [
-    "โลตัส โก เฟรช ตลาดวงศกร"
-   ]
-  },
-  {
-   "row": "3df7a5370aea",
-   "basis": "uuid",
-   "status": "candidate",
-   "linkedHost": "SC-001897",
-   "linkedName": "ตลาดวงศกร",
-   "relation": "in",
-   "distanceM": 0.3,
-   "spatialHosts": [
-    "SC-SM-04833"
-   ],
-   "spatialNames": [
-    "โลตัส โก เฟรช ตลาดวงศกร"
-   ]
-  },
-  {
-   "row": "96c86c3eaed1",
-   "basis": "uuid",
-   "status": "candidate",
-   "linkedHost": "SC-012204",
-   "linkedName": "เมกาบางนา",
-   "relation": "in",
-   "distanceM": 6.5,
-   "spatialHosts": [
-    "SC-SM-06664"
-   ],
-   "spatialNames": [
-    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
-   ]
-  },
-  {
    "row": "96c86c3eaed1",
    "basis": "common_retail",
    "status": "candidate",
@@ -210,63 +256,18 @@
    ]
   },
   {
-   "row": "5517a86015fe",
+   "row": "96c86c3eaed1",
    "basis": "uuid",
    "status": "candidate",
    "linkedHost": "SC-012204",
    "linkedName": "เมกาบางนา",
    "relation": "in",
-   "distanceM": 0.0,
+   "distanceM": 6.5,
    "spatialHosts": [
     "SC-SM-06664"
    ],
    "spatialNames": [
     "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
-   ]
-  },
-  {
-   "row": "5517a86015fe",
-   "basis": "common_retail",
-   "status": "candidate",
-   "linkedHost": "SC-012204",
-   "linkedName": "เมกาบางนา",
-   "relation": "in",
-   "distanceM": 0.0,
-   "spatialHosts": [
-    "SC-SM-06664"
-   ],
-   "spatialNames": [
-    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
-   ]
-  },
-  {
-   "row": "c56043fc6c33",
-   "basis": "common_retail",
-   "status": "candidate",
-   "linkedHost": "SC-006489",
-   "linkedName": "คอสโม บาซาร์",
-   "relation": "in",
-   "distanceM": 0.1,
-   "spatialHosts": [
-    "OFF-E3386CBA78C7"
-   ],
-   "spatialNames": [
-    "Cosmo Office Park"
-   ]
-  },
-  {
-   "row": "c56043fc6c33",
-   "basis": "uuid",
-   "status": "candidate",
-   "linkedHost": "SC-006489",
-   "linkedName": "คอสโม บาซาร์",
-   "relation": "in",
-   "distanceM": 0.1,
-   "spatialHosts": [
-    "OFF-E3386CBA78C7"
-   ],
-   "spatialNames": [
-    "Cosmo Office Park"
    ]
   },
   {
@@ -285,33 +286,33 @@
    ]
   },
   {
-   "row": "8ec41a431cee",
-   "basis": "uuid",
+   "row": "c56043fc6c33",
+   "basis": "common_retail",
    "status": "candidate",
-   "linkedHost": "SC-012204",
-   "linkedName": "เมกาบางนา",
+   "linkedHost": "SC-006489",
+   "linkedName": "คอสโม บาซาร์",
    "relation": "in",
-   "distanceM": 0.0,
+   "distanceM": 0.1,
    "spatialHosts": [
-    "SC-SM-06664"
+    "OFF-E3386CBA78C7"
    ],
    "spatialNames": [
-    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+    "Cosmo Office Park"
    ]
   },
   {
-   "row": "8ec41a431cee",
-   "basis": "common_retail",
+   "row": "c56043fc6c33",
+   "basis": "uuid",
    "status": "candidate",
-   "linkedHost": "SC-012204",
-   "linkedName": "เมกาบางนา",
+   "linkedHost": "SC-006489",
+   "linkedName": "คอสโม บาซาร์",
    "relation": "in",
-   "distanceM": 0.0,
+   "distanceM": 0.1,
    "spatialHosts": [
-    "SC-SM-06664"
+    "OFF-E3386CBA78C7"
    ],
    "spatialNames": [
-    "ท็อปส์ ฟู้ดส์ ฮอลล์ สาขา เซ็นทรัล เมกาบางนา 2"
+    "Cosmo Office Park"
    ]
   }
  ],
@@ -513,7 +514,7 @@
    "total": 38
   },
   "office:office_venue_source_record": {
-   "withPoints": 136,
+   "withPoints": 138,
    "total": 332
   },
   "shopping:agricultural_wholesale_market": {
@@ -949,7 +950,7 @@
    "total": 1
   }
  },
- "buildingsPublished": 991,
- "featuresPublished": 1055,
- "hostsPublished": 1091
+ "buildingsPublished": 992,
+ "featuresPublished": 1192,
+ "hostsPublished": 1093
 }

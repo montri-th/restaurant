@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.8.3",
+  "productVersion": "0.8.4",
   "updatedOn": "2026-11-03",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -47,7 +47,7 @@
       },
       {
         "path": "js/building-join.js",
-        "role": "display-time spatial join: display points × drawn footprints (smallest containing), venue buildings (official host or ≥ max(1, 20%) of joined points), click resolution, neighbours of a venue, venue focus region"
+        "role": "display-time spatial join: display points × drawn footprints (ground-standing, then smallest containing; stackedOn parts ride along — 0.8.4), venue buildings (official host or ≥ max(1, 20%) of joined points), click resolution, neighbours of a venue, venue focus region"
       },
       {
         "path": "js/model.js",

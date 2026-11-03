@@ -16,7 +16,7 @@ candidate polygons (optional, report only), data/restaurants.json, data/chains.j
 
 Method (every result is a display-time candidate, never a located-in or tenancy claim):
   1. Land building = the OpenStreetMap building polygon the map itself draws: the OpenFreeMap z14 polygon that holds
-     the host's point (smallest), else the nearest within LAND_EDGE_M (10 m), else the polygon that overlaps the
+     the host's point (standing on the ground first, then smallest — 0.8.4), else the nearest within LAND_EDGE_M (10 m), else the polygon that overlaps the
      registry's own reviewed OpenStreetMap footprint most (IoU ≥ 0.3). Pieces clipped at tile edges are merged with
      their same-id, same-height neighbours. No CityMETER V4 footprint is used (owner 2026-10-28 18:27), so a Land
      building never collides with the city massing: it IS the massing polygon, which the app hides under it.
@@ -260,6 +260,12 @@ def main():
         inside = [int(i) for i in osm_tree.query(p) if osm_geoms[i].contains(p)]
         i, by = None, 'none'
         if inside:
+            # A building can be several stacked OpenStreetMap polygons under one point — Q House Lumpini is a tower body
+            # 0–140 m with crown parts 140–148 m whose footprints also hold the point (owner 2026-11-03 10:58: only the
+            # top was drawn). The building stands on the ground: choose among the polygons that start lowest; the parts
+            # stacked on it ride along as pieces (osm_stack below).
+            low = min(osm[i]['base'] or 0.0 for i in inside)
+            inside = [i for i in inside if (osm[i]['base'] or 0.0) <= low + 0.5]
             # Nested polygons under one point (a tower drawn inside a mall outline): the registry's reviewed footprint
             # decides when it is the same building (best IoU ≥ 0.3); else a shopping host is the complex (largest),
             # a hotel or office is its own building (smallest).
@@ -315,6 +321,34 @@ def main():
                     stats['lod2_skipped_parts_outside_outline'] += 1
         if e.get('branchKeys'):
             b['branchKeys'] = list(dict.fromkeys(b['branchKeys'] + e['branchKeys']))
+    # OpenStreetMap parts of the same building (LOD2 from the map's own data) where the registry gave none: polygons
+    # that start above the chosen polygon's base or rise above its top, with ≥ 90 % of their area inside its outline —
+    # a crown, a roof, a mast, a tower standing in a podium outline. The outline stays the join footprint; every part
+    # is drawn from its own base to its own top, so the whole building takes the data colour, not one slab.
+    def osm_stack(i):
+        g, base, top = osm_geoms[i], osm[i]['base'] or 0.0, osm[i]['height'] or 0.0
+        out = []
+        for j in osm_tree.query(g):
+            j = int(j)
+            if j == i:
+                continue
+            bj, tj = osm[j]['base'] or 0.0, osm[j]['height'] or 0.0
+            if bj <= base + 0.5 and tj <= top + 0.5:
+                continue
+            gj = osm_geoms[j]
+            if gj.area > 0 and gj.intersection(g).area / gj.area >= 0.9:
+                out.append(j)
+        return out
+    for b in buildings:
+        if b['lod'] != 1:
+            continue
+        stack = osm_stack(b['osmIndex'])
+        if not stack:
+            continue
+        piece = lambda j: {'geom': osm_geoms[j], 'base': osm[j]['base'] or 0.0, 'top': osm[j]['height'], 'status': 'source_height' if osm[j]['height'] else 'unknown_display_fallback'}
+        b['pieces'], b['lod'], b['registryRef'] = [piece(b['osmIndex'])] + [piece(j) for j in stack], 2, 'osm_parts'
+        b['height'] = max([b['height'] or 0.0] + [osm[j]['height'] or 0.0 for j in stack])
+        stats['lod2_osm_parts'] += 1
     for b in buildings:
         b['hosts'] = list(dict.fromkeys(b['hosts']))
         if b['lod'] == 2:
@@ -574,9 +608,10 @@ def main():
         'meta': {'schema': 'citymeter-land-join-2', 'checkedOn': a.checked_on, 'shapesAsOf': shapes_as_of,
                  'datasets': {'shopping': 'research.TH.shopping', 'hotel': 'research.TH.hotel', 'office': 'research.TH.office'},
                  'rule': 'display-time candidate: restaurant display point (≈ 9.55 m grid) or register outlet point vs the Land building outline; in = inside or within 10 m (the coordinate\'s own uncertainty; such points get a display position inside the outline), near = 10–100 m (report only); never a located-in, tenancy or floor claim',
-                 'buildingRule': 'Land building = the OpenStreetMap building polygon of the OpenFreeMap z14 tiles the map draws: the polygon holding the host point, else the nearest within 10 m, else the polygon overlapping the registry\'s reviewed OpenStreetMap footprint most (IoU ≥ 0.3). Registry building parts (LOD > 1) are drawn inside the outline when the registry footprint is the same building (IoU ≥ 0.5). No CityMETER V4 footprint (owner 2026-10-28 18:27)',
+                 'buildingRule': 'Land building = the OpenStreetMap building polygon of the OpenFreeMap z14 tiles the map draws: the polygon holding the host point (standing on the ground first, then smallest; 0.8.4), else the nearest within 10 m, else the polygon overlapping the registry\'s reviewed OpenStreetMap footprint most (IoU ≥ 0.3). Registry building parts (LOD > 1) are drawn inside the outline when the registry footprint is the same building (IoU ≥ 0.5); otherwise OpenStreetMap polygons stacked on it (≥ 90 % inside, starting or reaching higher) are drawn as its parts from their own base (osm_parts, 0.8.4). No CityMETER V4 footprint (owner 2026-10-28 18:27)',
                  'geometrySources': {'openfreemap_osm': f"OpenStreetMap building polygons via OpenFreeMap ({osm_meta.get('source', 'z14 building layer')}), ODbL",
-                                     'registry_parts': 'Shopping Center release geometry bundle and Hotel registry 15_BUILDING_MASS building parts (OpenStreetMap-derived; base/top as recorded, unverified)'},
+                                     'registry_parts': 'Shopping Center release geometry bundle and Hotel registry 15_BUILDING_MASS building parts (OpenStreetMap-derived; base/top as recorded, unverified)',
+                                     'osm_parts': 'OpenStreetMap building parts of the same tiles stacked on the Land building (render_min_height / render_height as mapped, unverified)'},
                  'relations': ['in', 'in', 'near'],
                  'display': 'snaps.rows / snaps.chains: display positions inside the outline for points counted in from within 10 m; the source positions stay in restaurants.json / chains.json',
                  'nested': 'a point inside several nested Land buildings has one row per building, the smallest first'},
@@ -627,7 +662,7 @@ def main():
               'inFromWithin10m': in_from_edge, 'displayPositions': dict(moved),
               'snapshotPoints': len(snap), 'chainPointsInCoveredProvinces': len(outlets),
               'pointsInNestedBuildings': {'snapshot': len(snap_also), 'chain': len(chain_also)},
-              'nameLinkReview': review,
+              'nameLinkReview': sorted(review, key=lambda x: (x['row'], x['linkedHost'], x['basis'])),  # one order per input (0.8.4)
               'nameLinksShopping': {'links': len(name_links), 'result': dict(shop_cmp)},
               'nameLinksHotel': {'links': len(hotel_name), 'result': dict(hotel_cmp)},
               'hotelMassBranchKeys': dict(mass_cmp),
