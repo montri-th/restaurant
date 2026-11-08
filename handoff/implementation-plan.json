@@ -3,7 +3,7 @@
   "schemaVersion": "1.5.0",
   "documentType": "implementation-plan",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.9.3",
+  "productVersion": "0.10.0",
   "updatedOn": "2026-11-03",
   "brief": "product-brief.json",
   "statement": "product-statement.json",
@@ -122,7 +122,7 @@
         "role": "logo registries (sha256-checked files, lookup by id, backplate, role captions)"
       },
       {
-        "path": "js/navigation.js · js/launch.js · js/vendors.js",
+        "path": "js/navigation.js · js/shell/launch.js · js/vendors.js",
         "role": "nav-7 glyphs and help dialog; launch/slow/error overlay and file:// bridge; pinned MapLibre loader"
       },
       {
@@ -401,7 +401,7 @@
         "logos.css",
         "navigation.css",
         "js/navigation.js",
-        "js/launch.js"
+        "js/shell/launch.js"
       ],
       "status": "done"
     },

@@ -32,7 +32,7 @@ API ของฟังก์ชัน: `{mode, minRows, areas, areaIds, count, k
 
 ## Prerequisites and safe paths — AHA-01-A
 
-- **จำเป็นสำหรับข้อค้นพบ:** `data/restaurants.json`, `data/areas.geojson`, `data/districts.geojson` โหลดและ parse ได้บน HTTP(S) เปิดเป็นไฟล์ในเครื่องจะถูกพาไปเว็บสาธารณะ (`js/launch.js`)
+- **จำเป็นสำหรับข้อค้นพบ:** `data/restaurants.json`, `data/areas.geojson`, `data/districts.geojson` โหลดและ parse ได้บน HTTP(S) เปิดเป็นไฟล์ในเครื่องจะถูกพาไปเว็บสาธารณะ (`js/shell/launch.js`)
 - **ไม่จำเป็น:** บัญชี ข้อมูลส่วนตัว ตำแหน่งผู้ใช้ สิทธิ์อุปกรณ์ การแชร์ ไลบรารีกราฟ WebGL tiles แผนที่ อาคาร หรือโลโก้
 - แผนที่ (MapLibre จาก unpkg + tiles OpenFreeMap) โหลดแยก ถ้าล้มเหลว ข้อค้นพบ แผง กราฟ และตารางยังใช้ได้ และมีปุ่มลองโหลดแผนที่ใหม่
 - ข้อมูลหลักโหลดไม่ได้ → หน้าแสดงสถานะ error พร้อม retry และลิงก์เว็บสาธารณะ ไม่แสดงตัวเลขว่าง

@@ -98,7 +98,7 @@ test('breadcrumb follows production: ประเทศไทย › จัง�
   const nbi = index.byId.get('120612');
   assert.equal(breadcrumbText(buildBreadcrumb({area: nbi})).split(' › ')[2].startsWith('อำเภอ'), true);
   const venue = buildBreadcrumb({venue: {id: 'RV-1', name: 'Central Pinklao', province: 'BKK'}});
-  assert.deepEqual(venue.map(c => c.level), ['country', 'province', 'venue'], 'a venue is never placed under a แขวง');
+  assert.deepEqual(venue.map(c => c.level), ['country', 'province', 'site'], 'a venue is never placed under a แขวง');
   assert.equal(productionLink(), 'https://landometer.com/v3/citymeter?d=restaurant');
   assert.equal(productionLink({province: 'NBI'}), 'https://landometer.com/v3/citymeter/NBI?d=restaurant');
 });
