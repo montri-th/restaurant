@@ -21,8 +21,8 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '
 /**
  * Pure model. sel.province = production code or ''; sel.area = a district record ({id, name, province}) or null;
  * sel.sub = a subdistrict record ({id, name, province, district, districtName}) or null — its district crumb comes
- * from sel.area when given, else from its own district fields; sel.unit = a local administrative unit
- * ({id, name, province}) or null; sel.site = a site the reader is inside ({id, name, province}) or null — the last
+ * from sel.area when given, else from its own district fields; sel.unit = a local administrative unit or a locale
+ * ({id, name, province, kind: 'M' | 'L'}, kind M when absent) or null; sel.site = a site the reader is inside ({id, name, province}) or null — the last
  * crumb, with no production link (§5.3 rule 4). Crumb actions: crumb-country, crumb-province, crumb-area (district),
  * crumb-sub (subdistrict), crumb-unit (local administrative unit), crumb-site.
  */
@@ -33,7 +33,7 @@ export function buildBreadcrumb({province = '', area = null, sub = null, unit = 
   const p = provinceByCode(code);
   if (p) crumbs.push({level: 'province', label: p.th, id: p.code, action: 'crumb-province', href: productionHref(dataset, {province: p.code, kind: 'P'})});
   if (unit) {
-    crumbs.push({level: 'unit', label: unit.name, id: unit.id, action: 'crumb-unit', href: productionHref(dataset, {province: code, kind: 'M', code: unit.id})});
+    crumbs.push({level: 'unit', label: unit.name, id: unit.id, action: 'crumb-unit', href: productionHref(dataset, {province: code, kind: unit.kind === 'L' ? 'L' : 'M', code: unit.id})});
   } else {
     const district = area || (sub?.district ? {id: sub.district, name: sub.districtName || '', province: code} : null);
     if (district) {

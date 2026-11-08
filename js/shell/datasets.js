@@ -21,7 +21,7 @@ export const DEMOS = Object.freeze([
   {path: 'camera', name: 'Camera Shops', group: 'Location', at: false},
   {path: 'factory', name: 'Factory', group: 'Location', at: true},
   {path: 'fitness', name: 'Fitness', group: 'Location', at: false},
-  {path: 'grocery', name: 'Grocery', group: 'Location', at: false},
+  {path: 'grocery', name: 'Grocery', group: 'Location', at: true},
   {path: 'hospital', name: 'Hospital', group: 'Location', at: true},
   {path: 'luxurybrands', name: 'Luxury Brands', group: 'Location', at: false},
   {path: 'pharmacy', name: 'Pharmacy', group: 'Location', at: true},
