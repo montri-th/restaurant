@@ -39,7 +39,9 @@
  * Camera: 3D by default (camera.js presets city/model/eye) with a 2D plan
  * toggle; the basemap is generated (map-style.js) on OpenFreeMap tiles.
  * Panel modes: overview | district | area | venue | building | store (with a back stack).
- * URL state: filters, district, area, areas, view, store, place, view3d, cam.
+ * URL state (own names, inside): filters, district, area, areas, view, store, place, land, outlet, company,
+ * chains, rdots, lens, view3d, cam — written in the shared grammar d · at · e · n · m · f.* · focus · view · v3d ·
+ * cam by citymeter-shell (js/shell/url.js), with a browser history entry per level (the back button goes up a level).
  *
  * Two more data sets (release 0.3, owner request 2026-10-28), loaded after the first paint:
  *   chain register (data/chains.json, js/register.js) — the national register of chain outlets. Its unit
@@ -79,6 +81,8 @@ import {streetView, streetLines, namedStreetLines, aimCamera} from './outbound.j
 import {installMassing, outerRings} from './massing.js';
 import {presetFor, applyPreset, fitPitched, framePoint} from './camera.js';
 import {buildBreadcrumb, renderBreadcrumb, breadcrumbText} from './breadcrumb.js';
+import {createCodec, createNavigator} from './shell/url.js';
+import {pageTitle} from './shell/title.js';
 import {classify} from './scales.js';
 import {cueMarkup} from './cues.js';
 
@@ -113,6 +117,20 @@ const registerMode = () => REGISTER_MODES.has(state.panel.mode);
 /** Area frames, labels and context dots of the snapshot are shown in every view (the register shares the map). */
 const areasShown = () => state.showAreas;
 
+/* ---------- address (citymeter-shell, js/shell/url.js) ---------- */
+// The page keeps its own parameter names inside (saveURL / restoreFromURL); the shell writes them in the shared
+// grammar d · at · e · n · m · f.* · focus · view · v3d · cam, and opening an area, a store, a place, an outlet or a
+// company adds one browser history entry, so the back button goes up a level. `at` reaches the subdistrict
+// (BKK/S/102601). Old links (?district=, ?area=, ?store=, ?place=, ?land=, ?outlet=, ?company=, ?lens= …) still open
+// and are rewritten. The `e` kinds are provisional until the dataset registry declares them: `store`, `outlet`,
+// `venue` (this dataset's own place ids, RV-/RX-) and `land` (the Land host ids, SC-/VN-; `site` once the registry
+// confirms them as accepted venue ids); a company is the network `n=company:`. `chains`, `rdots` and `rq` stay as they are.
+const nav = createNavigator(createCodec({
+  dataset: 'restaurant', levels: ['P', 'D', 'S'], place: {province: 'province', D: 'district', S: 'area'},
+  items: {store: 'store', outlet: 'outlet', place: 'venue', land: 'land'}, networks: {company: 'company'}, filters: FIELDS,
+  rename: {lens: 'm', areas: 'focus', view: 'view', view3d: 'v3d', cam: 'cam'},
+  provinceOf: (code, kind) => (kind === 'S' ? state.index?.byId.get(code) : state.index?.districtById.get(code))?.province || '',
+}), {onPop: restoreFromHistory});
 /* ---------- helpers ---------- */
 const values = () => Object.fromEntries(FIELDS.map(k => [k, $(k).value]));
 const rowById = id => state.rowById.get(id) || null;
@@ -185,7 +203,8 @@ function saveURL() {
   if (!state.twoPoint) p.set('cam', 'model');
   // A bare URL opens the default lens, so the unfiltered overview names its own lens to survive a reload or a share.
   if (!p.size && DEFAULT_LENS !== 'density') p.set('lens', 'density');
-  history.replaceState(null, '', location.pathname + (p.size ? '?' + p : ''));
+  // A building view has no address of its own: the address stays on what it was opened from.
+  if (state.panel.mode !== 'building') nav.commit(p);
 }
 
 /* ---------- theme ---------- */
@@ -471,11 +490,14 @@ function renderCrumbs() {
   }
   $('crumbs').innerHTML = renderBreadcrumb(crumbs);
   const reg = state.register;
-  const title = mode === 'store' ? `${rowById(id)?.name || ''} · ` : mode === 'building' ? 'อาคาร · ' : mode === 'land' ? `${currentLand()?.name || ''} · ` : '';
   const o = mode === 'outlet' ? reg?.byId.get(id) : null;
   const regTitle = mode === 'company' ? reg?.companyById.get(id)?.name : o ? `${o.brand.name}${o.name && o.name !== o.brand.name ? ` ${o.name}` : ''}` : mode === 'chains' ? 'เครือร้าน' : '';
   const chain = !registerMode() && $('brand').value ? chainLabel(state.chains?.byKey.get($('brand').value)) : '';
-  document.title = registerMode() ? `${regTitle ? `${regTitle} · ` : ''}Restaurants · CityMETER` : `${title}${chain ? `${chain} · ` : ''}${breadcrumbText(crumbs)} · Restaurants · CityMETER`;
+  // Tab title: what the view shows, then the product, ≤ 60 characters (LDS FAVICON-01, js/shell/title.js).
+  const place = crumbs[crumbs.length - 1].label;
+  document.title = pageTitle(registerMode() ? regTitle || 'เครือร้าน'
+    : mode === 'store' ? rowById(id)?.name || place : mode === 'land' ? currentLand()?.name || place
+    : mode === 'building' ? `อาคาร ${place}` : chain ? `${chain} ${place}` : `ร้านอาหาร ${place}`);
   return crumbs;
 }
 
@@ -678,6 +700,8 @@ function renderMapAha(insight, summary = null, {noPoint = 0, lens = null, lensSt
 function pushHistory() { state.history.push({...state.panel, area: state.selectedArea, district: state.selectedDistrict, building: state.buildingSel}); if (state.history.length > 20) state.history.shift(); }
 
 function goBack() {
+  // Every level change is a browser history entry (citymeter-shell): go up the way the browser's button does.
+  if (state.panel.mode !== 'building' && nav.canGoBack()) { nav.back(); return; }
   const previous = state.history.pop();
   if (!previous) { state.selectedArea = ''; state.selectedDistrict = ''; state.panel = overviewPanel(); update({fit: true}); return; }
   const fit = previous.area !== state.selectedArea || previous.district !== state.selectedDistrict;
@@ -1249,9 +1273,9 @@ function onPanelAction(event) {
     case 'clear-filter': clearFilter(id); break;
     case 'crumb-country': $('province').value = ''; resetToOverview(); break;
     case 'crumb-province': { const c = provinceCodeFrom(id); if (c) $('province').value = c; resetToOverview(); break; }
-    case 'crumb-district': selectDistrict(id); break;
-    case 'crumb-area': selectArea(id); break;
-    case 'crumb-venue': selectVenue(id); break;
+    case 'crumb-area': selectDistrict(id); break;
+    case 'crumb-sub': selectArea(id); break;
+    case 'crumb-site': selectVenue(id); break;
     case 'crumb-expand': { const ol = target.closest('.crumbs'); ol.classList.add('is-expanded'); target.setAttribute('aria-expanded', 'true'); ol.querySelector('.crumb:not(.crumb-more)')?.focus({preventScroll: true}); break; }
     case 'toggle-3d': toggle3d(); break;
     default: break;
@@ -1939,7 +1963,7 @@ const KNOWN_PARAMS = ['search', 'group', 'food', 'price', 'size', 'province', 'b
   'outlet', 'company', 'chains', 'rq', 'view3d', 'cam', 'lens'];
 
 function restoreFromURL() {
-  const p = new URLSearchParams(location.search);
+  const p = nav.read();
   // The overview opens on a lens (owner 2026-11-03 “สลับดูได้ 3 มุม”): a bare URL takes the default, ?lens= names one.
   const lensParam = p.get('lens') || (![...p.keys()].some(k => KNOWN_PARAMS.includes(k)) ? DEFAULT_LENS : '');
   const preset = lensFilters(lensParam);
@@ -1990,6 +2014,16 @@ function aimStreetView(a) {
   const camera = aimCamera(target, streetLines(query('transportation'), target), named);
   a.href = streetView(target.lat, target.lng, camera);
   a.dataset.aimed = camera ? `${Math.round(camera.heading)}° · ${Math.round(camera.distance)} ม. · ${camera.by}` : 'default';
+}
+
+/** Browser back / forward (citymeter-shell): show the level the restored address names. */
+function restoreFromHistory() {
+  for (const f of FIELDS) $(f).value = '';
+  Object.assign(state, {view: 'density', selectedArea: '', selectedDistrict: '', focusAreaIds: [], autoFocus: true, panel: overviewPanel(), history: [], buildingSel: null});
+  restoreFromURL();
+  $('toggle-3d').setAttribute('aria-pressed', String(state.view3d));
+  syncEyeToggle();
+  update({fit: true});
 }
 
 function wireEvents() {
@@ -2137,7 +2171,7 @@ async function init() {
     $('category-items').innerHTML = state.data.groups.map(g => `<span>${cueMarkup(g.series)}${esc(g.th)}</span>`).join('');
 
     // A link into a register or Land view waits for that data; otherwise the snapshot paints first.
-    const opensExtra = EXTRA_PARAMS.some(k => new URLSearchParams(location.search).has(k));
+    const opensExtra = EXTRA_PARAMS.some(k => nav.read().has(k));
     if (opensExtra) { await loadExtras(); state.rowsSnapped = 0; } // the first update() below sends the moved points
     restoreFromURL();
     $('toggle-3d').setAttribute('aria-pressed', String(state.view3d));

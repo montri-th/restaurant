@@ -534,9 +534,9 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
 @media (max-width: 760px) and (orientation: portrait) {
   :root { --panel-width: 0px; }
   /* Map first: chrome shrinks on a phone (owner 2026-10-28 20:06); the panel is a sheet — half height for a detail, expandable. */
-  .topbar { gap: 8px; padding: 0 10px; height: 40px; }
-  .workspace { height: calc(100dvh - 40px); }
-  .brand, .theme-control select { min-height: 36px; }
+  .topbar { gap: 8px; padding: 0 10px; height: 48px; }
+  .workspace { height: calc(100dvh - 48px); }
+  .brand, .theme-control select { min-height: 44px; }
   .brand { font-size: 14px; gap: 6px; }
   .brand img { width: 22px; height: 22px; }
   .top-actions a.text-link { display: none; }

@@ -13,6 +13,7 @@ const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
 const modules = () => [
   ...readdirSync(join(ROOT, 'js')).filter(f => f.endsWith('.js') && f !== 'launch.js').map(f => `js/${f}`),
   ...readdirSync(join(ROOT, 'js/vendor')).filter(f => f.endsWith('.js')).map(f => `js/vendor/${f}`),
+  ...readdirSync(join(ROOT, 'js/shell')).filter(f => f.endsWith('.js') && f !== 'launch.js').map(f => `js/shell/${f}`),
 ];
 
 test('one cache tag on every entry file and every module in the import map', () => {

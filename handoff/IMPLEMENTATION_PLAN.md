@@ -59,7 +59,7 @@ Static HTML/CSS/JavaScript ES modules ไม่มี framework ไม่มี 
 | `js/profile-model.js`, `js/panel.js` | view models + HTML ของแผง (รวมแผงอาคาร วิธีจับคู่สถานที่ และร้านอื่นที่จุดตกในอาคารเดียวกัน) + provenance; 0.8.0: แท่งราคา 6 ช่วงและ `sizeBars` (ขนาดเครือ ชื่อสั้น ชื่อเต็มใน title สีกลางสีเดียว) เป็นปุ่ม `filter-field`, `sizeFact` (ขนาด + วิธีนับ; CPF “ไม่จัดขนาด”) ใช้ในหน้าร้านและหน้าสาขา (`js/register-panel.js`) |
 | `js/chart-model.js`, `js/charts.js` | กราฟ HTML ไม่มี vendor |
 | `js/brand-logos.js`, `js/venue-logos.js` | registry โลโก้ |
-| `js/navigation.js`, `js/launch.js`, `js/vendors.js` | ไอคอน/help, launch overlay, MapLibre loader |
+| `js/navigation.js`, `js/shell/launch.js`, `js/vendors.js` | ไอคอน/help, launch overlay, MapLibre loader |
 | `scripts/build-boundaries.py` | ขอบเขตจาก production + ใบรับ |
 | `scripts/build-data.py` | ข้อมูล โลโก้ อาคาร จากชีตวิจัยและ manifest + สถานที่จากท้ายชื่อร้าน (`suffix_venue_rules`) |
 | `scripts/build-segments.py` → `data/segments.json` | 0.8.0: แท็บ `10_CLASSIFICATION` ของทะเบียน → ขนาดเครือรายแถวและรายสาขาพร้อมวิธีนับ ผูกด้วย sha256 ของ id สองชุด, `meta.priceCheck` (ช่วงราคาของเว็บเทียบ `price_band_observed`), `meta.held` (แกนที่รอตรวจ), `meta.reviewStatus`; ไม่เขียนลิงก์หรือ id ของชีต |
