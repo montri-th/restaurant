@@ -1,0 +1,18 @@
+# Checks for register pull requests (2026-11-09): every test on a branch whose name starts with “register”. Other pull
+# requests of this repository are not touched by this workflow.
+name: Register checks
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    if: startsWith(github.head_ref, 'register')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test

@@ -1,0 +1,27 @@
+# The publish date of a register read (2026-11-09): when data/release.json reaches main with publishedAt still null
+# (a merged register pull request), set it to now, Thailand time, so the page can say “เผยแพร่ …” beside “อ่านชีต …”.
+# A release already stamped is left alone, so other merges never move the date.
+name: Register publish date
+on:
+  push:
+    branches: [main]
+    paths: ['data/release.json']
+permissions:
+  contents: write
+concurrency:
+  group: register-stamp
+  cancel-in-progress: false
+jobs:
+  stamp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: python3 -I scripts/release-stamp.py --if-unset
+      - run: |
+          if git diff --quiet data/release.json; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Register release published $(python3 -c "import json;print(json.load(open('data/release.json'))['publishedAt'])")" -- data/release.json
+          git push origin HEAD:main
