@@ -1,0 +1,65 @@
+{
+ "schema": "citymeter-restaurant-release-1",
+ "rule": "register.sourceSha256 fingerprints the nine tabs the builds read (canonical cells); the tests hold data/chains.json to register.outlets, brandsWithOutlets, withCoordinates and the two id fingerprints; readAt = the sheet read, publishedAt = when that read went on the page (null before the merge)",
+ "register": {
+  "readAt": "2026-11-09T20:26:57+07:00",
+  "sheetModifiedAt": "2026-11-08T08:18:40+07:00",
+  "reader": "xlsx-export",
+  "sourceSha256": "2c18f2ba4b7da698837af2532d992e36fe14477ec4e0e9fc96f0222144a72dda",
+  "tabs": {
+   "00_README": {
+    "rows": 202,
+    "sha256": "11645ade9fd8fac2b2f6258269aec8ed58e2d57014730aa696ed95414a9c90d0"
+   },
+   "01_BRANDS": {
+    "rows": 1315,
+    "sha256": "4ccfc8f53a84766cdc143fa659af563b5229df45608bff78cbdf48abb69b17b4"
+   },
+   "02_STORES": {
+    "rows": 27954,
+    "sha256": "9829c30764114a47896e7cfe3c2b2019d3c9e18290efc40dd829e208feb9f217"
+   },
+   "03_COMPANIES": {
+    "rows": 421,
+    "sha256": "ec9313e0a74b6864f83a9262d2d237d16bec60ff6e9c7b96e612d46a66093b7d"
+   },
+   "06_DATA_DICTIONARY": {
+    "rows": 523,
+    "sha256": "43a60a25cd87243445a056d2de8039c92bae357ec9c0dca2e24f66b66ad3d9dd"
+   },
+   "08_COVERAGE": {
+    "rows": 1315,
+    "sha256": "e5cfd17d1e8500c2d59f8091ced98523e7a3ec5b472f77d52d74b6ed4ea8ed3d"
+   },
+   "10_CLASSIFICATION": {
+    "rows": 95341,
+    "sha256": "ffe590c88b58508d6a75dd469517005c2e45a629166ccb8a4b0b186b1d13c280"
+   },
+   "16_MASTER_OBSERVATIONS": {
+    "rows": 1234,
+    "sha256": "9a51300aeb2415bfc631425910533154a505c0363b4184d72c3f5a0e9e27e371"
+   },
+   "20_CHAIN_LOGOS": {
+    "rows": 585,
+    "sha256": "496f9454b6b63da1292dd150ea978bf76d3b939ac75fe42b9e9aa584a8205a60"
+   }
+  },
+  "outlets": 27954,
+  "brandsWithOutlets": 982,
+  "withCoordinates": 22710,
+  "outletIdsSha256": "ae8ef83082a3ab6c6129f2b6660fde157ec8c90b213bb1bd73ca998dc4af9e34",
+  "brandIdsSha256": "d757ea6cb650c0e0a42ae6e451239f10c7db1b22d4b65d1f9bbaaa7d0a20c877",
+  "workbook": {
+   "bytes": 90995067,
+   "sha256": "b3b02c4442b360d54433f51618fba2334f3da88687c2c1b7c0a37f458fb57952"
+  }
+ },
+ "publishedAt": null,
+ "previous": {
+  "readAt": "2026-11-03T01:16:57+07:00",
+  "publishedAt": "2026-11-03T02:20:56+07:00",
+  "sourceSha256": "ef336f8ca082faab21f96daae6ec806628b820d0f1b9ee5e01f3525b60c83c1b",
+  "outlets": 27527,
+  "brandsWithOutlets": 907
+ }
+}

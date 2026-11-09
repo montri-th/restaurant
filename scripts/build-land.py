@@ -129,6 +129,7 @@ def main():
     ap = argparse.ArgumentParser()
     for k in ['osm', 'shop', 'hotel', 'office', 'estates', 'ie-tiles', 'lod-buildings', 'sheet1', 'chain-dump', 'restaurants', 'chains', 'areas', 'out', 'report']:
         ap.add_argument('--' + k, required=k not in ('ie-tiles', 'lod-buildings', 'estates'))
+    ap.add_argument('--estates-from', help='a previous docs/land-join-check.json: without --estates/--ie-tiles its industrialEstates section is carried over as it was (report only; it reads the snapshot rows, never the chain register)')
     ap.add_argument('--checked-on', default='2026-10-28', help='the date of this join run (YYYY-MM-DD), cited by every Land number; 0.3–0.7.0 joins ran on 2026-10-28, the 0.7.1 join on 2026-10-30')
     a = ap.parse_args()
     if not re.match(r'^\d{4}-\d{2}-\d{2}$', a.checked_on):
@@ -556,6 +557,13 @@ def main():
                       'boundaryStatus': dict(collections.Counter(text(r.get('boundary_review_status')) for r in ie_all)),
                       'candidatePolygonsChecked': len(ie_report),
                       'rule': 'registry link DL-2669875b0346b95e63be: candidate polygons never confirm inside; inside vs around after boundary, date and rights acceptance'}
+
+    if not ie_summary and a.estates_from:
+        prev = json.load(open(a.estates_from, encoding='utf-8'))
+        carried = prev.get('industrialEstates') or {}
+        ie_summary, ie_report = dict(carried.get('summary') or {}), list(carried.get('candidates') or [])
+        if ie_summary:
+            ie_summary.setdefault('carriedFrom', {'checkedOn': prev.get('checkedOn', ''), 'why': 'estates inputs not re-read; the section does not depend on the chain register'})
 
     # ---------- write ----------
     # Published per-point relations: in only (the building the point is counted in). “near” is a report statistic;

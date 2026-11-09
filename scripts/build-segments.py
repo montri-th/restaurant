@@ -146,12 +146,30 @@ def main():
     out_size, out_basis = ['.'] * len(ids), ['.'] * len(ids)
     out_food, out_sub = ['.'] * len(ids), ['.'] * len(ids)
     by_cls = 0
+    # The tab sizes an outlet by chain_record_count, the number of 02_STORES rows of its brand_id when it was classified
+    # (rule CHAIN-SIZE-EVIDENCED-COUNT-V1). When the register has moved since, the same rule is applied to this register's
+    # rows (2026-11-09: 7 brands crossed a band) and the brand is listed in meta.outlets.recounted — a count, never a
+    # judgement, so it needs no review. The tab must still agree with its own count and with the outlet's brand_id.
+    recounted = {}
     for r in cls:
         i = id_index.get(r.get('source_record_id'))
         if i is None:
             continue
-        out_size[i] = str(SIZE.index(r['chain_size_band']))
-        out_basis[i] = BASIS[r['chain_link_status']]
+        b = brand_of.get(r['source_record_id'])
+        if b != r.get('brand_id'):
+            sys.exit(f'classification row {r["source_record_id"]}: brand_id {r.get("brand_id")} but 02_STORES says {b}')
+        band, basis = SIZE.index(r['chain_size_band']), BASIS[r['chain_link_status']]
+        counted = int(r.get('chain_record_count') or 0)
+        if basis in ('c', 's'):
+            if counted and size_band(counted) != band:
+                sys.exit(f'classification row {r["source_record_id"]}: {r["chain_size_band"]} disagrees with its own count {counted}')
+            if counted and counted != per_brand[b]:
+                was = band
+                band, basis = size_band(per_brand[b]), ('s' if per_brand[b] == 1 else 'c')
+                x = recounted.setdefault(b, {'classifiedCount': counted, 'count': per_brand[b], 'classifiedBand': SIZE[was], 'band': SIZE[band], 'outlets': 0})
+                x['outlets'] += 1
+        out_size[i] = str(band)
+        out_basis[i] = basis
         out_food[i], out_sub[i] = food_of(r)
         if r.get('food_group_id'): food_basis[r.get('food_basis')] += 1
         by_cls += 1
@@ -207,7 +225,9 @@ def main():
         'rows': {'count': len(keys), 'classified': classified_rows, 'moved': len(moved), 'keySha256': digest(keys), 'bands': counts(row_size, row_basis)},
         'outlets': {'count': len(ids), 'classified': by_cls, 'byRegisterRule': sum(rule_rows.values()), 'ruleBrands': dict(rule_rows),
                     'notSized': sum(not_sized.values()), 'notSizedBrands': dict(not_sized),
-                    'idSha256': digest(ids), 'bands': counts(out_size, out_basis)},
+                    'idSha256': digest(ids), 'bands': counts(out_size, out_basis),
+                    **({'recounted': {b: recounted[b] for b in sorted(recounted)}, 'recountRule': 'chain_record_count of the tab differs from this register: the band is the same count rule (02_STORES rows of the brand_id) on this register; bandChanged lists the brands that crossed a band'} if recounted else {}),
+                    **({'bandChanged': sorted(b for b, x in recounted.items() if x['classifiedBand'] != x['band'])} if recounted else {})},
         'priceCheck': dict(price_check),
         'food': {
             'basis': dict(food_basis),

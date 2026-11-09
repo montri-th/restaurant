@@ -48,6 +48,16 @@ def text(v):
     s = '' if v is None else str(v).strip()
     return '' if s in ('None', 'nan', '-') else s
 
+def publisher_zone(notes):
+    """The host's zone as the publisher's directory lists it (02_STORES notes.zone, e.g. True Digital Park EAST / WEST,
+    added 2026-11-07): display only, copied as written; '' when the notes carry none."""
+    try:
+        n = json.loads(notes) if isinstance(notes, str) and notes.strip().startswith('{') else {}
+    except ValueError:
+        return ''
+    z = n.get('zone') if isinstance(n, dict) else None
+    return z.strip()[:24] if isinstance(z, str) else ''
+
 def evidence_class(v):
     s = text(v)
     if 'รถเข็น' in s:
@@ -264,7 +274,7 @@ def main():
         raise SystemExit(f'outlets reference brands missing from 01_BRANDS: {missing_brand[:10]}')
 
     # ---------- outlets ----------
-    cols = {k: [] for k in ['id', 'name', 'brand', 'company', 'lat', 'lon', 'prov', 'provBy', 'area', 'ev', 'st', 'geo', 'floor', 'unit', 'addr', 'src', 'checked']}
+    cols = {k: [] for k in ['id', 'name', 'brand', 'company', 'lat', 'lon', 'prov', 'provBy', 'area', 'ev', 'st', 'geo', 'floor', 'zone', 'unit', 'addr', 'src', 'checked']}
     urls, url_index = [], {}
     stats = collections.Counter()
     ids = set()
@@ -302,6 +312,7 @@ def main():
         cols['st'].append(STATUS.index(status_class(r.get('operating_status'))))
         cols['geo'].append(GEO.index(geo_class(r.get('geometry_role'))) if has else -1)
         cols['floor'].append(text(r.get('floor_raw'))[:40])
+        cols['zone'].append(publisher_zone(r.get('notes')))
         cols['unit'].append(text(r.get('unit_raw'))[:40])
         cols['addr'].append(text(r.get('address'))[:180])
         cols['src'].append(url_index.get(u, -1))
@@ -346,6 +357,7 @@ def main():
             'area': 'area = index of the data/areas.geojson subdistrict whose polygon contains the outlet point (seven covered provinces only); -1 elsewhere or without a point. Display only: register counts are never added to the restaurant snapshot',
             'evidence': 'cart = evidence_status names a cart point of sale; secondary = evidence_status starts with secondary / แหล่งรอง (pending brand confirmation); primary = brand, company or host published',
             'status': 'closed / temporary = the source declares a closure (not verified); pending = brand or current operation still to confirm; listed = listed by the source, not field-verified',
+            'zone': 'zone = the host zone the publisher lists for the outlet (02_STORES notes.zone, e.g. True Digital Park EAST / WEST); display only, never a location claim',
             'coordinate': 'lat/lon = the register selected coordinate (official locator, publisher or provider point; never a host or map centroid). geo: brand = brand/company locator, other = other source point, host = reference point of the host venue (not the shopfront). The register\'s separate approximate point (latitude_approx / longitude_approx, a venue reference) is counted in stats.approxOnly and never drawn',
         },
         'logos': {'linked': len(logo_links), 'withFileInRegister': sum(1 for b in brands_tab if text(b.get('logo_file_url'))), 'rule': 'brand logo linked only when its sha256 equals a verified file in data/brand-logos.json (files shipped from the portable manifest or, since 0.7.1, from the register\'s own folder via --logo-files)'},
