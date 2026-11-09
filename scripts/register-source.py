@@ -104,7 +104,11 @@ def main():
         b = open(a.workbook, 'rb').read()
         register['workbook'] = {'bytes': len(b), 'sha256': hashlib.sha256(b).hexdigest()}
     previous = None
-    if prev and prev.get('register'):
+    if prev and prev.get('register') and prev.get('publishedAt') is None and prev.get('previous'):
+        # The read being replaced never reached the page (a register pull request still open): the page still shows the
+        # release before it, so that one stays the release this one replaces.
+        previous = prev['previous']
+    elif prev and prev.get('register'):
         p = prev['register']
         previous = {'readAt': p.get('readAt'), 'publishedAt': prev.get('publishedAt'), 'sourceSha256': p.get('sourceSha256'),
                     'outlets': p.get('outlets'), 'brandsWithOutlets': p.get('brandsWithOutlets')}

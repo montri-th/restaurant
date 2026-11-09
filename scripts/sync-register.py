@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Register sync: read the sheet, and when what the page uses changed, rebuild what the register feeds (2026-11-09).
+"""Register sync: from a read of the sheet, rebuild what the register feeds when what the page uses changed (2026-11-09).
 
-The nightly job and its button (.github/workflows/register-sync.yml) run this; a person can run it the same way with a
-downloaded xlsx. Every step is an existing build step on the same inputs as a manual round:
+The nightly round (a Claude scheduled task on the owner's Mac, scripts/register-nightly.py) runs this with the xlsx it
+downloaded; a person can run it the same way with a downloaded xlsx. Every step is an existing build step on the same
+inputs as a manual round:
 
-  1. read      scripts/fetch-register.py (service account, read-only) — or --xlsx with --read-at for a manual read
+  1. read      --xlsx: the sheet's own export (File → Download → .xlsx), with --read-at (when it was read)
   2. dump      scripts/xlsx-dump.py
   3. compare   scripts/register-source.py --check against data/release.json: the same nine tabs → stop, nothing changed
   4. guard     16_MASTER_OBSERVATIONS (the snapshot rows moved to the register) changed → stop: that part needs a full
@@ -17,10 +18,10 @@ downloaded xlsx. Every step is an existing build step on the same inputs as a ma
 Not rerun here: the Land join (scripts/build-land.py reads the internal Land registers and the OSM building tiles of a
 manual round). data/land.json keeps its own date; outlets added since have no building until the next manual round.
 
-Exit 0 with changed=true|false (and skipped=true when not configured) in --github-output; anything else = a failed
-round, the working tree is not to be published (the last published data stays on the page).
+Exit 0 with changed=true|false in --github-output (key=value lines); anything else = a failed round, the working tree is
+not to be published (the last published data stays on the page).
 
-    python3 scripts/sync-register.py --work <dir> [--xlsx <file> --read-at <ISO> --sheet-modified <ISO>] [--github-output <file>]
+    python3 scripts/sync-register.py --work <dir> --xlsx <file> --read-at <ISO> [--sheet-modified <ISO>] [--github-output <file>]
 """
 import argparse, json, os, shutil, subprocess, sys
 
@@ -64,30 +65,24 @@ def link_logos(built, shipped_path, register_ids):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--work', required=True)
-    ap.add_argument('--xlsx', default='')
-    ap.add_argument('--read-at', default='')
+    ap.add_argument('--xlsx', required=True)
+    ap.add_argument('--read-at', required=True)
     ap.add_argument('--sheet-modified', default='')
     ap.add_argument('--github-output', default='')
     a = ap.parse_args()
     work = os.path.abspath(a.work)
     os.makedirs(work, exist_ok=True)
-    src, dump, prov, build = (os.path.join(work, d) for d in ('src', 'dump', 'provinces', 'build'))
+    dump, prov, build = (os.path.join(work, d) for d in ('dump', 'provinces', 'build'))
     for d in (dump, build):
         shutil.rmtree(d, ignore_errors=True)
 
     # 1–2. read and dump
-    if a.xlsx:
-        if not a.read_at:
-            sys.exit('--xlsx needs --read-at (when the sheet was read)')
-        xlsx, read = os.path.abspath(a.xlsx), {'readAt': a.read_at, 'sheetModifiedAt': a.sheet_modified, 'reader': 'xlsx-export'}
-    else:
-        r = run(PY[:1] + [os.path.join(ROOT, 'scripts/fetch-register.py'), '--out', src])
-        if r.returncode == 78:
-            output(a.github_output, changed='false', skipped='true')
-            return
-        if r.returncode != 0:
-            sys.exit('reading the sheet failed')
-        xlsx, read = os.path.join(src, 'register.xlsx'), json.load(open(os.path.join(src, 'read.json'), encoding='utf-8'))
+    if not os.path.isfile(a.xlsx):
+        sys.exit(f'no xlsx at {a.xlsx}')
+    with open(a.xlsx, 'rb') as fh:
+        if fh.read(2) != b'PK':
+            sys.exit(f'{a.xlsx} is not an xlsx file (a sign-in page or an unfinished download?)')
+    xlsx, read = os.path.abspath(a.xlsx), {'readAt': a.read_at, 'sheetModifiedAt': a.sheet_modified, 'reader': 'xlsx-export'}
     must(PY + [os.path.join(ROOT, 'scripts/xlsx-dump.py'), xlsx, dump])
 
     # 3. anything the page uses changed?
