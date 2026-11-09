@@ -10,7 +10,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {join} from 'node:path';
-import {load, readJSON, readBytes, sha256, ROOT} from './helpers.js';
+import {load, readJSON, readBytes, sha256, ROOT, release} from './helpers.js';
 import {brandsIn, provincesIn, outletMix, searchRegister, EVIDENCE, STATUS} from '../js/register.js';
 import {decodeLand, geometryContains, distanceToGeometry, landProfile, landOfRow, landOfOutlet, hostsOf, aroundGeometry, landTypeTh, applyRowDisplay, applyOutletDisplay, LAND_RULE} from '../js/land.js';
 import {renderLandHostsIn, renderStoreLand, renderStoreRegister, renderChains, renderCompany, renderOutlet, renderLand, REGISTER_RULE} from '../js/register-panel.js';
@@ -40,12 +40,17 @@ function setup() {
 }
 const PRIVATE = /(docs|drive)\.google\.com|googleusercontent\.com|drive\.usercontent/;
 
-test('chains.json keeps the register unit: 27,527 outlet_ids, unique, every column complete', () => {
+test('chains.json keeps the register unit: one row per outlet_id of the source set, unique, every column complete', () => {
   const {raw, reg} = setup();
   assert.equal(raw.meta.schema, 'citymeter-chain-register-1');
   const n = raw.cols.id.length;
-  // Snapshot values of the register read on 2026-11-03 (regression fixtures, never UI constants; 0.7.1: 27,120).
-  assert.equal(n, 27527);
+  // The source set of this build answers (data/release.json, scripts/register-source.py): read 2026-11-09 27,954 outlets
+  // of 982 brands; 0.8.0 (3 Nov) 27,527 of 907; 0.7.1 27,120. Never UI constants.
+  const src = release().register;
+  assert.equal(n, src.outlets);
+  assert.equal(sha256(Buffer.from([...raw.cols.id].sort().join('\n'))), src.outletIdsSha256, 'the same outlet ids as the source set');
+  assert.equal(raw.brands.length, src.brandsWithOutlets);
+  assert.equal(sha256(Buffer.from(raw.brands.map(b => b.id).sort().join('\n'))), src.brandIdsSha256, 'the same brands with outlets as the source set');
   assert.equal(raw.meta.outlets, n);
   assert.equal(String(raw.meta.readmeCounts['จำนวนตัวตนสาขา/จุดขาย']), String(n), 'equals the register README count');
   for (const [k, col] of Object.entries(raw.cols)) assert.equal(col.length, n, `column ${k}`);
@@ -65,7 +70,7 @@ test('coordinates: only the register\'s selected points, inside Thailand; no poi
     assert.ok(o.latitude > 5 && o.latitude < 21 && o.longitude > 97 && o.longitude < 106, o.id);
   }
   assert.equal(withPoint, raw.meta.stats.withPoint);
-  assert.equal(withPoint, 22547, 'register of 2026-11-03 (0.7.1: 22,182)');
+  assert.equal(withPoint, release().register.withCoordinates, 'the source set\'s rows with a coordinate in Thailand (2026-11-09: 22,710; 0.8.0: 22,547; 0.7.1: 22,182)');
 });
 
 test('province and แขวง/ตำบล are derived and say how: point-in-polygon first, register text second, unknown stays unknown', () => {

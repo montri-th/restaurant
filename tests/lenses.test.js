@@ -5,7 +5,8 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {load, readJSON} from './helpers.js';
+import {load, readJSON, fixture} from './helpers.js';
+import {dens} from '../js/panel.js';
 import {LENSES, DEFAULT_LENS, LENS_TEST, lensOf, lensFilters, lensesOffered, lensShare} from '../js/lenses.js';
 import {summarizeAreaInsight, filterAreaRows} from '../js/area-insight.js';
 import {buildOverview, buildAreaProfile, areaCharacter} from '../js/profile-model.js';
@@ -33,35 +34,36 @@ test('a lens is exactly its preset: national chains by default, 1,000+ baht, den
   assert.equal(lensFilters('nope'), null);
 });
 
-test('national chains lens: 26.9 % of the restaurants in วังใหม่ · ถนนพญาไท · ปทุมวัน are 200+ chains; 9.4 % everywhere', () => {
+test('national chains lens: the share of 200+ chains in the three densest areas of them, against everywhere (fixture: วังใหม่ · ถนนพญาไท · ปทุมวัน)', () => {
   const {data, index, coverage} = load();
   configureBrandLogos(readJSON('data/brand-logos.json'));
   const scope = filterRows(data.rows, {size: 'S5'});
   const insight = summarizeAreaInsight(scope, index, {coverage});
   assert.equal(insight.mode, 'density');
-  assert.deepEqual(insight.areas.map(a => a.name).sort(), ['ถนนพญาไท', 'ปทุมวัน', 'วังใหม่'].sort());
+  fixture('lens.chains.areas', insight.areas.map(a => a.name).sort());
   const s = lensShare(data.rows, insight.areaIds, LENS_TEST.chains);
-  assert.deepEqual({count: s.count, total: s.total, baselineCount: s.baselineCount, baselineTotal: s.baselineTotal}, {count: 187, total: 695, baselineCount: 7605, baselineTotal: 80629});
-  assert.equal(s.share.toFixed(1), '26.9');
-  assert.equal(s.baseline.toFixed(1), '9.4');
+  // 2026-11-09: 187 of 712 (26.3 %), everywhere 9.4 %; 0.8.0: 187 of 695 (26.9 %).
+  fixture('lens.chains.share', {count: s.count, total: s.total, baselineCount: s.baselineCount, baselineTotal: s.baselineTotal});
+  assert.equal(s.share, s.count / s.total * 100);
+  const share = s.share.toFixed(1), baseline = s.baseline.toFixed(1);
   const chains = buildChainIndex({rows: data.rows, brands: data.brands, register: load().register});
   const top = chainsOf(filterAreaRows(scope, new Set(insight.areaIds)), chains, 6);
   // Chains, not names: KFC's three operator networks stay apart (js/chains.js), so none of them reaches the top three.
-  assert.deepEqual(top.slice(0, 3).map(c => [c.chain?.name || c.brand?.name, c.count]), [['Café Amazon', 30], ['Starbucks', 23], ['Dairy Queen', 13]]);
-  assert.equal(top.total, 22, 'national chains in the three areas');
+  fixture('lens.chains.top', top.slice(0, 3).map(c => [c.chain?.name || c.brand?.name, c.count]));
+  fixture('lens.chains.total', top.total, 'national chains in the three areas');
   const html = renderOverview({insight, summary: summarize(scope), overview: buildOverview(scope, index), focusMode: 'auto', classOf: () => '#000', meta: data.meta, coverage,
     lens: 'chains', lenses: true, lensStats: s, lensChains: top});
   const t = text(html);
-  assert.ok(t.includes('ข้อค้นพบแรก · เครือระดับชาติ') && t.includes('26.9% ของร้านใน 3 แขวงนี้ เป็นเครือ 200+ สาขา'), t.slice(0, 500));
-  assert.ok(t.includes('187 จาก 695 ร้าน · ทุกพื้นที่ 9.4%'));
+  assert.ok(t.includes('ข้อค้นพบแรก · เครือระดับชาติ') && t.includes(`${share}% ของร้านใน 3 แขวงนี้ เป็นเครือ 200+ สาขา`), t.slice(0, 500));
+  assert.ok(t.includes(`${s.count.toLocaleString('en-US')} จาก ${s.total.toLocaleString('en-US')} ร้าน · ทุกพื้นที่ ${baseline}%`));
   assert.equal((html.match(/class="lens-chip"/g) || []).length, 3);
   assert.equal((html.match(/aria-pressed="true"/g) || []).length, 1);
   assert.ok(/data-id="chains" aria-pressed="true"/.test(html));
   assert.ok(html.includes('data-action="open-filters"') && t.includes('ลองกับร้านแบบคุณ'));
-  assert.ok(html.includes('class="aha-chains"') && html.includes('Café Amazon'), 'the chains there, by logo chip');
+  assert.ok(html.includes('class="aha-chains"') && html.includes(top[0].chain?.name || top[0].brand?.name), 'the chains there, by logo chip');
 });
 
-test('1,000+ baht lens: 24.3 % of them in คลองตันเหนือ · ลุมพินี · ทุ่งมหาเมฆ; density lens keeps 169.4', () => {
+test('1,000+ baht lens: 24.3 % of them in คลองตันเหนือ · ลุมพินี · ทุ่งมหาเมฆ; the density lens keeps the first Aha', () => {
   const {data, index, coverage} = load();
   const scope = filterRows(data.rows, {price: 'P6'});
   assert.equal(scope.length, 886);
@@ -72,7 +74,8 @@ test('1,000+ baht lens: 24.3 % of them in คลองตันเหนือ �
   assert.ok(t.includes('ข้อค้นพบแรก · ร้าน 1,000+ บาท') && t.includes('24.3% ของร้านราคาเริ่ม 1,000 บาทขึ้นไป อยู่ใน 3 แขวงนี้') && t.includes('215 จาก 886 ร้าน'), t.slice(0, 500));
   const all = summarizeAreaInsight(data.rows, index, {coverage});
   const td = text(renderOverview({insight: all, summary: summarize(data.rows), overview: buildOverview(data.rows, index), focusMode: 'auto', classOf: () => '#000', meta: data.meta, coverage, lens: 'density', lenses: true}));
-  assert.ok(td.includes('ข้อค้นพบแรก · แน่นที่สุด') && td.includes('169.4 ร้าน/ตร.กม. — แน่นที่สุดใน 3 แขวงนี้') && td.includes('ทุกพื้นที่ 9.9'), td.slice(0, 500));
+  const d = fixture('firstAha.density', dens(all.density));
+  assert.ok(td.includes('ข้อค้นพบแรก · แน่นที่สุด') && td.includes(`${d} ร้าน/ตร.กม. — แน่นที่สุดใน 3 แขวงนี้`) && td.includes(`ทุกพื้นที่ ${dens(all.baselineDensity)}`), td.slice(0, 500));
 });
 
 test('a place’s character in one line: top type group, the price stated most, 200+ chains beside everywhere — whatever the filters', () => {

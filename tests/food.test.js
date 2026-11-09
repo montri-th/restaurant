@@ -9,7 +9,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {load, readJSON, ROOT} from './helpers.js';
+import {load, readJSON, ROOT, fixture} from './helpers.js';
 import {FOOD, foodMatch, foodLabel, foodMix, filterRows, summarize} from '../js/model.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile} from '../js/profile-model.js';
 import {renderOverview, renderArea, renderDistrict, renderStore, renderVenue, renderFilterChips, foodSection, foodFact} from '../js/panel.js';
@@ -35,15 +35,14 @@ test('the codebook: 6 categories · 19 groups · 31 sub-groups; every classified
     if (r.foodSub) assert.equal(FOOD.byId.get(r.foodSub).group, r.food);
   }
   const mix = foodMix(data.rows);
-  assert.deepEqual({classified: mix.classified, unclassified: mix.unclassified, rows: data.restaurants.filter(r => r.food).length, outlets: data.outlets.filter(r => r.food).length},
-    {classified: 68887, unclassified: 27620, rows: 46626, outlets: 22261});
-  assert.deepEqual(Object.fromEntries(mix.cats), {FC01: 21786, FC02: 12669, FC03: 17872, FC04: 8080, FC05: 4561, FC06: 3919});
+  fixture('food.mix', {classified: mix.classified, unclassified: mix.unclassified, rows: data.restaurants.filter(r => r.food).length, outlets: data.outlets.filter(r => r.food).length});
+  assert.equal(mix.classified + mix.unclassified, data.rows.length, 'classified and unclassified make the population');
+  fixture('food.categories', Object.fromEntries(mix.cats));
   assert.equal([...mix.cats.values()].reduce((a, b) => a + b, 0), mix.classified, 'categories add up to the classified rows');
   assert.equal([...mix.groups.values()].reduce((a, b) => a + b, 0), mix.classified, 'so do groups');
   // The filter reaches every level by id; an unclassified row never matches a category.
-  assert.equal(filterRows(data.rows, {food: 'FC03'}).length, 17872);
-  assert.equal(filterRows(data.rows, {food: 'FG01'}).length, 12715);
-  assert.equal(filterRows(data.rows, {food: 'FSG01'}).length, 3239);
+  assert.equal(filterRows(data.rows, {food: 'FC03'}).length, mix.cats.get('FC03'));
+  fixture('food.filtered', ['FC03', 'FG01', 'FSG01'].map(id => filterRows(data.rows, {food: id}).length));
   assert.equal(foodMatch({}, 'FC01'), false);
   assert.equal(foodMatch({}, ''), true);
   assert.deepEqual(Object.keys(FOOD_CATEGORY_PICTOGRAM).sort(), FOOD.categories.map(c => c.id).sort(), 'one approved glyph per category');
@@ -52,13 +51,14 @@ test('the codebook: 6 categories · 19 groups · 31 sub-groups; every classified
 test('area panel: categories, groups and menus as bars that filter, labelled อนุมาน; unclassified said apart (สีลม)', () => {
   const {data, index} = load();
   const p = buildAreaProfile(data.rows, '100402', index, data.groups);
-  assert.deepEqual({count: p.count, classified: p.byFood.classified, unclassified: p.byFood.unclassified}, {count: 261, classified: 190, unclassified: 71});
+  const silom = fixture('food.silom', {count: p.count, classified: p.byFood.classified, unclassified: p.byFood.unclassified});
   const html = renderArea(p, {...data.meta, segmentsOn: '2026-11-02'});
   const t = text(html);
   assert.ok(html.includes('class="panel-section food-section"') && t.includes('หมวดอาหาร อนุมาน'), 'the section says อนุมาน once, beside its heading');
   assert.ok(/data-action="filter-field" data-id="food" data-value="FC03"[^>]*>.*เครื่องดื่ม\/ของหวาน/.test(html), 'category bars filter');
-  assert.ok(/data-id="food" data-value="FG05"/.test(html) && t.includes('กาแฟ/คาเฟ่ 48'), 'the top group with its count');
-  assert.ok(t.includes('ไม่จัดหมวด 71 ร้าน'), 'rows without a class are counted apart, never a zero of a category');
+  const coffee = fixture('food.silom.coffee', p.byFood.groups.get('FG05') ?? null);
+  assert.ok(/data-id="food" data-value="FG05"/.test(html) && t.includes(`กาแฟ/คาเฟ่ ${coffee}`), 'the top group with its count');
+  assert.ok(t.includes(`ไม่จัดหมวด ${silom.unclassified} ร้าน`), 'rows without a class are counted apart, never a zero of a category');
   assert.ok(!/data-value="FSG28"/.test(html), 'a fallback sub-group is no menu chip');
   assert.ok(!CAVEATS.test(t), t.match(CAVEATS)?.[0]);
   // The section sits right after the type bars, in the district panel as well.
