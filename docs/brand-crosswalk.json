@@ -1,8 +1,8 @@
 {
  "schema": "citymeter-restaurant-brand-crosswalk-1",
- "checkedOn": "2026-11-09",
+ "checkedOn": "2026-11-10",
  "register": {
-  "outlets": 27954,
+  "outlets": 28306,
   "brandsWithOutlets": 982
  },
  "rule": "pair a snapshot name candidate the sheet links to no register brand with a register brand that has outlets only when the names agree (NFKC, case, spacing, punctuation aside) and one more fact ties them: the same source page, the brand's own web domain, or a candidate row within 50 m of an outlet point of that brand; anything else is review and changes nothing on the page",

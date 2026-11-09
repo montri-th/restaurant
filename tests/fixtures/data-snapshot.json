@@ -1,12 +1,12 @@
 {
  "rule": "Numbers the tests pin that move with the register. Written by npm run fixtures from a run, never by hand; history keeps what each refresh replaced (newest first).",
  "generatedFrom": {
-  "registerReadAt": "2026-11-09T20:26:57+07:00",
-  "sourceSha256": "2c18f2ba4b7da698837af2532d992e36fe14477ec4e0e9fc96f0222144a72dda",
+  "registerReadAt": "2026-11-10T02:11:04+07:00",
+  "sourceSha256": "9ee7c6dbc21f092cffed642a30679ec179ed26db3dba4dc2c809ff21f6f0d83d",
   "files": {
-   "data/restaurants.json": "7e9df68f580ee33b994793a74a4c5603149983f6474f6151bbf655dd20fcc05d",
-   "data/chains.json": "8c4af1a19f2097963f7e92805e578de58d6a8a789230eb8006bf475f61417d60",
-   "data/segments.json": "7d361d8417f7cf437aa1b901064f14bc3a351a278b72b6aca5948cfab2959207",
+   "data/restaurants.json": "a899c5982b0d2ed4febfab8755dd2d28b18c08176f1a260cc67d45a8a3a057ef",
+   "data/chains.json": "f54830619f6f15072c51100ea1673213a1a760d25a282293ce48635ca2c2f9de",
+   "data/segments.json": "65475aa0947a0dc9fe1cbeb03401e5be3f8b41a361d415aeeb60684b9c72e7ca",
    "data/land.json": "524eca7fd0b5dd0ef3874792b28e303ab045515c007bf8ccc846d5e005a30585",
    "data/land-buildings.geojson": "8e4bf6d5cb68b47db743cfc2492a7b7a21048e028d1a201976eba72092b971b0"
   }
@@ -16,7 +16,7 @@
    [
     "100402",
     "สีลม",
-    266
+    269
    ],
    [
     "100108",
@@ -26,11 +26,11 @@
    [
     "100403",
     "สุริยวงศ์",
-    99
+    101
    ]
   ],
-  "firstAha.baseline": 9.87,
-  "firstAha.density": "172.0",
+  "firstAha.baseline": 9.9,
+  "firstAha.density": "174.2",
   "firstAha.mostReviewed": [
    "103902",
    "คลองตันเหนือ"
@@ -50,14 +50,14 @@
   ],
   "food.mix": {
    "classified": 68887,
-   "unclassified": 28047,
+   "unclassified": 28399,
    "rows": 46626,
    "outlets": 22261
   },
   "food.silom": {
-   "count": 266,
+   "count": 269,
    "classified": 191,
-   "unclassified": 75
+   "unclassified": 78
   },
   "food.silom.coffee": 48,
   "lens.chains.areas": [
@@ -66,10 +66,10 @@
    "วังใหม่"
   ],
   "lens.chains.share": {
-   "count": 187,
-   "total": 712,
-   "baselineCount": 7608,
-   "baselineTotal": 80770
+   "count": 199,
+   "total": 724,
+   "baselineCount": 7863,
+   "baselineTotal": 81025
   },
   "lens.chains.top": [
    [
@@ -85,20 +85,20 @@
     13
    ]
   ],
-  "lens.chains.total": 22,
-  "provinces.unknown": 2287,
+  "lens.chains.total": 23,
+  "provinces.unknown": 2288,
   "segments.attached": {
-   "attached": 95768,
+   "attached": 96120,
    "lifted": 750,
    "ok": true,
    "food": 68887
   },
   "segments.bySize": {
-   "S1": 67453,
+   "S1": 67452,
    "S2": 1221,
    "S3": 3539,
    "S4": 6489,
-   "S5": 17066
+   "S5": 17419
   },
   "segments.foodRows": {
    "grouped": [
@@ -116,6 +116,62 @@
   }
  },
  "history": [
+  {
+   "until": "2026-11-09T20:26:57+07:00",
+   "values": {
+    "firstAha.areas": [
+     [
+      "100402",
+      "สีลม",
+      266
+     ],
+     [
+      "100108",
+      "ตลาดยอด",
+      32
+     ],
+     [
+      "100403",
+      "สุริยวงศ์",
+      99
+     ]
+    ],
+    "firstAha.baseline": 9.87,
+    "firstAha.density": "172.0",
+    "food.mix": {
+     "classified": 68887,
+     "unclassified": 28047,
+     "rows": 46626,
+     "outlets": 22261
+    },
+    "food.silom": {
+     "count": 266,
+     "classified": 191,
+     "unclassified": 75
+    },
+    "lens.chains.share": {
+     "count": 187,
+     "total": 712,
+     "baselineCount": 7608,
+     "baselineTotal": 80770
+    },
+    "lens.chains.total": 22,
+    "provinces.unknown": 2287,
+    "segments.attached": {
+     "attached": 95768,
+     "lifted": 750,
+     "ok": true,
+     "food": 68887
+    },
+    "segments.bySize": {
+     "S1": 67453,
+     "S2": 1221,
+     "S3": 3539,
+     "S4": 6489,
+     "S5": 17066
+    }
+   }
+  },
   {
    "until": "2026-11-03T01:16:57+07:00",
    "values": {

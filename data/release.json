@@ -2,22 +2,22 @@
  "schema": "citymeter-restaurant-release-1",
  "rule": "register.sourceSha256 fingerprints the nine tabs the builds read (canonical cells); the tests hold data/chains.json to register.outlets, brandsWithOutlets, withCoordinates and the two id fingerprints; readAt = the sheet read, publishedAt = when that read went on the page (null before the merge)",
  "register": {
-  "readAt": "2026-11-09T20:26:57+07:00",
-  "sheetModifiedAt": "2026-11-08T08:18:40+07:00",
+  "readAt": "2026-11-10T02:11:04+07:00",
+  "sheetModifiedAt": "2026-11-10T02:07:07+07:00",
   "reader": "xlsx-export",
-  "sourceSha256": "2c18f2ba4b7da698837af2532d992e36fe14477ec4e0e9fc96f0222144a72dda",
+  "sourceSha256": "9ee7c6dbc21f092cffed642a30679ec179ed26db3dba4dc2c809ff21f6f0d83d",
   "tabs": {
    "00_README": {
     "rows": 202,
-    "sha256": "11645ade9fd8fac2b2f6258269aec8ed58e2d57014730aa696ed95414a9c90d0"
+    "sha256": "4c633cabaa21dfac64b1d2c634281c00c1aa7589ac6cef37c6e290d706219fe3"
    },
    "01_BRANDS": {
     "rows": 1315,
     "sha256": "4ccfc8f53a84766cdc143fa659af563b5229df45608bff78cbdf48abb69b17b4"
    },
    "02_STORES": {
-    "rows": 27954,
-    "sha256": "9829c30764114a47896e7cfe3c2b2019d3c9e18290efc40dd829e208feb9f217"
+    "rows": 28306,
+    "sha256": "2458fab47376c82451e50df5b9255850a8b0c436642e3f6f5b56e6533ac75ca1"
    },
    "03_COMPANIES": {
     "rows": 421,
@@ -44,14 +44,14 @@
     "sha256": "496f9454b6b63da1292dd150ea978bf76d3b939ac75fe42b9e9aa584a8205a60"
    }
   },
-  "outlets": 27954,
+  "outlets": 28306,
   "brandsWithOutlets": 982,
-  "withCoordinates": 22710,
-  "outletIdsSha256": "ae8ef83082a3ab6c6129f2b6660fde157ec8c90b213bb1bd73ca998dc4af9e34",
+  "withCoordinates": 23040,
+  "outletIdsSha256": "4313ae13c3c0775388cd5777ae8e2357978ce9f0b26bd6f109c1d3ef93399307",
   "brandIdsSha256": "d757ea6cb650c0e0a42ae6e451239f10c7db1b22d4b65d1f9bbaaa7d0a20c877",
   "workbook": {
-   "bytes": 90995067,
-   "sha256": "b3b02c4442b360d54433f51618fba2334f3da88687c2c1b7c0a37f458fb57952"
+   "bytes": 91025557,
+   "sha256": "64d8f880ba559dab95eb1c305b5210fb5d8e257cad519646cb2c5d381e154436"
   }
  },
  "publishedAt": null,
