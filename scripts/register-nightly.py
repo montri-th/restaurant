@@ -14,7 +14,7 @@ the branch to build on — the open pull request whose branch starts with “reg
   2. npm run fixtures, npm test — a failing test stops the round and nothing is pushed
   3. scripts/register-report.mjs against origin/main — before = what the page shows now
   4. commit only what a register round writes (data/chains.json, segments.json, release.json, brand-logos.json,
-     restaurants.json, docs/brand-crosswalk.json, tests/fixtures/), refuse a sheet link or any --forbid text, push to
+     restaurants.json, land.json, docs/brand-crosswalk.json, tests/fixtures/), refuse a sheet link or any --forbid text, push to
      the branch (a new register-YYYY-MM-DD from main when no register pull request is open)
   5. open a draft pull request, or replace the open one's report part and add the report as a comment
 
@@ -26,7 +26,7 @@ import argparse, datetime, importlib.util, json, os, re, shutil, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BANGKOK = datetime.timezone(datetime.timedelta(hours=7))
-ALLOWED = {'data/chains.json', 'data/segments.json', 'data/release.json', 'data/brand-logos.json', 'data/restaurants.json', 'docs/brand-crosswalk.json'}
+ALLOWED = {'data/chains.json', 'data/segments.json', 'data/release.json', 'data/brand-logos.json', 'data/restaurants.json', 'data/land.json', 'docs/brand-crosswalk.json'}
 ALLOWED_DIRS = ('tests/fixtures/',)
 NO_LINKS = ('data/release.json', 'docs/brand-crosswalk.json', 'tests/fixtures/')  # files that never hold a sheet link
 PRIVATE = ('docs.google.com', 'drive.google.com', 'spreadsheets/d/')
@@ -120,7 +120,9 @@ def report_block(release, report, pending, passed):
              report['md'].strip(), '',
              f"ทดสอบ: `npm test` ผ่าน {passed} (fixtures สร้างใหม่จากการรัน ค่าเดิมอยู่ใน history ของ `tests/fixtures/data-snapshot.json`)", '',
              '**งานอัตโนมัติไม่ได้ทำ (รอบที่คนทำ)**',
-             f"- อาคาร Land: ยังเป็นฉบับจับคู่ {pending.get('landCheckedOn') or '—'} — สาขาที่เพิ่มหรือย้ายพิกัดหลังจากนั้นยังไม่มีอาคาร (ใช้ทะเบียน Land ภายใน)",
+             f"- อาคาร Land: ยังเป็นฉบับจับคู่ {pending.get('landCheckedOn') or '—'} — สาขาที่เพิ่มหลังจากนั้นยังไม่มีอาคาร"
+             + (f" · ตัดความสัมพันธ์ของ {pending['landDropped']['outlets']} สาขาที่หายจากทะเบียน ({pending['landDropped']['left']}) หรือย้ายพิกัด ({pending['landDropped']['moved']})"
+                if (pending.get('landDropped') or {}).get('outlets') else '') + ' (จับคู่ใหม่ต้องใช้ทะเบียน Land ภายใน)',
              f"- โลโก้ที่ทะเบียนชี้ไฟล์ใหม่: {len(pending.get('logosPending') or [])} เครือ"
              + (f" ({', '.join(pending['logosPending'][:12])}{' …' if len(pending['logosPending']) > 12 else ''})" if pending.get('logosPending') else '')]
     if first and str(first[1]) != str(first[2]):
