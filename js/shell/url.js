@@ -64,13 +64,13 @@ export function serialize(params) {
  *   dataset     production `?d=` code, e.g. 'hotel'
  *   levels      area levels the dataset opens, e.g. ['P', 'D'] (js/shell/area-path.js#clampAt)
  *   place       own parameters that carry the area: {province: 'province', D: 'area'} (+ S for a subdistrict,
- *               M for a local administrative unit)
+ *               M for a local administrative unit, L for a locale; M and L may share one parameter)
  *   items       own parameter → `e` kind, first match wins: {hotel: 'hotel', station: 'station'}
  *   networks    own parameter → `n` kind, first match wins: {company: 'company'} (brand | company | operator | line)
  *   filters     own filter parameters → `f.<name>` (the province parameter is part of `at`, not a filter)
  *   rename      own → shared key for the rest (default: metric → m, areas → focus, view → view, view3d → v3d)
  *   provinceOf  (code, kind) → the production province code of one of the dataset's districts / subdistricts /
- *               local administrative units (kind 'D', 'S' or 'M')
+ *               local administrative units / locales (kind 'D', 'S', 'M' or 'L'; '' when the code is not of that kind)
  * A district opened inside a province filter keeps that filter as `f.province`, so the view comes back the same.
  */
 export function createCodec(config) {
@@ -82,7 +82,7 @@ export function createCodec(config) {
   const netKinds = Object.fromEntries(Object.entries(networks).map(([param, kind]) => [kind, param]));
   const filters = (config.filters || []).filter(f => f !== place.province);
   const rename = config.rename || RENAME;
-  const owned = new Set([place.province, place.D, place.S, place.M, ...Object.keys(items), ...Object.keys(networks), ...filters, ...Object.keys(rename)].filter(Boolean));
+  const owned = new Set([place.province, place.D, place.S, place.M, place.L, ...Object.keys(items), ...Object.keys(networks), ...filters, ...Object.keys(rename)].filter(Boolean));
   const provinceOf = config.provinceOf || (() => '');
 
   /** Own parameters (as the dataset writes them) → shared grammar (URLSearchParams). */
@@ -93,8 +93,10 @@ export function createCodec(config) {
     const sub = place.S ? own.get(place.S) || '' : '';
     const district = place.D ? own.get(place.D) || '' : '';
     const unit = place.M ? own.get(place.M) || '' : '';
+    const locale = place.L ? own.get(place.L) || '' : '';
     let at = null;
     if (unit) { const p = provinceOf(unit, 'M'); if (p) at = {province: p, kind: 'M', code: unit}; }
+    if (!at && locale) { const p = provinceOf(locale, 'L'); if (p) at = {province: p, kind: 'L', code: locale}; }
     if (!at && sub) { const p = provinceOf(sub, 'S'); if (p) at = {province: p, kind: 'S', code: sub}; }
     if (!at && district) { const p = provinceOf(district, 'D'); if (p) at = {province: p, kind: 'D', code: district}; }
     if (!at && province) at = {province, kind: 'P', code: ''};
@@ -105,6 +107,7 @@ export function createCodec(config) {
       if (district) out.set(place.D, district);
       if (sub) out.set(place.S, sub);
       if (unit) out.set(place.M, unit);
+      if (locale && !out.has(place.L)) out.set(place.L, locale);
     }
     for (const [param, kind] of Object.entries(items)) {
       const v = own.get(param);
@@ -136,6 +139,7 @@ export function createCodec(config) {
         if (at.kind === 'D' && place.D) own.set(place.D, at.code);
         if (at.kind === 'S' && place.S) own.set(place.S, at.code);
         if (at.kind === 'M' && place.M) own.set(place.M, at.code);
+        if (at.kind === 'L' && place.L) own.set(place.L, at.code);
         if (src.get('f.province')) own.set(place.province, src.get('f.province'));
       }
     }

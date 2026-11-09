@@ -1,6 +1,6 @@
 /**
  * citymeter-shell — the shared code of the CityMETER demos (js/shell/): navigation (0.1.0), the map modules (0.2.0),
- * the header (0.3.0) and the subdistrict and local-unit levels (0.4.0). This file is the same in every repository that carries the shell: the files must match
+ * the header (0.3.0) and the subdistrict, local-unit and locale levels (0.4.0, 0.4.1). This file is the same in every repository that carries the shell: the files must match
  * js/shell/manifest.json byte for byte (and so must the files it lists under `shared`), and the navigation modules
  * must keep the contract of demo-platform-review §5.2–5.3 (address grammar, history, breadcrumb, tab title). The map
  * modules keep their own tests in each repository (tests/camera.test.js, tests/terrain.test.js …); the launch card
@@ -184,6 +184,15 @@ test('subdistricts and local administrative units travel in `at` for the demos t
   assert.equal(m.decode('at=CBI/M/03200701').own.get('unit'), '03200701');
   assert.equal(serialize(m.encode(new URLSearchParams('unit=9'))), 'd=grocery&unit=9', 'a unit the address cannot spell is kept');
   assert.equal(codec().decode('at=CBI/M/03200701').own.get('area'), null, 'a demo without the level opens the province');
+  // One own parameter for both a local unit and a locale (Grocery, 0.4.1): the key's kind decides the path.
+  const LOC = 'a29ec31e-3a36-4ab7-9670-7cef38873c80';
+  const g = createCodec({dataset: 'grocery', levels: ['P', 'D', 'M', 'L'], place: {province: 'province', D: 'district', M: 'unit', L: 'unit'},
+    provinceOf: (code, kind) => ({M: {'03200701': 'CBI'}, L: {[LOC]: 'BKK'}, D: {'2001': 'CBI'}}[kind] || {})[code] || ''});
+  assert.equal(serialize(g.encode(new URLSearchParams('unit=03200701'))), 'd=grocery&at=CBI/M/03200701');
+  assert.equal(serialize(g.encode(new URLSearchParams(`unit=${LOC}`))), `d=grocery&at=BKK/L/${LOC}`);
+  assert.equal(g.decode(`at=BKK/L/${LOC}`).own.get('unit'), LOC);
+  assert.equal(g.decode('at=CBI/M/03200701').own.get('unit'), '03200701');
+  assert.equal(serialize(g.encode(new URLSearchParams('unit=zz'))), 'd=grocery&unit=zz', 'an unknown key is kept once');
   const r = createCodec({dataset: 'restaurant', levels: ['P', 'D', 'S'], place: {province: 'province', D: 'district', S: 'area'},
     items: {store: 'store', place: 'venue'}, networks: {company: 'company'}, provinceOf: code => PROVINCES[code.slice(0, 2)] || ''});
   assert.equal(serialize(r.encode(new URLSearchParams('company=RCO-minor-food&area=103902'))), 'd=restaurant&at=BKK/S/103902&n=company:RCO-minor-food');
@@ -207,6 +216,9 @@ test('the breadcrumb reaches the subdistrict, and a local unit follows the provi
   assert.equal(breadcrumbText(unit), 'ประเทศไทย › ชลบุรี › เทศบาลนครแหลมฉบัง');
   assert.equal(unit.at(-1).href, 'https://landometer.com/v3/citymeter/CBI/M/03200701?d=grocery');
   assert.equal(unit.at(-1).action, 'crumb-unit');
+  const loc = buildBreadcrumb({unit: {id: 'a29ec31e-3a36-4ab7-9670-7cef38873c80', name: 'อโศก', province: 'BKK', kind: 'L'}}, {...ctx, dataset: 'grocery'});
+  assert.equal(breadcrumbText(loc), 'ประเทศไทย › กรุงเทพมหานคร › อโศก', 'a locale follows the province too');
+  assert.equal(loc.at(-1).href, 'https://landometer.com/v3/citymeter/BKK/L/a29ec31e-3a36-4ab7-9670-7cef38873c80?d=grocery');
   const site = buildBreadcrumb({site: {id: 'RV-1', name: 'เซ็นทรัลเวิลด์', province: 'BKK'}}, ctx);
   assert.equal(breadcrumbText(site), 'ประเทศไทย › กรุงเทพมหานคร › เซ็นทรัลเวิลด์');
   assert.equal(site.at(-1).href, undefined, 'a site has no production page');
@@ -237,6 +249,7 @@ test('header: a demo on the shell opens the same area, the others their start pa
   assert.equal(demoHref(transit, '?at=BKK/D/1039'), 'https://montri-th.github.io/transit/');
   assert.equal(demoHref(DEMOS.find(d => d.path === 'pharmacy'), '?at=BKK/S/103902'), 'https://montri-th.github.io/pharmacy/?at=BKK/S/103902');
   assert.equal(demoHref(DEMOS.find(d => d.path === 'restaurant'), '?at=BKK/S/103902'), 'https://montri-th.github.io/restaurant/?at=BKK/S/103902');
+  assert.equal(demoHref(DEMOS.find(d => d.path === 'grocery'), '?at=CBI/M/03200701'), 'https://montri-th.github.io/grocery/?at=CBI/M/03200701');
   assert.equal(currentDemo('/governmentoffice/')?.path, 'governmentoffice');
   assert.equal(currentDemo('/hotelx/'), null);
   const html = pickerList({pathname: '/hotel/', search: '?d=hotel&at=BKK/D/1039', place: 'เขตวัฒนา'});
