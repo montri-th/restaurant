@@ -1,7 +1,7 @@
 /**
  * citymeter-shell — the shared code of the CityMETER demos (js/shell/): navigation (0.1.0), the map modules (0.2.0),
- * the header (0.3.0), the subdistrict, local-unit and locale levels (0.4.0, 0.4.1) and a zone a dataset defines itself
- * (0.4.2). This file is the same in every repository that carries the shell: the files must match
+ * the header (0.3.0), the subdistrict, local-unit and locale levels (0.4.0, 0.4.1), a zone a dataset defines itself
+ * (0.4.2) and networks (0.4.3). This file is the same in every repository that carries the shell: the files must match
  * js/shell/manifest.json byte for byte (and so must the files it lists under `shared`), and the navigation modules
  * must keep the contract of demo-platform-review §5.2–5.3 (address grammar, history, breadcrumb, tab title). The map
  * modules keep their own tests in each repository (tests/camera.test.js, tests/terrain.test.js …); the launch card
@@ -244,10 +244,10 @@ test('header: the demo list is one entry per demo, grouped Land · Location · L
 });
 
 test('header: a demo on the shell opens the same area, the others their start page (0.3.0)', () => {
-  const hotel = DEMOS.find(d => d.path === 'hotel'), transit = DEMOS.find(d => d.path === 'transit');
+  const hotel = DEMOS.find(d => d.path === 'hotel'), later = {path: 'later', name: 'Later', group: 'Living', at: false};
   assert.equal(demoHref(hotel, '?d=office&at=BKK/D/1039&e=office:OFF-1'), 'https://montri-th.github.io/hotel/?at=BKK/D/1039');
   assert.equal(demoHref(hotel, '?d=office'), 'https://montri-th.github.io/hotel/');
-  assert.equal(demoHref(transit, '?at=BKK/D/1039'), 'https://montri-th.github.io/transit/');
+  assert.equal(demoHref(later, '?at=BKK/D/1039'), 'https://montri-th.github.io/later/', 'a demo not on the shell opens its start page');
   assert.equal(demoHref(DEMOS.find(d => d.path === 'pharmacy'), '?at=BKK/S/103902'), 'https://montri-th.github.io/pharmacy/?at=BKK/S/103902');
   assert.equal(demoHref(DEMOS.find(d => d.path === 'restaurant'), '?at=BKK/S/103902'), 'https://montri-th.github.io/restaurant/?at=BKK/S/103902');
   assert.equal(demoHref(DEMOS.find(d => d.path === 'grocery'), '?at=CBI/M/03200701'), 'https://montri-th.github.io/grocery/?at=CBI/M/03200701');
@@ -257,7 +257,8 @@ test('header: a demo on the shell opens the same area, the others their start pa
   assert.match(html, /เปิดเขตวัฒนาในชุดข้อมูลอื่น/);
   assert.match(html, /href="https:\/\/montri-th\.github\.io\/hotel\/\?at=BKK\/D\/1039" aria-current="page"/);
   assert.match(html, /href="https:\/\/montri-th\.github\.io\/school\/\?at=BKK\/D\/1039"><span>School<\/span><\/a>/);
-  assert.match(html, /href="https:\/\/montri-th\.github\.io\/transit\/"><span>Transit<\/span><span class="dataset-note">หน้าแรก<\/span>/);
+  assert.match(html, /href="https:\/\/montri-th\.github\.io\/transit\/\?at=BKK\/D\/1039"><span>Transit<\/span><\/a>/, 'every demo is on the shell (0.4.3)');
+  assert.doesNotMatch(html, /dataset-note/);
   assert.equal((html.match(/aria-current/g) || []).length, 1);
   assert.doesNotMatch(html, /role="menu/, 'a disclosure of links, never menu roles (LDS NAV-02)');
   assert.match(pickerList({pathname: '/hotel/'}), /ชุดข้อมูลอื่นของ CityMETER/);
@@ -319,4 +320,26 @@ test('header: the picker names the place `at` hands over, and Camera Shops and L
   const loc = '?at=BKK/L/a29ec31e-3a36-4ab7-9670-7cef38873c80';
   assert.equal(demoHref(DEMOS.find(d => d.path === 'camera'), loc), `https://montri-th.github.io/camera/${loc}`);
   assert.equal(demoHref(DEMOS.find(d => d.path === 'luxurybrands'), '?at=BKK&f.neighborhood=siam'), 'https://montri-th.github.io/luxurybrands/?at=BKK');
+});
+
+test('a network the reader came through gets a crumb without a production link; no registry code, no `d` (0.4.3)', () => {
+  const ctx = {dataset: '', provinceByCode: c => ({BKK: {code: 'BKK', th: 'กรุงเทพมหานคร'}}[c] || null)};
+  const crumbs = buildBreadcrumb({province: 'BKK', network: {id: 'BTS_SUKHUMVIT', name: 'สายสุขุมวิท'}, site: {id: 'CONSTCAT:BTS_SUKHUMVIT:E4', name: 'สถานีอโศก', province: 'BKK'}}, ctx);
+  assert.equal(breadcrumbText(crumbs), 'ประเทศไทย › กรุงเทพมหานคร › สายสุขุมวิท › สถานีอโศก');
+  assert.deepEqual(crumbs.map(c => c.level), ['country', 'province', 'network', 'site']);
+  assert.equal(crumbs[2].action, 'crumb-network');
+  assert.equal(crumbs[2].href, undefined, 'a network is not a production area');
+  assert.equal(deepestHref(crumbs), 'https://landometer.com/v3/citymeter/BKK');
+  const brand = buildBreadcrumb({network: {id: 'B-1', name: 'Uniqlo'}}, ctx);
+  assert.deepEqual(brand.map(c => c.label), ['ประเทศไทย', 'Uniqlo'], 'a brand page: the country, then the brand');
+  const none = createCodec({dataset: '', levels: ['P', 'D'], place: {province: 'province', D: 'area'}, items: {store: 'store'},
+    provinceOf: code => PROVINCES[code.slice(0, 2)] || ''});
+  assert.equal(serialize(none.encode(new URLSearchParams('area=1039&store=FIT-1'))), 'at=BKK/D/1039&e=store:FIT-1', 'no code in the registry: no `d`');
+  assert.equal(none.decode('at=BKK/D/1039&e=store:FIT-1').own.get('store'), 'FIT-1');
+  const w = fakeWindow('?area=1039');
+  const nav = createNavigator(none, {win: w.win});
+  nav.commit(nav.read());
+  assert.equal(nav.commit(new URLSearchParams('area=1039&store=FIT-1')), true, 'opening an item still pushes');
+  assert.deepEqual(w.entries(), ['/hotel/?at=BKK/D/1039', '/hotel/?at=BKK/D/1039&e=store:FIT-1']);
+  for (const path of ['shoppingcenter', 'fitness', 'transit']) assert.equal(DEMOS.find(d => d.path === path).at, true, path);
 });

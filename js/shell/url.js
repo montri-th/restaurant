@@ -3,7 +3,7 @@
  *
  * One grammar for every CityMETER demo, equal to production (demo-platform-review §5.2, owner 2026-11-08 “ทำงาน ตาม
  * demo platform review ระยะถัดไปต่อเลยครับ”):
- *   d       dataset — the production `?d=` code
+ *   d       dataset — the production `?d=` code (a dataset with no code in the registry yet writes none, 0.4.3)
  *   at      area — the production path after /v3/citymeter/ (js/shell/area-path.js)
  *   e       the thing open — `<kind>:<id>`, split at the first colon; the id is the registry's stable key, verbatim
  *   n       network — `<kind>:<id>` (brand | company | operator | line)
@@ -63,7 +63,7 @@ export function serialize(params) {
 
 /**
  * The translator between a dataset's own parameters and the shared grammar.
- *   dataset     production `?d=` code, e.g. 'hotel'
+ *   dataset     production `?d=` code, e.g. 'hotel'; '' when the dataset has no code in the registry yet (no `d`)
  *   levels      area levels the dataset opens, e.g. ['P', 'D'] (js/shell/area-path.js#clampAt)
  *   place       own parameters that carry the area: {province: 'province', D: 'area'} (+ S for a subdistrict,
  *               M for a local administrative unit, L for a locale; M and L may share one parameter)
@@ -93,7 +93,7 @@ export function createCodec(config) {
   /** Own parameters (as the dataset writes them) → shared grammar (URLSearchParams). */
   function encode(own) {
     const out = new URLSearchParams();
-    out.set('d', config.dataset);
+    if (config.dataset) out.set('d', config.dataset);
     const province = own.get(place.province) || '';
     const sub = place.S ? own.get(place.S) || '' : '';
     const district = place.D ? own.get(place.D) || '' : '';
