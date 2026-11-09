@@ -39,7 +39,7 @@ function decorate(element, name) {
   element.classList.add('nav-decorated');
 }
 
-function decorateNavigation(titles = {}) {
+function decorateNavigation(titles = {}, externalLinks = '') {
   const byId = (id, name) => decorate(document.getElementById(id), name);
   byId('close-help', 'close');
   byId('mobile-panel', 'menu');
@@ -47,7 +47,9 @@ function decorateNavigation(titles = {}) {
   byId('toggle-table', 'close');
   const mode = document.getElementById('theme');
   if (mode) decorate(mode.closest('label'), mode.value === 'dark' ? 'dark_mode' : mode.value === 'light' ? 'light_mode' : 'contrast');
-  for (const anchor of document.querySelectorAll('.source-link[target="_blank"], .usage-dialog a[target="_blank"], .top-actions a[target="_blank"], .links a[target="_blank"]')) {
+  const external = ['.source-link[target="_blank"]', '.usage-dialog a[target="_blank"]', '.top-actions a[target="_blank"]', '.links a[target="_blank"]'];
+  if (externalLinks) external.push(externalLinks);
+  for (const anchor of document.querySelectorAll(external.join(', '))) {
     // This glyph only marks destinations that really open a new browsing context.
     decorate(anchor, 'open_in_new');
   }
@@ -67,10 +69,23 @@ function installHelp() {
   if (!dialog || !openers.length || !close) return;
   const shown = el => el?.isConnected && el.getClientRects().length > 0;
   let returnFocus = openers[0];
-  for (const opener of openers) opener.addEventListener('click', () => {
+  // `section`: a part of the dialog to open at; focus goes to its tabindex="-1" heading, else to the close button.
+  const open = (opener, section = null) => {
     returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : opener;
     if (!dialog.open) dialog.showModal();
-    close.focus({preventScroll: true});
+    if (section && dialog.contains(section)) {
+      (section.querySelector('[tabindex="-1"]') || close).focus({preventScroll: true});
+      section.scrollIntoView({block: 'start'});
+    } else close.focus({preventScroll: true});
+  };
+  for (const opener of openers) opener.addEventListener('click', () => open(opener));
+  // A link outside the dialog with data-open-help="<id of a section>" opens the dialog at that section (Shopping
+  // Center's map credit “ที่มา” opens “ที่มาของแผนที่”); without JavaScript it stays an in-page link.
+  document.addEventListener('click', event => {
+    const link = event.target instanceof Element ? event.target.closest('[data-open-help]') : null;
+    if (!link || dialog.contains(link)) return;
+    event.preventDefault();
+    open(link, document.getElementById(link.dataset.openHelp));
   });
   close.addEventListener('click', () => dialog.close());
   // Native dialog supplies modal focus containment and Escape/cancel behavior.
@@ -83,16 +98,18 @@ function installHelp() {
 }
 
 /** Decorate the controls, wire the help dialog, watch the fonts. titles: {elementId: title}; pictogramProbe: one
- * glyph of the demo's pictogram subset (the font is reported ready once that glyph loads). */
-export function installNavigation({titles = {}, pictogramProbe = ''} = {}) {
-  decorateNavigation(titles);
+ * glyph of the demo's pictogram subset (the font is reported ready once that glyph loads); externalLinks: a selector
+ * of this demo's own links that open a new tab, marked like the shared ones. */
+export function installNavigation({titles = {}, pictogramProbe = '', externalLinks = ''} = {}) {
+  const redecorate = () => decorateNavigation(titles, externalLinks);
+  redecorate();
   installHelp();
-  document.getElementById('theme')?.addEventListener('change', () => decorateNavigation(titles));
+  document.getElementById('theme')?.addEventListener('change', redecorate);
   let queued = false;
   const observer = new MutationObserver(() => {
     if (queued) return;
     queued = true;
-    queueMicrotask(() => { queued = false; decorateNavigation(titles); });
+    queueMicrotask(() => { queued = false; redecorate(); });
   });
   observer.observe(document.body, {childList: true, subtree: true, attributes: true, attributeFilter: ['aria-expanded']});
   if (document.fonts?.load) {

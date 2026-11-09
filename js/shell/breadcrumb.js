@@ -6,7 +6,8 @@
  * so a demo crumb and a production page name the same place. An item, a station or a building is the panel
  * heading, never a crumb (demo-platform-review §5.3). A local administrative unit (อปท.) is another way of dividing
  * the province, so it follows the province directly and never sits under a district (§5.3 rule 5). A zone a dataset
- * defines itself (an analytical ย่าน, 0.4.2) is not a production area: its crumb has no production link. With four levels
+ * defines itself (an analytical ย่าน, 0.4.2) is not a production area: its crumb has no production link, nor has a
+ * network the reader came through (a rail line, a brand page, 0.4.3). With four levels
  * the upper ones fold behind “…” on narrow screens. The dataset passes its own lookups, so the module knows no
  * dataset:
  *   ctx = {dataset: 'hotel', provinceByCode: code => {code, th} | null, areaWord: provinceCode => 'เขต' | 'อำเภอ',
@@ -24,12 +25,14 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '
  * sel.sub = a subdistrict record ({id, name, province, district, districtName}) or null — its district crumb comes
  * from sel.area when given, else from its own district fields; sel.unit = a local administrative unit or a locale
  * ({id, name, province, kind: 'M' | 'L'}, kind M when absent) or null; sel.zone = an area the dataset defines itself
- * ({id, name, province}) or null — after the administrative crumbs, with no production link (0.4.2); sel.site = a site
+ * ({id, name, province}) or null — after the administrative crumbs, with no production link (0.4.2); sel.network = a
+ * network the reader came through ({id, name}: a rail line, a brand) or null — after the area crumbs, with no production
+ * link (0.4.3); sel.site = a site
  * the reader is inside ({id, name, province}) or null — the last crumb, with no production link (§5.3 rule 4). Crumb
  * actions: crumb-country, crumb-province, crumb-area (district), crumb-sub (subdistrict), crumb-unit (local
- * administrative unit or locale), crumb-zone, crumb-site.
+ * administrative unit or locale), crumb-zone, crumb-network, crumb-site.
  */
-export function buildBreadcrumb({province = '', area = null, sub = null, unit = null, zone = null, site = null} = {},
+export function buildBreadcrumb({province = '', area = null, sub = null, unit = null, zone = null, network = null, site = null} = {},
   {dataset = '', provinceByCode = () => null, areaWord = () => '', subWord = () => ''} = {}) {
   const crumbs = [{level: 'country', label: 'ประเทศไทย', action: 'crumb-country', href: productionHref(dataset)}];
   const code = sub?.province || area?.province || unit?.province || zone?.province || province || site?.province || '';
@@ -49,6 +52,7 @@ export function buildBreadcrumb({province = '', area = null, sub = null, unit = 
     }
   }
   if (zone) crumbs.push({level: 'zone', label: zone.name, id: zone.id, action: 'crumb-zone'});
+  if (network) crumbs.push({level: 'network', label: network.name, id: network.id, action: 'crumb-network'});
   if (site) crumbs.push({level: 'site', label: site.name, id: site.id, action: 'crumb-site'});
   crumbs[crumbs.length - 1].current = true;
   return crumbs;
