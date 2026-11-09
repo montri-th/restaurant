@@ -1,6 +1,7 @@
 /**
  * citymeter-shell — the shared code of the CityMETER demos (js/shell/): navigation (0.1.0), the map modules (0.2.0),
- * the header (0.3.0) and the subdistrict, local-unit and locale levels (0.4.0, 0.4.1). This file is the same in every repository that carries the shell: the files must match
+ * the header (0.3.0), the subdistrict, local-unit and locale levels (0.4.0, 0.4.1) and a zone a dataset defines itself
+ * (0.4.2). This file is the same in every repository that carries the shell: the files must match
  * js/shell/manifest.json byte for byte (and so must the files it lists under `shared`), and the navigation modules
  * must keep the contract of demo-platform-review §5.2–5.3 (address grammar, history, breadcrumb, tab title). The map
  * modules keep their own tests in each repository (tests/camera.test.js, tests/terrain.test.js …); the launch card
@@ -16,7 +17,7 @@ import {buildBreadcrumb, renderBreadcrumb, breadcrumbText, deepestHref} from '..
 import {pageTitle, TITLE_MAX} from '../js/shell/title.js';
 import {terrainChips} from '../js/shell/terrain.js';
 import {DEMOS, GROUPS, demoUrl} from '../js/shell/datasets.js';
-import {demoHref, currentDemo, pickerList} from '../js/shell/header.js';
+import {demoHref, currentDemo, pickerList, placeLevel} from '../js/shell/header.js';
 
 const SHELL = new URL('../js/shell/', import.meta.url);
 const sha256 = buf => createHash('sha256').update(buf).digest('hex');
@@ -260,4 +261,62 @@ test('header: a demo on the shell opens the same area, the others their start pa
   assert.equal((html.match(/aria-current/g) || []).length, 1);
   assert.doesNotMatch(html, /role="menu/, 'a disclosure of links, never menu roles (LDS NAV-02)');
   assert.match(pickerList({pathname: '/hotel/'}), /ชุดข้อมูลอื่นของ CityMETER/);
+});
+
+test('a zone a dataset defines itself stays a filter, and opening it adds a history entry (0.4.2)', () => {
+  const zones = () => createCodec({
+    dataset: 'luxuryBrands', levels: ['P'], place: {province: 'province'}, items: {store: 'store', place: 'venue'},
+    filters: ['search', 'neighborhood', 'province'], levelFilters: ['neighborhood', 'nowhere'],
+    rename: {areas: 'focus', view: 'view', view3d: 'v3d', cam: 'cam'},
+  });
+  const c = zones();
+  assert.deepEqual(c.levelKeys, ['f.neighborhood'], 'only a declared filter can open a level');
+  assert.equal(serialize(c.encode(new URLSearchParams('province=BKK&neighborhood=siam'))), 'd=luxuryBrands&at=BKK&f.neighborhood=siam');
+  assert.equal(c.decode('at=BKK&f.neighborhood=siam').own.get('neighborhood'), 'siam');
+  assert.equal(c.decode('at=BKK/L/a29ec31e-3a36-4ab7-9670-7cef38873c80').own.get('province'), 'BKK', 'a production locale opens the province');
+  assert.equal(c.decode('?neighborhood=siam&place=49b5afdc-2436-48bc-8a89-007ac5541d98').legacy, true);
+  assert.equal(codec().levelKeys.length, 0);
+  const w = fakeWindow('?province=BKK');
+  const nav = createNavigator(c, {win: w.win});
+  nav.commit(nav.read());
+  assert.equal(nav.commit(new URLSearchParams('province=BKK&neighborhood=siam')), true, 'opening a zone pushes');
+  assert.equal(nav.commit(new URLSearchParams('province=BKK&neighborhood=siam&search=Dior')), false, 'a search replaces');
+  assert.equal(nav.commit(new URLSearchParams('province=BKK&search=Dior')), true, 'leaving the zone pushes');
+  assert.deepEqual(w.entries(), ['/hotel/?d=luxuryBrands&at=BKK', '/hotel/?d=luxuryBrands&at=BKK&f.search=Dior&f.neighborhood=siam', '/hotel/?d=luxuryBrands&at=BKK&f.search=Dior']);
+  // A production locale held in the dataset's own ย่าน parameter travels in `at` (Camera Shops).
+  const LOC = 'a29ec31e-3a36-4ab7-9670-7cef38873c80';
+  const cam = createCodec({dataset: 'cameraShops', levels: ['P', 'L'], place: {province: 'province', L: 'neighborhood'},
+    items: {store: 'store', place: 'venue'}, filters: ['search', 'venue'], provinceOf: (code, kind) => (kind === 'L' && code === LOC ? 'BKK' : '')});
+  assert.equal(serialize(cam.encode(new URLSearchParams(`neighborhood=${LOC}&place=49b5afdc`))), `d=cameraShops&at=BKK/L/${LOC}&e=venue:49b5afdc`);
+  assert.equal(cam.decode(`at=BKK/L/${LOC}`).own.get('neighborhood'), LOC);
+  assert.equal(cam.decode('at=BKK/D/1039').own.get('province'), 'BKK', 'a district link opens the province');
+});
+
+test('a zone crumb has no production link; every crumb names its level for the picker (0.4.2)', () => {
+  const ctx = {dataset: '', provinceByCode: c => ({BKK: {code: 'BKK', th: 'กรุงเทพมหานคร'}}[c] || null)};
+  const crumbs = buildBreadcrumb({province: 'BKK', zone: {id: 'siam', name: 'สยาม', province: 'BKK'}, site: {id: '49b5afdc', name: 'Siam Paragon', province: 'BKK'}}, ctx);
+  assert.equal(breadcrumbText(crumbs), 'ประเทศไทย › กรุงเทพมหานคร › สยาม › Siam Paragon');
+  assert.deepEqual(crumbs.map(c => c.action), ['crumb-country', 'crumb-province', 'crumb-zone', 'crumb-site']);
+  assert.equal(crumbs[2].href, undefined, 'a zone is not a production area');
+  assert.equal(deepestHref(crumbs), 'https://landometer.com/v3/citymeter/BKK');
+  const zoneOnly = buildBreadcrumb({zone: {id: 'nimman', name: 'นิมมาน', province: 'BKK'}}, ctx);
+  assert.deepEqual(zoneOnly.map(c => c.level), ['country', 'province', 'zone'], 'the zone gives the province');
+  const html = renderBreadcrumb(crumbs);
+  assert.deepEqual([...html.matchAll(/data-level="([a-z]+)"/g)].map(m => m[1]), ['country', 'province', 'zone', 'site']);
+  assert.match(html, /<li class="is-collapsible" data-level="country"><button type="button" class="crumb" data-action="crumb-country" data-id="">ประเทศไทย<\/button><\/li>/);
+  assert.match(html, /data-level="site"><span class="crumb is-current" aria-current="location">Siam Paragon<\/span>/);
+});
+
+test('header: the picker names the place `at` hands over, and Camera Shops and Luxury Brands are on the shell (0.4.2)', () => {
+  assert.equal(placeLevel('?d=hotel&at=BKK/D/1039&e=hotel:HT-1'), 'area');
+  assert.equal(placeLevel('?at=BKK/S/103902'), 'sub');
+  assert.equal(placeLevel('?at=CBI/M/03200701'), 'unit');
+  assert.equal(placeLevel('?at=BKK/L/a29ec31e-3a36-4ab7-9670-7cef38873c80&e=venue:x'), 'unit');
+  assert.equal(placeLevel('?d=luxuryBrands&at=BKK&f.neighborhood=siam'), 'province', 'a zone is not handed over');
+  assert.equal(placeLevel('?d=luxuryBrands&f.neighborhood=siam'), '');
+  assert.equal(placeLevel('?at=nowhere'), '');
+  for (const path of ['camera', 'luxurybrands']) assert.equal(DEMOS.find(d => d.path === path).at, true, path);
+  const loc = '?at=BKK/L/a29ec31e-3a36-4ab7-9670-7cef38873c80';
+  assert.equal(demoHref(DEMOS.find(d => d.path === 'camera'), loc), `https://montri-th.github.io/camera/${loc}`);
+  assert.equal(demoHref(DEMOS.find(d => d.path === 'luxurybrands'), '?at=BKK&f.neighborhood=siam'), 'https://montri-th.github.io/luxurybrands/?at=BKK');
 });
