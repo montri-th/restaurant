@@ -23,7 +23,9 @@ import argparse, collections, difflib, json, os, re, unicodedata
 from shapely.geometry import shape, Point
 from shapely.strtree import STRtree
 
-PUBLIC_BLOCK = re.compile(r'(^|\.)(drive\.google\.com|docs\.google\.com|drive\.usercontent\.google\.com|googleusercontent\.com)$')
+# Workspace documents never reach the page: Google Drive / Docs files and (2026-11-10) Lark / Feishu share links — the
+# register keeps such a link as its source (e.g. a brand's branch list shared as a Lark Base view), the page shows none.
+PUBLIC_BLOCK = re.compile(r'(^|\.)(drive\.google\.com|docs\.google\.com|drive\.usercontent\.google\.com|googleusercontent\.com|larksuite\.com|larksuite\.cn|feishu\.cn|larkoffice\.com)$')
 EVIDENCE = ['primary', 'secondary', 'cart']
 EVIDENCE_TH = {'primary': 'แหล่งของแบรนด์/บริษัท/สถานที่ระบุสาขา', 'secondary': 'แหล่งรอง รอยืนยันจากแบรนด์', 'cart': 'จุดขายรถเข็น รอยืนยันสถานะและตำแหน่ง'}
 STATUS = ['listed', 'pending', 'temporary', 'closed']

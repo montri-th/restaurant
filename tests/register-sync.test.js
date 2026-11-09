@@ -20,7 +20,34 @@ import RESTAURANT_EN from '../js/lang-en.js';
 const text = html => html.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/\s+/g, ' ');
 const YOGURUTO = 'VNBR-ff68cbb4d4a0e734', TDP_EAST_2F = 'VNOUT-8f358b44eb262263b76f';
 
-test('Yoguruto: its page names the brand code, lists the True Digital Park EAST floor 2 branch with its code, and draws no pin', ctx => {
+test('Yoguruto: the brand register\'s branches are pins only from the register coordinate; True Digital Park EAST 2F stays listed without one', ctx => {
+  const {data, register} = load();
+  const o = register.byId.get(TDP_EAST_2F);
+  if (!o) { ctx.skip(`${TDP_EAST_2F} is not in the register read of ${release().register.readAt}`); return; }
+  const rows = filterRows(data.rows, {brand: YOGURUTO});
+  if (rows.length === 1) { ctx.skip('the register still lists one Yoguruto branch: the single-branch case below applies'); return; }
+  // The owner's “ปัก Yoguruto ให้ครบ” (2026-11-10): the brand's own branch list (a Lark Base view, status Open) joined
+  // 02_STORES as its own rows (record_origin yoguruto_brand_register_lark_2026_11_10). The EAST 2F row the venue's
+  // directory gave stays as it was and is not repeated by the brand's “True Digital Park (East)”.
+  const chains = readJSON('data/chains.json');
+  const ids = new Set(rows.map(r => r.id));
+  const inChains = chains.cols.id.map((id, i) => [id, i]).filter(([id]) => ids.has(id));
+  assert.equal(inChains.length, rows.length, 'every Yoguruto row of the page is a register outlet');
+  const withPoint = inChains.filter(([, i]) => chains.cols.lat[i] !== null).length;
+  assert.ok(withPoint > 0 && withPoint < rows.length, `${withPoint} of ${rows.length} with a register coordinate`);
+  assert.equal(pointCollection(rows).features.length, withPoint, 'a pin only where the register selected a coordinate: never the host reference or an approximate point');
+  assert.equal(rows.filter(r => r.name.includes('True Digital Park') && /EAST|East/.test(r.name)).length, 1, 'True Digital Park EAST is one outlet');
+  assert.equal(o.hasPoint, false);
+  const out = text(renderOutlet({reg: register, outlet: o}));
+  assert.ok(out.includes('Yoguruto — True Digital Park EAST 2F') && out.includes('ฝั่ง EAST · ชั้น 2') && out.includes('ยังไม่มีพิกัด'));
+  // The brand's list is a workspace document link: it stays in the sheet, never on the page.
+  for (const [, i] of inChains) {
+    const s = chains.cols.src[i];
+    assert.ok(s === -1 || !/larksuite\.com|feishu\.cn/.test(chains.urls[s]), 'no Lark link reaches the page');
+  }
+});
+
+test('Yoguruto (one branch): its page names the brand code, lists the True Digital Park EAST floor 2 branch with its code, and draws no pin', ctx => {
   const {data, register, index, coverage} = load();
   const o = register.byId.get(TDP_EAST_2F);
   // The case the owner asked about (2026-11-09). A later read without this row says so in the register round's pull
@@ -31,6 +58,7 @@ test('Yoguruto: its page names the brand code, lists the True Digital Park EAST 
   assert.deepEqual([o.name, o.floor, o.zone, o.hasPoint], ['Yoguruto — True Digital Park EAST 2F', '2F', 'EAST', false], 'as the register lists it, without a storefront point');
   // The brand filter reaches it; the page lists it although no coordinate puts it on the map.
   const rows = filterRows(data.rows, {brand: YOGURUTO});
+  if (rows.length > 1) { ctx.skip(`the register lists ${rows.length} Yoguruto branches since the brand's own list joined it: the test above applies`); return; }
   assert.deepEqual(rows.map(r => r.id), [TDP_EAST_2F]);
   const chains = buildChainIndex({rows: data.rows, brands: data.brands, register});
   const chain = chains.byKey.get(YOGURUTO);
