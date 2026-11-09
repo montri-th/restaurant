@@ -18,7 +18,7 @@ test('restaurants.json decodes to the 70,214 observations of the snapshot, nothi
   assert.equal(data.restaurants.length, 68980, 'sheet 1');
   assert.equal(data.moved.length, 1234, 'rows moved to the chain register, counted there');
   assert.equal(data.outlets.length, register.outlets.length);
-  // The register's outlets are its source set's (data/release.json: 27,954 read 2026-11-09; 0.8.0: 27,527; 0.7.1: 27,120).
+  // The register's outlets are its source set's (data/release.json: 28,306 read 2026-11-10; 2026-11-09: 27,954; 0.8.0: 27,527; 0.7.1: 27,120).
   assert.equal(data.rows.length, 68980 + release().register.outlets, 'one population: sheet 1 + the register (owner 2026-10-28 22:36)');
   assert.equal(data.dropped, 0, 'every row resolves to a subdistrict frame');
   assert.equal(new Set([...data.rows, ...data.moved].map(r => r.id)).size, data.rows.length + data.moved.length, 'row keys are unique across both sheets');

@@ -42,7 +42,7 @@ test('national chains lens: the share of 200+ chains in the three densest areas 
   assert.equal(insight.mode, 'density');
   fixture('lens.chains.areas', insight.areas.map(a => a.name).sort());
   const s = lensShare(data.rows, insight.areaIds, LENS_TEST.chains);
-  // 2026-11-09: 187 of 712 (26.3 %), everywhere 9.4 %; 0.8.0: 187 of 695 (26.9 %).
+  // 2026-11-10: 199 of 724 (27.5 %; Yoguruto's 353 outlets reach 200+), everywhere 9.7 %; 2026-11-09: 187 of 712 (26.3 %); 0.8.0: 187 of 695 (26.9 %).
   fixture('lens.chains.share', {count: s.count, total: s.total, baselineCount: s.baselineCount, baselineTotal: s.baselineTotal});
   assert.equal(s.share, s.count / s.total * 100);
   const share = s.share.toFixed(1), baseline = s.baseline.toFixed(1);

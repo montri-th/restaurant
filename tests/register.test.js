@@ -44,8 +44,8 @@ test('chains.json keeps the register unit: one row per outlet_id of the source s
   const {raw, reg} = setup();
   assert.equal(raw.meta.schema, 'citymeter-chain-register-1');
   const n = raw.cols.id.length;
-  // The source set of this build answers (data/release.json, scripts/register-source.py): read 2026-11-09 27,954 outlets
-  // of 982 brands; 0.8.0 (3 Nov) 27,527 of 907; 0.7.1 27,120. Never UI constants.
+  // The source set of this build answers (data/release.json, scripts/register-source.py): read 2026-11-10 28,306 outlets
+  // of 982 brands; 2026-11-09 27,954 of 982; 0.8.0 (3 Nov) 27,527 of 907; 0.7.1 27,120. Never UI constants.
   const src = release().register;
   assert.equal(n, src.outlets);
   assert.equal(sha256(Buffer.from([...raw.cols.id].sort().join('\n'))), src.outletIdsSha256, 'the same outlet ids as the source set');
@@ -70,7 +70,7 @@ test('coordinates: only the register\'s selected points, inside Thailand; no poi
     assert.ok(o.latitude > 5 && o.latitude < 21 && o.longitude > 97 && o.longitude < 106, o.id);
   }
   assert.equal(withPoint, raw.meta.stats.withPoint);
-  assert.equal(withPoint, release().register.withCoordinates, 'the source set\'s rows with a coordinate in Thailand (2026-11-09: 22,710; 0.8.0: 22,547; 0.7.1: 22,182)');
+  assert.equal(withPoint, release().register.withCoordinates, 'the source set\'s rows with a coordinate in Thailand (2026-11-10: 23,040; 2026-11-09: 22,710; 0.8.0: 22,547; 0.7.1: 22,182)');
 });
 
 test('province and แขวง/ตำบล are derived and say how: point-in-polygon first, register text second, unknown stays unknown', () => {

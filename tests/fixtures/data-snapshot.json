@@ -7,8 +7,8 @@
    "data/restaurants.json": "a899c5982b0d2ed4febfab8755dd2d28b18c08176f1a260cc67d45a8a3a057ef",
    "data/chains.json": "f54830619f6f15072c51100ea1673213a1a760d25a282293ce48635ca2c2f9de",
    "data/segments.json": "65475aa0947a0dc9fe1cbeb03401e5be3f8b41a361d415aeeb60684b9c72e7ca",
-   "data/land.json": "524eca7fd0b5dd0ef3874792b28e303ab045515c007bf8ccc846d5e005a30585",
-   "data/land-buildings.geojson": "8e4bf6d5cb68b47db743cfc2492a7b7a21048e028d1a201976eba72092b971b0"
+   "data/land.json": "9df98c81b05b74f869730675ee2b7242799cc68c046a8a0d8cab73572a52464a",
+   "data/land-buildings.geojson": "077df2c2775d1b4db7f2bda5c896645a412e73e0af025088a22846275fa382e5"
   }
  },
  "values": {

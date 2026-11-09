@@ -14,8 +14,8 @@ test('first Aha (one-population fixture): the three densest แขวง with �
   assert.equal(i.mode, 'density');
   assert.equal(i.minRows, MIN_AREA_ROWS);
   // The three areas and their numbers move with the register: tests/fixtures/data-snapshot.json, from a run (npm run
-  // fixtures), with the values it replaced in its history. Register of 2026-11-09: สีลม · ตลาดยอด · สุริยวงศ์ 172.0
-  // (397 rows). Before: 0.8.0 the same three at 169.4 (391); 0.7.1 ตลาดยอด · สีลม · สุริยวงศ์ 164.6 (380); 0.6.0–0.7.0
+  // fixtures), with the values it replaced in its history. Register of 2026-11-10: สีลม · ตลาดยอด · สุริยวงศ์ 174.2
+  // (402 rows; 2026-11-09: 172.0, 397). Before: 0.8.0 the same three at 169.4 (391); 0.7.1 ตลาดยอด · สีลม · สุริยวงศ์ 164.6 (380); 0.6.0–0.7.0
   // สุริยวงศ์ · สีลม · วังใหม่ 122.0; 0.4 สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.7 from the sheet-1 rows alone.
   fixture('firstAha.areas', i.areas.map(a => [a.id, a.name, a.count]));
   assert.equal(i.count, i.areas.reduce((s, a) => s + a.count, 0));
@@ -88,7 +88,7 @@ test('province frames count rows per province (a total, not a density)', () => {
   const outletsBy = {}; for (const o of register.outlets) if (o.province) outletsBy[o.province] = (outletsBy[o.province] || 0) + 1;
   for (const p of m.provinces) assert.equal(p.count, (raw.meta.rowsByProvince[p.code] || 0) - (movedBy[p.code] || 0) + (outletsBy[p.code] || 0), p.code);
   assert.equal(m.unknown, register.outlets.filter(o => !o.province).length, 'outlets without a province are counted apart');
-  fixture('provinces.unknown', m.unknown, 'outlets without a province (2026-11-09: 2,287; 0.8.0: 2,236; 0.7.1: 2,213)');
+  fixture('provinces.unknown', m.unknown, 'outlets without a province (2026-11-10: 2,288; 2026-11-09: 2,287; 0.8.0: 2,236; 0.7.1: 2,213)');
   assert.ok(m.provinces.every(p => p.count > 0), 'every province holds at least one restaurant or outlet');
   assert.equal(m.classes.scaleId, 'count');
   const none = buildProvinceModel([], provincesGeo);
