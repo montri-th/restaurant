@@ -580,7 +580,7 @@ export default {
     [re(`ร้าน ใน ${D} ตร\\.กม\\.`), 'restaurants in $1 km²'],
     [re(`ทุกพื้นที่ ([\\d.,]+%)`), 'all areas $1'],
     [re(`ร้าน 1,000\\+ บาท ([\\d.,]+%) อยู่ใน ${N} พื้นที่`), (m, t) => `${m[1]} of the restaurants from 1,000 baht are in ${plural(t, m[2], 'area', 'areas')}`],
-    [re(`เครือ 200\\+ สาขา ([\\d.,]+%) ของร้านใน ${N} พื้นที่`), (m, t) => `chains with 200+ branches: ${m[1]} of the restaurants in ${plural(t, m[2], 'area', 'areas')}`],
+    [re(`เครือ 200\\+ สาขา ([\\d.,]+%) ของร้านใน ${N} พื้นที่`), (m, t) => `Chains with 200+ branches: ${m[1]} of the restaurants in ${plural(t, m[2], 'area', 'areas')}`],
     [re(`เฉลี่ยจาก ${N} ร้านที่มีคะแนน`), (m, t) => `average of ${m[1]} rated ${t.plural(m[1], 'restaurant', 'restaurants')}`],
     [re(`ตามร้านชื่อเดียวกัน ${N} ร้านในชุดข้อมูล`), (m, t) => `from ${m[1]} same-named ${t.plural(m[1], 'restaurant', 'restaurants')} in the dataset`],
     [re(`ตำแหน่งเดียวกับอีก ${N} ร้าน`), (m, t) => `same position as ${m[1]} other ${t.plural(m[1], 'restaurant', 'restaurants')}`],
