@@ -354,6 +354,14 @@ export default {
     'ตามรูปแบบที่ทะเบียนระบุ': 'from the format the register states',
     'ทะเบียนวิจัย (ภายใน)': 'research register (internal)',
     'ห้างหรือศูนย์การค้า': 'Department store or shopping centre',
+    // Venue types and logo roles (data/restaurants.json venues[].typeTh, js/venue-logos.js ROLE_LABELS)
+    'มหาวิทยาลัย': 'University', 'ศูนย์การค้าในเครือ': 'Group shopping centre', 'ตลาดอาหาร': 'Food market',
+    'คอมมูนิตี้มอลล์ / ศูนย์การค้า': 'Community mall / shopping centre', 'อาคารพาณิชย์': 'Commercial building', 'สนามบิน': 'Airport',
+    'ศูนย์ประชุม': 'Convention centre', 'ห้างสรรพสินค้า': 'Department store', 'ย่านการค้า': 'Shopping district',
+    'โครงการมิกซ์ยูส': 'Mixed-use development', 'โรงแรม / อาคาร': 'Hotel / building', 'ศูนย์ราชการ': 'Government centre',
+    'โลโก้ผู้ให้บริการในเครือ': "Operator group's logo", 'โลโก้หน่วยงานแม่': "Parent institution's logo", 'โลโก้โครงการแม่': "Parent complex's logo",
+    'โลโก้ห้างสรรพสินค้าในเครือ': "Department store group's logo", 'โลโก้โรงแรม': "Hotel's logo", 'โลโก้แบรนด์อาคาร': "Building brand's logo",
+    'ดูทั้งหมดในรายการ': 'see them all in the list',
     'ไฮเปอร์มาร์เก็ต / ร้านค้าในเครือ': 'Hypermarket / group stores',
     'โรงพยาบาล': 'Hospital',
     'ทะเบียนศูนย์การค้าและสถานที่ค้าปลีก': 'Shopping centre and retail venue register',
@@ -513,7 +521,7 @@ export default {
     // Places in provenance and empty notes
     [/^(.+) \(ขอบเขตแขวง\/ตำบลของ CityMETER\)$/, (m, t) => { const s = t.text(m[1]); return s == null ? null : `${s} (CityMETER subdistrict boundaries)`; }],
     [/^(.+) \(ขอบเขตจังหวัดของ CityMETER · สาขาเครือ\)$/, (m, t) => { const p = places(t, m[1]); return p == null ? null : `${p} (CityMETER province boundary · chain branches)`; }],
-    [/^([^\d+]+) \(ขอบเขต CityMETER\)$/, (m, t) => { const p = places(t, m[1]); return p == null ? null : `${p} (CityMETER boundaries)`; }],
+    [/^([^\d+·]+) \(ขอบเขต CityMETER\)$/, (m, t) => { const p = places(t, m[1]); return p == null ? null : `${p} (CityMETER boundaries)`; }],
     [/^ไม่มีข้อมูลร้านใน(.+)$/, (m, t) => `No restaurant data for ${t.name(m[1])}`],
     [/^ไม่พบร้านตามตัวกรองใน(.+)$/, (m, t) => `No restaurants match the filters in ${t.name(m[1])}`],
     [re(`ร้านในพื้นที่อื่น`), 'restaurants in other areas'],
@@ -535,7 +543,7 @@ export default {
     [/^เลือก (.+)$/, (m, t) => `Selected ${t.part(m[1]) ?? t.name(m[1])}`],
 
     // Titles: a place (a chain in a place, “After You ประเทศไทย”, is js/lang.js's: it knows the crumb labels)
-    [/^ร้านอาหาร (.+)$/, (m, t) => { const p = t.known(m[1]); return p ? `Restaurants in ${p}` : null; }],
+    [/^ร้านอาหาร (.+)$/, (m, t) => { const p = t.known(m[1]) ?? t.part(m[1]); return p == null ? null : `Restaurants in ${p}`; }],
     // Outbound titles: the question an English page builds (js/outbound.js), then what the link does
     [/^(.+) — ค้นใน Google \(กดแท็บ AI Mode ในหน้านั้นเพื่อถามต่อ\)$/, m => `${m[1]} — a Google search (open the AI Mode tab there to ask more)`],
     [/^(.+) — เปิดร้านใน Google Maps \(รูปหน้าร้าน เวลาเปิด รีวิว\)$/, m => `${m[1]} — the restaurant in Google Maps (storefront photo, opening hours, reviews)`],
@@ -548,6 +556,8 @@ export default {
     [/^โลโก้ (?![\d,]+\/[\d,]+$)(.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n} logo`; }],
     [/^ร้านที่ชื่ออ้างถึง (.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `Restaurants whose names refer to ${n}`; }],
     [/^ร้านในอาคารของ (.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `Restaurants in the building of ${n}`; }],
+    [/^อาคารของ (.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `the building of ${n}`; }],
+    [re(`รวม ${N} รายการที่เป็นชื่อสถานที่เอง(?: \\(${N} รีวิว\\))?`), (m, t) => `including ${m[1]} ${t.plural(m[1], 'record that is', 'records that are')} the venue's own listing${m[2] ? ` (${plural(t, m[2], 'review', 'reviews')})` : ''}`],
     [/^อาคารเดียวกับ (.+)$/, (m, t) => {
       const names = m[1].split(', ').map(x => t.part(x));
       return names.some(x => x == null) ? null : `Same building as ${names.join(', ')}`;

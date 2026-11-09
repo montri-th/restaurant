@@ -77,7 +77,7 @@ export function registerDataNames({index, data}) {
   for (const p of index?.provinces || []) places.add(p.name);
   for (const d of index?.districts || []) places.add(`${d.province === 'BKK' ? 'เขต' : 'อำเภอ'}${d.name}`);
   for (const a of index?.areas || []) places.add(`${a.province === 'BKK' ? 'แขวง' : 'ตำบล'}${a.name}`);
-  registerDictionary({patterns: [[/^([^\u0E00-\u0E7F]+) ([\u0E00-\u0E7F].*)$/, (m, t) => (places.has(m[2]) ? `${m[1]} in ${t.name(m[2])}` : null)]]});
+  registerDictionary({patterns: [[/^([^\u0E00-\u0E7F·—|›]+) ([\u0E00-\u0E7F].*)$/, (m, t) => (places.has(m[2]) ? `${m[1]} in ${t.name(m[2])}` : null)]]});
 }
 
 /** The chain register and the Land join load after the first paint: their names, once they arrive. */
