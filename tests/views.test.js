@@ -207,6 +207,33 @@ test('outbound (0.8.1): questions open Google Search at once; the store name is 
   assert.equal(store.find(l => l.kind === 'maps').href, 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Prime Burger Khaosan Road แขวงบวรนิเวศ เขตพระนคร กรุงเทพมหานคร'));
 });
 
+test('outbound in English (?lang=en): the same links, the questions in English, names as the data gives them', async () => {
+  const {outboundFor} = await import('../js/outbound.js');
+  const THAI = /[ก-๙]/;
+  // On an English page js/lang.js has registered the English names; here they are passed in English already.
+  const ctx = {kind: 'store', brand: 'Prime Burger', branch: 'Prime Burger Khaosan Road', area: 'Bowon Niwet', district: 'Phra Nakhon', province: 'Bangkok', lat: 13.7588, lng: 100.4973};
+  const en = outboundFor(ctx, 'en');
+  assert.deepEqual(outboundFor(ctx), outboundFor(ctx, 'th'), 'a Thai page (the default) keeps the Thai questions');
+  assert.deepEqual(en.map(l => [l.kind, l.label]), outboundFor(ctx, 'th').map(l => [l.kind, l.label]), 'same links and labels: js/lang-en.js translates the labels');
+  assert.equal(en[0].question, 'Prime Burger Khaosan Road (Bowon Niwet, Phra Nakhon, Bangkok): reviews, menu, prices and opening hours');
+  assert.equal(en.find(l => l.kind === 'maps').question, 'Prime Burger Khaosan Road, Bowon Niwet, Phra Nakhon, Bangkok');
+  assert.deepEqual(en.find(l => l.kind === 'street').aim, {lat: 13.7588, lng: 100.4973, hint: ''}, 'Street View still turns toward the place');
+  assert.ok(!en.some(l => l.href.includes('udm=')), 'a plain search: no confirmation step');
+  for (const kind of ['store', 'chain', 'company', 'area', 'district', 'venue', 'country']) {
+    const links = outboundFor({kind, name: 'MK', brand: 'MK', area: 'Si Lom', district: 'Bang Rak', province: 'Bangkok', lat: 13.72, lng: 100.53}, 'en');
+    assert.ok(links.some(l => l.kind === 'ai'), kind);
+    for (const l of links) assert.ok(!THAI.test(l.question) && !THAI.test(decodeURIComponent(l.href)), `${kind}: ${l.question} ${l.href}`);
+  }
+  assert.equal(outboundFor({kind: 'area', area: 'Si Lom', district: 'Bang Rak', province: 'Bangkok'}, 'en')[0].question,
+    'Restaurants around Si Lom, Bang Rak, Bangkok: which are well known, which kinds are most common and roughly what they cost');
+  assert.equal(outboundFor({kind: 'district', area: '', district: 'Bang Rak', province: 'Bangkok'}, 'en')[0].question.startsWith('Restaurants around Bang Rak, Bangkok:'), true, 'a place said once');
+  // A building of the spatial join has no name: its area stands in.
+  const building = outboundFor({kind: 'venue', name: 'อาคาร แขวงสีลม', building: 'Si Lom', province: 'Bangkok', lat: 13.72, lng: 100.53}, 'en');
+  assert.equal(building[0].question, 'Restaurants in a building in Si Lom (Bangkok): which are there, on which floors and the newest ones');
+  assert.equal(building.find(l => l.kind === 'maps').href, 'https://www.google.com/maps/search/?api=1&query=13.720000%2C100.530000', 'a point opens the point');
+  assert.equal(outboundFor({kind: 'country', province: 'Phuket'}, 'en')[0].question, 'Restaurant chains with the most branches in Thailand and the brands expanding now in Phuket');
+});
+
 test('density format: a measured non-zero density never prints as zero; labels and panel share it', () => {
   assert.equal(dens(1 / 76.5), '0.01', 'one restaurant in the largest covered subdistrict (76.5 km²)');
   assert.equal(dens(0.004), '<0.01');

@@ -8,6 +8,7 @@
  * stays as its source writes it (keepThai), and so do the register's addresses and research notes.
  */
 import {LANG, registerDictionary, registerNames, keepThai, startTranslation} from './shell/i18n.js';
+import {entryParts} from './model.js';
 import RESTAURANT_EN from './lang-en.js';
 
 const THAI = /[ก-ฺเ-๎]/;
@@ -64,11 +65,19 @@ export function registerDataNames({index, data}) {
   const sub = new Map();
   for (const a of index?.areas || []) { const s = sub.get(a.name); sub.set(a.name, s === undefined ? a.nameEn || '' : s === (a.nameEn || '') ? s : null); }
   for (const [th, en] of plain) { const s = sub.get(th); if (s === null) { book.keep(th); continue; } book.add(th, s !== undefined ? s : en); }
-  // As the sources write them: restaurant and venue names (a venue with an English name reads it already).
-  for (const r of data?.rows || []) book.keep(r.name);
+  // As the sources write them: restaurant and venue names (a venue with an English name reads it already), and the part
+  // of a restaurant's name after its chain (“สาขาเซ็นทรัล บางนา”), which lists show on its own (js/model.js#entryParts).
+  for (const r of data?.rows || []) { book.keep(r.name); book.keep(entryParts(r).secondary); }
   for (const r of data?.moved || []) book.keep(r.name);
   for (const v of data?.venues || []) book.keep(v.name);
   book.done();
+  // A chain in a place is the tab title of a chain page (“After You ประเทศไทย”, js/app.js#updateCrumbs): the place is
+  // the last crumb's label, so only those labels read as places here.
+  const places = new Set(['ประเทศไทย']);
+  for (const p of index?.provinces || []) places.add(p.name);
+  for (const d of index?.districts || []) places.add(`${d.province === 'BKK' ? 'เขต' : 'อำเภอ'}${d.name}`);
+  for (const a of index?.areas || []) places.add(`${a.province === 'BKK' ? 'แขวง' : 'ตำบล'}${a.name}`);
+  registerDictionary({patterns: [[/^([^\u0E00-\u0E7F]+) ([\u0E00-\u0E7F].*)$/, (m, t) => (places.has(m[2]) ? `${m[1]} in ${t.name(m[2])}` : null)]]});
 }
 
 /** The chain register and the Land join load after the first paint: their names, once they arrive. */
@@ -76,7 +85,12 @@ export function registerExtraNames({register, land}) {
   if (LANG !== 'en') return;
   const book = nameBook();
   for (const p of register?.provinces || []) { book.add(p.th, p.en); }
-  for (const o of register?.outlets || []) { book.keep(o.name); book.keep(o.address); }
+  // An outlet reads as its chain and its own name (map pins, the tab title): “Swensen's สเวนเซ่นส์ เซ็นทรัล บางนา ชั้น 5”.
+  for (const o of register?.outlets || []) {
+    book.keep(o.name); book.keep(o.address);
+    const brand = o.brand?.name || '';
+    if (brand && o.name && o.name !== brand) book.keep(`${brand} ${o.name}`);
+  }
   for (const c of register?.companies || []) book.keep(c.name);
   for (const b of register?.brands || []) book.keep(b.name);
   for (const h of land?.hosts || []) book.add(h.name, h.nameEn);

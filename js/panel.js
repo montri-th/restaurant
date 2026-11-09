@@ -554,7 +554,7 @@ export function renderBuilding(b, meta = {}, extra = '') {
       <h2>ร้านที่จุดตกในอาคารนี้</h2>
       <div class="metrics compact">${metricTile(b.count, 'ร้าน', 'store')}${metricTile(b.reviewed ? b.reviews : '—', 'รีวิว', 'exclusive')}${b.ratingMean != null ? metricTile(dec(b.ratingMean), 'คะแนนเฉลี่ย', 'plain') : ''}</div>
       ${height ? `<p class="hint">${pic('building')}${esc(height)}</p>` : ''}
-      ${outboundRow({kind: 'venue', name: `อาคาร ${area}`, province: b.rows[0] ? provinceName(b.rows[0].province) : '', lat: pt?.latitude, lng: pt?.longitude})}
+      ${outboundRow({kind: 'venue', name: `อาคาร ${area}`, building: area, province: b.rows[0] ? provinceName(b.rows[0].province) : '', lat: pt?.latitude, lng: pt?.longitude})}
     </section>
     <section class="panel-section"><div class="section-heading">${heading('store', 'ร้าน')}<span class="hint">${num(b.count)}</span></div>${restaurantList(b.rows.slice(0, 40), {showArea: b.areaCount > 1, index: meta.index})}
       ${b.count > 40 ? `<p class="hint">แสดง ${num(40)} จาก ${num(b.count)} ร้าน (รีวิวมากก่อน) · ดูทั้งหมดในรายการ</p>` : ''}</section>
