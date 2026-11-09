@@ -54,6 +54,7 @@
  *     Panel mode land opens one host at venue level (its building in the data colour, x-ray, eye camera).
  * URL: chains=1 (+ rq=query), chain, company, outlet, land.
  */
+import {registerDataNames, registerExtraNames} from './lang.js';
 import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, LEGACY_PRICE, LEGACY_PRICE_LABELS, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, attachSegments, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink, FOOD, foodLabel, foodMix} from './model.js';
 import {buildAreaIndex, areaWord, districtWord, areaLocator} from './areas.js';
 import {summarizeAreaInsight, filterAreaRows, MIN_AREA_ROWS} from './area-insight.js';
@@ -333,6 +334,7 @@ function loadExtras() {
   state.extras = Promise.allSettled(resources.map(r => fetchJSON(r, {timeout: 60000}))).then(([land, landGeo]) => {
     if (land.status === 'fulfilled' && landGeo.status === 'fulfilled' && validFeatureCollection(landGeo.value)) {
       try { state.landGeo = landGeo.value; state.land = decodeLand(land.value, landGeo.value); } catch (e) { state.land = null; console.warn('Land join', e); }
+      if (state.land) registerExtraNames({land: state.land});
     } else console.warn('Land join', land.reason || landGeo.reason || 'invalid building outlines');
     // Points that lay within 10 m of their Land building are drawn inside it (owner 2026-10-28 “จุดร้านอาหารที่ตกริม ๆ
     // ให้รวบเข้าตึกนั้น”): outlets before the register layer is built, rows before the map re-sends them (`snapped`).
@@ -2108,6 +2110,7 @@ async function init() {
     state.buildingGeo = results[4].status === 'fulfilled' && validFeatureCollection(results[4].value) ? results[4].value : {type: 'FeatureCollection', features: []};
     state.index = buildAreaIndex(state.areasGeo, state.districtsGeo, state.provincesGeo);
     state.data = decodeDataset(results[0].value, state.areasGeo);
+    registerDataNames({index: state.index, data: state.data});
     if (state.data.dropped) console.warn('Rows outside the frame set', state.data.dropped);
     state.venueById = new Map(state.data.venues.map(v => [v.id, v]));
     state.brandById = new Map(state.data.brands.map(b => [b.id, b]));
@@ -2115,6 +2118,7 @@ async function init() {
     // The chain register joins the population: its outlets become rows of the group ‘สาขาร้านเครือ’ (no type, price or
     // rating), rows the owner moved to the register are counted there only, and every province it names is known.
     if (results[7].status === 'fulfilled') { try { state.register = decodeRegister(results[7].value, state.index); } catch (e) { console.warn('Chain register', e); } }
+    if (state.register) registerExtraNames({register: state.register});
     else console.warn('Chain register', results[7].reason);
     linkExtras();
     const brandLogos = configureBrandLogos(results[5].status === 'fulfilled' ? results[5].value : {assets: []});
