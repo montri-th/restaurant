@@ -14,6 +14,8 @@
  * A dataset keeps its own parameter names inside (`?area=`, `?hotel=` …): `createCodec` translates them to and from
  * this grammar, and old links keep working — they are read once and the address is rewritten in the new grammar.
  * The `e` kinds are provisional until the dataset registry declares them; an old kind can be kept as an alias.
+ * A zone a dataset defines itself (an analytical ย่าน that is not a production area) stays a filter, `f.<name>`, but
+ * opening it adds a browser history entry like `at` (`levelFilters`, 0.4.2).
  *
  * Part of the shared CityMETER demo shell: edit it in every repository at once (js/shell/manifest.json).
  */
@@ -68,6 +70,8 @@ export function serialize(params) {
  *   items       own parameter → `e` kind, first match wins: {hotel: 'hotel', station: 'station'}
  *   networks    own parameter → `n` kind, first match wins: {company: 'company'} (brand | company | operator | line)
  *   filters     own filter parameters → `f.<name>` (the province parameter is part of `at`, not a filter)
+ *   levelFilters  filters that open a level of the dataset's own — a zone it defines itself, never a production area,
+ *               so it never goes in `at`: a change adds a browser history entry (codec.levelKeys, 0.4.2)
  *   rename      own → shared key for the rest (default: metric → m, areas → focus, view → view, view3d → v3d)
  *   provinceOf  (code, kind) → the production province code of one of the dataset's districts / subdistricts /
  *               local administrative units / locales (kind 'D', 'S', 'M' or 'L'; '' when the code is not of that kind)
@@ -81,6 +85,7 @@ export function createCodec(config) {
   const networks = config.networks || {};
   const netKinds = Object.fromEntries(Object.entries(networks).map(([param, kind]) => [kind, param]));
   const filters = (config.filters || []).filter(f => f !== place.province);
+  const levelKeys = (config.levelFilters || []).filter(f => filters.includes(f)).map(f => `f.${f}`);
   const rename = config.rename || RENAME;
   const owned = new Set([place.province, place.D, place.S, place.M, place.L, ...Object.keys(items), ...Object.keys(networks), ...filters, ...Object.keys(rename)].filter(Boolean));
   const provinceOf = config.provinceOf || (() => '');
@@ -157,13 +162,14 @@ export function createCodec(config) {
     return {own, legacy};
   }
 
-  return {encode, decode, dataset: config.dataset};
+  return {encode, decode, dataset: config.dataset, levelKeys};
 }
 
 /**
  * The page's address, read and written through a codec.
  *   read()            own parameters of the current address
- *   commit(own)       write them: a change of d / at / e / n pushes a history entry, anything else replaces;
+ *   commit(own)       write them: a change of d / at / e / n (or of a codec's levelKeys) pushes a history entry,
+ *                     anything else replaces;
  *                     the first commit after load always replaces (it rewrites an old link in the new grammar)
  *   canGoBack()       an earlier entry of this page exists (the panel's back button can use the browser's)
  * onPop(own) runs on the browser's back and forward buttons with the restored parameters. `lang` is kept as is.
@@ -172,6 +178,7 @@ export function createNavigator(codec, {onPop = null, win = globalThis} = {}) {
   const initial = win.history && win.history.state;
   let depth = initial && initial.citymeterShell ? initial.depth : 0;
   let started = false, last = '';
+  const levelKeys = [...LEVEL_KEYS, ...(codec.levelKeys || [])];
   const query = () => win.location.search.replace(/^\?/, '');
 
   function read() { return codec.decode(win.location.search).own; }
@@ -183,7 +190,7 @@ export function createNavigator(codec, {onPop = null, win = globalThis} = {}) {
     const text = serialize(next);
     if (started && text === query()) return false;
     const prev = new URLSearchParams(started ? last : query());
-    const level = started && !replace && LEVEL_KEYS.some(k => (prev.get(k) || '') !== (next.get(k) || ''));
+    const level = started && !replace && levelKeys.some(k => (prev.get(k) || '') !== (next.get(k) || ''));
     const url = `${win.location.pathname}${text ? `?${text}` : ''}${win.location.hash || ''}`;
     if (level) { depth += 1; win.history.pushState({citymeterShell: 1, depth}, '', url); }
     else win.history.replaceState({citymeterShell: 1, depth}, '', url);

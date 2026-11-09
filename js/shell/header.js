@@ -12,6 +12,7 @@
  * Part of the shared CityMETER demo shell: edit it in every repository at once (js/shell/manifest.json).
  */
 import {DEMOS, GROUPS, demoUrl} from './datasets.js';
+import {parseAt} from './area-path.js';
 
 export const PHONE_QUERY = '(max-width: 760px) and (orientation: portrait)';
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -20,6 +21,13 @@ const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '
 export function demoHref(demo, search = '') {
   const at = demo.at ? new URLSearchParams(search).get('at') : null;
   return at ? `${demoUrl(demo)}?at=${encodeURIComponent(at).replace(/%2F/gi, '/')}` : demoUrl(demo);
+}
+
+/** The crumb level of the place a link hands over: the level `at` names (a zone or a site of this dataset is not part
+ * of `at`, so the other demos never open it); '' without `at` (0.4.2). */
+export function placeLevel(search = '') {
+  const at = parseAt(new URLSearchParams(search).get('at'));
+  return at ? {P: 'province', D: 'area', S: 'sub', M: 'unit', L: 'unit'}[at.kind] || '' : '';
 }
 
 /** The demo this page belongs to, by its path (/hotel/…), or null. */
@@ -58,8 +66,10 @@ export function installHeader({doc = document, win = window} = {}) {
   name.replaceWith(wrap);
   const button = wrap.querySelector('.dataset-picker'), menu = wrap.querySelector('.dataset-menu');
   const list = menu.querySelector('.dataset-list'), utility = menu.querySelector('.dataset-utility');
-  const place = () => (new URLSearchParams(win.location.search).has('at')
-    ? doc.querySelector('#crumbs .crumb.is-current')?.textContent.trim() || '' : '');
+  const place = () => {
+    const level = placeLevel(win.location.search);
+    return level ? doc.querySelector(`#crumbs li[data-level="${level}"] .crumb`)?.textContent.trim() || '' : '';
+  };
 
   function open() {
     list.innerHTML = pickerList({pathname: win.location.pathname, search: win.location.search, place: place()});
