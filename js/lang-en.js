@@ -602,6 +602,11 @@ export default {
     [/^ชุดข้อมูล (.+)$/, (m, t) => { const d = t.text(m[1]); return d == null ? null : `Dataset: ${d}`; }],
     [/^ตรวจ (\d{1,2} [ก-๙.]+ \d{4}(?:–\d{1,2} [ก-๙.]+ \d{4})?)$/, (m, t) => `checked ${t.date(m[1])}`],
     [/^เติมพิกัดและโลโก้ (\d{1,2} [ก-๙.]+ \d{4})$/, (m, t) => `coordinates and logos added ${t.date(m[1])}`],
+    // 2026-11-09: the register's sheet read and its publication on this page, two dates
+    [/^อ่านชีต (\d{1,2} [ก-๙.]+ \d{4})$/, (m, t) => `sheet read ${t.date(m[1])}`],
+    [/^เผยแพร่ (\d{1,2} [ก-๙.]+ \d{4})$/, (m, t) => `published ${t.date(m[1])}`],
+    // an outlet's zone of its host, as the publisher lists it (True Digital Park EAST / WEST)
+    [/^ฝั่ง ([A-Za-z0-9-]{1,24})$/, '$1 zone'],
     [/^จับคู่ (\d{1,2} [ก-๙.]+ \d{4})$/, (m, t) => `joined ${t.date(m[1])}`],
     [/^แหล่ง ร้าน (.+) ดึง (\d{1,2} [ก-๙.]+ \d{4})$/, (m, t) => { const s = t.text(m[1]); return s == null ? null : `Source: restaurants from the ${s}, retrieved ${t.date(m[2])}`; }],
     [/^สาขาเครือ (ทะเบียนร้านเครือ .+)$/, (m, t) => { const s = t.text(m[1]); return s == null ? null : `chain branches: ${s}`; }],

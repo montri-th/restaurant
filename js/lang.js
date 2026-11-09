@@ -91,6 +91,8 @@ export function registerExtraNames({register, land}) {
     book.keep(o.name); if (!/^ชั้น\s/.test(o.address || '')) book.keep(o.address);
     const brand = o.brand?.name || '';
     if (brand && o.name && o.name !== brand) book.keep(`${brand} ${o.name}`);
+    // Lists show an outlet's place without its chain, zone and floor (js/model.js#entryParts, 2026-11-09): as written.
+    book.keep(entryParts({...o, kind: 'outlet'}).secondary);
   }
   for (const c of register?.companies || []) book.keep(c.name);
   for (const b of register?.brands || []) book.keep(b.name);

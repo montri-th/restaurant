@@ -55,7 +55,7 @@
  * URL: chains=1 (+ rq=query), chain, company, outlet, land.
  */
 import {registerDataNames, registerExtraNames} from './lang.js';
-import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, LEGACY_PRICE, LEGACY_PRICE_LABELS, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, attachSegments, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink, FOOD, foodLabel, foodMix} from './model.js';
+import {PROVINCES, ALL_PROVINCES, registerProvinces, isCoveredProvince, PRICE_BUCKETS, PRICE_LABELS, LEGACY_PRICE, LEGACY_PRICE_LABELS, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, attachSegments, provinceByCode, provinceCodeFrom, decodeDataset, outletRows, deriveChainGroups, entryParts, filterRows, summarize, hasPoint, productionLink, FOOD, foodLabel, foodMix, floorLabel} from './model.js';
 import {buildAreaIndex, areaWord, districtWord, areaLocator} from './areas.js';
 import {summarizeAreaInsight, filterAreaRows, MIN_AREA_ROWS} from './area-insight.js';
 import {LENSES, DEFAULT_LENS, LENS_TEST, lensOf, lensFilters, lensesOffered, lensShare} from './lenses.js';
@@ -75,7 +75,7 @@ import {configureVenueLogos} from './venue-logos.js';
 import {installAreaLayers, installAreaLabels, buildAreaModel, featureBounds, FILL_MAX_ZOOM, AREA_MIN_ZOOM} from './map-layers.js';
 import {installProvinceLayers, buildProvinceModel, provinceBounds, PROVINCE_FILL_MAX_ZOOM, PROVINCE_LABEL_MAX_ZOOM} from './provinces.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildStoreDetail, buildVenueProfile, buildBuildingProfile, areaCharacter} from './profile-model.js';
-import {renderOverview, renderBrandHead, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate, heading} from './panel.js';
+import {renderOverview, renderBrandHead, overviewList, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, link, esc, num, dec, dens, thaiDate, heading} from './panel.js';
 import {joinRows, venueBuildings, buildingVenues, resolveBuilding, venueNeighbours, venueRegion, containsPoint, wholeBuilding} from './building-join.js';
 import {buildMapStyle, basemapPalette, TILEJSON_URL, MASSING_BEFORE, SOURCE_ID} from './map-style.js';
 import {streetView, streetLines, namedStreetLines, aimCamera} from './outbound.js';
@@ -646,12 +646,12 @@ function renderPanel(summary = summarize(state.rows)) {
     const searchChains = q ? chainsOf(state.scopeRows, state.chains, Infinity).filter(c => chainLabel(c).toLocaleLowerCase('th-TH').includes(q)).slice(0, 12) : [];
     const noPoint = state.scopeRows.reduce((n, r) => n + (hasPoint(r) ? 0 : 1), 0);
     // A small scope (a search, a chain, a province of a few outlets) is listed in the panel, chain first.
-    const listRows = !f.brand && state.scopeRows.length <= 40 && (q || noPoint) ? [...state.scopeRows].sort((a, b) => (b.reviews ?? -1) - (a.reviews ?? -1) || (a.brand?.name || a.name).localeCompare(b.brand?.name || b.name, 'th')) : null;
+    const {listRows, listTotal} = overviewList(state.scopeRows, {brand: f.brand, query: q, noPoint});
     const brandHead = f.brand ? brandPageHead(f.brand, province) : '';
     const {lens, lensStats, lensChains} = lensFinding(f, insight);
     html = renderOverview({insight, summary, overview, focusMode: focusMode(), classOf: densityClassOf, provinces, meta, coverage: state.coverage, province, extra: overviewExtras(),
       unknownProvince: province ? 0 : (pmodel.unknown ?? state.scopeRows.filter(r => r.kind === 'outlet' && !r.province).length),
-      chains, chainTotal: chains.total, noPoint, filtered: activeFilterCount(f) > 0, listRows, brandHead, search: f.search.trim(), searchChains, index: state.index,
+      chains, chainTotal: chains.total, noPoint, filtered: activeFilterCount(f) > 0, listRows, listTotal, brandHead, search: f.search.trim(), searchChains, index: state.index,
       lens, lenses: lensesOffered(f), lensStats, lensChains, byFood: overviewFood(f), food: f.food});
     renderMapAha(insight, summary, {noPoint, lens, lensStats});
   } else {
@@ -1362,7 +1362,7 @@ function renderTable() {
     const outlet = r.kind === 'outlet';
     const parts = entryParts(r), g = state.data.groups[r.group];
     // Brand first (owner 2026-10-29): logo · เครือ · สาขา; an outlet's type is its chain's derived type.
-    const type = outlet ? `${g?.id !== 'unspecified' ? `${g?.th || ''} (ตามเครือ) · ` : ''}สาขาเครือ${r.floor ? ` · ชั้น ${r.floor}` : ''}` : r.type || 'ไม่ระบุประเภท';
+    const type = outlet ? `${g?.id !== 'unspecified' ? `${g?.th || ''} (ตามเครือ) · ` : ''}สาขาเครือ${r.zone ? ` · ฝั่ง ${r.zone}` : ''}${r.floor ? ` · ${floorLabel(r.floor)}` : ''}` : r.type || 'ไม่ระบุประเภท';
     return `<tr><td><button type="button" class="row-name brand-row" data-id="${esc(r.id)}">${brandLogoMarkup(r.brand, {size: 'xs'})}<span><strong>${esc(parts.primary)}</strong>${parts.secondary ? ` <span class="entry-branch">${esc(parts.secondary)}</span>` : ''}</span></button><small>${esc(type)}</small></td>
       <td>${outlet ? '<span class="hint">—</span>' : esc(PRICE_LABELS[r.price])}</td>
       <td>${Number.isFinite(r.rating) ? `★ <span class="data-number">${dec(r.rating)}</span>` : `<span class="hint">${outlet ? '—' : 'ไม่มีคะแนน'}</span>`}<small>${Number.isFinite(r.reviews) ? `${num(r.reviews)} รีวิว` : ''}</small></td>
@@ -2101,7 +2101,7 @@ function wireEvents() {
 async function init() {
   try {
     // One population (owner 2026-10-28 22:36): the chain register loads with the snapshot, before the first paint.
-    const resources = ['data/restaurants.json', 'data/areas.geojson', 'data/districts.geojson', 'data/provinces.geojson', 'data/venue-buildings.geojson', 'data/brand-logos.json', 'data/venue-logos.json', 'data/chains.json', 'data/segments.json'];
+    const resources = ['data/restaurants.json', 'data/areas.geojson', 'data/districts.geojson', 'data/provinces.geojson', 'data/venue-buildings.geojson', 'data/brand-logos.json', 'data/venue-logos.json', 'data/chains.json', 'data/segments.json', 'data/release.json'];
     const results = await Promise.allSettled(resources.map(r => fetchJSON(r, {timeout: r.includes('restaurants') || r.includes('chains') ? 45000 : 20000})));
     for (const i of [0, 1, 2]) if (results[i].status === 'rejected') throw results[i].reason;
     for (const i of [1, 2]) if (!validFeatureCollection(results[i].value)) { const e = new Error('Invalid boundary FeatureCollection'); e.resource = resources[i]; e.phase = 'data-schema'; throw e; }
@@ -2133,6 +2133,14 @@ async function init() {
       state.data.outlets = outletRows(state.register, state.data.groups, {snapshotOf: state.snapshotOf, index: state.index, chainGroups: state.chainGroups});
       state.data.rows = [...state.data.rows, ...state.data.outlets];
       state.data.meta = {...state.data.meta, registerChecked: registerChecked(state.register.meta)};
+      // Two dates of the register, said apart (2026-11-09, data/release.json): when the sheet was read, and when that
+      // read went on this page. A release file of another register build says nothing.
+      const release = results[9]?.status === 'fulfilled' ? results[9].value : null;
+      if (release?.register && release.register.outlets === state.register.outlets.length) {
+        const day = v => String(v || '').slice(0, 10);
+        state.data.meta = {...state.data.meta, registerRead: day(release.register.readAt), published: day(release.publishedAt)};
+        setSourceDates({registerRead: day(release.register.readAt), published: day(release.publishedAt)});
+      }
     } else state.data.outlets = [];
     // Chain size (0.8.0, register workbook 10_CLASSIFICATION): aligned to the two id arrays of this build; a missing or
     // misaligned file leaves every row unsized and the size filter hidden — never a guessed band.

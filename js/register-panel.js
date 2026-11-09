@@ -17,7 +17,7 @@ import {esc, num, dec, link, thaiDate, metricTile, heading, entryMarkup, chainCh
 import {brandLogoMarkup, getBrandLogo} from './brand-logos.js';
 import {cueMarkup} from './cues.js';
 import {areaWord, districtWord} from './areas.js';
-import {hasPoint} from './model.js';
+import {hasPoint, floorLabel} from './model.js';
 import {EVIDENCE, EVIDENCE_TH, EVIDENCE_SHORT, STATUS_TH} from './register.js';
 import {RELATION_TH, LAND_RULE} from './land.js';
 import {chainLabel, chainLogoBrand} from './chains.js';
@@ -46,8 +46,12 @@ const foot = compact => (compact ? 'hint source-line' : 'hint panel-foot provena
 
 /** Every register view and register section ends with dataset · source · date · boundary (+ the unit, once). */
 export function registerProvenance(meta = {}, boundary = 'ประเทศไทย', note = REGISTER_RULE, {compact = false} = {}) {
-  return `<p class="${foot(compact)}"><span>ชุดข้อมูล ทะเบียนร้านเครือ (CityMETER Chain Restaurants)</span> · <span>แหล่ง เว็บและแอปของแบรนด์ บริษัท สถานที่ และแหล่งรองรายสาขา</span> · <span>ตรวจ ${esc(checkedRange(meta))}</span> · <span>ขอบเขต ${esc(boundary)}</span>${note ? `<br>${esc(note)}` : ''}</p>`;
+  return `<p class="${foot(compact)}"><span>ชุดข้อมูล ทะเบียนร้านเครือ (CityMETER Chain Restaurants)</span> · <span>แหล่ง เว็บและแอปของแบรนด์ บริษัท สถานที่ และแหล่งรองรายสาขา</span> · <span>ตรวจ ${esc(checkedRange(meta))}</span>${readAndPublished()} · <span>ขอบเขต ${esc(boundary)}</span>${note ? `<br>${esc(note)}` : ''}</p>`;
 }
+
+/** The register's sheet read and its publication on this page (data/release.json, 2026-11-09): two dates, said apart. */
+const readAndPublished = () => (SOURCES.registerRead ? ` · <span>อ่านชีต ${esc(thaiDate(SOURCES.registerRead))}</span>` : '') +
+  (SOURCES.published ? ` · <span>เผยแพร่ ${esc(thaiDate(SOURCES.published))}</span>` : '');
 
 /** Land numbers mix three inputs: the line names each with its date, then the in-rule once. */
 export function landProvenance(meta = {}, boundary = '', {compact = false, note = LAND_RULE} = {}) {
@@ -187,7 +191,7 @@ export function renderOutlet({reg, outlet: o, area = null, land = null, sameBran
         ${foodFact(o)}${sizeFact(o)}
         <dt>หลักฐาน</dt><dd>${esc(EVIDENCE_TH[o.evidence])}${status}</dd>
         ${o.address ? `<dt>${pic('place')}ที่อยู่</dt><dd>${esc(o.address)}</dd>` : ''}
-        ${o.floor || o.unit ? `<dt>ชั้น/ยูนิต</dt><dd>${esc([o.floor && `ชั้น ${o.floor}`, o.unit && `ยูนิต ${o.unit}`].filter(Boolean).join(' · '))}</dd>` : ''}
+        ${o.floor || o.unit || o.zone ? `<dt>ชั้น/ยูนิต</dt><dd>${esc([o.zone && `ฝั่ง ${o.zone}`, floorLabel(o.floor), o.unit && `ยูนิต ${o.unit}`].filter(Boolean).join(' · '))}</dd>` : ''}
         <dt>${pic('province')}จังหวัด</dt><dd>${province}</dd>
         ${areaHtml}${landHtml}
         <dt>${pic('place')}พิกัด</dt><dd>${coords}</dd>

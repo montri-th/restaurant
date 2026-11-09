@@ -19,7 +19,7 @@
  * Missing is never shown as 0. Metric tiles and headings carry the pictogram subset
  * (js/navigation.js PICTOGRAM_CONTRACT); text is the meaning.
  */
-import {PRICED, PRICE_LABELS, PRICE_SHORT, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, SIZE_BASIS, SIZE_LIFTED, productionLink, provinceByCode, PRODUCTION, entryParts, hasPoint, FOOD, foodLabel} from './model.js';
+import {PRICED, PRICE_LABELS, PRICE_SHORT, SIZE_BANDS, SIZE_LABELS, SIZE_SHORT, SIZE_BASIS, SIZE_LIFTED, productionLink, provinceByCode, PRODUCTION, entryParts, hasPoint, FOOD, foodLabel, floorLabel} from './model.js';
 import {areaWord, districtWord} from './areas.js';
 import {brandLogoMarkup, getBrandLogo} from './brand-logos.js';
 import {venueLogoMarkup, getVenueLogo} from './venue-logos.js';
@@ -76,7 +76,8 @@ const provinceName = code => provinceByCode(code)?.th || code || '';
 export function provenance(meta = {}, boundary = '', note = PROXY_NOTE) {
   const date = thaiDate(meta.retrievedOn || meta.asOf || '');
   const source = link(meta.sourcePage || `${PRODUCTION}?d=restaurant`, 'CityMETER Restaurants API สาธารณะ');
-  const register = meta.registerChecked ? ` · ทะเบียนร้านเครือ ตรวจ ${esc(meta.registerChecked)}` : ' · ทะเบียนร้านเครือ';
+  const register = (meta.registerChecked ? ` · ทะเบียนร้านเครือ ตรวจ ${esc(meta.registerChecked)}` : ' · ทะเบียนร้านเครือ') +
+    (meta.registerRead ? ` · อ่านชีต ${esc(thaiDate(meta.registerRead))}` : '') + (meta.published ? ` · เผยแพร่ ${esc(thaiDate(meta.published))}` : '');
   // Chain size, the price tiers' check and (0.9.2) the food taxonomy come from the register's classification tab: its own date.
   const segments = meta.segmentsOn ? ` · ${FOOD.groups.length ? 'ขนาดเครือและหมวดอาหาร' : 'ขนาดเครือ'}จัดกลุ่ม ${esc(thaiDate(meta.segmentsOn))}` : '';
   return `<p class="hint panel-foot provenance"><span>ชุดข้อมูล CityMETER Restaurants + ทะเบียนร้านเครือ</span> · <span>แหล่ง ${source}${register}${segments}</span> · <span>ดึงข้อมูล ${esc(date)}</span> · <span>ขอบเขต ${esc(boundary)}</span>${note ? `<br>${esc(note)}` : ''}</p>`;
@@ -116,20 +117,22 @@ function entryMark(r) {
   return logo || `<span class="entry-cue">${cueMarkup(r.series)}</span>`;
 }
 
-/** Meta line of a row: outlet → สาขาเครือ · ชั้น · จังหวัด; restaurant → type · ★ · reviews; + area when asked. */
-function entryMeta(r, {showArea = false, index = null} = {}) {
+/** Meta line of a row: outlet → สาขาเครือ · ฝั่ง · ชั้น · จังหวัด; restaurant → type · ★ · reviews; + area when asked;
+ * + the record's id on a chain's page (2026-11-09: a chain's page names its codes). */
+function entryMeta(r, {showArea = false, index = null, showId = false} = {}) {
   const area = showArea && index ? index.byId.get(r.area) : null;
   const parts = r.kind === 'outlet'
-    ? ['สาขาเครือ', r.floor ? `ชั้น ${r.floor}` : '', !area && r.provinceTh ? r.provinceTh : '', !hasPoint(r) ? 'ยังไม่มีพิกัด' : '']
+    ? ['สาขาเครือ', r.zone ? `ฝั่ง ${r.zone}` : '', floorLabel(r.floor), !area && r.provinceTh ? r.provinceTh : '', !hasPoint(r) ? 'ยังไม่มีพิกัด' : '']
     : [r.type || 'ไม่ระบุประเภท', Number.isFinite(r.rating) ? `★ ${dec(r.rating)}` : '', Number.isFinite(r.reviews) ? `${num(r.reviews)} รีวิว` : ''];
   if (area) parts.push(`${areaWord(area.province)}${area.name}`);
+  if (showId && r.kind === 'outlet' && r.id) parts.push(`รหัส ${r.id}`);
   return parts.filter(Boolean).join(' · ');
 }
 
 /** One list entry, brand first: [logo | cue] เครือ · สาขา — meta. select-store opens a restaurant or an outlet. */
-export function entryMarkup(r, {showArea = false, index = null, meta = null} = {}) {
+export function entryMarkup(r, {showArea = false, index = null, meta = null, showId = false} = {}) {
   const p = entryParts(r);
-  const m = meta ?? entryMeta(r, {showArea, index});
+  const m = meta ?? entryMeta(r, {showArea, index, showId});
   return `<li><button type="button" class="brand-row entry" data-action="select-store" data-id="${esc(r.id)}" aria-label="${esc([p.primary, p.secondary, m].filter(Boolean).join(' · '))}">${entryMark(r)}<span class="entry-text"><strong>${esc(p.primary)}</strong>${p.secondary ? ` <span class="entry-branch">${esc(p.secondary)}</span>` : ''}${m ? `<br><span class="small muted">${esc(m)}</span>` : ''}</span></button></li>`;
 }
 
@@ -244,8 +247,8 @@ const pic = kind => `<i class="pictogram fact-pic pic-${esc(kind)}" aria-hidden=
 /** The pictogram role of a type group (none for “other” and “not stated”). */
 export const groupPic = group => (group && GROUP_PICTOGRAM[group.id] ? pic(GROUP_PICTOGRAM[group.id]) : '');
 
-function restaurantList(rows, {showArea = false, index = null} = {}) {
-  return `<ul class="outlet-list">${rows.map(r => entryMarkup(r, {showArea, index})).join('')}</ul>`;
+function restaurantList(rows, {showArea = false, index = null, showId = false} = {}) {
+  return `<ul class="outlet-list">${rows.map(r => entryMarkup(r, {showArea, index, showId})).join('')}</ul>`;
 }
 
 /** Chain chips, brand first: logo + name + count (restaurants and outlets together); filter-brand by chain key. */
@@ -326,6 +329,7 @@ export function renderBrandHead({chain, rows, group = null, groupBy = null, prov
       ${lb ? brandLogoMarkup(lb, {size: 'lg', className: 'detail-logo', decorative: false}) : ''}
       <p class="eyebrow">เครือร้าน${company ? ` · ${esc(company)}` : ''}${chain.registry ? ' · ทะเบียนจุดขายหลายแบรนด์' : ''}</p>
       <h2>${esc(chainLabel(chain))}</h2>
+      ${chain.key ? `<p class="hint data-number brand-code">รหัส ${esc(chain.key)}</p>` : ''}
       <div class="metrics compact">${metricTile(rows.length, 'ร้าน', 'store')}${metricTile(provinces ? provinces : '—', 'จังหวัด', 'province', provinces ? '' : 'ทะเบียนไม่ระบุจังหวัดของร้านเหล่านี้')}${metricTile(withPoint, 'บนแผนที่', 'area', 'ร้านที่มีพิกัด')}${metricTile(typeLabel, groupBy ? 'ประเภท · อนุมาน' : 'ประเภท', 'segment', typeHow)}</div>
       ${withPoint < rows.length ? `<p class="hint">ยังไม่มีพิกัด ${num(rows.length - withPoint)} ร้าน</p>` : ''}
       ${ev}
@@ -333,6 +337,18 @@ export function renderBrandHead({chain, rows, group = null, groupBy = null, prov
       <div class="detail-actions">${web ? link(web, 'เว็บของเครือ', 'btn quiet source-link') : ''}<button type="button" class="btn quiet" data-action="open-table">รายการ ${num(rows.length)}</button><button type="button" class="btn quiet" data-action="clear-filter" data-id="brand">ล้างตัวกรองเครือ</button></div>
     </section>
     <section class="panel-section"><div class="section-heading">${heading('province', 'จังหวัดที่มีร้าน')}<span class="hint">${num(provinces)} จังหวัด</span></div>${provinceBars(rows)}</section>`;
+}
+
+/**
+ * The overview's list: a small scope (a search, a province of a few outlets) is listed, chain first; a chain's page
+ * (2026-11-09) lists its rows when there are at most 40, or the first 40 when none has a point — the page says
+ * “ดูรายชื่อด้านล่าง”, and a branch without coordinates is still the chain's.
+ */
+export function overviewList(rows, {brand = '', query = '', noPoint = 0, limit = 40} = {}) {
+  const listed = brand ? rows.length <= limit || (rows.length > 0 && noPoint === rows.length) : rows.length <= limit && Boolean(query || noPoint);
+  if (!listed) return {listRows: null, listTotal: 0};
+  const byReviews = (a, b) => (b.reviews ?? -1) - (a.reviews ?? -1) || (a.brand?.name || a.name).localeCompare(b.brand?.name || b.name, 'th');
+  return {listRows: [...rows].sort(byReviews).slice(0, limit), listTotal: rows.length};
 }
 
 /* ---------- Overview ---------- */
@@ -349,7 +365,7 @@ export function lensRow(active = null) {
 const TRY_YOURS = '<button type="button" class="btn quiet" data-action="open-filters"><i class="pictogram pic-tune" aria-hidden="true"></i>ลองกับร้านแบบคุณ</button>';
 
 export function renderOverview({insight, summary, overview, focusMode = 'auto', classOf, provinces = [], meta = {}, coverage = null, province = '', extra = '',
-  unknownProvince = 0, chains = [], chainTotal = 0, noPoint = 0, filtered = false, listRows = null, brandHead = '', search = '', searchChains = [], index = null,
+  unknownProvince = 0, chains = [], chainTotal = 0, noPoint = 0, filtered = false, listRows = null, listTotal = 0, brandHead = '', search = '', searchChains = [], index = null,
   lens = null, lenses = false, lensStats = null, lensChains = [], byFood = null, food = ''}) {
   const foodEntry = foodChips(byFood, food);
   const count = insight.areas.length;
@@ -414,7 +430,10 @@ export function renderOverview({insight, summary, overview, focusMode = 'auto', 
   </section>${noPoint && filtered && !brandHead ? `<p class="hint population-line">ยังไม่มีพิกัด ${num(noPoint)} ร้าน</p>` : ''}`;
   const scope = province ? `${provinceName(province)} · ${coverage?.areas ? `${num(coverage.areas)} ` : ''}${areaWordFor(province)}ที่มีร้าน` : `ร้าน 7 จังหวัด + สาขาเครือทั่วประเทศ · ${coverage?.areas ? `${num(coverage.areas)} ` : ''}แขวง/ตำบลที่มีร้าน`;
   const matches = search && searchChains.length ? `<section class="panel-section"><div class="section-heading">${heading('brand', 'เครือที่ตรงกับคำค้น')}<span class="hint">${num(searchChains.length)} เครือ</span></div>${chainChips(searchChains)}</section>` : '';
-  const list = listRows?.length ? `<section class="panel-section"><div class="section-heading">${heading('store', 'รายการ')}<span class="hint">${num(listRows.length)} ร้าน</span></div>${restaurantList(listRows, {showArea: true, index})}</section>` : '';
+  // A chain's page lists its restaurants when there are few, or the first ones when none has a point (2026-11-09: the
+  // page says “ดูรายชื่อด้านล่าง”, and a branch without coordinates is still the chain's): with each outlet's code.
+  const total = Math.max(listTotal, listRows?.length || 0);
+  const list = listRows?.length ? `<section class="panel-section"><div class="section-heading">${heading('store', 'รายการ')}<span class="hint">${num(total)} ร้าน</span></div>${restaurantList(listRows, {showArea: true, index, showId: Boolean(brandHead)})}${total > listRows.length ? `<p class="hint">แสดง ${num(listRows.length)} จาก ${num(total)} ร้าน</p>` : ''}</section>` : '';
   const provinceRow = p => `<li><button type="button" class="province-row" data-action="select-province" data-id="${esc(p.code)}" aria-label="${esc(p.name)} ${num(p.count)} ร้าน กดเพื่อดูจังหวัด"><i class="province-swatch" style="background:${esc(p.fill)}" aria-hidden="true"></i><span class="province-name">${esc(p.name)}${p.covered === false ? '<small>สาขาเครือเท่านั้น</small>' : ''}</span><span class="province-count data-number">${num(p.count)}<small>ร้าน</small></span></button></li>`;
   const PROVINCE_SHOWN = 8;
   const provinceList = provinces.length > 1 ? `<section class="panel-section" aria-labelledby="province-title">
@@ -430,7 +449,8 @@ export function renderOverview({insight, summary, overview, focusMode = 'auto', 
   const chainSection = chains.length && !brandHead ? `<section class="panel-section"><div class="section-heading">${heading('brand', 'เครือร้านที่พบมากที่สุด')}<span class="hint">${num(chainTotal || chains.length)} เครือ</span></div>${chainChips(chains)}<div class="detail-actions"><button type="button" class="btn quiet" data-action="open-chains">เครือทั้งหมด${chainTotal ? ` (${num(chainTotal)})` : ''}</button></div></section>` : '';
   const outbound = brandHead ? '' : outboundRow({kind: 'country', province: province ? provinceName(province) : ''});
   const boundary = province && !coverage?.areas ? `${provinceName(province)} (ขอบเขตจังหวัดของ CityMETER · สาขาเครือ)` : `${scope} (ขอบเขตแขวง/ตำบลของ CityMETER)`;
-  return `${brandHead}${aha}${brandHead ? '' : metrics}${brandHead ? '' : foodEntry}${outbound}${matches}${list}${provinceList}${rank}${chainSection}${extra}${provenance(meta, boundary)}`;
+  // A chain's page lists its provinces in its head (renderBrandHead): the overview's province list would say it twice.
+  return `${brandHead}${aha}${brandHead ? '' : metrics}${brandHead ? '' : foodEntry}${outbound}${matches}${list}${brandHead ? '' : provinceList}${rank}${chainSection}${extra}${provenance(meta, boundary)}`;
 }
 
 const areaWordFor = province => (province === 'BKK' ? 'แขวง' : 'ตำบล');
