@@ -22,6 +22,7 @@ import {EVIDENCE, EVIDENCE_TH, EVIDENCE_SHORT, STATUS_TH} from './register.js';
 import {RELATION_TH, LAND_RULE} from './land.js';
 import {chainLabel, chainLogoBrand} from './chains.js';
 import {GROUP_PICTOGRAM} from './navigation.js';
+import {LANG} from './shell/i18n.js';
 
 /** The register's unit, in one clause (the provenance line of register views). */
 export const REGISTER_RULE = 'สาขาเครือ = สาขาที่ทะเบียนร้านเครือบันทึกพร้อมหลักฐาน · นับรวมกับร้านในชุดข้อมูล';
@@ -236,7 +237,7 @@ export function renderLand({land, profile, around, groups, venue = null, index =
   return `<section class="detail-head venue land-host">
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
       <p class="eyebrow">${esc(h.typeTh)} · ทะเบียน${esc(h.datasetTh)}${area ? ` · <button type="button" class="link-button" data-action="select-area" data-id="${esc(area.id)}">${esc(areaWord(area.province))}${esc(area.name)}</button>` : ''}</p>
-      <h2>${esc(h.name)}</h2>${h.nameEn && h.nameEn !== h.name ? `<p class="subtle">${esc(h.nameEn)}</p>` : ''}
+      <h2>${esc(h.name)}</h2>${h.nameEn && h.nameEn !== h.name ? (LANG === 'en' ? `<p class="subtle" lang="th" translate="no">${esc(h.name)}</p>` : `<p class="subtle">${esc(h.nameEn)}</p>`) : ''}
       <div class="metrics compact">${metricTile(all.length, 'ร้านในอาคาร', 'store')}${metricTile(around.length, 'ร้านรอบ 100 ม.', 'area')}${metricTile(chains.filter(x => !x.chain?.registry).length, 'เครือ', 'brand')}</div>
       ${shape ? `<p class="hint land-shape">${pic('building')}${esc(shape)}</p>` : ''}
       ${profile.cohosts.length ? `<p class="hint">อาคารเดียวกับ ${profile.cohosts.map(c => `<button type="button" class="link-button" data-action="select-land" data-id="${esc(c.id)}">${esc(c.name)}</button> (${esc(c.typeTh)})`).join(' · ')}</p>` : ''}

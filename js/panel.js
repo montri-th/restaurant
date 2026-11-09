@@ -29,6 +29,7 @@ import {chainLabel, chainLogoBrand} from './chains.js';
 import {outboundFor} from './outbound.js';
 import {LENSES} from './lenses.js';
 import {GROUP_PICTOGRAM, FOOD_CATEGORY_PICTOGRAM} from './navigation.js';
+import {LANG} from './shell/i18n.js';
 
 const NUMBER = new Intl.NumberFormat('th-TH', {maximumFractionDigits: 0});
 const DEC1 = new Intl.NumberFormat('th-TH', {minimumFractionDigits: 1, maximumFractionDigits: 1});
@@ -81,6 +82,11 @@ export function provenance(meta = {}, boundary = '', note = PROXY_NOTE) {
   return `<p class="hint panel-foot provenance"><span>ชุดข้อมูล CityMETER Restaurants + ทะเบียนร้านเครือ</span> · <span>แหล่ง ${source}${register}${segments}</span> · <span>ดึงข้อมูล ${esc(date)}</span> · <span>ขอบเขต ${esc(boundary)}</span>${note ? `<br>${esc(note)}` : ''}</p>`;
 }
 
+/** The line under a place heading: its English name on a Thai page; on an English page (the heading reads the English
+ * name) its Thai name, marked as Thai and left alone. */
+const subName = (thai, english) => (LANG === 'en'
+  ? (english ? `<p class="subtle" lang="th" translate="no">${esc(thai)}</p>` : '')
+  : (english ? `<p class="subtle">${esc(english)}</p>` : ''));
 const ratingText = rating => (rating == null ? 'ไม่มีคะแนน' : `${dec(rating)}`);
 const words = areas => {
   const p = new Set(areas.map(a => a.province));
@@ -460,7 +466,7 @@ export function renderDistrict(p, classOf, meta = {}, extra = '') {
   const head = `<section class="detail-head">
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
       <p class="eyebrow">${esc(w.district)} · ${esc(provinceName(d.province))} · ${esc(rankText)}</p>
-      <h2>${esc(w.district)}${esc(d.name)}</h2>${d.nameEn ? `<p class="subtle">${esc(d.nameEn)}</p>` : ''}
+      <h2>${esc(w.district)}${esc(d.name)}</h2>${subName(`${w.district}${d.name}`, d.nameEn)}
       ${p.coverageState === 'no_data' ? '' : `<div class="metrics compact">${metricTile(p.count, 'ร้าน', 'store')}${metricTile(dens(p.density), 'ร้าน/ตร.กม.', 'gla', `${km(p.km2 || 0)} ตร.กม.`)}${metricTile(p.reviewed ? p.reviews : '—', 'รีวิว', 'exclusive')}${metricTile(`${num(ranked.length)}/${num(p.areaTotal)}`, `${w.area}ที่มีร้าน`, 'area')}</div>`}
       ${characterLine(p.character)}
       ${selectionNote(p, place)}
@@ -489,7 +495,7 @@ export function renderArea(p, meta = {}, extra = '') {
   const head = `<section class="detail-head">
       <button type="button" class="btn quiet back" data-action="back">กลับ</button>
       <p class="eyebrow">${esc(w.area)} · <button type="button" class="link-button" data-action="select-district" data-id="${esc(a.district)}">${esc(w.district)}${esc(a.districtName)}</button> · ${esc(rankText)}</p>
-      <h2>${esc(w.area)}${esc(a.name)}</h2>${a.nameEn ? `<p class="subtle">${esc(a.nameEn)}</p>` : ''}
+      <h2>${esc(w.area)}${esc(a.name)}</h2>${subName(`${w.area}${a.name}`, a.nameEn)}
       ${p.coverageState === 'no_data' ? '' : `<div class="metrics compact">${metricTile(p.count, 'ร้าน', 'store')}${metricTile(dens(p.density), 'ร้าน/ตร.กม.', 'gla', `${km(p.km2 || 0)} ตร.กม.`)}${metricTile(p.reviewed ? p.reviews : '—', 'รีวิว', 'exclusive')}${metricTile(ratingText(p.ratingMean), 'คะแนนเฉลี่ย', 'exclusive', p.rated ? `เฉลี่ยจาก ${num(p.rated)} ร้านที่มีคะแนน` : '')}</div>`}
       ${characterLine(p.character)}
       ${selectionNote(p, place)}
@@ -548,7 +554,7 @@ export function renderBuilding(b, meta = {}, extra = '') {
       <h2>ร้านที่จุดตกในอาคารนี้</h2>
       <div class="metrics compact">${metricTile(b.count, 'ร้าน', 'store')}${metricTile(b.reviewed ? b.reviews : '—', 'รีวิว', 'exclusive')}${b.ratingMean != null ? metricTile(dec(b.ratingMean), 'คะแนนเฉลี่ย', 'plain') : ''}</div>
       ${height ? `<p class="hint">${pic('building')}${esc(height)}</p>` : ''}
-      ${outboundRow({kind: 'venue', name: `อาคาร ${area}`, province: b.rows[0] ? provinceName(b.rows[0].province) : '', lat: pt?.latitude, lng: pt?.longitude})}
+      ${outboundRow({kind: 'venue', name: `อาคาร ${area}`, building: area, province: b.rows[0] ? provinceName(b.rows[0].province) : '', lat: pt?.latitude, lng: pt?.longitude})}
     </section>
     <section class="panel-section"><div class="section-heading">${heading('store', 'ร้าน')}<span class="hint">${num(b.count)}</span></div>${restaurantList(b.rows.slice(0, 40), {showArea: b.areaCount > 1, index: meta.index})}
       ${b.count > 40 ? `<p class="hint">แสดง ${num(40)} จาก ${num(b.count)} ร้าน (รีวิวมากก่อน) · ดูทั้งหมดในรายการ</p>` : ''}</section>

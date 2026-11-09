@@ -77,7 +77,7 @@ js/register.js · js/register-layer.js · js/register-panel.js · js/land.js
                       ทะเบียนร้านเครือ (ถอดข้อมูล จุดบนแผนที่ แผง) และอาคาร Land (ความสัมพันธ์จุด–อาคาร เรขาคณิต)
 data/                 restaurants.json, chains.json, segments.json, land.json, land-buildings.geojson, areas/districts/provinces.geojson,
                       boundary-receipts.json, logo registries, venue-buildings.geojson
-scripts/              build-boundaries.py, build-data.py, build-chains.py, build-land.py, build-segments.py, xlsx-dump.py, build-handoff.mjs, verify-live.mjs, build-pictogram-font.py
+scripts/              build-boundaries.py, add-english-names.py, build-data.py, build-chains.py, build-land.py, build-segments.py, xlsx-dump.py, build-handoff.mjs, verify-live.mjs, build-pictogram-font.py
 tests/                node --test บนข้อมูลจริง
 handoff/              Product Brief, Implementation Plan, Verification, JSON + schema
 ```
@@ -87,7 +87,7 @@ handoff/              Product Brief, Implementation Plan, Verification, JSON + s
 - สีทุกค่าตรง LDS 0.9.7 (`v0.9.7-owner.1`, `color-srgb-10`, SHA-256 `d3085cbc…96`) — ตรวจ 72 รายการ (LUT 41 ค่า × 3 families × 2 ธีม, classes 3/5/7/9, scaleVersion, series 1–10, foundation, map roles, dataState) บันทึกใน [handoff/VERIFICATION.md](handoff/VERIFICATION.md)
 - ฟอนต์และไอคอนจาก LDS build kit (`assets/lds/build-kit/`), ไอคอน nav-7 และ pictogram 8 ตัว (Apache-2.0)
 - โลโก้เครือ 155 และสถานที่ 157 ไฟล์ คงไบต์เดิม ตรวจ SHA-256 ทุกไฟล์ (`tests/logos.test.js`) — โลโก้เป็นของเจ้าของเครื่องหมายการค้า การรวบรวมไม่ใช่การได้รับอนุญาต
-- ขอบเขตจาก CityMETER production (ใบรับ 581 ใบใน `data/boundary-receipts.json`); อาคาร © OpenStreetMap contributors (ODbL 1.0); basemap © OpenFreeMap / OpenMapTiles / OpenStreetMap
+- ขอบเขตจาก CityMETER production (ใบรับ 581 ใบใน `data/boundary-receipts.json`); อาคาร © OpenStreetMap contributors (ODbL 1.0); basemap © OpenFreeMap / OpenMapTiles / OpenStreetMap; ชื่ออังกฤษของเขต/อำเภอและบางแขวง/ตำบล OpenGISData-Thailand (CC BY 4.0, อ้าง DOPA)
 - `npm run handoff:manifest` สร้าง hash ของทุกไฟล์ · `npm run verify:live` เทียบไบต์บนเว็บจริงกับ manifest
 
 ส่งต่อให้ developer หรือ coding agent: เริ่มที่ [handoff/README.md](handoff/README.md) และอ่าน [AGENTS.md](AGENTS.md) ก่อนแก้ไข

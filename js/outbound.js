@@ -17,7 +17,13 @@
  *    storefront. The point is a display position (restaurants ≈ 9.55 m grid) or a publisher
  *    point, so the view faces the place, not a surveyed shop door; without a street within reach the link keeps
  *    Google's default view at the point.
+ *
+ * An English page (citymeter-shell 0.5.x, `?lang=en`) asks in English with the English names the data gives
+ * (js/lang.js); a restaurant's, a branch's or a venue's name stays as its source writes it. The labels stay Thai here and
+ * are translated by js/shell/i18n.js like the rest of the page (js/lang-en.js).
  */
+import {LANG, englishName} from './shell/i18n.js';
+
 const q = s => encodeURIComponent(String(s || '').replace(/\s+/g, ' ').trim());
 const fix = v => Number(v).toFixed(6);
 
@@ -131,7 +137,8 @@ const storeName = c => {
  * name, brand, branch, company, area, district, province, lat, lng, hint}. Returns [{kind, label, question, href, aim}];
  * `aim` = the point a Street View link turns toward (the panel lets the app place the camera when it is clicked).
  */
-export function outboundFor(c = {}) {
+export function outboundFor(c = {}, lang = LANG) {
+  if (lang === 'en') return outboundEnglish(c);
   const out = [];
   const ask = (label, question) => out.push({kind: 'ai', label, question, href: googleSearch(question)});
   const street = aim => hasPoint(c) && out.push({kind: 'street', label: 'Street View', question: '', href: streetView(c.lat, c.lng), aim: aim ? {lat: c.lat, lng: c.lng, hint: String(c.hint || '').slice(0, 240)} : null});
@@ -169,6 +176,61 @@ export function outboundFor(c = {}) {
     case 'country':
     default:
       ask('Google · เครือร้านอาหารในไทย', `เครือร้านอาหารในประเทศไทยที่มีสาขามากที่สุด และแบรนด์ที่กำลังขยายสาขา ${c.province ? `ใน${c.province}` : ''}`);
+      break;
+  }
+  return out;
+}
+
+/**
+ * The same links for an English page: the same questions in English. Places read in the English the data gives
+ * (“Bowon Niwet, Phra Nakhon, Bangkok”), and so does a venue the Land register names in English; a store, chain or
+ * company name reads as its source writes it. A building
+ * of the spatial join has no name: `building` carries its area (“a building in Bang Rak”).
+ */
+function outboundEnglish(c = {}) {
+  const out = [];
+  const N = s => englishName(String(s || '').replace(/\s+/g, ' ').trim());
+  const ask = (label, question) => out.push({kind: 'ai', label, question, href: googleSearch(question)});
+  const street = aim => hasPoint(c) && out.push({kind: 'street', label: 'Street View', question: '', href: streetView(c.lat, c.lng), aim: aim ? {lat: c.lat, lng: c.lng, hint: String(c.hint || '').slice(0, 240)} : null});
+  const where = [...new Set([c.area, c.district, c.province].filter(Boolean).map(N))].join(', ');
+  const province = N(c.province);
+  const name = String(c.name || c.brand || '').trim();
+  const inProvince = province ? ` (${province})` : '';
+  switch (c.kind) {
+    case 'store': {
+      const full = storeName(c);
+      ask('Google · รีวิว เมนู เวลาเปิด', `${full}${where ? ` (${where})` : ''}: reviews, menu, prices and opening hours`);
+      street(true);
+      const query = [full, where].filter(Boolean).join(', ');
+      out.push({kind: 'maps', label: 'Google Maps', question: query, href: mapsSearch(query)});
+      break;
+    }
+    case 'chain':
+      ask('Google · สาขาและข่าวล่าสุด', `${name}: how many branches in Thailand, the newest branches and news of its expansion`);
+      ask('Google · แฟรนไชส์และคู่แข่ง', `${name} franchise: terms and costs, and the closest competing brands`);
+      out.push({kind: 'maps', label: 'Google Maps', question: '', href: mapsSearch(`${name} ${province || 'Thailand'}`)});
+      break;
+    case 'company':
+      ask('Google · แบรนด์ในเครือ', `${name}: its restaurant brands, how many branches they have and its expansion plans`);
+      break;
+    case 'area':
+    case 'district':
+      ask('Google · ร้านดังและราคาแถวนี้', `Restaurants around ${where}: which are well known, which kinds are most common and roughly what they cost`);
+      ask('Google · ทำเลและค่าเช่า', `Opening a restaurant in ${where}: locations, restaurant space rents and customer groups`);
+      street(false); // an area's label point is not a place to look at
+      out.push({kind: 'maps', label: 'Google Maps', question: '', href: mapsSearch(`restaurants ${where}`)});
+      break;
+    case 'venue': {
+      const venue = c.building !== undefined ? (c.building ? `a building in ${N(c.building)}` : 'a building') : N(name);
+      ask('Google · ร้านในสถานที่นี้', `Restaurants in ${venue}${inProvince}: which are there, on which floors and the newest ones`);
+      ask('Google · พื้นที่เช่า', `Restaurant space for rent in ${venue}${inProvince}: leasing contacts and rents`);
+      street(true);
+      out.push({kind: 'maps', label: 'Google Maps', question: '', href: hasPoint(c) ? mapsPoint(c.lat, c.lng) : mapsSearch(`${venue} ${province}`.trim())});
+      break;
+    }
+    case 'country':
+    default:
+      ask('Google · เครือร้านอาหารในไทย', `Restaurant chains with the most branches in Thailand and the brands expanding now${province ? ` in ${province}` : ''}`);
       break;
   }
   return out;
