@@ -16,7 +16,7 @@ import {decodeDataset, outletRows, deriveChainGroups, registerProvinces, attachS
 import {buildAreaIndex} from '../js/areas.js';
 import {decodeRegister} from '../js/register.js';
 import {summarizeAreaInsight} from '../js/area-insight.js';
-import {dens} from '../js/panel.js';
+import {dens, thaiDate} from '../js/panel.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -69,10 +69,10 @@ const goneBrands = a.chains.brands.filter(x => !brandsB.has(x.id)).map(x => ({id
 const grown = b.chains.brands.filter(x => brandsA.has(x.id) && x.outlets !== brandsA.get(x.id).outlets).map(x => ({id: x.id, name: x.name, before: brandsA.get(x.id).outlets, after: x.outlets})).sort((p, q) => (q.after - q.before) - (p.after - p.before));
 const recount = b.segments.meta?.outlets?.recounted || {};
 const bandChanged = (b.segments.meta?.outlets?.bandChanged || []).map(id => ({id, name: brandsB.get(id)?.name || id, ...recount[id]}));
-const landIn = s => (s.land ? s.land.chains.length : null);
-const pct = (n, d) => (d ? `${(n / d * 100).toFixed(1)}%` : '—');
+const landIn = s => (s.land ? new Set(s.land.chains.map(x => x[0])).size : null);
+const readAt = r => (r?.register?.readAt ? `${thaiDate(r.register.readAt)} ${r.register.readAt.slice(11, 16)} น.` : '');
 const totals = [
-  ['อ่านชีต', a.release?.register?.readAt?.slice(0, 16).replace('T', ' ') || '3 พ.ย. 2569 (ก่อนมี release.json)', b.release?.register?.readAt?.slice(0, 16).replace('T', ' ') || '—'],
+  ['อ่านชีต', readAt(a.release) || readAt({register: b.release?.previous}) || '—', readAt(b.release) || '—'],
   ['สาขาในทะเบียน (outlet_id)', a.chains.cols.id.length, b.chains.cols.id.length],
   ['เครือที่มีสาขา (brand_id)', a.chains.brands.length, b.chains.brands.length],
   ['บริษัท/บทบาท', a.chains.companies.length, b.chains.companies.length],
