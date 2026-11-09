@@ -14,6 +14,7 @@
 | เครือร้าน (chain candidate) | ชีตวิจัยแท็บ `01_BRANDS` (จับคู่จากชื่อร้าน) + manifest โลโก้ | 22 ต.ค. 2569 | `data/restaurants.json → brands`, `data/brand-logos.json`, `assets/brand-logos/` |
 | สถานที่ (venue candidate) | ชีตวิจัยแท็บ `07_VENUES` (ชื่อร้านอ้างถึงสถานที่) + manifest โลโก้ | 22 ต.ค. 2569 | `data/restaurants.json → venues`, `data/venue-logos.json`, `assets/venue-logos/` |
 | ขอบเขตแขวง/ตำบล เขต/อำเภอ จังหวัด | CityMETER production public API (`/restaurant/info/geom/{uuid}/SUBDISTRICT`, `/base/info/lv1/{province uuid}`) | 22 ต.ค. 2569 | `data/areas.geojson`, `data/districts.geojson`, `data/provinces.geojson`, `data/boundary-receipts.json` |
+| ชื่ออังกฤษของเขต/อำเภอ และของแขวง/ตำบลที่ production ไม่มีชื่ออังกฤษ | OpenGISData-Thailand `districts.geojson` / `subdistricts.geojson` @ `fafcea1` (CC BY 4.0, อ้าง DOPA) — ใช้อ่านชื่อในหน้าภาษาอังกฤษ ไม่ใช้เป็นขอบเขต | ตาม commit | `data/districts.geojson → metadata.englishNames`, `data/areas.geojson → metadata.englishNames`, `metadata.englishFromOgd` |
 | อาคารของสถานที่ | ชุด host buildings ของ CityMETER · Luxury Brands รุ่น 0.5 (footprint จาก OpenStreetMap ODbL 1.0, ส่วนอาคารจาก CityMETER) จับคู่ด้วยชื่อสถานที่ตรงตัวหลัง normalize; ส่วนอาคาร LOD2 ของ Shopping Center release แทนเมื่อละเอียดกว่า จับด้วย uuid ของ CityMETER (§8.4) | footprint ดึง 21 ต.ค. 2569 | `data/venue-buildings.geojson` |
 | แผนที่ฐานและมวลอาคารเมือง | OpenFreeMap (OpenMapTiles schema, © OpenStreetMap contributors) | โหลดตอนเปิดหน้า | ไม่มีไฟล์ใน repository |
 
@@ -55,6 +56,7 @@
 - ทำให้เบาสำหรับเว็บด้วย mapshaper `-simplify interval=16 keep-shapes -clean` (คง topology) เขต/อำเภอ 90 กรอบ dissolve จากแขวง/ตำบลที่ทำให้เบาแล้ว จังหวัด 7 กรอบ dissolve แล้วทำให้เบาที่ 120 ม. สำหรับมุมมองประเทศ (`scripts/build-boundaries.py`)
 - **พื้นที่ (ตร.กม.)** มาจาก `areaSqm` ของ production — ไม่คำนวณใหม่จากเส้นที่ทำให้เบา
 - กรอบเป็น navigation และตัวหารของความหนาแน่น ไม่ใช่การยืนยันเขตปกครองทางกฎหมาย
+- **ชื่ออังกฤษ** production ให้ชื่ออังกฤษของจังหวัดและแขวง/ตำบล 394 จาก 581 แห่ง แต่ไม่มีของเขต/อำเภอเลย `scripts/add-english-names.py` เติมจาก OpenGISData-Thailand @ `fafcea1` (ตรวจ SHA-256 ของไฟล์ก่อนใช้): เขต/อำเภอตามรหัส 90 จาก 90 (เหมือนเดโมอื่นของ CityMETER) และแขวง/ตำบลที่ production ไม่มีชื่อ เฉพาะเมื่อรหัสและชื่อไทยตรงกัน 159 แห่ง (หลักเดียวกับ Fitness) ชื่ออังกฤษของ production คงไว้เสมอ ยังไม่มีชื่ออังกฤษ 28 แขวง/ตำบลในกรุงเทพฯ และสมุทรปราการ หน้าอังกฤษจึงแสดงชื่อไทยของพื้นที่เหล่านี้ ชื่อเป็นตัวช่วยอ่าน ไม่ใช่ชื่อทางการที่ยืนยันแล้ว
 
 ## 6. ตัวชี้วัด
 
@@ -198,6 +200,8 @@ Observed fact จาก source audit: ชุด Restaurants ของ production
 ```sh
 # ขอบเขต (อินพุต: geometry responses + .meta.json receipts ที่ดึงจาก API สาธารณะ)
 python3 -I scripts/build-boundaries.py --api <api-dir> --geom <geom-dir> --provinces 10,11,12,13,24,73,74 --out . --mapshaper <path-to-mapshaper>
+# ชื่ออังกฤษที่ production ไม่มี (อินพุต: districts.geojson + subdistricts.geojson ของ OpenGISData-Thailand ที่ commit fafcea1)
+python3 -I scripts/add-english-names.py --ogd <ogd-dir>
 # แปลง xlsx ของชีตวิจัยเป็น JSON ทีละแท็บ (อินพุตภายใน)
 python3 -I scripts/xlsx-dump.py <sheet.xlsx> <dump-dir>
 # ร้าน เครือ สถานที่ โลโก้ อาคาร (ชีต 1 + แถวที่ย้ายไปชีต 2 + manifest + โฟลเดอร์โลโก้ + host buildings + ส่วนอาคาร LOD2 จาก Shopping Center release)

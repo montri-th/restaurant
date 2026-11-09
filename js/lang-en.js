@@ -19,15 +19,19 @@ const these = (n, w) => {
   const one = w === 'พื้นที่' ? 'area' : 'subdistrict';
   return n === '1' ? `this ${one}` : `these ${n} ${one}s`;
 };
-/** Place words written one after another → "Siam, Pathum Wan, Bangkok"; the longest known run first. */
+/** Place words written one after another → "Siam, Pathum Wan, Bangkok"; the longest known run first. Null unless
+ * every run is a registered name (English, or Thai kept as the data writes it), so other text never reads as places. */
 function places(t, text) {
   const words = text.replace(/ · /g, ' ').split(' ').filter(Boolean);
+  // A run of several words must be a registered name; one word may also be a name kept Thai (t.part).
+  const known = (run, one) => t.known(run) ?? (one ? t.part(run) : null);
   const out = [];
   for (let i = 0; i < words.length;) {
     let j = words.length;
-    while (j > i + 1 && !t.known(words.slice(i, j).join(' '))) j--;
-    const run = words.slice(i, j).join(' ');
-    out.push(t.known(run) ?? t.name(run));
+    while (j > i + 1 && known(words.slice(i, j).join(' '), false) == null) j--;
+    const en = known(words.slice(i, j).join(' '), j === i + 1);
+    if (en == null) return null;
+    out.push(en);
     i = j;
   }
   return out.join(', ');
@@ -360,6 +364,10 @@ export default {
     'ประเภทร้านในอาคารเทียบรอบอาคาร': 'Restaurant types in the building and around it',
     'ประเภทร้าน: ในอาคารเทียบรอบอาคาร': 'Restaurant types: in the building and around it',
     'ร้านมากก่อน': 'most restaurants first',
+    'ใกล้ที่สุดก่อน': 'nearest first',
+    'ก–ฮ, A–Z': 'alphabetical',
+    'แขวง/ตำบล 7 จังหวัด': 'subdistricts of 7 provinces',
+    'แขวง/ตำบล 7 จังหวัด (ขอบเขต CityMETER)': 'subdistricts of 7 provinces (CityMETER boundaries)',
     'ไม่มีความสูง': 'No height',
     'หมุดสาขาเครือจากซูมเมือง': 'chain branch pins from city zoom',
     'รหัสสังเกตการณ์ในชุดข้อมูลนี้ (ย่อ)': 'Observation id in this dataset (shortened)',
@@ -452,7 +460,7 @@ export default {
     [re(`${D}/ตร\\.กม\\.`), '$1/km²'],
     [re(`${D} ตร\\.กม\\.`), '$1 km²'],
     [re(`★ ${D}`), '★ $1'],
-    [re(`ชั้น (.+)`), 'Floor $1'],
+    [re(`ชั้น (?:ชั้น ?)?(.+)`), 'Floor $1'],
     [re(`อีก ${N} จังหวัด`), (m, t) => `${m[1]} more ${t.plural(m[1], 'province', 'provinces')}`],
     [re(`และอีก ${N} จังหวัด`), (m, t) => `and ${m[1]} more ${t.plural(m[1], 'province', 'provinces')}`],
     [re(`อีก ${N} กลุ่ม`), (m, t) => `${m[1]} more ${t.plural(m[1], 'group', 'groups')}`],
@@ -464,7 +472,10 @@ export default {
     [re(`จาก ${N} ร้าน`), (m, t) => `of ${shops(t, m[1])}`],
     [re(`${N} จาก ${N}`), '$1 of $2'],
     [re(`แสดง ${N} จาก ${N} ร้าน \\(รีวิวมากก่อน\\)`), (m, t) => `Showing ${m[1]} of ${shops(t, m[2])} (most reviewed first)`],
-    [re(`แสดง ${N} จาก ${N} (.+?)(?: \\((.+)\\))?`), (m, t) => { const u = t.text(`${m[2]} ${m[3]}`); return u == null ? null : `Showing ${m[1]} of ${u}${m[4] ? ` (${t.text(m[4]) ?? m[4]})` : ''}`; }],
+    [re(`แสดง ${N} จาก ${N} (.+?)(?: \\((.+)\\))?`), (m, t) => {
+      const u = t.text(`${m[2]} ${m[3]}`), o = m[4] ? t.text(m[4]) : '';
+      return u == null || o == null ? null : `Showing ${m[1]} of ${u}${o ? ` (${o})` : ''}`;
+    }],
     [re(`ไม่ระบุราคา ${N} ร้าน`), (m, t) => `No price stated: ${shops(t, m[1])}`],
     [re(`ไม่จัดขนาด ${N} ร้าน`), (m, t) => `Not sized: ${shops(t, m[1])}`],
     [re(`ไม่มีข้อมูลขนาดเครือ ${N} ร้าน`), (m, t) => `No chain size data: ${shops(t, m[1])}`],
@@ -492,22 +503,24 @@ export default {
     [re(`อันดับความหนาแน่น ${N} จาก ${N}`), 'Density rank $1 of $2'],
     [re(`น้อยกว่า ${N} ร้าน`), (m, t) => `Under ${shops(t, m[1])}`],
     [re(`(อันดับ ${N}|น้อยกว่า ${N} ร้าน ไม่จัดอันดับ) (.+) ${D} ร้านต่อตารางกิโลเมตร ${N} ร้าน`), (m, t) => {
-      const rank = m[2] ? `Rank ${m[2]}` : `Under ${shops(t, m[3])}, not ranked`;
-      return `${rank} ${places(t, m[4])} ${m[5]} restaurants per km² ${shops(t, m[6])}`;
+      const rank = m[2] ? `Rank ${m[2]}` : `Under ${shops(t, m[3])}, not ranked`, p = places(t, m[4]);
+      return p == null ? null : `${rank} ${p} ${m[5]} restaurants per km² ${shops(t, m[6])}`;
     }],
-    [re(`อันดับ ${N} (.+): (.+) กดเพื่อดูพื้นที่นี้`), (m, t) => `Rank ${m[1]} ${places(t, m[2])}: ${t.text(m[3]) ?? m[3]}, select to view this area`],
+    [re(`อันดับ ${N} (.+): (.+) กดเพื่อดูพื้นที่นี้`), (m, t) => { const p = places(t, m[2]), v = t.text(m[3]); return p == null || v == null ? null : `Rank ${m[1]} ${p}: ${v}, select to view this area`; }],
     [re(`${N} ร้าน \\(${D} ร้านต่อตารางกิโลเมตร\\)`), (m, t) => `${shops(t, m[1])} (${m[2]} restaurants per km²)`],
     [re(`${D} ร้านต่อตารางกิโลเมตร, ${N} ร้าน`), (m, t) => `${m[1]} restaurants per km², ${shops(t, m[2])}`],
     [re(`(แขวง|ตำบล)ใน(เขต|อำเภอ)นี้`), 'Subdistricts in this district'],
     // Places in provenance and empty notes
     [/^(.+) \(ขอบเขตแขวง\/ตำบลของ CityMETER\)$/, (m, t) => { const s = t.text(m[1]); return s == null ? null : `${s} (CityMETER subdistrict boundaries)`; }],
-    [/^(.+) \(ขอบเขตจังหวัดของ CityMETER · สาขาเครือ\)$/, (m, t) => `${places(t, m[1])} (CityMETER province boundary · chain branches)`],
-    [/^(.+) \(ขอบเขต CityMETER\)$/, (m, t) => `${places(t, m[1])} (CityMETER boundaries)`],
+    [/^(.+) \(ขอบเขตจังหวัดของ CityMETER · สาขาเครือ\)$/, (m, t) => { const p = places(t, m[1]); return p == null ? null : `${p} (CityMETER province boundary · chain branches)`; }],
+    [/^([^\d+]+) \(ขอบเขต CityMETER\)$/, (m, t) => { const p = places(t, m[1]); return p == null ? null : `${p} (CityMETER boundaries)`; }],
     [/^ไม่มีข้อมูลร้านใน(.+)$/, (m, t) => `No restaurant data for ${t.name(m[1])}`],
     [/^ไม่พบร้านตามตัวกรองใน(.+)$/, (m, t) => `No restaurants match the filters in ${t.name(m[1])}`],
     [re(`ร้านในพื้นที่อื่น`), 'restaurants in other areas'],
     [re(`ดึงข้อมูล ${DT}`), (m, t) => `Retrieved ${t.date(m[1])}`],
-    [re(`ทะเบียนร้านเครือ ตรวจ (.+)`), (m, t) => `chain register checked ${t.date(m[1])}`],
+    [/^ทะเบียนร้านเครือ ตรวจ (\d{1,2} [ก-๙.]+ \d{4}(?:–\d{1,2} [ก-๙.]+ \d{4})?)$/, (m, t) => `chain register checked ${t.date(m[1])}`],
+    [/^(ขนาดเครือและหมวดอาหาร|ขนาดเครือ)จัดกลุ่ม (\d{1,2} [ก-๙.]+ \d{4})$/, (m, t) => `${m[1] === 'ขนาดเครือ' ? 'chain sizes' : 'chain sizes and food categories'} grouped ${t.date(m[2])}`],
+    [/^CityMETER Restaurants API ดึง (\d{1,2} [ก-๙.]+ \d{4}) \+ ทะเบียนร้านเครือ$/, (m, t) => `CityMETER Restaurants API retrieved ${t.date(m[1])} + chain register`],
     [re(`ราคาที่ระบุบ่อยสุด`), 'Most common stated price'],
     [re(`เริ่ม ${N} บาท`), 'From $1 baht'],
     [re(`ไม่เกิน ${N} บาท`), 'Up to $1 baht'],
@@ -532,7 +545,7 @@ export default {
     [/^(.+) ที่อื่นในจังหวัดเดียวกัน$/, (m, t) => { const n = t.text(m[1]); return n == null ? null : `${n} elsewhere in the same province`; }],
     [/^(.+) \(ตามเครือ\)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n} (from the chain)`; }],
     [/^(.+)อื่นในพื้นที่$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n}: others in the area`; }],
-    [/^โลโก้ (.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n} logo`; }],
+    [/^โลโก้ (?![\d,]+\/[\d,]+$)(.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n} logo`; }],
     [/^ร้านที่ชื่ออ้างถึง (.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `Restaurants whose names refer to ${n}`; }],
     [/^ร้านในอาคารของ (.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `Restaurants in the building of ${n}`; }],
     [/^อาคารเดียวกับ (.+)$/, (m, t) => {

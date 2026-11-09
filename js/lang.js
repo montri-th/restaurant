@@ -87,7 +87,8 @@ export function registerExtraNames({register, land}) {
   for (const p of register?.provinces || []) { book.add(p.th, p.en); }
   // An outlet reads as its chain and its own name (map pins, the tab title): “Swensen's สเวนเซ่นส์ เซ็นทรัล บางนา ชั้น 5”.
   for (const o of register?.outlets || []) {
-    book.keep(o.name); book.keep(o.address);
+    // An address that is only a floor (“ชั้น B1”) reads as the floor does elsewhere (js/lang-en.js), not as a name.
+    book.keep(o.name); if (!/^ชั้น\s/.test(o.address || '')) book.keep(o.address);
     const brand = o.brand?.name || '';
     if (brand && o.name && o.name !== brand) book.keep(`${brand} ${o.name}`);
   }
