@@ -42,9 +42,14 @@
 - harness หลัง Land join (Chromium, http.server ในเครื่อง ไม่มี tile พื้นแผนที่): `?brand=VNBR-ff68cbb4d4a0e734` → “353 ร้าน · 46 จังหวัด · 330 บนแผนที่ · ยังไม่มีพิกัด 23 ร้าน · หลักฐานสาขา: แหล่งของแบรนด์ 353” · `?land=SC-001245` เซ็นทรัลเวิลด์มี Yoguruto 2 ในรายการเครือ · `?land=SC-001077` สีลมเอจมี Yoguruto 1 · `?lang=en` “353 restaurants · 330 on the map · No coordinates yet: 23” · ไม่มี error ใน console ไม่มี scroll แนวนอน
 - เอกสารตามข้อมูลฉบับ 10 พ.ย.: README, PRODUCT_STATEMENT, DATA_METHOD (§8.2 Yoguruto, จำนวน พิกัด สัดส่วนเครือระดับชาติ), AGENTS, `docs/LAND_JOIN_CHECK.md`, `handoff/START_HERE.md`, `handoff/product-brief.json` (firstAha, registerSnapshot, landSnapshot) และ comment ในทดสอบ
 
-### R20.4 Live
+### R20.4 Live 0.12.0 (`d525c6d`, เผยแพร่ 10 พ.ย. 2569 07:00 น.)
 
-- ยังไม่เผยแพร่ — รอคำสั่งเจ้าของ (Draft PR)
+- ที่มา: เจ้าของสั่ง “เผยแพร่” 10 พ.ย. 2569 06:58 น. · main ไม่มี commit ใหม่ตั้งแต่ 0.11.1 และไม่มี PR อื่นค้าง จึงใช้ cache tag `20261109-r10` เดิม → `scripts/release-stamp.py` ใส่ `publishedAt` `2026-11-10T07:00:00+07:00` (`507c6d1`) · `npm test` 148/149 ข้าม 1 · CI `test` ผ่าน → squash merge #10 เป็น `d525c6d` (tree ตรงกับ `507c6d1`) · workflow “Register publish date” เห็นว่าใส่วันแล้วจึงไม่ commit เพิ่ม · Pages deploy สำเร็จ 07:02 น.
+- `npm run verify:live` (manifest จาก `507c6d1` ต้นไม้สะอาด): 846 ไฟล์ตรงทุกไบต์ ไม่ตรง 0
+- หน้าจริงใน Chromium ของเครื่องทำงาน (desktop 1440 px): บรรทัดแหล่งข้อมูล “ทะเบียนร้านเครือ ตรวจ 25 ต.ค. 2569–10 พ.ย. 2569 · เติมพิกัดและโลโก้ 30 ต.ค. 2569 · อ่านชีต 10 พ.ย. 2569 · เผยแพร่ 10 พ.ย. 2569” · `?lang=en` “sheet read 10 Nov 2026 · published 10 Nov 2026” · ข้อค้นพบแรก (เครือระดับชาติ) 27.5% · 199 จาก 724 ร้าน · ทุกพื้นที่ 9.7% · Café Amazon 30 · Starbucks 23 · Dairy Queen 13 · KAMU Tea 12 · McDonald's 12 · Yoguruto 12
+- Yoguruto (`?brand=VNBR-ff68cbb4d4a0e734`): 353 ร้าน · 46 จังหวัด · 330 บนแผนที่ · ยังไม่มีพิกัด 23 ร้าน · หลักฐานสาขา แหล่งของแบรนด์ 353 · ไม่ระบุจังหวัด 2 ร้าน · `&lang=en` “353 restaurants · 330 on the map · No coordinates yet: 23 restaurants” · อาคาร Land: เซ็นทรัลเวิลด์ (`?land=SC-001245`) มี Yoguruto 2 ในรายการเครือ · สีลมเอจ (`?land=SC-001077`) มี Yoguruto 1 · ไม่มี error ของหน้าเว็บ · ไม่มี scroll แนวนอนที่ 1440 px และ 390 px
+- Claude in Chrome ของเจ้าของ (หน้าต่างกว้าง 606 px แผนที่จริง OpenFreeMap): หน้าเครือ Yoguruto “353 ร้าน · 46 จังหวัด · ยังไม่มีพิกัด 23” ฟองจังหวัด กรุงเทพมหานคร 200 · ปทุมธานี 17 · ชลบุรี 13 · เชียงใหม่ 6 · ขอนแก่น 5 ฯลฯ · กดกรุงเทพฯ → “Yoguruto · 200 ร้าน · ยังไม่มีพิกัด 12” หมุดกระจายทั่วเมืองบนแผนที่จริง · ปิดแท็บหลังตรวจ
+- ยังไม่ได้ตรวจ: มือถือเครื่องจริง · ตำแหน่งหมุด Yoguruto รายสาขาเทียบหน้าร้านจริง (หมุด 53 สาขาจากการค้นเป็นหลักฐานรอง ความแม่นของหมุดไม่ทราบ)
 
 ## R19. รุ่น 0.9.2–0.9.3 — หมวดอาหาร 6/19/31 ขึ้นเว็บพร้อมป้าย “อนุมาน” (3 พ.ย. 2569)
 
