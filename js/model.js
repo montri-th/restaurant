@@ -340,13 +340,39 @@ export function entryParts(r) {
   const brand = r?.brand?.name || '';
   const name = r?.name || '';
   if (!brand) return {primary: name, secondary: ''};
-  if (r.kind === 'outlet') return {primary: brand, secondary: name && lower(name) !== lower(brand) ? name : ''};
   if (lower(name).startsWith(lower(brand))) {
     let rest = name.slice(brand.length).trim().replace(/^[\-–—·,:|]+\s*/, '');
     if (/^\(.*\)$/.test(rest)) rest = rest.slice(1, -1).trim(); // “After You (Siam Paragon)” → Siam Paragon
+    // 2026-11-09: an outlet's name written “Yoguruto — True Digital Park EAST 2F” reads as its place; the zone and the
+    // floor the register lists apart are said by the meta line (“ฝั่ง EAST · ชั้น 2”), so they leave the place here.
+    if (r.kind === 'outlet') rest = placeOnly(rest, r);
     return {primary: brand, secondary: rest};
   }
-  return {primary: brand, secondary: name};
+  return {primary: brand, secondary: r.kind === 'outlet' && lower(name) === lower(brand) ? '' : name};
+}
+
+/** An outlet's place without the zone and floor tokens it ends with, when the register lists them apart. */
+function placeOnly(text, r) {
+  let s = text;
+  for (const token of [r.floor, r.zone]) {
+    const t = String(token || '').trim();
+    if (t && s.length > t.length && lower(s).endsWith(` ${lower(t)}`)) s = s.slice(0, -t.length).trim().replace(/[\-–—·,:|]+$/, '').trim();
+  }
+  return s;
+}
+
+/**
+ * A floor as the page says it (2026-11-09): the register writes floors as its sources do (“2F”, “3rd Floor”, “G FL.”,
+ * “ชั้น 1”); the common forms read “ชั้น 2”, “ชั้น G”. Anything else keeps the source's words (never “ชั้น ชั้น 1”).
+ */
+export function floorLabel(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return '';
+  const x = (s.match(/^ชั้น\s*([A-Za-z]{0,2}\d{0,3})$/) || s.match(/^(?:fl\.?|floor|level)\s*([A-Za-z]{0,2}\d{0,3})$/i) ||
+    s.match(/^(\d{1,3})(?:st|nd|rd|th)?\s*(?:f|fl\.?|floor)?\.?$/i) || s.match(/^([A-Za-z]{1,2}\d{0,2})(?:\s*,?\s*(?:f|fl\.?|floor)\.?)?$/i) ||
+    s.match(/^(?:(g)round)\s*floor$/i) || [])[1];
+  if (x) return `ชั้น ${(x.length > 1 && /^[A-Za-z]{1,2}\d{0,2}F$/.test(x) ? x.slice(0, -1) : x).toUpperCase()}`;
+  return /ชั้น|floor|\bfl\b|level|lobby/i.test(s) ? s : `ชั้น ${s}`;
 }
 
 /** One key per chain across both sheets: a snapshot candidate with a register link counts as that register brand. */

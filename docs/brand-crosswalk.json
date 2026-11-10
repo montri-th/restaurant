@@ -1,0 +1,389 @@
+{
+ "schema": "citymeter-restaurant-brand-crosswalk-1",
+ "checkedOn": "2026-11-10",
+ "register": {
+  "outlets": 28306,
+  "brandsWithOutlets": 982
+ },
+ "rule": "pair a snapshot name candidate the sheet links to no register brand with a register brand that has outlets only when the names agree (NFKC, case, spacing, punctuation aside) and one more fact ties them: the same source page, the brand's own web domain, or a candidate row within 50 m of an outlet point of that brand; anything else is review and changes nothing on the page",
+ "pairs": [
+  {
+   "legacy": "RBR-bankara",
+   "name": "Bankara Ramen",
+   "rows": 1,
+   "source": "https://hanaken.co.jp/ramen-bankara/",
+   "register": "D4BR-C28B02-bankara",
+   "registerName": "BANKARA Ramen",
+   "outlets": 4,
+   "evidence": [
+    {
+     "kind": "domain",
+     "detail": "hanaken.co.jp"
+    },
+    {
+     "kind": "point",
+     "detail": [
+      {
+       "row": "BANKARA Ramen Sukhumvit 39",
+       "outlet": "D4OBS-d0b950938c7c02e5b40d7975",
+       "outletName": "BANKARA Ramen — Sukhumvit39",
+       "metres": 17
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "legacy": "RBR-mixue",
+   "name": "MIXUE",
+   "rows": 2,
+   "source": "https://www.mega-bangna.com/en/store/MIXUE/832",
+   "register": "R5BR-th-mixue",
+   "registerName": "MIXUE",
+   "outlets": 512,
+   "evidence": [
+    {
+     "kind": "point",
+     "detail": [
+      {
+       "row": "Mixue สาขาตลาดพระประแดง",
+       "outlet": "BEVOUT-90b470615c11582b2eed458a",
+       "outletName": "Mixue ตลาดพระประแดง",
+       "metres": 8
+      },
+      {
+       "row": "MIXUE สวนผัก",
+       "outlet": "BEVOUT-004a4547fcbaa318b20d188e",
+       "outletName": "Mixue สวนผัก",
+       "metres": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "legacy": "RBR-ochaya",
+   "name": "Ochaya",
+   "rows": 1,
+   "source": "https://www.ochaya.co.th/",
+   "register": "R5BR-th-ochaya",
+   "registerName": "Ochaya",
+   "outlets": 134,
+   "evidence": [
+    {
+     "kind": "domain",
+     "detail": "ochaya.co.th"
+    }
+   ]
+  },
+  {
+   "legacy": "RBR-penguin_eat_shabu",
+   "name": "Penguin Eat Shabu",
+   "rows": 2,
+   "source": "https://www.terminal21.co.th/asok/shop/detail/en/700/penguin-eat-shabu",
+   "register": "D4BR-C28B11B-penguin-eat-shabu",
+   "registerName": "Penguin Eat Shabu",
+   "outlets": 3,
+   "evidence": [
+    {
+     "kind": "page",
+     "detail": "https://www.terminal21.co.th/asok/shop/detail/en/700/penguin-eat-shabu"
+    }
+   ]
+  },
+  {
+   "legacy": "RBR-shake_shack",
+   "name": "Shake Shack",
+   "rows": 2,
+   "source": "https://linktr.ee/shakeshackth",
+   "register": "D4BR-C28B05C-shake-shack",
+   "registerName": "Shake Shack",
+   "outlets": 5,
+   "evidence": [
+    {
+     "kind": "page",
+     "detail": "https://linktr.ee/shakeshackth"
+    },
+    {
+     "kind": "point",
+     "detail": [
+      {
+       "row": "Shake Shack CentralWorld",
+       "outlet": "D4OBS-a46e6c759e3a8cabcdb92f48",
+       "outletName": "Shake Shack — CentralWorld",
+       "metres": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "legacy": "RBR-true_coffee",
+   "name": "True Coffee",
+   "rows": 1,
+   "source": "https://truecoffee.co.th/",
+   "register": "BEVBR-30d0aa95c251d6aa2f93",
+   "registerName": "TrueCoffee",
+   "outlets": 70,
+   "evidence": [
+    {
+     "kind": "page",
+     "detail": "https://truecoffee.co.th/"
+    },
+    {
+     "kind": "point",
+     "detail": [
+      {
+       "row": "True Coffee ม.เกษตร",
+       "outlet": "BEVOUT-d8e67c54a7594db1bd6dec5f",
+       "outletName": "TrueCoffee Kasetsart University",
+       "metres": 15
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "review": [
+  {
+   "legacy": "RBR-bake_a_wish",
+   "name": "Bake A Wish",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store-guide/?page=3&category=2",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-food_patio",
+   "name": "Food Patio",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Food-Patio/903",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-gyukaku",
+   "name": "Gyu-Kaku",
+   "rows": 2,
+   "source": "https://www.gyu-kaku.com/",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-honmono_sushi",
+   "name": "Honmono Sushi",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Honmono-Sushi/85",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-ja_guem_song",
+   "name": "Ja Guem Song",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Ja-Guem-Song/740",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-kagonoya",
+   "name": "Kagonoya",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Kagonoya/62",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-mos_burger",
+   "name": "MOS Burger",
+   "rows": 2,
+   "source": "https://www.mega-bangna.com/en/store-guide/?page=12&category=2",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-pranakorn_boat_noodle",
+   "name": "Pranakorn Boat Noodle",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Pranakorn-Boat-Noodle/626",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-sindosegi",
+   "name": "Sindosegi",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Sindosegi/882",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-skyluck",
+   "name": "Skyluck",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Skyluck/878",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-souri",
+   "name": "SOURI",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/SOURI/893",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-spaghetti_factory",
+   "name": "Spaghetti Factory",
+   "rows": 2,
+   "source": "https://www.mega-bangna.com/en/store/Spaghetti-Factory/715",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-sunrise_tacos",
+   "name": "Sunrise Tacos",
+   "rows": 2,
+   "source": "https://www.mega-bangna.com/en/store/Sunrise-Tacos/35",
+   "why": "same name, nothing else ties them",
+   "candidates": [
+    {
+     "register": "D4BR-C28-sunrise-tacos",
+     "registerName": "Sunrise Tacos",
+     "outlets": 12,
+     "evidence": []
+    }
+   ],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-sushiplus",
+   "name": "SUSHiPLUS",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/SUSHiPLUS/659",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-tan_por_salapao",
+   "name": "Tan Por Salapao",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Tan-Por-Salapao/920",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-tohkai_yakiniku",
+   "name": "TOHKAI YAKINIKU",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/TOHKAI-YAKINIKU/115",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-warabimochi_kamakura",
+   "name": "WARABIMOCHI KAMAKURA",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/WARABIMOCHI-KAMAKURA/950",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-xiao_fuwang",
+   "name": "Xiao Fuwang",
+   "rows": 1,
+   "source": "https://www.mega-bangna.com/en/store/Xiao-Fuwang/968",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  },
+  {
+   "legacy": "RBR-yum_saap",
+   "name": "Yum Saap",
+   "rows": 2,
+   "source": "https://page.line.me/yumsaap",
+   "why": "no register brand of this name has outlets",
+   "candidates": [],
+   "profilesWithoutOutlets": []
+  }
+ ],
+ "exactNoOutlets": [
+  {
+   "legacy": "RBR-bangkok_congee",
+   "name": "Bangkok Congee",
+   "rows": 64,
+   "code": "RBR-bangkok_congee"
+  },
+  {
+   "legacy": "RBR-cheng_sim_ei",
+   "name": "Cheng Sim Ei",
+   "rows": 26,
+   "code": "RBR-cheng_sim_ei"
+  },
+  {
+   "legacy": "RBR-five_star",
+   "name": "Five Star Chicken",
+   "rows": 216,
+   "code": "ROOT-BR-cpf-five-star"
+  },
+  {
+   "legacy": "RBR-hasul",
+   "name": "HASUL",
+   "rows": 1,
+   "code": "RBR-hasul"
+  },
+  {
+   "legacy": "RBR-jim_burger",
+   "name": "Jim's Burger & Beers",
+   "rows": 5,
+   "code": "RBR-jim_burger"
+  },
+  {
+   "legacy": "RBR-neta_grill",
+   "name": "Neta Grill",
+   "rows": 5,
+   "code": "RBR-neta_grill"
+  },
+  {
+   "legacy": "RBR-samyan_congee",
+   "name": "Samyan Congee",
+   "rows": 77,
+   "code": "RBR-samyan_congee"
+  },
+  {
+   "legacy": "RBR-shabu_nangnai",
+   "name": "Shabu Nangnai",
+   "rows": 3,
+   "code": "RBR-shabu_nangnai"
+  },
+  {
+   "legacy": "RBR-suki_dara",
+   "name": "Suki Dara",
+   "rows": 8,
+   "code": "RBR-suki_dara"
+  },
+  {
+   "legacy": "RBR-yang_noey",
+   "name": "Yang Noey",
+   "rows": 11,
+   "code": "RBR-yang_noey"
+  }
+ ]
+}

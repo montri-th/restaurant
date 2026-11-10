@@ -1,0 +1,231 @@
+{
+ "rule": "Numbers the tests pin that move with the register. Written by npm run fixtures from a run, never by hand; history keeps what each refresh replaced (newest first).",
+ "generatedFrom": {
+  "registerReadAt": "2026-11-10T02:11:04+07:00",
+  "sourceSha256": "9ee7c6dbc21f092cffed642a30679ec179ed26db3dba4dc2c809ff21f6f0d83d",
+  "files": {
+   "data/restaurants.json": "a899c5982b0d2ed4febfab8755dd2d28b18c08176f1a260cc67d45a8a3a057ef",
+   "data/chains.json": "f54830619f6f15072c51100ea1673213a1a760d25a282293ce48635ca2c2f9de",
+   "data/segments.json": "65475aa0947a0dc9fe1cbeb03401e5be3f8b41a361d415aeeb60684b9c72e7ca",
+   "data/land.json": "9df98c81b05b74f869730675ee2b7242799cc68c046a8a0d8cab73572a52464a",
+   "data/land-buildings.geojson": "077df2c2775d1b4db7f2bda5c896645a412e73e0af025088a22846275fa382e5"
+  }
+ },
+ "values": {
+  "firstAha.areas": [
+   [
+    "100402",
+    "สีลม",
+    269
+   ],
+   [
+    "100108",
+    "ตลาดยอด",
+    32
+   ],
+   [
+    "100403",
+    "สุริยวงศ์",
+    101
+   ]
+  ],
+  "firstAha.baseline": 9.9,
+  "firstAha.density": "174.2",
+  "firstAha.mostReviewed": [
+   "103902",
+   "คลองตันเหนือ"
+  ],
+  "food.categories": {
+   "FC05": 4561,
+   "FC03": 17872,
+   "FC02": 12669,
+   "FC06": 3919,
+   "FC01": 21786,
+   "FC04": 8080
+  },
+  "food.filtered": [
+   17872,
+   12715,
+   3239
+  ],
+  "food.mix": {
+   "classified": 68887,
+   "unclassified": 28399,
+   "rows": 46626,
+   "outlets": 22261
+  },
+  "food.silom": {
+   "count": 269,
+   "classified": 191,
+   "unclassified": 78
+  },
+  "food.silom.coffee": 48,
+  "lens.chains.areas": [
+   "ถนนพญาไท",
+   "ปทุมวัน",
+   "วังใหม่"
+  ],
+  "lens.chains.share": {
+   "count": 199,
+   "total": 724,
+   "baselineCount": 7863,
+   "baselineTotal": 81025
+  },
+  "lens.chains.top": [
+   [
+    "Café Amazon",
+    30
+   ],
+   [
+    "Starbucks",
+    23
+   ],
+   [
+    "Dairy Queen",
+    13
+   ]
+  ],
+  "lens.chains.total": 23,
+  "provinces.unknown": 2288,
+  "segments.attached": {
+   "attached": 96120,
+   "lifted": 750,
+   "ok": true,
+   "food": 68887
+  },
+  "segments.bySize": {
+   "S1": 67452,
+   "S2": 1221,
+   "S3": 3539,
+   "S4": 6489,
+   "S5": 17419
+  },
+  "segments.foodRows": {
+   "grouped": [
+    46626,
+    22261
+   ],
+   "sub": [
+    28265,
+    4852
+   ]
+  },
+  "segments.notSized": 1166,
+  "segments.reviewStatus": {
+   "unreviewed": 95341
+  }
+ },
+ "history": [
+  {
+   "until": "2026-11-09T20:26:57+07:00",
+   "values": {
+    "firstAha.areas": [
+     [
+      "100402",
+      "สีลม",
+      266
+     ],
+     [
+      "100108",
+      "ตลาดยอด",
+      32
+     ],
+     [
+      "100403",
+      "สุริยวงศ์",
+      99
+     ]
+    ],
+    "firstAha.baseline": 9.87,
+    "firstAha.density": "172.0",
+    "food.mix": {
+     "classified": 68887,
+     "unclassified": 28047,
+     "rows": 46626,
+     "outlets": 22261
+    },
+    "food.silom": {
+     "count": 266,
+     "classified": 191,
+     "unclassified": 75
+    },
+    "lens.chains.share": {
+     "count": 187,
+     "total": 712,
+     "baselineCount": 7608,
+     "baselineTotal": 80770
+    },
+    "lens.chains.total": 22,
+    "provinces.unknown": 2287,
+    "segments.attached": {
+     "attached": 95768,
+     "lifted": 750,
+     "ok": true,
+     "food": 68887
+    },
+    "segments.bySize": {
+     "S1": 67453,
+     "S2": 1221,
+     "S3": 3539,
+     "S4": 6489,
+     "S5": 17066
+    }
+   }
+  },
+  {
+   "until": "2026-11-03T01:16:57+07:00",
+   "values": {
+    "firstAha.areas": [
+     [
+      "100402",
+      "สีลม",
+      261
+     ],
+     [
+      "100108",
+      "ตลาดยอด",
+      32
+     ],
+     [
+      "100403",
+      "สุริยวงศ์",
+      98
+     ]
+    ],
+    "firstAha.baseline": 9.85,
+    "firstAha.density": "169.4",
+    "food.mix": {
+     "classified": 68887,
+     "unclassified": 27620,
+     "rows": 46626,
+     "outlets": 22261
+    },
+    "food.silom": {
+     "count": 261,
+     "classified": 190,
+     "unclassified": 71
+    },
+    "lens.chains.share": {
+     "count": 187,
+     "total": 695,
+     "baselineCount": 7605,
+     "baselineTotal": 80629
+    },
+    "provinces.unknown": 2236,
+    "segments.attached": {
+     "attached": 95341,
+     "lifted": 726,
+     "ok": true,
+     "food": 68887
+    },
+    "segments.bySize": {
+     "S1": 67411,
+     "S2": 1162,
+     "S3": 3398,
+     "S4": 6338,
+     "S5": 17032
+    }
+   }
+  }
+ ]
+}

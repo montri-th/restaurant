@@ -1,5 +1,5 @@
 {
- "checkedOn": "2026-11-03",
+ "checkedOn": "2026-11-10",
  "landPoints": {
   "shopping": 3262,
   "hotel": 2266,
@@ -35,7 +35,7 @@
   "office:iou>=0.5": 6
  },
  "publishedBuildingsByLod": {
-  "lod1": 945,
+  "lod1": 947,
   "lod2": 47
  },
  "publishedParts": 200,
@@ -54,8 +54,8 @@
    "fp_edge_osm": 276,
    "snapshot_near": 3617,
    "snapshot_in": 1811,
-   "chain_in": 3227,
-   "chain_near": 1438
+   "chain_in": 3396,
+   "chain_near": 1486
   },
   "hotel": {
    "points": 2266,
@@ -64,8 +64,8 @@
    "fp_edge_osm": 341,
    "snapshot_near": 1417,
    "snapshot_in": 344,
-   "chain_near": 285,
-   "chain_in": 154
+   "chain_near": 291,
+   "chain_in": 165
   },
   "office": {
    "points": 378,
@@ -74,8 +74,8 @@
    "fp_edge_osm": 50,
    "snapshot_near": 522,
    "snapshot_in": 275,
-   "chain_in": 697,
-   "chain_near": 270
+   "chain_in": 755,
+   "chain_near": 290
   }
  },
  "snapshotJoined": {
@@ -83,22 +83,22 @@
   "in": 2239
  },
  "chainJoined": {
-  "near": 1905,
-  "in": 3468
+  "near": 1978,
+  "in": 3659
  },
  "inFromWithin10m": {
   "snapshot": 594,
-  "chain": 492
+  "chain": 511
  },
  "displayPositions": {
   "snapshot": 594,
-  "chain": 492
+  "chain": 511
  },
  "snapshotPoints": 70214,
- "chainPointsInCoveredProvinces": 11649,
+ "chainPointsInCoveredProvinces": 12045,
  "pointsInNestedBuildings": {
   "snapshot": 13,
-  "chain": 34
+  "chain": 38
  },
  "nameLinkReview": [
   {
@@ -347,7 +347,11 @@
     "ยังไม่พบ polygon ที่จับคู่ได้": 9
    },
    "candidatePolygonsChecked": 10,
-   "rule": "registry link DL-2669875b0346b95e63be: candidate polygons never confirm inside; inside vs around after boundary, date and rights acceptance"
+   "rule": "registry link DL-2669875b0346b95e63be: candidate polygons never confirm inside; inside vs around after boundary, date and rights acceptance",
+   "carriedFrom": {
+    "checkedOn": "2026-11-03",
+    "why": "estates inputs not re-read; the section does not depend on the chain register"
+   }
   },
   "candidates": [
    {
@@ -514,7 +518,7 @@
    "total": 38
   },
   "office:office_venue_source_record": {
-   "withPoints": 138,
+   "withPoints": 140,
    "total": 332
   },
   "shopping:agricultural_wholesale_market": {
@@ -582,7 +586,7 @@
    "total": 2
   },
   "shopping:covered_market_source_reported": {
-   "withPoints": 85,
+   "withPoints": 86,
    "total": 567
   },
   "shopping:department_store_or_retail_complex": {
@@ -694,7 +698,7 @@
    "total": 3
   },
   "shopping:mall_subarea_or_provider_duplicate_candidate": {
-   "withPoints": 1,
+   "withPoints": 0,
    "total": 1
   },
   "shopping:managed_food_court_and_event_space_scope_pending": {
@@ -950,7 +954,7 @@
    "total": 1
   }
  },
- "buildingsPublished": 992,
- "featuresPublished": 1192,
- "hostsPublished": 1093
+ "buildingsPublished": 994,
+ "featuresPublished": 1194,
+ "hostsPublished": 1095
 }

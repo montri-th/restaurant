@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {load} from './helpers.js';
+import {load, fixture} from './helpers.js';
+import {dens} from '../js/panel.js';
 import {summarizeAreaInsight, filterAreaRows, MIN_AREA_ROWS, SMALL_SELECTION} from '../js/area-insight.js';
 import {summarizeAreas, combinedDensity, levelWords, byDensity} from '../js/areas.js';
 import {filterRows, summarize} from '../js/model.js';
@@ -12,25 +13,24 @@ test('first Aha (one-population fixture): the three densest แขวง with �
   const i = summarizeAreaInsight(data.rows, index, {coverage});
   assert.equal(i.mode, 'density');
   assert.equal(i.minRows, MIN_AREA_ROWS);
-  // 0.8.0 (register of 2026-11-03, 22,547 outlets with a point): สีลม · ตลาดยอด · สุริยวงศ์ — สีลม gained 11 located
-  // outlets (261 rows, 172.3 /km²) and passed ตลาดยอด (171.9). Previous: 0.7.1 ตลาดยอด · สีลม · สุริยวงศ์ 164.6 (380 rows);
-  // 0.6.0–0.7.0: สุริยวงศ์ · สีลม · วังใหม่ at 122.0; 0.4: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ at 99.7 from the sheet-1
-  // rows alone. Numbers come from a run, never by hand.
-  assert.deepEqual(i.areaIds, ['100402', '100108', '100403'], 'สีลม · ตลาดยอด · สุริยวงศ์');
-  assert.deepEqual(i.areas.map(a => a.count), [261, 32, 98]);
-  assert.equal(i.count, 391);
+  // The three areas and their numbers move with the register: tests/fixtures/data-snapshot.json, from a run (npm run
+  // fixtures), with the values it replaced in its history. Register of 2026-11-10: สีลม · ตลาดยอด · สุริยวงศ์ 174.2
+  // (402 rows; 2026-11-09: 172.0, 397). Before: 0.8.0 the same three at 169.4 (391); 0.7.1 ตลาดยอด · สีลม · สุริยวงศ์ 164.6 (380); 0.6.0–0.7.0
+  // สุริยวงศ์ · สีลม · วังใหม่ 122.0; 0.4 สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.7 from the sheet-1 rows alone.
+  fixture('firstAha.areas', i.areas.map(a => [a.id, a.name, a.count]));
+  assert.equal(i.count, i.areas.reduce((s, a) => s + a.count, 0));
   const km2 = i.areas.reduce((s, a) => s + a.km2, 0);
-  assert.ok(Math.abs(i.density - 391 / km2) < 1e-9, 'combined density is a ratio of totals, not a mean of ratios');
-  assert.ok(Math.abs(i.density - 169.4) < 0.05, `${i.density}`);
+  assert.ok(Math.abs(i.density - i.count / km2) < 1e-9, 'combined density is a ratio of totals, not a mean of ratios');
+  fixture('firstAha.density', dens(i.density));
   // The baseline counts the rows that sit in a covered frame (outlets outside the covered provinces have no frame).
   assert.equal(i.framedRows, data.rows.filter(r => r.area).length);
   assert.ok(Math.abs(i.baselineDensity - i.framedRows / coverage.km2) < 1e-9);
-  assert.ok(Math.abs(i.baselineDensity - 9.85) < 0.01, `${i.baselineDensity}`);
+  fixture('firstAha.baseline', Math.round(i.baselineDensity * 100) / 100);
   assert.ok(i.areas.every(a => a.count >= MIN_AREA_ROWS));
   // Every eligible area outside the three is less dense than the third.
   const all = summarizeAreas(data.rows, index).filter(a => a.count >= MIN_AREA_ROWS).sort(byDensity);
   assert.deepEqual(all.slice(0, 3).map(a => a.id), i.areaIds);
-  assert.equal(i.mostReviewed.id, '103902', 'secondary finding: แขวงคลองตันเหนือ holds the most reviews');
+  fixture('firstAha.mostReviewed', [i.mostReviewed.id, i.mostReviewed.name], 'secondary finding: the area that holds the most reviews');
 });
 
 test('small selections switch to a count Aha (share of the selection in three areas)', () => {
@@ -88,7 +88,7 @@ test('province frames count rows per province (a total, not a density)', () => {
   const outletsBy = {}; for (const o of register.outlets) if (o.province) outletsBy[o.province] = (outletsBy[o.province] || 0) + 1;
   for (const p of m.provinces) assert.equal(p.count, (raw.meta.rowsByProvince[p.code] || 0) - (movedBy[p.code] || 0) + (outletsBy[p.code] || 0), p.code);
   assert.equal(m.unknown, register.outlets.filter(o => !o.province).length, 'outlets without a province are counted apart');
-  assert.equal(m.unknown, 2236, 'register of 2026-11-03 (0.7.1: 2,213)');
+  fixture('provinces.unknown', m.unknown, 'outlets without a province (2026-11-10: 2,288; 2026-11-09: 2,287; 0.8.0: 2,236; 0.7.1: 2,213)');
   assert.ok(m.provinces.every(p => p.count > 0), 'every province holds at least one restaurant or outlet');
   assert.equal(m.classes.scaleId, 'count');
   const none = buildProvinceModel([], provincesGeo);

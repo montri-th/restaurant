@@ -1,5 +1,6 @@
 /** Shared loaders for the node tests (data files are read once per process). */
-import {readFileSync} from 'node:fs';
+import {readFileSync, writeFileSync, existsSync, mkdirSync} from 'node:fs';
+import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {dirname, join} from 'node:path';
@@ -40,3 +41,35 @@ export function load() {
   loaded = {raw, data, register, index, areasGeo, districtsGeo, provincesGeo, covered, coverage: {km2, areas: covered.size}};
   return loaded;
 }
+
+/**
+ * Data fixtures (2026-11-09). Numbers that move with the chain register — the first Aha, the lens shares, the food and
+ * size counts of a place — live in tests/fixtures/data-snapshot.json, refreshed from a run by `npm run fixtures`
+ * (scripts/refresh-fixtures.mjs: it keeps the values it replaces in `history`), never by hand. A test states which
+ * number it pins: fixture('firstAha.counts', i.areas.map(a => a.count)). With CITYMETER_FIXTURES_RECORD=<dir> the
+ * values are written to <dir> instead of compared (the refresh run); every other assertion still runs.
+ */
+const FIXTURES = join(ROOT, 'tests/fixtures/data-snapshot.json');
+/** The data files the fixtures are computed from (tests/fixtures.test.js holds the snapshot to them). */
+export const FIXTURE_DATA = ['data/restaurants.json', 'data/chains.json', 'data/segments.json', 'data/land.json', 'data/land-buildings.geojson'];
+let fixtureValues = null;
+export function fixture(key, actual, message = key) {
+  const dir = process.env.CITYMETER_FIXTURES_RECORD;
+  if (dir) {
+    mkdirSync(dir, {recursive: true});
+    const file = join(dir, `${process.pid}.json`);
+    const seen = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+    if (key in seen) assert.deepEqual(actual, seen[key], `${key} recorded twice with different values`);
+    seen[key] = actual;
+    writeFileSync(file, JSON.stringify(seen));
+    return actual;
+  }
+  fixtureValues ??= existsSync(FIXTURES) ? JSON.parse(readFileSync(FIXTURES, 'utf8')).values : {};
+  assert.ok(key in fixtureValues, `fixture ${key} is missing — run npm run fixtures`);
+  assert.deepEqual(actual, fixtureValues[key], `${message} (tests/fixtures/data-snapshot.json; npm run fixtures refreshes it from a run)`);
+  return actual;
+}
+export const recordingFixtures = () => Boolean(process.env.CITYMETER_FIXTURES_RECORD);
+
+/** The register's source set and dates (data/release.json, scripts/register-source.py): the totals the build answers to. */
+export const release = () => readJSON('data/release.json');

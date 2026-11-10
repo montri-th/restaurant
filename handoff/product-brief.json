@@ -3,8 +3,8 @@
   "schemaVersion": "1.5.0",
   "documentType": "product-brief",
   "productId": "citymeter-restaurants",
-  "productVersion": "0.11.1",
-  "updatedOn": "2026-11-03",
+  "productVersion": "0.12.0",
+  "updatedOn": "2026-11-10",
   "datasetCheckedOn": "2026-10-22 (restaurants) · register 2026-10-25/31, read back 2026-10-30, workbook read 2026-11-03 · classification 2026-11-02 (unreviewed; chain size, price tiers and — by owner decision 2026-11-03 16:59 — the food taxonomy labelled อนุมาน) · Land join 2026-11-03",
   "language": "th",
   "productName": "CityMETER · Restaurants",
@@ -201,8 +201,8 @@
     "model": "js/area-insight.js#summarizeAreaInsight",
     "filter": "js/area-insight.js#filterAreaRows",
     "defaultSnapshot": {
-      "asOf": "2026-11-03",
-      "population": "sheet 1 + register of 2026-11-03 (0.8.0)",
+      "asOf": "2026-11-10",
+      "population": "sheet 1 + register read 2026-11-10 (0.12.0)",
       "areaIds": [
         "100402",
         "100108",
@@ -214,16 +214,16 @@
         "สุริยวงศ์"
       ],
       "rows": [
-        261,
+        269,
         32,
-        98
+        101
       ],
-      "count": 391,
+      "count": 402,
       "km2": 2.3079,
-      "density": 169.41,
-      "baselineDensity": 9.85,
-      "framedRows": 80629,
-      "totalRows": 96507,
+      "density": 174.18,
+      "baselineDensity": 9.9,
+      "framedRows": 81025,
+      "totalRows": 97286,
       "coverage": {
         "areas": 476,
         "km2": 8185.59
@@ -233,8 +233,8 @@
         "name": "คลองตันเหนือ",
         "reviews": 214826
       },
-      "previous": "0.7.1 (register of 2026-10-30): ตลาดยอด · สีลม · สุริยวงศ์ 164.65 ร้าน/ตร.กม., baseline 9.83, 80,333 framed rows over 475 frames; 0.6.0–0.7.0 (register of 2026-10-28): สุริยวงศ์ · สีลม · วังใหม่ 121.99 ร้าน/ตร.กม., baseline 9.37, 76,610 framed rows; 0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66, baseline 18.01, coverage 308 / 3,899.11 km²",
-      "status": "regression fixture (tests/insight.test.js) — never a UI constant; km2, density, framedRows and coverage.km2 read from a run of tests/helpers.js#load + js/area-insight.js#summarizeAreaInsight on 2026-11-03"
+      "previous": "0.12.0 with the register read of 2026-11-09 (superseded before publication by the read of 2026-11-10, which adds the Yoguruto branch list): สีลม · ตลาดยอด · สุริยวงศ์ 172.01 ร้าน/ตร.กม. (266 · 32 · 99 = 397 rows), baseline 9.87, 80,770 framed rows, 96,934 rows; 0.8.0–0.11.0 (register of 2026-11-03): สีลม · ตลาดยอด · สุริยวงศ์ 169.41 ร้าน/ตร.กม. (261 · 32 · 98 = 391 rows), baseline 9.85, 80,629 framed rows, 96,507 rows; 0.7.1 (register of 2026-10-30): ตลาดยอด · สีลม · สุริยวงศ์ 164.65 ร้าน/ตร.กม., baseline 9.83, 80,333 framed rows over 475 frames; 0.6.0–0.7.0 (register of 2026-10-28): สุริยวงศ์ · สีลม · วังใหม่ 121.99 ร้าน/ตร.กม., baseline 9.37, 76,610 framed rows; 0.5.x restaurants only: สี่แยกมหานาค · ตลาดน้อย · สุริยวงศ์ 99.66, baseline 18.01, coverage 308 / 3,899.11 km²",
+      "status": "regression fixture (tests/insight.test.js via tests/fixtures/data-snapshot.json (npm run fixtures)) — never a UI constant; km2, density, framedRows and coverage.km2 read from a run of tests/helpers.js#load + js/area-insight.js#summarizeAreaInsight on 2026-11-10"
     },
     "fallbacks": {
       "noRows": "ไม่พบร้านตามตัวกรองนี้ + ล้างตัวกรอง",
@@ -880,32 +880,32 @@
     "register": "data/chains.json (columnar; meta, provinces (77), areas, companies, brands, urls, cols id/name/brand/company/lat/lon/prov/provBy/area/ev/st/geo/floor/unit/addr/src/checked)",
     "land": "data/land.json (meta, hosts, snapshot [[key, building, rel, d]], chains [[outlet_id, building, rel, d]]) + data/land-buildings.geojson (land_host_building outline/LOD1 block + land_host_building_part LOD2 parts)",
     "registerSnapshot": {
-      "asOf": "2026-11-03 (workbook read 2026-11-03; owner read-back 2026-10-30)",
-      "outlets": 27527,
-      "brandsWithOutlets": 907,
-      "brandProfiles": 1249,
-      "companyRecords": 397,
-      "withPoint": 22547,
-      "approxOnly": 938,
-      "inCoveredSubdistricts": 11649,
-      "provinceByPoint": 22539,
-      "provinceByText": 2752,
-      "noProvince": 2236,
+      "asOf": "2026-11-10 (workbook read 2026-11-10 02:11 after the Yoguruto rows were appended; owner read-back 2026-10-30)",
+      "outlets": 28306,
+      "brandsWithOutlets": 982,
+      "brandProfiles": 1315,
+      "companyRecords": 421,
+      "withPoint": 23040,
+      "approxOnly": 1010,
+      "inCoveredSubdistricts": 12045,
+      "provinceByPoint": 23032,
+      "provinceByText": 2986,
+      "noProvince": 2288,
       "pointOutsideProvinces": 8,
       "evidence": {
-        "primary": 20375,
-        "secondary": 4734,
+        "primary": 21025,
+        "secondary": 4863,
         "cart": 2418
       },
       "status": {
-        "listed": 21992,
-        "pending": 5387,
-        "temporary": 104,
+        "listed": 22637,
+        "pending": 5515,
+        "temporary": 110,
         "closed": 44
       },
       "geometry": {
-        "brand": 13115,
-        "other": 9432,
+        "brand": 13151,
+        "other": 9889,
         "host": 0
       },
       "logos": {
@@ -915,19 +915,19 @@
         "folderFiles": 577,
         "filesAdded": 408
       },
-      "checked": "2026-10-25/2026-10-31 · readBackOn 2026-10-30",
-      "receipt": "data/chains.json meta of the 2026-11-03 build (brandProfiles, stats, evidence, status, geometry, logos); logos unchanged since 0.7.1 (the rebuilt 408 files are byte-identical)",
+      "checked": "2026-10-25/2026-11-10 · readBackOn 2026-10-30",
+      "receipt": "data/chains.json meta of the 2026-11-10 build (brandProfiles, stats, evidence, status, geometry, logos); the read of 2026-11-09 (27,954 outlets, 22,710 with a point) went into the same unpublished 0.12.0 and the read of 2026-11-10 adds the Yoguruto branch list (+352 outlets, +330 points); logos unchanged since 0.7.1 (the rebuilt 408 files are byte-identical)",
       "previous": {
-        "asOf": "2026-10-30",
-        "outlets": 27120,
-        "brandsWithOutlets": 821,
-        "brandProfiles": 1149,
-        "companyRecords": 336,
-        "withPoint": 22182,
-        "inCoveredSubdistricts": 11353,
-        "provinceByPoint": 22174,
-        "provinceByText": 2733,
-        "noProvince": 2213,
+        "asOf": "2026-11-03",
+        "outlets": 27527,
+        "brandsWithOutlets": 907,
+        "brandProfiles": 1249,
+        "companyRecords": 397,
+        "withPoint": 22547,
+        "inCoveredSubdistricts": 11649,
+        "provinceByPoint": 22539,
+        "provinceByText": 2752,
+        "noProvince": 2236,
         "logosLinked": 541
       }
     },
@@ -937,36 +937,36 @@
         "hotel": 2266,
         "office": 378
       },
-      "hostsPublished": 1091,
-      "buildings": 991,
-      "features": 1055,
-      "lod2Buildings": 15,
-      "lod2Parts": 64,
+      "hostsPublished": 1095,
+      "buildings": 994,
+      "features": 1194,
+      "lod2Buildings": 47,
+      "lod2Parts": 200,
       "snapshotPoints": {
         "in": 2239,
         "near": 5451,
-        "inFromWithin10m": 595,
-        "nested": 11
+        "inFromWithin10m": 594,
+        "nested": 13
       },
       "registerPoints": {
-        "in": 3464,
-        "near": 1908,
-        "inFromWithin10m": 494,
-        "nested": 34
+        "in": 3659,
+        "near": 1978,
+        "inFromWithin10m": 511,
+        "nested": 38
       },
-      "checkedOn": "2026-11-03",
+      "checkedOn": "2026-11-10",
       "report": "docs/LAND_JOIN_CHECK.md + docs/land-join-check.json",
       "source": "openfreemap_osm (OpenFreeMap planet 20261025_080012_pt z14 building layer)",
-      "receipt": "rerun 2026-11-03 with the same tiles and rule; hostsPublished, buildings, features and registerPoints.nested read from data/land.json, data/land-buildings.geojson and docs/land-join-check.json of that run",
+      "receipt": "rerun 2026-11-10 with the same tiles, rule and Land registers (re-running the inputs of 2026-11-09 first gave the same bytes of data/land.json, data/land-buildings.geojson and docs/land-join-check.json); only the register changed — the added relations are Yoguruto’s (99 outlets, 101 rows), no other outlet or restaurant relation changed; values read from docs/land-join-check.json of that run",
       "previous": {
-        "checkedOn": "2026-10-30",
-        "hostsPublished": 1089,
-        "buildings": 989,
-        "features": 1053,
+        "checkedOn": "2026-11-09",
+        "hostsPublished": 1093,
+        "buildings": 992,
+        "features": 1192,
         "registerPoints": {
-          "in": 3396,
-          "inFromWithin10m": 478,
-          "nested": 33
+          "in": 3560,
+          "inFromWithin10m": 501,
+          "nested": 36
         }
       }
     }

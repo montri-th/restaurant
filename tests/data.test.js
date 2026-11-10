@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {load, readJSON, sha256} from './helpers.js';
+import {load, readJSON, sha256, fixture, release} from './helpers.js';
 import {PROVINCES, PRICE_BUCKETS, GRID, gridToLngLat, sourceTile, hasPoint, priceTier, LEGACY_PRICE, filterRows, SIZE_BANDS} from '../js/model.js';
 
 // One population since 0.6.0 (owner 2026-10-28 22:36): data.rows = sheet-1 restaurants + register outlets; the rows the
@@ -18,7 +18,8 @@ test('restaurants.json decodes to the 70,214 observations of the snapshot, nothi
   assert.equal(data.restaurants.length, 68980, 'sheet 1');
   assert.equal(data.moved.length, 1234, 'rows moved to the chain register, counted there');
   assert.equal(data.outlets.length, register.outlets.length);
-  assert.equal(data.rows.length, 68980 + 27527, 'one population: sheet 1 + the register (owner 2026-10-28 22:36; register of 2026-11-03 since 0.8.0 — 0.7.1: 27,120)');
+  // The register's outlets are its source set's (data/release.json: 28,306 read 2026-11-10; 2026-11-09: 27,954; 0.8.0: 27,527; 0.7.1: 27,120).
+  assert.equal(data.rows.length, 68980 + release().register.outlets, 'one population: sheet 1 + the register (owner 2026-10-28 22:36)');
   assert.equal(data.dropped, 0, 'every row resolves to a subdistrict frame');
   assert.equal(new Set([...data.rows, ...data.moved].map(r => r.id)).size, data.rows.length + data.moved.length, 'row keys are unique across both sheets');
   for (const k of Object.keys(raw.cols)) assert.equal(raw.cols[k].length, 70214, `column ${k} is complete`);
@@ -71,7 +72,8 @@ test('segments (0.8.0; food 0.9.2): chain size and the food taxonomy from the re
   assert.equal(m.rows.keySha256, sha256(Buffer.from(raw.cols.key.join('\n'))), 'rows aligned to restaurants.json cols.key');
   assert.equal(m.outlets.idSha256, sha256(Buffer.from(readJSON('data/chains.json').cols.id.join('\n'))), 'outlets aligned to chains.json cols.id');
   assert.deepEqual(m.priceCheck, {agree: 68980}, 'the page\'s tiers equal price_band_observed on every classified row');
-  assert.deepEqual(m.reviewStatus, {unreviewed: 95341}, 'nothing reviewed yet');
+  assert.deepEqual(Object.keys(m.reviewStatus), ['unreviewed'], 'nothing reviewed yet');
+  fixture('segments.reviewStatus', m.reviewStatus);
   // 0.9.2: the food taxonomy ships by owner decision (2026-11-03 16:59) ahead of the QA check; the other axes stay held.
   for (const f of ['format_id', 'occasion_ids', 'special_label_ids', 'price_band_inferred', 'food_subgroup_secondary_ids', 'food_group_secondary_ids']) assert.ok(m.held.fields.includes(f), f);
   for (const f of ['food_category_id', 'food_group_id', 'food_subgroup_primary_id']) assert.ok(!m.held.fields.includes(f), f);
@@ -82,17 +84,20 @@ test('segments (0.8.0; food 0.9.2): chain size and the food taxonomy from the re
   assert.equal(seg.outlets.sub.length, readJSON('data/chains.json').cols.id.length);
   // Attached as the browser does: a group carries its category; a sub-group sits under its group (the build checks the codebook).
   const grouped = data.rows.filter(r => r.food);
-  assert.equal(grouped.length, 46626 + 22261, 'sheet-1 rows + outlets with a food group');
-  assert.equal(data.rows.filter(r => r.foodSub).length, 28265 + 4852);
+  fixture('segments.foodRows', {grouped: [data.restaurants.filter(r => r.food).length, data.outlets.filter(r => r.food).length], sub: [data.restaurants.filter(r => r.foodSub).length, data.outlets.filter(r => r.foodSub).length]}, 'sheet-1 rows + outlets with a food group / sub-group');
+  assert.equal(grouped.length, m.food.rows.grouped + m.food.outlets.grouped);
+  assert.equal(data.rows.filter(r => r.foodSub).length, m.food.rows.subgrouped + m.food.outlets.subgrouped);
   const groupOf = new Map(m.food.groups.map(g => [g.id, g.category])), subOf = new Map(m.food.subgroups.map(x => [x.id, x.group]));
   assert.ok(grouped.every(r => groupOf.get(r.food) === r.foodCat && (!r.foodSub || subOf.get(r.foodSub) === r.food)));
   assert.ok(data.moved.every(r => !r.food), 'a moved row is classified on the register side');
   assert.ok(!/docs\.google|drive\.google|spreadsheets\/d\//.test(JSON.stringify(seg)), 'no private sheet link');
   // Every kept row and every outlet but the point-of-sale registry is sized; moved rows are sized on the register side.
-  assert.deepEqual(data.segments, {attached: 95341, lifted: 726, ok: true, food: 68887});
+  assert.equal(data.segments.ok, true);
+  assert.equal(data.segments.attached, data.restaurants.length + data.outlets.filter(o => o.sizeBasis !== 'x').length);
+  fixture('segments.attached', data.segments);
   assert.ok(data.restaurants.every(r => SIZE_BANDS.includes(r.size)));
   assert.ok(data.outlets.every(o => SIZE_BANDS.includes(o.size) || (o.sizeBasis === 'x' && o.brand.id === 'ROOT-BR-cpf-pos-network')), 'only the registry is unsized');
-  assert.equal(data.outlets.filter(o => o.sizeBasis === 'x').length, 1166);
+  fixture('segments.notSized', data.outlets.filter(o => o.sizeBasis === 'x').length);
   // One chain, one size: a chain's rows all carry the largest band the source gives any of them, never a smaller one.
   const byKey = new Map();
   for (const r of data.rows) { if (!r.size || !(r.kind === 'outlet' ? r.brand?.id : r.brand)) continue; const k = r.kind === 'outlet' ? r.brand.id : (r.brand.national?.[0] || r.brand.id); (byKey.get(k) || byKey.set(k, new Set()).get(k)).add(r.size); }
@@ -101,7 +106,7 @@ test('segments (0.8.0; food 0.9.2): chain size and the food taxonomy from the re
   // A row without a chain candidate is “one observed row”, never “an independent shop”.
   assert.ok(data.restaurants.filter(r => !r.brand).every(r => r.size === 'S1' && r.sizeBasis === 's'));
   const bySize = Object.fromEntries(SIZE_BANDS.map(b => [b, data.rows.filter(r => r.size === b).length]));
-  assert.deepEqual(bySize, {S1: 67411, S2: 1162, S3: 3398, S4: 6338, S5: 17032});
+  fixture('segments.bySize', bySize);
 });
 
 test('membership is the source subdistrict: every row sits in an existing frame of its own district and province', () => {

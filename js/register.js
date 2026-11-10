@@ -49,7 +49,7 @@ export function decodeRegister(json, index = null) {
       province: p?.code || '', provinceTh: p?.th || '', provinceBy: c.provBy[i] === 1 ? 'point' : c.provBy[i] === 2 ? 'text' : '',
       area, district: a?.district || '', coveredProvince: a?.province || '',
       evidence: EVIDENCE[c.ev[i]] || 'primary', status: STATUS[c.st[i]] || 'listed', geo: GEO[c.geo[i]] || '',
-      floor: c.floor[i] || '', unit: c.unit[i] || '', address: c.addr[i] || '', source: urls[c.src[i]] || '', checked: c.checked[i] || '',
+      floor: c.floor[i] || '', zone: c.zone?.[i] || '', unit: c.unit[i] || '', address: c.addr[i] || '', source: urls[c.src[i]] || '', checked: c.checked[i] || '',
     };
     o.haystack = lower([o.name, brand?.name, o.company?.name, o.address].filter(Boolean).join(' '));
     o.nameLower = lower(o.name);

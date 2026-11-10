@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {load, readJSON} from './helpers.js';
+import {load, readJSON, fixture} from './helpers.js';
 import {buildOverview, buildAreaProfile, buildDistrictProfile, buildVenueProfile, buildStoreDetail, buildBuildingProfile, describeGeometry, describePrice} from '../js/profile-model.js';
 import {renderOverview, renderArea, renderDistrict, renderVenue, renderBuilding, renderStore, renderFilterChips, provenance, dens} from '../js/panel.js';
 import {summarizeAreaInsight} from '../js/area-insight.js';
@@ -43,7 +43,7 @@ test('every panel view ends with dataset · source · date · boundary, and carr
     assert.ok(!CAVEATS.test(t), `${name}: no caveat — ${t.match(CAVEATS)}`);
   }
   // One population (0.6.0): the first Aha reads restaurants and chain outlets together (fixture in tests/insight.test.js).
-  assert.ok(text(views.overview).includes('169.4 ร้าน/ตร.กม.'), text(views.overview).slice(0, 300));
+  assert.ok(text(views.overview).includes(`${fixture('firstAha.density', dens(insight.density))} ร้าน/ตร.กม.`), text(views.overview).slice(0, 300));
   // One vocabulary (0.7.0): the two sheets are told apart in the provenance line only — never in a tile, an Aha or a hint.
   const ov = text(views.overview);
   assert.ok(ov.includes('ร้าน = ร้านในชุดข้อมูล 7 จังหวัด + สาขาเครือทั่วประเทศ'), 'the split lives in the provenance line, as a definition');
