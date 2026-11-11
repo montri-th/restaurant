@@ -379,7 +379,7 @@ html[lang="en"] .detail-head:not(.brand-head) > .metrics.compact:has(> .metric:n
 
 /* Neighborhood labels */
 .area-labels { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
-.neighborhood-label, .province-label { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; min-height: 0; padding: 4px 5px 4px 10px; font: 700 12px/1.3 var(--font-display); letter-spacing: 0; color: var(--area-label-ink); background: var(--area-label-bg); border: 1px solid var(--area-label-border); border-radius: 6px; max-width: 200px; white-space: nowrap; box-shadow: 0 1px 2px rgba(0, 0, 0, .18); }
+.neighborhood-label, .province-label { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; display: inline-flex; align-items: center; gap: 7px; min-height: 0; padding: 4px 5px 4px 10px; font: 700 12px/1.3 var(--font-display); letter-spacing: 0; color: var(--area-label-ink); background: var(--area-label-bg); border: 1px solid var(--area-label-border); border-radius: 6px; max-width: 204px; white-space: nowrap; box-shadow: 0 1px 2px rgba(0, 0, 0, .18); }
 .neighborhood-label::before, .province-label::before { content: ""; width: 8px; height: 8px; flex: 0 0 8px; border: 1.5px solid var(--area-label-ink); border-radius: 2px; opacity: .85; }
 .neighborhood-label .label-name, .province-label .label-name { overflow: hidden; text-overflow: ellipsis; }
 .neighborhood-label .label-count, .province-label .label-count { font: 400 11px/1.3 var(--font-mono); min-width: 22px; padding: 1px 6px; border-radius: 4px; background: var(--area-label-ink); color: var(--area-label-bg); text-align: center; }
@@ -596,7 +596,7 @@ td small { display: block; color: var(--text-metadata); font-size: 12px; margin-
   .insight-heading button { padding: 4px 9px; min-height: 32px; }
   .results { padding: 8px 10px; max-height: min(75%, calc(100% - var(--bottom-panel-height) - 8px)); }
   .results-heading h2 { font-size: 14px; }
-  .neighborhood-label, .province-label { max-width: 184px; font-size: 11px; }
+  .neighborhood-label, .province-label { max-width: 196px; font-size: 12px; }
   .bar-row { grid-template-columns: 16px minmax(70px, 110px) minmax(0, 1fr) 70px; gap: 6px; }
   .bar-row.stacked { grid-template-columns: minmax(70px, 110px) minmax(0, 1fr) 54px; }
   .map-failure { inset: 25% 12px; }
