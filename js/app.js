@@ -83,6 +83,7 @@ import {installMassing, outerRings} from './massing.js';
 import {presetFor, applyPreset, fitPitched, framePoint} from './camera.js';
 import {buildBreadcrumb, renderBreadcrumb, breadcrumbText} from './breadcrumb.js';
 import {createCodec, createNavigator} from './shell/url.js';
+import {mapBudget, budgetPixelRatio, reloadOnContextLoss} from './shell/maplibre-guard.js';
 import {pageTitle} from './shell/title.js';
 import {classify} from './scales.js';
 import {cueMarkup} from './cues.js';
@@ -335,7 +336,7 @@ function loadExtras() {
     if (land.status === 'fulfilled' && landGeo.status === 'fulfilled' && validFeatureCollection(landGeo.value)) {
       try { state.landGeo = landGeo.value; state.land = decodeLand(land.value, landGeo.value); } catch (e) { state.land = null; console.warn('Land join', e); }
       if (state.land) registerExtraNames({land: state.land});
-    } else console.warn('Land join', land.reason || landGeo.reason || 'invalid building outlines');
+    } else { partial('land'); console.warn('Land join', land.reason || landGeo.reason || 'invalid building outlines'); }
     // Points that lay within 10 m of their Land building are drawn inside it (owner 2026-10-28 “จุดร้านอาหารที่ตกริม ๆ
     // ให้รวบเข้าตึกนั้น”): outlets before the register layer is built, rows before the map re-sends them (`snapped`).
     if (state.register && state.land) applyOutletDisplay(state.land, state.register.byId);
@@ -1791,7 +1792,7 @@ function initMap() {
   if (!window.maplibregl) throw new Error('Map library is unavailable');
   try {
     state.mapTheme = theme();
-    state.map = new maplibregl.Map({container: 'map', center: BANGKOK.center, zoom: BANGKOK.zoom, pitch: 0, maxPitch: 85, attributionControl: {compact: true}, style: buildMapStyle(state.mapTheme)});
+    state.map = new maplibregl.Map({container: 'map', pixelRatio: budgetPixelRatio(mapBudget()), maxTileCacheZoomLevels: mapBudget().cacheZoomLevels, center: BANGKOK.center, zoom: BANGKOK.zoom, pitch: 0, maxPitch: 85, attributionControl: {compact: true}, style: buildMapStyle(state.mapTheme)});
     state.map.addControl(new maplibregl.NavigationControl({showCompass: true, visualizePitch: true}), 'top-right');
     state.attribObserver = trackAttribution(state.map);
     state.labels = installAreaLabels(state.map, $('map'), {className: 'neighborhood-label', hostId: 'area-labels', hostLabel: 'แขวง/ตำบลบนแผนที่', minZoom: 11.5, verb: 'กดเพื่อสำรวจพื้นที่', onSelect: id => selectArea(id, {fromMap: true}), reservedBottom: labelBottomSpace, maxLabels: 40});
@@ -1815,7 +1816,9 @@ function initMap() {
     state.map.on('click', onMapClick);
     state.map.on('mousemove', onMapMove);
     state.map.on('error', e => console.warn('Map resource', e.error?.message || e));
-    fetch(TILEJSON_URL).then(r => r.json()).then(j => { state.tileTemplate = j.tiles?.[0] || ''; if (state.loaded) updateSpatialLayers(); }).catch(e => console.warn('TileJSON', e));
+    // A lost WebGL context (a phone under memory pressure): say so and reload once, lean (js/shell/maplibre-guard.js).
+    reloadOnContextLoss(state.map);
+    fetch(TILEJSON_URL).then(r => r.json()).then(j => { state.tileTemplate = j.tiles?.[0] || ''; if (state.loaded) updateSpatialLayers(); }).catch(e => { partial('basemap'); console.warn('TileJSON', e); });
   } catch (e) {
     state.loaded = false; state.initialCameraDone = false;
     for (const cleanup of [() => state.attribObserver?.disconnect(), () => state.labels?.dispose(), () => state.provinceLabels?.dispose(), disposeSpatial, () => state.map?.remove()]) { try { cleanup(); } catch (err) { console.warn('Map cleanup', err); } }
@@ -2098,12 +2101,36 @@ function wireEvents() {
   if (typeof ResizeObserver === 'function') new ResizeObserver(measureSheet).observe($('panel'));
 }
 
+/**
+ * A part of the data that did not load is said on the page (citymeter-shell 0.6.0, js/shell/launch.js
+ * `citymeter:partial`): what is missing and what that does to the result on screen, with a reload that keeps the
+ * address. The words live here, by file: [Thai name, Thai effect, English name, English effect].
+ */
+const PARTIAL = {
+  'data/provinces.geojson': ['กรอบจังหวัด', 'แผนที่ไม่แสดงขอบจังหวัด', 'Province outlines', 'The map shows no province outlines'],
+  'basemap': ['แผนที่ฐาน', 'ถนน แหล่งน้ำ และอาคารพื้นหลังอาจไม่แสดง ข้อมูลในแผงและตารางยังใช้ได้', 'Basemap', 'Roads, water and background buildings may be missing; the panel and the table still work'],
+  'data/brand-logos.json': ['โลโก้แบรนด์', 'แสดงชื่อแทนโลโก้', 'Brand logos', 'Names are shown instead of logos'],
+  'data/venue-logos.json': ['โลโก้สถานที่', 'แสดงชื่อแทนโลโก้', 'Venue logos', 'Names are shown instead of logos'],
+  'data/venue-buildings.geojson': ['อาคารของสถานที่', 'ร้านในสถานที่ไม่ถูกจัดเข้าอาคารของสถานที่นั้น', 'Venue buildings', 'Restaurants in a venue are not placed in its building'],
+  'data/chains.json': ['ทะเบียนร้านเครือ', 'ยอดร้านยังไม่รวมสาขาร้านเครือ และรายชื่อเครือไม่ครบ', 'Chain register', 'Totals leave out chain branches, and the list of chains is incomplete'],
+  'data/segments.json': ['ขนาดเครือและชนิดอาหาร', 'ตัวกรองขนาดเครือและชนิดอาหารถูกซ่อน', 'Chain size and food type', 'The chain-size and food-type filters are hidden'],
+  'data/release.json': ['วันที่ของทะเบียนร้านเครือ', 'ไม่แสดงวันที่อ่านทะเบียนและวันที่เผยแพร่', 'Chain register dates', 'The register read date and publish date are not shown'],
+  'land': ['ทะเบียน Land', 'ไม่แสดงอาคารและสถานที่จากทะเบียน Land', 'Land register', 'Buildings and hosts of the Land register are not shown'],
+};
+function partial(key) {
+  const words = PARTIAL[key];
+  if (!words || typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('citymeter:partial', {detail: {id: key, label: words[0], effect: words[1], labelEn: words[2], effectEn: words[3]}}));
+}
+
 async function init() {
   try {
     // One population (owner 2026-10-28 22:36): the chain register loads with the snapshot, before the first paint.
     const resources = ['data/restaurants.json', 'data/areas.geojson', 'data/districts.geojson', 'data/provinces.geojson', 'data/venue-buildings.geojson', 'data/brand-logos.json', 'data/venue-logos.json', 'data/chains.json', 'data/segments.json', 'data/release.json'];
     const results = await Promise.allSettled(resources.map(r => fetchJSON(r, {timeout: r.includes('restaurants') || r.includes('chains') ? 45000 : 20000})));
     for (const i of [0, 1, 2]) if (results[i].status === 'rejected') throw results[i].reason;
+    // A file that did not load is said on the page (citymeter-shell 0.6.0).
+    resources.forEach((r, i) => { if (results[i].status === 'rejected') partial(r); });
     for (const i of [1, 2]) if (!validFeatureCollection(results[i].value)) { const e = new Error('Invalid boundary FeatureCollection'); e.resource = resources[i]; e.phase = 'data-schema'; throw e; }
     state.areasGeo = results[1].value; state.districtsGeo = results[2].value;
     state.provincesGeo = results[3].status === 'fulfilled' && validFeatureCollection(results[3].value) ? results[3].value : {type: 'FeatureCollection', features: []};
