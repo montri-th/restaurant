@@ -187,6 +187,7 @@ export default {
     // Panel: search and filters
     'เส้นทางพื้นที่: ประเทศไทย › จังหวัด › เขต/อำเภอ › แขวง/ตำบล': 'Area path: Thailand › Province › District › Subdistrict',
     'ค้นหาร้าน เครือ สาขา สถานที่ หรือพื้นที่': 'Search restaurants, chains, branches, venues or areas',
+    'ลองชื่อร้าน เครือ สถานที่ แขวง/ตำบล เขต/อำเภอ หรือจังหวัด': 'Try the name of a restaurant, a chain, a venue, a subdistrict, a district or a province',
     'ค้นหาชื่อร้าน เครือร้าน สถานที่ แขวง/ตำบล หรือเขต/อำเภอ': 'Search restaurant names, chains, venues, subdistricts or districts',
     'ตัวกรอง': 'Filters',
     'ทุกประเภท': 'All types',
@@ -345,7 +346,7 @@ export default {
     'เครือในพอร์ตตามทะเบียน': 'Chains in the portfolio, per the register',
     'บริษัทหรือกลุ่ม': 'Company or group',
     'เว็บของบริษัท': "Company's website",
-    'โลโก้เครือ': 'Chain logo',
+    'โลโก้เครือ': 'Chain logo', 'ที่มาโลโก้': 'Logo source',
     'แหล่งรอง': 'secondary sources',
     'แหล่งผสม': 'mixed sources',
     'ส่วนใหญ่มาจากแหล่งรอง': 'mostly from secondary sources',
@@ -433,6 +434,8 @@ export default {
     'ประเทศไทย': 'Thailand',
   },
   contexts: [
+    // The line under a name in the search list (js/find.js#searchNote): one entry, so the singular.
+    ['.find-where', {'เครือร้าน': 'Chain', 'บริษัทเจ้าของเครือ': 'Company behind chains', 'ประเภทร้าน': 'Restaurant type', 'สถานที่': 'Venue', 'จังหวัด': 'Province'}],
     ['.metric > span:not([class])', {
       'ร้าน': count('restaurant', 'restaurants'), 'ร้าน ในโฟกัส': count('restaurant in focus', 'restaurants in focus'),
       'รีวิว': count('review', 'reviews'), 'รีวิว ในโฟกัส': count('review in focus', 'reviews in focus'),
@@ -551,6 +554,8 @@ export default {
     [/^(.+) ([\d,]+) ร้านในอาคาร$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n}: ${shops(t, m[2])} in the building`; }],
     [/^(.+) — สาขาเครือ$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n} — chain branch`; }],
     [/^(.+) ที่อื่นในจังหวัดเดียวกัน$/, (m, t) => { const n = t.text(m[1]); return n == null ? null : `${n} elsewhere in the same province`; }],
+    // A branded restaurant's profile: the heading over its brand's other restaurants
+    [/^(.+) ที่อื่น$/, (m, t) => { const n = t.text(m[1]); return n == null ? null : `${n} elsewhere`; }],
     [/^(.+) \(ตามเครือ\)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n} (from the chain)`; }],
     [/^(.+)อื่นในพื้นที่$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n}: others in the area`; }],
     [/^โลโก้ (?![\d,]+\/[\d,]+$)(.+)$/, (m, t) => { const n = t.part(m[1]); return n == null ? null : `${n} logo`; }],
