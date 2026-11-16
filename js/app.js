@@ -85,6 +85,9 @@ import {buildBreadcrumb, renderBreadcrumb, breadcrumbText} from './breadcrumb.js
 import {createCodec, createNavigator} from './shell/url.js';
 import {mapBudget, budgetPixelRatio, reloadOnContextLoss} from './shell/maplibre-guard.js';
 import {pageTitle} from './shell/title.js';
+import {createIndex} from './shell/fuzzy.js';
+import {installSearch} from './shell/search.js';
+import {SEARCH_KINDS, SEARCH_HEADS, SEARCH_HINT, searchEntries, searchNote} from './find.js';
 import {classify} from './scales.js';
 import {cueMarkup} from './cues.js';
 
@@ -290,6 +293,7 @@ function update({fit = false} = {}) {
   drawChart();
   syncList();
   saveURL();
+  state.finder?.sync();
   announce(`พบ ${num(s.count)} ร้าน`);
 }
 
@@ -2031,6 +2035,56 @@ function restoreFromHistory() {
   update({fit: true});
 }
 
+/**
+ * The search box (0.14.0; owner 2026-11-12 12:05, VERBATIM: “ศึกษาแนวคิดเรื่อง Fuzzy search แล้ว implement กับ demo web
+ * ให้ได้ user benefit สูงสุดตาม user intent ในขณะนั้น และตาม product statement”). A name typed is listed with what it is
+ * and where (js/shell/search.js, names from js/find.js) and opens the level that answers the product statement's
+ * question for it: a province, a เขต/อำเภอ or a แขวง/ตำบล its restaurants, a chain its page, a company its chains, a
+ * restaurant type its filter, a place the restaurants in it, a restaurant or an outlet its page. The map and the
+ * panel no longer change while the reader is still typing.
+ */
+function openFound(entry) {
+  // A filter chosen by name is shown for the whole page: the place being looked at is left and the filters that
+  // would leave it no row are lifted first (js/shell/search.js#makeWay). One the page does not offer is applied by
+  // name as the words of the text filter.
+  const offered = (field, id) => [...$(field).options].some(o => o.value === id);
+  const way = (field, id) => state.finder.makeWay(field, id);
+  // An item chosen by name always opens: the words and the filters it does not pass are lifted first.
+  const clear = rows => { if (state.finder.makeWayFor(v => filterRows(rows, v).length).length) update(); };
+  const words = () => state.finder.filter(entry.name);
+  if (entry.kind === 'province') selectProvince(entry.id);
+  else if (entry.kind === 'district') selectDistrict(entry.id);
+  else if (entry.kind === 'area') selectArea(entry.id);
+  else if (entry.kind === 'chain') { if (offered('brand', entry.id)) { way('brand', entry.id); filterBrand(entry.id); } else words(); }
+  // A company's page does not draw the rows again by itself: words lifted for it are drawn first.
+  else if (entry.kind === 'company') { if (state.finder.makeWayFor(() => true).length) update(); selectCompany(entry.id); }
+  // A restaurant type has no action of its own: its select takes the value and says so, as a reader's choice would.
+  else if (entry.kind === 'group') { if (offered('group', entry.id)) { way('group', entry.id); $('group').value = entry.id; $('group').dispatchEvent(new Event('change', {bubbles: true})); } else words(); }
+  else if (entry.kind === 'venue') { clear(state.data.rows.filter(r => r.venue?.id === entry.id)); selectVenue(entry.id); }
+  else if (entry.kind === 'store') { clear([entry.row]); selectStore(entry.id); }
+}
+function installFinder() {
+  try {
+    state.finder = installSearch({
+      input: $('search'),
+      index: createIndex({kinds: SEARCH_KINDS, heads: SEARCH_HEADS}),
+      entries: () => searchEntries({data: state.data, index: state.index, chains: state.chains, register: state.register}),
+      note: entry => searchNote(entry, {index: state.index, data: state.data}),
+      // What the reader is looking at comes first among equal names.
+      scope: () => ({province: $('province').value || areaById(state.selectedArea)?.province || districtById(state.selectedDistrict)?.province || '', area: state.selectedArea || ''}),
+      rows: text => filterRows(state.data.rows, {...values(), search: text}).length,
+      unit: 'ร้าน',
+      hint: SEARCH_HINT,
+      pick: openFound,
+      // A filter or words chosen from the list: the area being looked at is left; the filters that may be
+      // lifted for it are these — never the province (a province without it is a reading of that province).
+      filters: {fields: ['group', 'food', 'price', 'size', 'brand'], values, count: v => filterRows(state.data.rows, v).length, leave: () => { state.selectedArea = ''; state.selectedDistrict = ''; state.panel = overviewPanel(); }},
+      // On a phone the open sheet stands tall while a name is typed, so the list has room above the keyboard.
+      onFocus: () => { if (sheetOpen()) setSheetExpanded(true); },
+    });
+  } catch (e) { state.finder = null; console.warn('Search list unavailable', e); }
+}
+
 function wireEvents() {
   // Before the browser follows a Street View link (mouse, touch, keyboard or a middle click), place its camera.
   for (const type of ['pointerdown', 'focusin', 'click', 'auxclick']) {
@@ -2045,7 +2099,11 @@ function wireEvents() {
       if (f === 'province') { state.selectedArea = ''; state.selectedDistrict = ''; }
       state.panel = state.selectedArea ? {mode: 'area', id: state.selectedArea} : state.selectedDistrict ? {mode: 'district', id: state.selectedDistrict} : overviewPanel();
       update({fit: true});
-    }, f === 'search' ? 450 : 0);
+      // Words applied from the search box on a phone: the sheet goes back to half and the map shows them — unless
+      // the reader is still in the box (it was emptied, which lifts the words).
+      if (f === 'search' && document.activeElement !== state.finder?.box) setSheetExpanded(false);
+      // With the list, the words arrive whole (Enter or the list's last row); without it the box filters as it is typed in.
+    }, f === 'search' && !state.finder ? 450 : 0);
   });
   $('filters').addEventListener('reset', () => setTimeout(() => resetToOverview(), 0));
   $('panel-view').addEventListener('click', onPanelAction);
@@ -2218,6 +2276,7 @@ async function init() {
     try { $('theme').value = localStorage.getItem('citymeter-restaurants-theme') || 'auto'; } catch {}
     applyTheme();
     wireEvents();
+    installFinder();
     update();
     if (state.panel.mode !== 'overview') openMobilePanel();
     window.dispatchEvent(new CustomEvent('citymeter:ready'));
@@ -2236,6 +2295,6 @@ async function init() {
 }
 
 // Developer hook for live tuning in a browser console (not an API; may change without notice).
-window.__citymeter = {state, get map() { return state.map; }, update, fitMap, updateSpatialLayers, applyPreset: (name, opts) => state.map && applyPreset(state.map, name, opts), fitPitched: (b, opts) => state.map && fitPitched(state.map, b, opts), cameraPadding, buildMapStyle, productionLink};
+window.__citymeter = {state, get map() { return state.map; }, get finder() { return state.finder; }, update, fitMap, updateSpatialLayers, applyPreset: (name, opts) => state.map && applyPreset(state.map, name, opts), fitPitched: (b, opts) => state.map && fitPitched(state.map, b, opts), cameraPadding, buildMapStyle, productionLink};
 
 init();
